@@ -1,0 +1,22 @@
+{
+  "name": "whoami",
+  "version": "1.0.0",
+  "description": "Personal encyclopedia powered by AI. Agents browse your archives and write wiki pages about your life.",
+  "author": {
+    "name": "Jeremy Philemon",
+    "email": "jrmy@whoami.wiki",
+    "url": "https://github.com/jeremyphilemon"
+  },
+  "homepage": "https://whoami.wiki",
+  "repository": "https://github.com/whoami-wiki/whoami",
+  "license": "MIT",
+  "keywords": [
+    "personal-wiki",
+    "mediawiki",
+    "life-documentation",
+    "digital-archive",
+    "memoir",
+    "quantified-self"
+  ],
+  "mcpServers": "./.mcp.json"
+}

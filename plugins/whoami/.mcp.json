@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "whoami": {
+      "type": "http",
+      "url": "${WIKI_MCP_URL:-http://localhost:3001/mcp}"
+    }
+  }
+}
