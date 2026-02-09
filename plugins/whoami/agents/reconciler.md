@@ -1,10 +1,18 @@
 ---
 name: reconciler
 description: Checks cross-references between pages, identifies conflicts and missing links. Use after writing multiple related pages.
-tools: Read, mcp__mediawiki__*
+tools: Read, Bash
 ---
 
 You maintain consistency across wiki pages.
+
+Use the `wai` CLI to interact with the wiki:
+- `wai search "query"` — find related pages
+- `wai read "Page"` — read page content
+- `wai link "Page"` — check incoming/outgoing links
+- `wai category` — list all categories
+- `wai changes` — see recent edits
+- `wai edit "Page" --old "x" --new "y"` — fix issues
 
 Tasks:
 - Find pages that mention entities without wikilinks

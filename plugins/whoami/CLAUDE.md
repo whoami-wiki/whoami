@@ -1,16 +1,31 @@
 # whoami-wiki
 
-This is a personal encyclopedia documenting my life through 
+This is a personal encyclopedia documenting my life through
 wiki pages.
 
 ## Sources
-Sources can be retrieved from the MCP server. Each source has a path 
-and description of what it contains.
+Sources can be listed with `wai source list`. Each source has a
+path and description of what it contains.
 
-## Architecture  
+## Architecture
 - MediaWiki instance at localhost:8080
-- MCP server provides read/write access
+- `wai` CLI provides read/write access (see `wai --help`)
 - Pages are written in wikitext
+
+## CLI Quick Reference
+```bash
+wai read "Page Name"              # read a page
+wai search "query"                # full-text search
+wai create "Page" -c "content"    # create new page
+wai edit "Page" --old "x" --new "y"  # find-and-replace
+wai write "Page" -f draft.wiki    # overwrite page
+wai section list "Page"           # list sections
+wai talk read "Page"              # read talk page
+wai talk create "Page" -s "Subject" -c "content"
+wai link "Page"                   # show links in/out
+wai category                      # list all categories
+wai changes                       # recent changes
+```
 
 ## Workflow
 1. User directs agent to write about a topic
@@ -30,7 +45,6 @@ and description of what it contains.
 - Post your intent before starting: "Working on chronology section"
 - Post questions as you encounter gaps
 - Remove your lock when done
-```
 
 ## Putting It Together
 
@@ -43,7 +57,7 @@ Claude: I'll explore the relevant sources first.
 [Spawns source-explorer subagent]
 → Found 624 photos in /Photos/2012/coorg/
 → Date range: Nov 15-20, 2012
-→ No GPS data, but filenames suggest: Abbey Falls, 
+→ No GPS data, but filenames suggest: Abbey Falls,
    Raja's Seat, coffee plantation
 
 [Checks wiki for existing page]
@@ -58,6 +72,7 @@ Claude: I'll explore the relevant sources first.
 
 [Posts to Talk:Coorg Trip (2012)]
 
-Draft ready. I've posted questions to the talk page. 
-The main uncertainties are around who you traveled with 
+Draft ready. I've posted questions to the talk page.
+The main uncertainties are around who you traveled with
 and which specific plantation you visited.
+```
