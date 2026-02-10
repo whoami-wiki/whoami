@@ -174,44 +174,44 @@ function MessagesContent() {
       initials: "CG",
       color: "bg-blue-500",
       name: "College Gang",
-      preview: "Rohit: lol remember that night",
+      preview: "Vik: server's down again",
       time: "2:14 PM",
     },
     {
       initials: "A",
       color: "bg-green-500",
-      name: "Amma",
-      preview: "Call when you land",
-      time: "11:30 AM",
+      name: "Aai",
+      preview: "beta, khana khaya?",
+      time: "11:00 AM",
     },
     {
       initials: "PS",
       color: "bg-purple-500",
       name: "Priya S",
-      preview: "sent a photo",
+      preview: "hills friday?",
       time: "Tue",
     },
     {
       initials: "GT",
       color: "bg-orange-500",
       name: "Goa Trip 2019",
-      preview: "Vik: we doing this again?",
+      preview: "Rohit: we doing this again or",
       time: "Mon",
     },
     {
-      initials: "R",
+      initials: "S",
       color: "bg-rose-500",
-      name: "Rahul",
-      preview: "You: check this link",
+      name: "Sid",
+      preview: "You: check the nether hub",
       time: "Sun",
     },
   ];
   const chatBubbles = [
-    { sent: false, text: "lol remember that night", author: "Rohit" },
-    { sent: false, text: "the villa owner's face 😂", author: "Vik" },
-    { sent: true, text: "we literally broke the pool light" },
-    { sent: false, text: "that was Priya", author: "Rohit" },
-    { sent: true, text: "sure it was" },
+    { sent: false, text: "server's down again", author: "Vik" },
+    { sent: false, text: "the actual server or life", author: "Sid" },
+    { sent: true, text: "both" },
+    { sent: false, text: "lol", author: "Meera" },
+    { sent: false, text: "hills friday?", author: "Priya" },
   ];
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
@@ -334,11 +334,11 @@ function NumbersContent() {
 
 function VoiceMemosContent() {
   const memos = [
-    { title: "Walking idea #12", date: "Today", duration: "0:47", selected: true },
-    { title: "Startup pitch v3", date: "Jan 15", duration: "4:12" },
+    { title: "Nandi Hills gear idea", date: "Today", duration: "0:47", selected: true },
+    { title: "Flat hunt pros/cons", date: "Jan 15", duration: "4:12" },
     { title: "Late night — Goa", date: "Dec 19", duration: "22:03" },
     { title: "Call the dentist", date: "Dec 3", duration: "0:08" },
-    { title: "Grocery list", date: "Nov 28", duration: "0:23" },
+    { title: "Hot Wheels pricing", date: "Nov 28", duration: "0:23" },
   ];
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
@@ -356,7 +356,7 @@ function VoiceMemosContent() {
       </div>
       {/* Detail — waveform */}
       <div className="flex-1 flex flex-col min-w-0 p-2">
-        <div className="text-xs text-neutral-800 dark:text-neutral-200">Walking idea #12</div>
+        <div className="text-xs text-neutral-800 dark:text-neutral-200">Nandi Hills gear idea</div>
         <div className="text-xs text-neutral-400 mb-2">0:47</div>
         <div className="flex-1 flex items-center gap-[2px]">
           {Array.from({ length: 40 }).map((_, j) => (
@@ -380,14 +380,33 @@ function VoiceMemosContent() {
 }
 
 function MapsContent() {
-  const timeline = [
-    { place: "Home", time: "8:00 AM", icon: "bg-blue-500" },
-    { place: "Indiranagar Metro", time: "9:12 AM", icon: "bg-neutral-400" },
-    { place: "WeWork Prestige", time: "9:45 AM", icon: "bg-green-500" },
-    { place: "Truffles, Koramangala", time: "1:15 PM", icon: "bg-orange-400" },
-    { place: "WeWork Prestige", time: "2:00 PM", icon: "bg-green-500" },
-    { place: "Cubbon Park", time: "6:30 PM", icon: "bg-emerald-500" },
-    { place: "Home", time: "8:15 PM", icon: "bg-blue-500" },
+  const days = [
+    {
+      label: "Thu, Jan 15",
+      dim: false,
+      entries: [
+        { place: "Home", time: "8:00 AM", icon: "bg-blue-500" },
+        { place: "Indiranagar Metro", time: "9:12 AM", icon: "bg-neutral-400" },
+        { place: "WeWork Prestige", time: "9:45 AM", icon: "bg-green-500" },
+        { place: "Truffles, Koramangala", time: "1:15 PM", icon: "bg-orange-400" },
+        { place: "WeWork Prestige", time: "2:00 PM", icon: "bg-green-500" },
+        { place: "Cubbon Park", time: "6:30 PM", icon: "bg-emerald-500" },
+        { place: "Home", time: "8:15 PM", icon: "bg-blue-500" },
+        { place: "Home", time: "10:42 PM", icon: "bg-blue-500" },
+      ],
+    },
+    {
+      label: "Wed, Jan 14",
+      dim: true,
+      entries: [
+        { place: "Nandi Hills Rd", time: "4:38 AM", icon: "bg-orange-400" },
+        { place: "Nandi Hills Summit", time: "6:44 AM", icon: "bg-orange-400" },
+        { place: "Dosa stall, summit", time: "7:02 AM", icon: "bg-yellow-500" },
+        { place: "Home", time: "9:10 AM", icon: "bg-blue-500" },
+        { place: "Indiranagar Metro", time: "10:30 AM", icon: "bg-neutral-400" },
+        { place: "WeWork Prestige", time: "11:05 AM", icon: "bg-green-500" },
+      ],
+    },
   ];
   const dots = [
     { x: 45, y: 35 }, { x: 52, y: 40 }, { x: 48, y: 50 },
@@ -399,24 +418,28 @@ function MapsContent() {
     <div className="flex h-full overflow-hidden font-sans text-xs">
       {/* Timeline sidebar */}
       <div className="w-[38%] shrink-0 border-r border-neutral-300 dark:border-neutral-700 flex flex-col overflow-hidden bg-white dark:bg-neutral-900">
-        <div className="px-2 py-1 border-b border-neutral-200 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400">
-          Tue, Jan 14
-        </div>
-        <div className="relative flex-1">
-          {/* Continuous vertical line behind dots */}
-          <div className="absolute left-[11px] top-[18px] bottom-[18px] w-[1px] bg-neutral-300 dark:bg-neutral-600" />
-          {timeline.map((t, i) => (
-            <div key={i} className="relative flex gap-1.5 px-2 py-1">
-              <div className="flex items-center justify-center w-2 shrink-0">
-                <div className={`w-2 h-2 rounded-full ${t.icon} relative z-10`} />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs text-neutral-800 dark:text-neutral-200 truncate">{t.place}</div>
-                <div className="text-[9px] text-neutral-400">{t.time}</div>
-              </div>
+        {days.map((day, di) => (
+          <div key={di}>
+            <div className={`px-2 py-1 border-b border-neutral-200 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400${di > 0 ? " border-t" : ""}`}>
+              {day.label}
             </div>
-          ))}
-        </div>
+            <div className="relative">
+              {/* Continuous vertical line behind dots */}
+              <div className="absolute left-[11px] top-[10px] bottom-0 w-[1px] bg-neutral-300 dark:bg-neutral-600" />
+              {day.entries.map((t, i) => (
+                <div key={i} className="relative flex gap-1.5 px-2 py-1">
+                  <div className="flex items-center justify-center w-2 shrink-0">
+                    <div className={`w-[9px] h-[9px] shrink-0 rounded-full ${day.dim ? "opacity-40" : ""} ${t.icon} relative z-10`} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className={`text-xs truncate ${day.dim ? "text-neutral-400 dark:text-neutral-500" : "text-neutral-800 dark:text-neutral-200"}`}>{t.place}</div>
+                    <div className={`text-[9px] ${day.dim ? "text-neutral-300 dark:text-neutral-600" : "text-neutral-400"}`}>{t.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
       {/* Map area */}
       <div className="flex-1 relative bg-emerald-100 dark:bg-emerald-950/40">

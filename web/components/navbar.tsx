@@ -21,7 +21,7 @@ export function Navbar() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <nav className="navbar font-sans p-2 flex flex-row items-center justify-between">
+    <nav className="navbar font-sans p-2 flex flex-row items-center justify-between max-w-[1440px] mx-auto w-full">
       <div className="flex flex-row gap-4 text-sm">
         {navItems.map(({ label, href }) => (
           <Link

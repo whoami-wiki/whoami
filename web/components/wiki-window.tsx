@@ -50,7 +50,7 @@ export function WikiWindow({ activePage, zIndex }: Props) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.85 }}
           transition={{ duration: 0.1 }}
-          className="relative w-3/4 max-w-4xl h-4/5 rounded-xl bg-neutral-100 dark:bg-neutral-900 overflow-hidden flex flex-col shadow-2xl border border-neutral-300 dark:border-neutral-700"
+          className="absolute w-3/4 max-w-4xl h-4/5 rounded-xl bg-neutral-100 dark:bg-neutral-900 overflow-hidden flex flex-col shadow-2xl border border-neutral-300 dark:border-neutral-700 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           style={{ zIndex }}
         >
           <div className="flex items-center gap-2 p-3 bg-neutral-200 dark:bg-neutral-800 shrink-0 border-b border-neutral-300 dark:border-neutral-700">

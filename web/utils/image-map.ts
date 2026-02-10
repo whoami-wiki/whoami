@@ -5,67 +5,66 @@ export interface ImageEntry {
 }
 
 export const imageMap: Record<string, ImageEntry> = {
-  // — Photos 2019 —
-  img_p19_newyear: { src: null, alt: "New Year's party, January 2019", color: "bg-violet-200" },
-  img_p19_wedding: { src: null, alt: "Cousin's wedding, March 2019", color: "bg-pink-200" },
-  img_p19_marine_drive: { src: null, alt: "Fireworks over Marine Drive", color: "bg-indigo-200" },
-  img_p19_iphone: { src: null, alt: "iPhone 8 camera sample", color: "bg-sky-200" },
+  // — Canon PowerShot A2300 —
+  img_canon_camera: { src: null, alt: "The Canon PowerShot A2300", color: "bg-slate-200" },
+  img_canon_rajasthan: { src: null, alt: "Rajasthan trip, 2008", color: "bg-amber-200" },
+  img_canon_family: { src: null, alt: "Family photo, Diwali", color: "bg-orange-200" },
+
+  // — Mumbai Dance Competition —
+  img_mumbai_stage: { src: null, alt: "Backstage before the performance", color: "bg-pink-200" },
+  img_mumbai_train: { src: null, alt: "Train to Mumbai", color: "bg-sky-200" },
+  img_mumbai_marine: { src: null, alt: "Marine Drive, after the competition", color: "bg-indigo-200" },
 
   // — The Goa Trip —
   img_goa_villa: { src: null, alt: "The villa in Assagao", color: "bg-amber-200" },
-  img_goa_pool: { src: null, alt: "Pool at the villa", color: "bg-cyan-200" },
+  img_goa_pool: { src: null, alt: "The pool (before the light incident)", color: "bg-cyan-200" },
+  img_goa_group: { src: null, alt: "All six at the villa", color: "bg-orange-200" },
   img_goa_beach: { src: null, alt: "Anjuna Beach afternoon", color: "bg-teal-200" },
-  img_goa_group: { src: null, alt: "Group photo at the villa", color: "bg-orange-200" },
-  img_goa_panjim: { src: null, alt: "Latin Quarter, Panjim", color: "bg-lime-200" },
-  img_goa_snorkel: { src: null, alt: "Snorkeling GoPro still", color: "bg-sky-300" },
+  img_goa_dosa: { src: null, alt: "The dosa cart in Mapusa", color: "bg-yellow-200" },
   img_goa_sunset: { src: null, alt: "Sunset from the balcony", color: "bg-rose-200" },
 
-  // — WhatsApp Conversations —
-  img_wa_college_gang: { src: null, alt: "College Gang group chat screenshot", color: "bg-green-200" },
-  img_wa_message_chart: { src: null, alt: "Message frequency chart", color: "bg-emerald-200" },
+  // — Astral Projection —
+  img_band_show: { src: null, alt: "The one show, hostel common room", color: "bg-violet-200" },
+  img_band_practice: { src: null, alt: "Practice session, C-204", color: "bg-purple-100" },
+  img_band_group: { src: null, alt: "Astral Projection, all four", color: "bg-pink-100" },
 
-  // — Financial Records —
-  img_fin_spending_chart: { src: null, alt: "2021 monthly spending breakdown", color: "bg-blue-200" },
-  img_fin_delivery_apps: { src: null, alt: "Food delivery order collage", color: "bg-orange-100" },
+  // — The Croma Heist —
+  img_croma_store: { src: null, alt: "Croma, Pune (2014)", color: "bg-blue-100" },
+  img_croma_batteries: { src: null, alt: "The batteries", color: "bg-yellow-100" },
 
-  // — Screenshots Archive —
-  img_ss_booking: { src: null, alt: "Flight booking confirmation", color: "bg-sky-100" },
-  img_ss_recipe: { src: null, alt: "Dal makhani recipe screenshot", color: "bg-yellow-200" },
-  img_ss_apartment: { src: null, alt: "Apartment listing screenshot", color: "bg-stone-200" },
-  img_ss_meme: { src: null, alt: "Meme forwarded to College Gang", color: "bg-fuchsia-200" },
+  // — The Indiranagar Apartment —
+  img_flat_balcony: { src: null, alt: "The balcony, morning", color: "bg-sky-100" },
+  img_flat_listing: { src: null, alt: "NoBroker listing screenshot", color: "bg-stone-200" },
+  img_flat_moving: { src: null, alt: "Moving day, Aug 2021", color: "bg-amber-100" },
 
-  // — Tax Documents —
-  img_tax_form16: { src: null, alt: "Form 16 header", color: "bg-slate-200" },
+  // — Hot Wheels Collection —
+  img_hw_display: { src: null, alt: "Display case, Indiranagar flat", color: "bg-amber-100" },
+  img_hw_camaro: { src: null, alt: "'67 Camaro Super Treasure Hunt", color: "bg-red-200" },
+  img_hw_spreadsheet: { src: null, alt: "The spreadsheet", color: "bg-green-100" },
 
-  // — College Years —
-  img_col_orientation: { src: null, alt: "Orientation week group photo", color: "bg-amber-100" },
-  img_col_room204: { src: null, alt: "Room 204, east wing", color: "bg-yellow-100" },
-  img_col_mess: { src: null, alt: "Mess food documentation", color: "bg-orange-100" },
-  img_col_fest_stage: { src: null, alt: "Cultural fest performance", color: "bg-pink-100" },
-  img_col_robotics: { src: null, alt: "Robotics project, tech fest", color: "bg-cyan-100" },
-  img_col_graduation: { src: null, alt: "Last day group photo", color: "bg-violet-100" },
+  // — prakash-smp —
+  img_mc_spawn: { src: null, alt: "Spawn village, prakash-smp", color: "bg-emerald-200" },
+  img_mc_mountain: { src: null, alt: "Mountain fortress (Jay's base)", color: "bg-stone-200" },
+  img_mc_railway: { src: null, alt: "Sid's railway system", color: "bg-blue-100" },
 
-  // — Career Timeline —
-  img_career_first_office: { src: null, alt: "First office building", color: "bg-gray-200" },
-  img_career_startup: { src: null, alt: "Startup office", color: "bg-indigo-100" },
-  img_career_resume_v1: { src: null, alt: "Resume version 1 (2016)", color: "bg-stone-100" },
+  // — March 2020 – June 2021 —
+  img_lockdown_pune: { src: null, alt: "View from Pune flat, April 2020", color: "bg-gray-200" },
+  img_lockdown_desk: { src: null, alt: "WFH setup, version 1", color: "bg-slate-100" },
+  img_lockdown_move: { src: null, alt: "Moving day, Bangalore", color: "bg-sky-100" },
 
-  // — Location History —
-  img_loc_heatmap: { src: null, alt: "Location heatmap, all-time", color: "bg-red-200" },
-  img_loc_commute: { src: null, alt: "Daily commute route", color: "bg-blue-100" },
-  img_loc_goa_trail: { src: null, alt: "Goa trip GPS trail", color: "bg-emerald-100" },
-  img_loc_himachal: { src: null, alt: "Himachal Pradesh data points", color: "bg-green-100" },
+  // — Sid —
+  img_sid_bits: { src: null, alt: "Sid at BITS orientation", color: "bg-amber-100" },
+  img_sid_civic: { src: null, alt: "The birthday Civic (Hot Wheels)", color: "bg-red-100" },
+  img_sid_flat: { src: null, alt: "Sid in the Indiranagar flat", color: "bg-blue-100" },
 
-  // — Google Takeout —
-  img_gt_inbox: { src: null, alt: "Gmail inbox snapshot", color: "bg-red-100" },
-  img_gt_calendar: { src: null, alt: "Calendar heatmap", color: "bg-blue-100" },
-  img_gt_youtube: { src: null, alt: "YouTube watch history chart", color: "bg-red-200" },
+  // — Nandi Hills —
+  img_nh_sunrise: { src: null, alt: "Sunrise from Nandi Hills summit", color: "bg-orange-200" },
+  img_nh_bikes: { src: null, alt: "Bikes at the summit", color: "bg-sky-200" },
+  img_nh_route: { src: null, alt: "Strava route map", color: "bg-lime-200" },
+  img_nh_dosa: { src: null, alt: "Summit dosa stall", color: "bg-yellow-100" },
 
-  // — Chat Logs —
-  img_chat_bookclub: { src: null, alt: "Book club channel screenshot", color: "bg-teal-100" },
-  img_chat_discord: { src: null, alt: "Gaming server screenshot", color: "bg-indigo-200" },
-
-  // — Voice Memos —
-  img_vm_waveform: { src: null, alt: "Voice memo waveform", color: "bg-purple-200" },
-  img_vm_walking: { src: null, alt: "Walking commute route", color: "bg-lime-100" },
+  // — Aai —
+  img_aai_school: { src: null, alt: "Aai at school", color: "bg-pink-100" },
+  img_aai_call: { src: null, alt: "Sunday call screenshot", color: "bg-green-100" },
+  img_aai_diwali: { src: null, alt: "Diwali at home, Pune", color: "bg-orange-100" },
 };

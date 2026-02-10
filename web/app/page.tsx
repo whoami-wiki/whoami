@@ -66,9 +66,9 @@ export default function Home() {
             lines={[
               '$ wai query "who was at the Goa trip?"',
               "",
-              "Based on photos and the WhatsApp group chat, the Goa trip included you, Rahul, Priya, and Amit. Sneha joined for the last two days. There are 12 photos with everyone together, mostly from the beach house on day 3.",
+              "Based on photos and the College Gang WhatsApp group, the Goa trip included you, Sid, Priya, Rohit, Vik, and Meera. Vik booked the villa without asking. There are 12 photos with everyone together, mostly from the pool on night two.",
               "",
-              "Sources: Goa Trip (2019), College Gang, Sneha",
+              "Sources: The Goa Trip, Sid, Astral Projection (band)",
             ]}
           />
           <div className="font-sans">

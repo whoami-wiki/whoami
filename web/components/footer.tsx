@@ -38,7 +38,7 @@ export function Footer() {
 
   return (
     <footer className="font-sans text-sm border-t border-neutral-200 dark:border-neutral-700 px-6 pt-6 pb-6">
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-10 max-w-[1440px] mx-auto w-full">
         <div className="grid grid-cols-3 gap-8">
           {columns.map((col) => (
             <div key={col.heading} className="flex flex-col gap-3">
