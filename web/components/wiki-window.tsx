@@ -7,6 +7,7 @@ import { imageMap } from "@/utils/image-map";
 
 interface Props {
   activePage: WikiPage | null;
+  zIndex?: number;
 }
 
 // Parses [[Target]] and [[Target|display text]] into styled spans
@@ -39,7 +40,7 @@ function renderWikiText(text: string): ReactNode[] {
   return parts;
 }
 
-export function WikiWindow({ activePage }: Props) {
+export function WikiWindow({ activePage, zIndex }: Props) {
   return (
     <AnimatePresence>
       {activePage && (
@@ -49,10 +50,10 @@ export function WikiWindow({ activePage }: Props) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.85 }}
           transition={{ duration: 0.1 }}
-          className="relative z-10 w-3/4 max-w-4xl h-4/5 rounded-xl bg-neutral-100 dark:bg-neutral-900 overflow-hidden flex flex-col shadow-2xl"
+          className="relative w-3/4 max-w-4xl h-4/5 rounded-xl bg-neutral-100 dark:bg-neutral-900 overflow-hidden flex flex-col shadow-2xl border border-neutral-300 dark:border-neutral-700"
+          style={{ zIndex }}
         >
-          {/* Title bar */}
-          <div className="flex items-center gap-2 p-3 bg-neutral-200 dark:bg-neutral-800 shrink-0">
+          <div className="flex items-center gap-2 p-3 bg-neutral-200 dark:bg-neutral-800 shrink-0 border-b border-neutral-300 dark:border-neutral-700">
             <div className="w-3 h-3 rounded-full bg-red-400" />
             <div className="w-3 h-3 rounded-full bg-yellow-400" />
             <div className="w-3 h-3 rounded-full bg-green-400" />

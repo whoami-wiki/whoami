@@ -1,13 +1,6 @@
 "use client";
 
-export type FileType =
-  | "folder"
-  | "pdf"
-  | "zip"
-  | "csv"
-  | "json"
-  | "audio"
-  | "txt";
+export type FileType = "folder" | "pdf" | "zip" | "csv" | "json" | "audio" | "txt";
 
 interface Props {
   name: string;
@@ -28,9 +21,7 @@ function FolderIcon() {
 function FileIcon({ label, color }: { label: string; color: string }) {
   return (
     <div className={`relative w-10 h-12 ${color} rounded-sm`}>
-      {/* Folded corner */}
       <div className="absolute top-0 right-0 w-3 h-3 bg-white/30 rounded-bl-sm" />
-      {/* Type label */}
       <div className="absolute bottom-1.5 inset-x-0 text-center">
         <span className="text-[8px] font-sans font-bold text-white/80 uppercase">
           {label}
@@ -40,10 +31,7 @@ function FileIcon({ label, color }: { label: string; color: string }) {
   );
 }
 
-const fileConfig: Record<
-  Exclude<FileType, "folder">,
-  { label: string; color: string }
-> = {
+const fileConfig: Record<Exclude<FileType, "folder">, { label: string; color: string }> = {
   pdf: { label: "PDF", color: "bg-red-400" },
   zip: { label: "ZIP", color: "bg-yellow-500" },
   csv: { label: "CSV", color: "bg-green-500" },
