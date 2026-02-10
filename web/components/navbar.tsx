@@ -4,11 +4,12 @@ import cn from "classnames";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const navItems = [
   { label: "Home", href: "/" },
   { label: "Install", href: "/install" },
-  { label: "Story", href: "/story" },
+  { label: "Docs", href: "/docs" },
   { label: "Changelog", href: "/changelog" },
 ];
 
@@ -23,12 +24,13 @@ export function Navbar() {
     <nav className="navbar font-sans p-2 flex flex-row items-center justify-between">
       <div className="flex flex-row gap-4 text-sm">
         {navItems.map(({ label, href }) => (
-          <div
+          <Link
             key={href}
+            href={href}
             className={cn({ "text-neutral-500": pathname !== href })}
           >
             {label}
-          </div>
+          </Link>
         ))}
       </div>
 

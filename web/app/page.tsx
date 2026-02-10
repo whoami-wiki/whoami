@@ -1,3 +1,6 @@
+import { DesktopScene } from "@/components/desktop-scene";
+import { Terminal } from "@/components/terminal";
+
 export default function Home() {
   return (
     <div className="flex flex-col w-dvw items-center">
@@ -12,28 +15,123 @@ export default function Home() {
         <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
 
         <div className="font-sans">
-          You have years of digital life sitting in folders. Photos from trips
-          you've half-forgotten. Chat logs with inside jokes and turning points.
-          Documents that trace how your thinking evolved. Location history that
-          maps where you've actually spent your time.
-        </div>
-
-        <div className="font-sans">
           The whoami.wiki system turns your digital archives of photos, chats,
           documents, location history, and different types of data into a living
           encyclopedia about your life.
         </div>
       </div>
 
-      <div className="h-dvh w-dvw bg-blue-200 dark:bg-blue-800 p-8 flex flex-col items-end">
-        <div className="flex flex-col gap-2 max-w-16 items-center">
-          <div>
-            <div className="h-1 w-5 bg-blue-400 rounded-md rounded-b-none" />
-            <div className="w-11 h-8 bg-blue-400 rounded-sm rounded-tl-none" />
+      <DesktopScene />
+
+      <div className="max-w-150 flex flex-col gap-24 py-18 border-b border-neutral-200">
+        <div className="flex flex-1/2 flex-col gap-8 h-fit">
+          <div className="font-sans font-medium">Add sources</div>
+          <div className="font-sans">
+            Start by registering a source—a folder of photos, a chat export, a
+            pile of documents you&apos;ve been meaning to organize.
           </div>
-          <div className="font-sans text-xs wrap-break-word text-white text-shadow-lg text-center">
-            Coorg Trip 2013
+          <Terminal
+            animate="lines"
+            lines={[
+              '$ wai snapshot ~/Photos/Goa --title "Goa Trip (2019)"',
+              "",
+              "Snapshotting ~/Photos/Goa...",
+              "",
+              "  Files: 847",
+              "  New objects: 812 (2.1 GB)",
+              "  Deduplicated: 35 files (140 MB saved)",
+              "  Snapshot ID: a3f2b8c9",
+              "",
+              "Created: Source:Goa Trip (2019)",
+            ]}
+          />
+          <div className="font-sans">
+            An agent reads through the files, extracts what it can, and
+            cross-references against everything else in your wiki. It writes a
+            page, links it to related people and places, and flags gaps where
+            information is missing. Over time, as you add more sources, the
+            encyclopedia fills in.
           </div>
+        </div>
+
+        <div className="flex flex-1/2 flex-col gap-8 h-fit">
+          <div className="font-sans font-medium">Ask anything</div>
+          <div className="font-sans">
+            Once your wiki has some pages, you can query it in natural language.
+            The agent searches, reads the relevant pages, and gives you an
+            answer.
+          </div>
+          <Terminal
+            animate="stream"
+            lines={[
+              '$ wai query "who was at the Goa trip?"',
+              "",
+              "Based on photos and the WhatsApp group chat, the Goa trip included you, Rahul, Priya, and Amit. Sneha joined for the last two days. There are 12 photos with everyone together, mostly from the beach house on day 3.",
+              "",
+              "Sources: Goa Trip (2019), College Gang, Sneha",
+            ]}
+          />
+          <div className="font-sans">
+            Or skip the CLI and browse the wiki directly—it&apos;s just
+            MediaWiki, so you can search, click around, and edit pages yourself.
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-150 flex flex-col gap-24 py-18">
+        <div className="flex flex-1/2 flex-col gap-8 h-fit">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-6 font-sans">
+            <dt className="">Local-first</dt>
+            <dd className="text-neutral-500 dark:text-neutral-400">
+              Everything runs on your machine—MediaWiki in Docker, archive on
+              your filesystem. Your data never touches a server unless you put
+              it there.
+            </dd>
+            <dt className="">Works with your tools</dt>
+            <dd className="text-neutral-500 dark:text-neutral-400">
+              Built for{" "}
+              <a
+                href="https://docs.anthropic.com/en/docs/claude-code"
+                className="underline underline-offset-4"
+              >
+                Claude Code
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://openai.com/index/introducing-codex/"
+                className="underline underline-offset-4"
+              >
+                Codex
+              </a>
+              . Agents use the CLI directly, no plugins required. Add{" "}
+              <span className="font-mono p-0.5 px-1 border border-neutral-300 rounded-md">
+                wai
+              </span>{" "}
+              to any AI workflow that can run bash.
+            </dd>
+            <dt className="">Citations you can click</dt>
+            <dd className="text-neutral-500 dark:text-neutral-400">
+              Every fact links back to its source. Click a citation in the wiki
+              and see the original photo, chat message, or document it came
+              from.
+            </dd>
+            <dt className="">Content-addressed</dt>
+            <dd className="text-neutral-500 dark:text-neutral-400">
+              Files are stored by hash and deduplicated automatically. The same
+              photo across five exports is stored once.
+            </dd>
+            <dt className="">Export anytime</dt>
+            <dd className="text-neutral-500 dark:text-neutral-400">
+              Full export to Markdown and original files. Share a single page
+              with family or back up everything. No proprietary formats, no
+              lock-in.
+            </dd>
+            <dt className="">Open source</dt>
+            <dd className="text-neutral-500 dark:text-neutral-400">
+              MIT licensed. The core stays open forever. Run it, fork it, extend
+              it however you want.
+            </dd>
+          </dl>
         </div>
       </div>
     </div>
