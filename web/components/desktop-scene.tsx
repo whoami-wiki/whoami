@@ -49,7 +49,7 @@ const windows: WindowGroup[] = [
     title: "Photos",
     top: "5%",
     left: "2%",
-    width: "40%",
+    width: "50%",
     height: "55%",
     zIndex: 2,
     items: [
@@ -204,7 +204,7 @@ const windows: WindowGroup[] = [
   },
   {
     app: "messages",
-    title: "WhatsApp",
+    title: "Messages",
     top: "15%",
     left: "30%",
     width: "30%",
@@ -255,11 +255,11 @@ const windows: WindowGroup[] = [
   },
   {
     app: "numbers",
-    title: "Receipts 2021.csv",
-    top: "40%",
+    title: "Lab Report — Jan 2026.pdf",
+    top: "15%",
     left: "5%",
     width: "42%",
-    height: "40%",
+    height: "55%",
     zIndex: 1,
     items: [
       {
