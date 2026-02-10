@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
-import { Folder } from "@/components/folder";
+import { File } from "@/components/file";
 import { WikiWindow } from "@/components/wiki-window";
 
 export interface TocEntry {
@@ -29,6 +29,7 @@ export interface WikiPage {
 const folders = [
   {
     name: "Photos 2019",
+    type: "folder" as const,
     top: "6%",
     left: "4%",
     hideAt: 0.15,
@@ -54,6 +55,7 @@ const folders = [
   },
   {
     name: "Goa Trip",
+    type: "folder" as const,
     top: "8%",
     left: "18%",
     hideAt: 0.2,
@@ -81,6 +83,7 @@ const folders = [
   },
   {
     name: "WhatsApp Export",
+    type: "zip" as const,
     top: "7%",
     left: "90%",
     hideAt: 0.22,
@@ -106,6 +109,7 @@ const folders = [
   },
   {
     name: "Receipts 2021",
+    type: "csv" as const,
     top: "12%",
     left: "55%",
     hideAt: 0.25,
@@ -131,6 +135,7 @@ const folders = [
   },
   {
     name: "Screenshots",
+    type: "folder" as const,
     top: "5%",
     left: "78%",
     hideAt: 0.3,
@@ -156,6 +161,7 @@ const folders = [
   },
   {
     name: "Tax Documents",
+    type: "pdf" as const,
     top: "38%",
     left: "3%",
     hideAt: 0.35,
@@ -181,6 +187,7 @@ const folders = [
   },
   {
     name: "College Photos",
+    type: "folder" as const,
     top: "40%",
     left: "88%",
     hideAt: 0.4,
@@ -206,6 +213,7 @@ const folders = [
   },
   {
     name: "Old Resumes",
+    type: "pdf" as const,
     top: "55%",
     left: "5%",
     hideAt: 0.45,
@@ -231,6 +239,7 @@ const folders = [
   },
   {
     name: "Location History",
+    type: "json" as const,
     top: "75%",
     left: "8%",
     hideAt: 0.5,
@@ -256,6 +265,7 @@ const folders = [
   },
   {
     name: "Google Takeout",
+    type: "zip" as const,
     top: "60%",
     left: "92%",
     hideAt: 0.5,
@@ -283,6 +293,7 @@ const folders = [
   },
   {
     name: "Chat Logs",
+    type: "txt" as const,
     top: "72%",
     left: "85%",
     hideAt: 0.55,
@@ -304,6 +315,7 @@ const folders = [
   },
   {
     name: "Voice Memos",
+    type: "audio" as const,
     top: "80%",
     left: "45%",
     hideAt: 0.6,
@@ -348,9 +360,10 @@ export function DesktopScene() {
       <div className="sticky top-0 h-dvh w-dvw bg-blue-200 dark:bg-neutral-800 flex items-center justify-center">
         {folders.map((f) =>
           progress < f.hideAt ? (
-            <Folder
+            <File
               key={f.name}
               name={f.name}
+              type={f.type}
               top={f.top}
               left={f.left}
             />
