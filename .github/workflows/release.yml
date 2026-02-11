@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    tags: ['cli-v*']
 
 permissions:
   contents: write
@@ -39,7 +39,7 @@ jobs:
 
       - name: Create tarball
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${GITHUB_REF_NAME#cli-v}"
           mkdir -p "wai-v${VERSION}/bin"
           cp cli/dist/wai.cjs "wai-v${VERSION}/bin/wai"
           tar -czf "wai-v${VERSION}.tar.gz" "wai-v${VERSION}"
