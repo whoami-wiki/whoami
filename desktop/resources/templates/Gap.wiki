@@ -1,0 +1,8 @@
+<includeonly><div class="gap-box" style="background:#fff8e1; border:1px solid #ffe082; border-radius:4px; padding:8px 12px; margin:8px 0; font-size:0.9em;">&#x26A0;&#xFE0F; '''{{{1}}}'''</div></includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Gap|What year did this happen?}}</nowiki></code>
+
+Renders a yellow highlighted box indicating missing or uncertain information.
+
+[[Category:Templates]]
+</noinclude>

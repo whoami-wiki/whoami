@@ -1,0 +1,21 @@
+{
+  "name": "whoami",
+  "version": "1.0.0",
+  "description": "whoami.wiki app",
+  "main": "dist/src/main.js",
+  "scripts": {
+    "dev": "tsc && electron .",
+    "build": "tsc",
+    "bundle-deps": "bash scripts/bundle-mediawiki.sh && bash scripts/build-php.sh && bash scripts/bundle-lua.sh",
+    "dist": "tsc && electron-builder",
+    "reset": "rm -rf \"$HOME/Library/Application Support/whoami/data\""
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "^25.1.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,59 @@
+appId: wiki.whoami.app
+productName: whoami
+copyright: Copyright © 2025 Jeremy Philemon
+
+directories:
+  output: dist-electron
+
+files:
+  - dist/**/*
+  - renderer/**/*.html
+  - renderer/**/*.css
+  - renderer/**/*.js
+  - "!src/**/*"
+  - "!scripts/**/*"
+  - "!.build/**/*"
+
+extraResources:
+  - from: resources/php
+    to: resources/php
+    filter:
+      - "**/*"
+  - from: resources/lua
+    to: resources/lua
+    filter:
+      - "**/*"
+  - from: resources/mediawiki
+    to: resources/mediawiki
+    filter:
+      - "**/*"
+  - from: resources/templates
+    to: resources/templates
+    filter:
+      - "**/*"
+
+mac:
+  category: public.app-category.productivity
+  target:
+    - dmg
+    - zip
+  icon: build/icon.icns
+  darkModeSupport: true
+  identity: null
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+
+dmg:
+  title: "${productName}"
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+publish:
+  provider: github
+  owner: whoami-wiki
+  repo: whoami
