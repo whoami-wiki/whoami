@@ -13,10 +13,10 @@ const SIZES = {
   infobox: { w: 384, h: 224 },
   // Thumb: w-36 (144px) × h-24 (96px) → 2x = 288×192
   thumb: { w: 288, h: 192 },
-  // Gallery: ~250px × h-28 (112px) → 2x = 500×224
-  gallery: { w: 500, h: 224 },
-  // Photo grid: ~80px square cells → 2x = 160×160
-  grid: { w: 160, h: 160 },
+  // Gallery: ~250px × h-40 (160px) → 2x = 500×320
+  gallery: { w: 500, h: 320 },
+  // Photo grid: ~150px square cells → 2x = 300×300
+  grid: { w: 300, h: 300 },
 };
 
 // Map each image to its display context
@@ -50,11 +50,10 @@ const imageContext: Record<string, keyof typeof SIZES> = {
   // Mumbai Dance Competition
   img_mumbai_stage: "thumb",
   img_mumbai_train: "thumb",
-  img_mumbai_marine: "thumb",
 
   // The Goa Trip — some sections have 2 images (gallery)
-  img_goa_villa: "thumb",
-  img_goa_pool: "thumb",
+  img_goa_villa: "gallery",
+  img_goa_pool: "gallery",
   img_goa_dosa: "thumb",
   img_goa_group: "thumb",
   img_goa_beach: "gallery", // Daily life has beach + sunset
@@ -81,7 +80,7 @@ const imageContext: Record<string, keyof typeof SIZES> = {
 
   // prakash-smp
   img_mc_spawn: "thumb",
-  img_mc_mountain: "thumb",
+  img_mc_mountain: "gallery",
   img_mc_railway: "thumb",
 
   // Lockdown
@@ -95,8 +94,8 @@ const imageContext: Record<string, keyof typeof SIZES> = {
   img_sid_flat: "thumb",
 
   // Nandi Hills
-  img_nh_sunrise: "thumb",
-  img_nh_bikes: "thumb",
+  img_nh_sunrise: "gallery",
+  img_nh_bikes: "gallery",
   img_nh_route: "thumb",
   img_nh_dosa: "thumb",
 
@@ -106,6 +105,7 @@ const imageContext: Record<string, keyof typeof SIZES> = {
   img_aai_diwali: "thumb",
 
   // Gallery pair images
+  img_mumbai_marine: "gallery",
   img_mumbai_night: "gallery",
   img_mc_nether: "gallery",
 
