@@ -127,6 +127,16 @@ export function WikiWindow({ activePage, zIndex }: Props) {
                     <p className="font-sans text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
                       {renderWikiText(section.body)}
                     </p>
+                    {section.quote && (
+                      <blockquote className="my-4 ml-2 pl-3 border-l-2 border-neutral-300 dark:border-neutral-600 font-sans text-sm italic text-neutral-700 dark:text-neutral-300">
+                        {renderWikiText(section.quote)}
+                        {section.quoteAttrib && (
+                          <span className="block mt-0.5 text-xs not-italic text-neutral-500 dark:text-neutral-400">
+                            {section.quoteAttrib}
+                          </span>
+                        )}
+                      </blockquote>
+                    )}
                     {section.images && section.images.length >= 2 && (
                       <Gallery images={section.images} />
                     )}
