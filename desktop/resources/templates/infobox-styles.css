@@ -1,0 +1,107 @@
+/* Infobox styles */
+.infobox {
+  border: 1px solid #a2a9b1;
+  border-spacing: 3px;
+  background-color: #f8f9fa;
+  color: #202122;
+  margin: 0.5em 0 0.5em 1em;
+  padding: 0.2em;
+  float: right;
+  clear: right;
+  font-size: 88%;
+  line-height: 1.5em;
+  width: 22em;
+}
+
+.infobox caption {
+  font-size: 125%;
+  font-weight: bold;
+  padding: 0.2em;
+}
+
+.infobox td,
+.infobox th {
+  vertical-align: top;
+  text-align: left;
+  padding: 0.2em 0.4em;
+}
+
+.infobox th {
+  font-weight: bold;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.infobox .infobox-image {
+  text-align: center;
+  padding: 4px;
+}
+
+.infobox .infobox-header {
+  text-align: center;
+  background-color: #ddd;
+  font-weight: bold;
+}
+
+.infobox .infobox-above {
+  text-align: center;
+  font-size: 125%;
+  font-weight: bold;
+}
+
+.infobox .infobox-below {
+  text-align: center;
+  font-size: 90%;
+  padding: 4px;
+}
+
+/* Gap template */
+.gap-box {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: 0.9em;
+}
+
+/* Dialogue template */
+.dialogue blockquote {
+  margin: 0;
+  padding: 4px 0 4px 16px;
+  border-left: 3px solid #c8c8cc;
+}
+
+.dialogue-speaker {
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+/* Source namespace — slightly larger font like article namespace */
+.ns-100 #mw-content-text,
+.ns-101 #mw-content-text {
+  font-size: 1em;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .infobox {
+    background-color: #2a2a2e;
+    border-color: #48484a;
+    color: #e5e5e7;
+  }
+
+  .infobox .infobox-header {
+    background-color: #3a3a3c;
+  }
+
+  .gap-box {
+    background: #3a3000;
+    border-color: #665800;
+    color: #ffd600;
+  }
+
+  .dialogue blockquote {
+    border-left-color: #636366;
+  }
+}
