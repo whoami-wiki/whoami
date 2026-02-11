@@ -2,7 +2,7 @@ name: Release Electron
 
 on:
   push:
-    tags: ['electron-v*']
+    tags: ['desktop-v*']
 
 permissions:
   contents: write
