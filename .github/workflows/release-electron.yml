@@ -1,0 +1,44 @@
+name: Release Electron
+
+on:
+  push:
+    tags: ['electron-v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: desktop
+
+      - name: Build PHP
+        run: bash scripts/build-php.sh
+        working-directory: desktop
+
+      - name: Bundle MediaWiki
+        run: bash scripts/bundle-mediawiki.sh
+        working-directory: desktop
+
+      - name: Bundle Lua
+        run: bash scripts/bundle-lua.sh
+        working-directory: desktop
+
+      - name: Build & publish
+        run: pnpm dist -- --publish always
+        working-directory: desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

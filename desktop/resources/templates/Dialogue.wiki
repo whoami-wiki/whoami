@@ -1,0 +1,12 @@
+<includeonly><div class="dialogue" style="margin:12px 0; padding:0;">{{#if:{{{speaker|}}}|<div class="dialogue-speaker" style="font-weight:bold; margin-bottom:2px;">{{{speaker}}}</div>}}<blockquote style="margin:0; padding:4px 0 4px 16px; border-left:3px solid #c8c8cc;">{{{1}}}</blockquote></div></includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Dialogue|speaker=Jeremy|Hello, how are you?}}</nowiki></code>
+
+Formats a line of dialogue with an optional speaker name and a left-border blockquote.
+
+=== Parameters ===
+* '''1''' (required): The dialogue text
+* '''speaker''' (optional): Name of the speaker
+
+[[Category:Templates]]
+</noinclude>

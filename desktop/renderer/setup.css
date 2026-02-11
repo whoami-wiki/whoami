@@ -1,0 +1,256 @@
+@font-face {
+  font-family: "Apercu";
+  src: url("fonts/apercu_regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Apercu";
+  src: url("fonts/apercu_medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Apercu";
+  src: url("fonts/apercu_bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Apercu", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: transparent;
+  color: #1d1d1f;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #f5f5f7;
+  }
+}
+
+.titlebar {
+  height: 38px;
+  -webkit-app-region: drag;
+}
+
+main {
+  padding: 0 48px 48px;
+  min-height: calc(100vh - 38px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #86868b;
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+/* ── Form ─────────────────────────────────────────────────────────────── */
+
+form {
+  width: 100%;
+  max-width: 360px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #6e6e73;
+}
+
+@media (prefers-color-scheme: dark) {
+  label {
+    color: #a1a1a6;
+  }
+}
+
+input[type="text"],
+input[type="password"] {
+  font-family: inherit;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  outline: none;
+  margin-bottom: 20px;
+  transition: border-color 0.15s;
+}
+
+input:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  input[type="text"],
+  input[type="password"] {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #424245;
+    color: #f5f5f7;
+  }
+
+  input:focus {
+    border-color: #2997ff;
+    box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.2);
+  }
+}
+
+button {
+  font-family: inherit;
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-radius: 10px;
+  background: #0071e3;
+  color: white;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: #0077ed;
+}
+
+button:active {
+  background: #006edb;
+}
+
+button:disabled {
+  background: #86868b;
+  cursor: not-allowed;
+}
+
+/* ── Progress ─────────────────────────────────────────────────────────── */
+
+#progress-view {
+  width: 100%;
+  max-width: 360px;
+}
+
+#progress-view h1 {
+  margin-bottom: 24px;
+}
+
+#progress-list {
+  list-style: none;
+}
+
+#progress-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 15px;
+  color: #86868b;
+  transition: color 0.2s;
+}
+
+#progress-list li.running {
+  color: #1d1d1f;
+}
+
+#progress-list li.done {
+  color: #1d1d1f;
+}
+
+@media (prefers-color-scheme: dark) {
+  #progress-list li.running,
+  #progress-list li.done {
+    color: #f5f5f7;
+  }
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon::after {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d2d2d7;
+}
+
+li.running .icon::after {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: none;
+  border: 2px solid #0071e3;
+  border-top-color: transparent;
+  animation: spin 0.6s linear infinite;
+}
+
+li.done .icon::after {
+  content: "✓";
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: #34c759;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+li.error .icon::after {
+  content: "✕";
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: #ff3b30;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#error-msg {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 59, 48, 0.1);
+  border-radius: 8px;
+  color: #ff3b30;
+  font-size: 13px;
+}
+
+.hidden {
+  display: none !important;
+}

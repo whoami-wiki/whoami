@@ -2,3 +2,10 @@ node_modules/
 dist/
 *.tsbuildinfo
 .env
+
+# Desktop app
+desktop/resources/php/
+desktop/resources/lua/
+desktop/resources/mediawiki/
+desktop/dist-electron/
+desktop/.build/
