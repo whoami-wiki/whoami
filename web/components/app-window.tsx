@@ -34,43 +34,62 @@ function TrafficLights() {
   );
 }
 
+const ROLL_PHOTOS = [
+  "img_roll_raj_1", "img_roll_raj_2", "img_roll_raj_3",
+  "img_roll_raj_4", "img_roll_raj_5", "img_roll_raj_6",
+  "img_roll_raj_7", "img_roll_raj_8", "img_roll_raj_9",
+];
+
 function PhotosContent() {
-  const sidebar = [
-    { label: "Library", selected: true },
+  const sections = [
+    { label: "Library" },
     { label: "Recents" },
     { label: "Favorites" },
-    { label: "People" },
-    { label: "Places" },
   ];
-  const colors = [
-    "bg-amber-300",
-    "bg-sky-300",
-    "bg-rose-300",
-    "bg-emerald-300",
-    "bg-violet-300",
-    "bg-orange-300",
-    "bg-pink-300",
-    "bg-teal-300",
-    "bg-indigo-300",
+  const albums = [
+    { label: "Rajasthan 2008", count: 847, selected: true },
+    { label: "Diwali 2009", count: 124 },
+    { label: "BITS Orientation", count: 203 },
+    { label: "Mumbai Trip 2018", count: 340 },
+    { label: "Goa Dec 2019", count: 847 },
+    { label: "Lockdown Pune", count: 56 },
+    { label: "Flat Hunt 2021", count: 58 },
+    { label: "Nandi Hills", count: 412 },
   ];
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
       {/* Sidebar */}
       <div className="w-[28%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-neutral-300 dark:border-neutral-700 flex flex-col overflow-hidden py-1">
-        {sidebar.map((s, i) => (
+        {sections.map((s, i) => (
           <div
             key={i}
-            className={`px-2 py-0.5 truncate ${s.selected ? "bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400" : "text-neutral-700 dark:text-neutral-300"}`}
+            className="px-2 py-0.5 truncate text-neutral-700 dark:text-neutral-300"
           >
             {s.label}
+          </div>
+        ))}
+        <div className="px-2 pt-1.5 pb-0.5 text-[9px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+          Albums
+        </div>
+        {albums.map((a, i) => (
+          <div
+            key={i}
+            className={`px-2 py-0.5 truncate ${a.selected ? "bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400" : "text-neutral-700 dark:text-neutral-300"}`}
+          >
+            {a.label}
           </div>
         ))}
       </div>
       {/* Photo grid */}
       <div className="flex-1 min-w-0 p-1.5">
-        <div className="grid grid-cols-3 grid-rows-3 gap-1 h-full">
-          {colors.map((c, i) => (
-            <div key={i} className={`${c} rounded-sm`} />
+        <div className="grid grid-cols-3 grid-rows-3 gap-0.5 h-full">
+          {ROLL_PHOTOS.map((id) => (
+            <img
+              key={id}
+              src={`/images/${id}.png`}
+              alt=""
+              className="w-full h-full object-cover"
+            />
           ))}
         </div>
       </div>
