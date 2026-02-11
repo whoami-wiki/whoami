@@ -21,7 +21,7 @@ fi
 
 # Strip leading v if present
 VERSION="${VERSION#v}"
-TAG="electron-v${VERSION}"
+TAG="desktop-v${VERSION}"
 
 echo ""
 echo "  Releasing ${TAG}..."
