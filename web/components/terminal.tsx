@@ -116,7 +116,7 @@ export function Terminal({ lines, animate }: Props) {
   return (
     <div
       ref={ref}
-      className="relative z-10 max-w-4xl h-4/5 rounded-xl bg-neutral-900 dark:bg-neutral-950 overflow-hidden flex flex-col w-full"
+      className="relative z-10 max-w-4xl h-4/5 rounded-xl bg-neutral-900 dark:bg-neutral-950 overflow-hidden flex flex-col w-full border border-primary"
     >
       <div className="flex items-center gap-2 p-3 bg-neutral-800 dark:bg-neutral-900 shrink-0">
         <div className="w-3 h-3 rounded-full bg-red-400" />

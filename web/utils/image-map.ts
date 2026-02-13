@@ -23,7 +23,11 @@ export const imageMap: Record<string, ImageEntry> = {
     alt: "Backstage before the performance",
     color: "bg-pink-200",
   },
-  img_mumbai_train: { src: "/images/img_mumbai_train.png", alt: "Train to Mumbai", color: "bg-sky-200" },
+  img_mumbai_train: {
+    src: "/images/img_mumbai_train.png",
+    alt: "Train to Mumbai",
+    color: "bg-sky-200",
+  },
   img_mumbai_marine: {
     src: "/images/img_mumbai_marine.png",
     alt: "Marine Drive, after the competition",
@@ -177,12 +181,28 @@ export const imageMap: Record<string, ImageEntry> = {
     alt: "Sunrise from Nandi Hills summit",
     color: "bg-orange-200",
   },
-  img_nh_bikes: { src: "/images/img_nh_bikes.png", alt: "Bikes at the summit", color: "bg-sky-200" },
-  img_nh_route: { src: "/images/img_nh_route.png", alt: "Cycling route map", color: "bg-lime-200" },
-  img_nh_dosa: { src: "/images/img_nh_dosa.png", alt: "Summit dosa stall", color: "bg-yellow-100" },
+  img_nh_roads: {
+    src: "/images/img_nh_roads.png",
+    alt: "Winding roads at the summit",
+    color: "bg-sky-200",
+  },
+  img_nh_route: {
+    src: "/images/img_nh_route.png",
+    alt: "Cycling route map",
+    color: "bg-lime-200",
+  },
+  img_nh_dosa: {
+    src: "/images/img_nh_dosa.png",
+    alt: "Summit dosa stall",
+    color: "bg-yellow-100",
+  },
 
   // — Aai —
-  img_aai_school: { src: "/images/img_aai_school.png", alt: "Aai at school", color: "bg-pink-100" },
+  img_aai_school: {
+    src: "/images/img_aai_school.png",
+    alt: "Aai at school",
+    color: "bg-pink-100",
+  },
   img_aai_diwali: {
     src: "/images/img_aai_diwali.png",
     alt: "Diwali at home, Pune",
@@ -190,35 +210,143 @@ export const imageMap: Record<string, ImageEntry> = {
   },
 
   // — Infobox images —
-  img_ib_canon: { src: "/images/img_ib_canon.png", alt: "Canon PowerShot A2300", color: "bg-slate-100" },
-  img_ib_mumbai: { src: "/images/img_ib_mumbai.png", alt: "Mumbai Dance Competition", color: "bg-pink-100" },
-  img_ib_goa: { src: "/images/img_ib_goa.png", alt: "The Goa Trip", color: "bg-amber-100" },
-  img_ib_band: { src: "/images/img_ib_band.png", alt: "Astral Projection", color: "bg-violet-100" },
-  img_ib_croma: { src: "/images/img_ib_croma.png", alt: "The Croma Heist", color: "bg-blue-50" },
-  img_ib_flat: { src: "/images/img_ib_flat.png", alt: "The Indiranagar Apartment", color: "bg-sky-50" },
-  img_ib_hw: { src: "/images/img_ib_hw.png", alt: "Hot Wheels Collection", color: "bg-amber-50" },
-  img_ib_mc: { src: "/images/img_ib_mc.png", alt: "prakash-smp", color: "bg-emerald-100" },
-  img_ib_lockdown: { src: "/images/img_ib_lockdown.png", alt: "March 2020 – June 2021", color: "bg-gray-100" },
-  img_ib_sid: { src: "/images/img_ib_sid.png", alt: "Sid", color: "bg-amber-50" },
-  img_ib_nandi: { src: "/images/img_ib_nandi.png", alt: "Nandi Hills", color: "bg-orange-100" },
-  img_ib_aai: { src: "/images/img_ib_aai.png", alt: "Aai", color: "bg-pink-50" },
-  img_ib_priya: { src: "/images/img_ib_priya.png", alt: "Priya", color: "bg-sky-50" },
-  img_ib_appa: { src: "/images/img_ib_appa.png", alt: "Appa", color: "bg-stone-100" },
-  img_ib_kavya: { src: "/images/img_ib_kavya.png", alt: "Kavya", color: "bg-rose-50" },
-  img_ib_gang: { src: "/images/img_ib_gang.png", alt: "College Gang", color: "bg-orange-50" },
+  img_ib_canon: {
+    src: "/images/img_ib_canon.png",
+    alt: "Canon PowerShot A2300",
+    color: "bg-slate-100",
+  },
+  img_ib_mumbai: {
+    src: "/images/img_ib_mumbai.png",
+    alt: "Mumbai Dance Competition",
+    color: "bg-pink-100",
+  },
+  img_ib_goa: {
+    src: "/images/img_ib_goa.png",
+    alt: "The Goa Trip",
+    color: "bg-amber-100",
+  },
+  img_ib_band: {
+    src: "/images/img_ib_band.png",
+    alt: "Astral Projection",
+    color: "bg-violet-100",
+  },
+  img_ib_croma: {
+    src: "/images/img_ib_croma.png",
+    alt: "The Croma Heist",
+    color: "bg-blue-50",
+  },
+  img_ib_flat: {
+    src: "/images/img_ib_flat.png",
+    alt: "The Indiranagar Apartment",
+    color: "bg-sky-50",
+  },
+  img_ib_hw: {
+    src: "/images/img_ib_hw.png",
+    alt: "Hot Wheels Collection",
+    color: "bg-amber-50",
+  },
+  img_ib_mc: {
+    src: "/images/img_ib_mc.png",
+    alt: "prakash-smp",
+    color: "bg-emerald-100",
+  },
+  img_ib_lockdown: {
+    src: "/images/img_ib_lockdown.png",
+    alt: "March 2020 – June 2021",
+    color: "bg-gray-100",
+  },
+  img_ib_sid: {
+    src: "/images/img_ib_sid.png",
+    alt: "Sid",
+    color: "bg-amber-50",
+  },
+  img_ib_nandi: {
+    src: "/images/img_ib_nandi.png",
+    alt: "Nandi Hills",
+    color: "bg-orange-100",
+  },
+  img_ib_aai: {
+    src: "/images/img_ib_aai.png",
+    alt: "Aai",
+    color: "bg-pink-50",
+  },
+  img_ib_priya: {
+    src: "/images/img_ib_priya.png",
+    alt: "Priya",
+    color: "bg-sky-50",
+  },
+  img_ib_appa: {
+    src: "/images/img_ib_appa.png",
+    alt: "Appa",
+    color: "bg-stone-100",
+  },
+  img_ib_kavya: {
+    src: "/images/img_ib_kavya.png",
+    alt: "Kavya",
+    color: "bg-rose-50",
+  },
+  img_ib_gang: {
+    src: "/images/img_ib_gang.png",
+    alt: "College Gang",
+    color: "bg-orange-50",
+  },
 
   // — Gallery pair images —
-  img_mumbai_night: { src: "/images/img_mumbai_night.png", alt: "Marine Drive at night", color: "bg-indigo-200" },
-  img_mc_nether: { src: "/images/img_mc_nether.png", alt: "The Nether hub", color: "bg-red-200" },
+  img_mumbai_night: {
+    src: "/images/img_mumbai_night.png",
+    alt: "Marine Drive at night",
+    color: "bg-indigo-200",
+  },
+  img_mc_nether: {
+    src: "/images/img_mc_nether.png",
+    alt: "The Nether hub",
+    color: "bg-red-200",
+  },
 
   // — Photos app: Rajasthan 2008 camera roll —
-  img_roll_raj_1: { src: "/images/img_roll_raj_1.png", alt: "Mehrangarh Fort entrance", color: "bg-amber-200" },
-  img_roll_raj_2: { src: "/images/img_roll_raj_2.png", alt: "Blue city from the fort", color: "bg-sky-200" },
-  img_roll_raj_3: { src: "/images/img_roll_raj_3.png", alt: "Camel ride, Thar Desert", color: "bg-yellow-200" },
-  img_roll_raj_4: { src: "/images/img_roll_raj_4.png", alt: "Dinner at a dhaba", color: "bg-orange-200" },
-  img_roll_raj_5: { src: "/images/img_roll_raj_5.png", alt: "Jaipur bazaar", color: "bg-pink-200" },
-  img_roll_raj_6: { src: "/images/img_roll_raj_6.png", alt: "Hawa Mahal", color: "bg-rose-200" },
-  img_roll_raj_7: { src: "/images/img_roll_raj_7.png", alt: "Amber Fort", color: "bg-amber-100" },
-  img_roll_raj_8: { src: "/images/img_roll_raj_8.png", alt: "Hotel room", color: "bg-stone-200" },
-  img_roll_raj_9: { src: "/images/img_roll_raj_9.png", alt: "Road trip home", color: "bg-yellow-100" },
+  img_roll_raj_1: {
+    src: "/images/img_roll_raj_1.png",
+    alt: "Mehrangarh Fort entrance",
+    color: "bg-amber-200",
+  },
+  img_roll_raj_2: {
+    src: "/images/img_roll_raj_2.png",
+    alt: "Blue city from the fort",
+    color: "bg-sky-200",
+  },
+  img_roll_raj_3: {
+    src: "/images/img_roll_raj_3.png",
+    alt: "Camel ride, Thar Desert",
+    color: "bg-yellow-200",
+  },
+  img_roll_raj_4: {
+    src: "/images/img_roll_raj_4.png",
+    alt: "Dinner at a dhaba",
+    color: "bg-orange-200",
+  },
+  img_roll_raj_5: {
+    src: "/images/img_roll_raj_5.png",
+    alt: "Jaipur bazaar",
+    color: "bg-pink-200",
+  },
+  img_roll_raj_6: {
+    src: "/images/img_roll_raj_6.png",
+    alt: "Hawa Mahal",
+    color: "bg-rose-200",
+  },
+  img_roll_raj_7: {
+    src: "/images/img_roll_raj_7.png",
+    alt: "Amber Fort",
+    color: "bg-amber-100",
+  },
+  img_roll_raj_8: {
+    src: "/images/img_roll_raj_8.png",
+    alt: "Hotel room",
+    color: "bg-stone-200",
+  },
+  img_roll_raj_9: {
+    src: "/images/img_roll_raj_9.png",
+    alt: "Road trip home",
+    color: "bg-yellow-100",
+  },
 };

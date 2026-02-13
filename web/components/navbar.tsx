@@ -27,7 +27,7 @@ export function Navbar() {
           <Link
             key={href}
             href={href}
-            className={cn({ "text-neutral-500": pathname !== href })}
+            className={cn({ "text-muted": pathname !== href })}
           >
             {label}
           </Link>
