@@ -2,6 +2,15 @@ import Link from "next/link";
 import { ReactNode } from "react";
 
 export const MarkdownBlocks = {
+  h1: ({ children }: { children?: ReactNode }) => {
+    return <h1 className="text-3xl font-medium font-serif">{children}</h1>;
+  },
+  h2: ({ children }: { children?: ReactNode }) => {
+    return <h2 className="text-2xl font-medium font-serif">{children}</h2>;
+  },
+  h3: ({ children }: { children?: ReactNode }) => {
+    return <h3 className="text-xl font-medium text-primary font-serif">{children}</h3>;
+  },
   p: ({ children }: { children?: ReactNode }) => {
     return <p className="leading-6 text-base">{children}</p>;
   },
@@ -16,7 +25,7 @@ export const MarkdownBlocks = {
   },
   code: ({ children }: { children?: ReactNode }) => {
     return (
-      <code className="text-sm font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-600 rounded-md">
+      <code className="text-sm font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-600 rounded-md text-primary">
         {children}
       </code>
     );
