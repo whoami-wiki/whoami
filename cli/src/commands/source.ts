@@ -15,7 +15,7 @@ export async function sourceCommand(args: string[], globals: GlobalFlags): Promi
     outputJson(sources);
   } else {
     if (sources.length === 0) {
-      console.log('No sources configured. Edit ~/.config/wai/config.json to add sources.');
+      console.log('No sources configured. Edit ~/.whoami/config.json to add sources.');
       return;
     }
     outputTable(

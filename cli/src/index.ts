@@ -21,6 +21,8 @@ import { changesCommand } from './commands/changes.js';
 import { sourceCommand } from './commands/source.js';
 import { placeCommand } from './commands/place.js';
 import { snapshotCommand } from './commands/snapshot.js';
+import { importCommand } from './commands/import.js';
+import { exportCommand } from './commands/export.js';
 import { checkForUpdate, updateCommand } from './update.js';
 
 const VERSION = '1.0.1';
@@ -55,6 +57,8 @@ Discovery:
   place <query>               Look up a place (Google Places)
 
 Archive:
+  export <file>               Export to MediaWiki XML dump
+  import <file>               Import from MediaWiki XML dump
   snapshot <dir>              Archive a directory
 
 Auth:
@@ -117,7 +121,7 @@ async function main(): Promise<void> {
   // Validate command before attempting auth
   const wikiCommands = new Set([
     'read', 'write', 'edit', 'create', 'search',
-    'section', 'talk', 'upload', 'link', 'category', 'changes',
+    'section', 'talk', 'upload', 'link', 'category', 'changes', 'export', 'import',
   ]);
 
   if (!wikiCommands.has(command)) {
@@ -156,6 +160,10 @@ async function main(): Promise<void> {
         return categoryCommand(commandArgs, globals, client);
       case 'changes':
         return changesCommand(commandArgs, globals, client);
+      case 'export':
+        return exportCommand(commandArgs, globals, client);
+      case 'import':
+        return importCommand(commandArgs, globals, client);
       default:
         return Promise.resolve();
     }

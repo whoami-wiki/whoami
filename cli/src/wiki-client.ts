@@ -182,6 +182,29 @@ export class WikiClient {
     };
   }
 
+  async importPage(title: string, content: string, summary?: string): Promise<EditResult> {
+    const token = await this.getCSRFToken();
+    const params: Record<string, string> = {
+      action: 'edit',
+      title,
+      text: content,
+      bot: 'true',
+      token,
+      format: 'json',
+    };
+    if (summary) params.summary = summary;
+
+    const res = await this.client.post(this.api, new URLSearchParams(params));
+    this.handleEditError(res.data);
+    const edit = res.data.edit;
+    return {
+      title: edit.title,
+      oldRevid: 0,
+      newRevid: edit.newrevid ?? edit.oldrevid,
+      timestamp: edit.newtimestamp ?? '',
+    };
+  }
+
   async editPage(
     title: string,
     oldText: string,
@@ -511,6 +534,52 @@ export class WikiClient {
       oldlen: r.oldlen ?? 0,
       newlen: r.newlen ?? 0,
     }));
+  }
+
+  // ── Export ─────────────────────────────────────────────────────────
+
+  async getNamespaces(): Promise<{ id: number; name: string }[]> {
+    const res = await this.client.get(this.api, {
+      params: { action: 'query', meta: 'siteinfo', siprop: 'namespaces', format: 'json' },
+    });
+    const ns = res.data?.query?.namespaces ?? {};
+    return Object.values(ns)
+      .filter((n: any) => n.id >= 0)
+      .map((n: any) => ({ id: n.id, name: n['*'] ?? '' }));
+  }
+
+  async listAllPages(ns: number): Promise<string[]> {
+    const titles: string[] = [];
+    let apcontinue: string | undefined;
+    do {
+      const params: Record<string, string | number> = {
+        action: 'query',
+        list: 'allpages',
+        apnamespace: ns,
+        aplimit: 'max',
+        format: 'json',
+      };
+      if (apcontinue) params.apcontinue = apcontinue;
+      const res = await this.client.get(this.api, { params });
+      const pages = res.data?.query?.allpages ?? [];
+      titles.push(...pages.map((p: any) => p.title));
+      apcontinue = res.data?.continue?.apcontinue;
+    } while (apcontinue);
+    return titles;
+  }
+
+  async exportPages(titles: string[]): Promise<string> {
+    const res = await this.client.get(this.api, {
+      params: {
+        action: 'query',
+        titles: titles.join('|'),
+        export: 1,
+        exportnowrap: 1,
+      },
+      responseType: 'text',
+      transformResponse: [(data: any) => data],
+    });
+    return res.data;
   }
 
   // ── Places ───────────────────────────────────────────────────────────

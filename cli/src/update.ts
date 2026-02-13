@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 import { execSync } from 'node:child_process';
 import https from 'node:https';
 
-const CONFIG_DIR = join(homedir(), '.config', 'wai');
+const CONFIG_DIR = join(homedir(), '.whoami');
 const CACHE_FILE = join(CONFIG_DIR, 'update-check.json');
 const REPO = 'whoami-wiki/whoami';
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
