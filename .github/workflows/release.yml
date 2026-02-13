@@ -51,4 +51,4 @@ jobs:
           files: |
             wai-v*.tar.gz
             wai-v*.tar.gz.sha256
-          generate_release_notes: true
+          body_path: cli/RELEASE_NOTES.md
