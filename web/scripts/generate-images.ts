@@ -176,7 +176,8 @@ const prompts: Record<string, string> = {
     "An Indian family packed into the back seat of a white Tata Indica, seen through the car window — father driving, mother in front, two kids in back with snacks, long empty Rajasthan highway visible through windshield, golden hour, road trip photo, 2008 compact camera",
 };
 
-const STYLE = "Authentic personal photograph, like a real photo from someone's phone or compact digital camera. Natural, candid, unposed — people caught mid-moment, not looking at camera or arranged symmetrically. Imperfect framing, slightly off-center compositions, natural lighting with real shadows. Depth and dimension — not flat or planar. The scene should feel lived-in and spontaneous, like a photo you'd actually find in someone's Google Photos library. Indian characters should look consistent: Jay is a slim Indian man in his mid-twenties with short black hair; Sid is slightly taller with glasses; Priya has shoulder-length hair and an athletic build.";
+const STYLE =
+  "Authentic personal photograph, like a real photo from someone's phone or compact digital camera. Natural, candid, unposed — people caught mid-moment, not looking at camera or arranged symmetrically. Imperfect framing, slightly off-center compositions, natural lighting with real shadows. Depth and dimension — not flat or planar. The scene should feel lived-in and spontaneous, like a photo you'd actually find in someone's Google Photos library. Indian characters should look consistent: Jay is a slim Indian man in his mid-twenties with short black hair; Sid is slightly taller with glasses; Priya has shoulder-length hair and an athletic build.";
 
 async function generateImage(id: string, prompt: string): Promise<string> {
   const filename = `${id}.png`;
@@ -212,14 +213,13 @@ async function updateImageMap(generated: Record<string, string>) {
   let content = fs.readFileSync(IMAGE_MAP_PATH, "utf-8");
   for (const [id, src] of Object.entries(generated)) {
     // Replace src: null with src: "/images/id.png" for each generated image
-    const pattern = new RegExp(
-      `(${id}:\\s*\\{[^}]*?)src:\\s*null`,
-      "s",
-    );
+    const pattern = new RegExp(`(${id}:\\s*\\{[^}]*?)src:\\s*null`, "s");
     content = content.replace(pattern, `$1src: "${src}"`);
   }
   fs.writeFileSync(IMAGE_MAP_PATH, content);
-  console.log(`\n✅ Updated image-map.ts with ${Object.keys(generated).length} entries`);
+  console.log(
+    `\n✅ Updated image-map.ts with ${Object.keys(generated).length} entries`,
+  );
 }
 
 async function main() {
@@ -251,7 +251,9 @@ async function main() {
   }
 
   await updateImageMap(generated);
-  console.log(`\nDone! ${Object.keys(generated).length}/${ids.length} images generated.`);
+  console.log(
+    `\nDone! ${Object.keys(generated).length}/${ids.length} images generated.`,
+  );
 }
 
 main().catch(console.error);

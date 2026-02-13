@@ -43,7 +43,6 @@ const imageContext: Record<string, keyof typeof SIZES> = {
   img_ib_gang: "infobox",
 
   // Canon PowerShot A2300
-  img_canon_camera: "thumb",
   img_canon_rajasthan: "thumb",
   img_canon_family: "thumb",
 
@@ -70,7 +69,6 @@ const imageContext: Record<string, keyof typeof SIZES> = {
 
   // Indiranagar Apartment
   img_flat_balcony: "thumb",
-  img_flat_listing: "thumb",
   img_flat_moving: "thumb",
 
   // Hot Wheels
@@ -95,13 +93,11 @@ const imageContext: Record<string, keyof typeof SIZES> = {
 
   // Nandi Hills
   img_nh_sunrise: "gallery",
-  img_nh_bikes: "gallery",
   img_nh_route: "thumb",
   img_nh_dosa: "thumb",
 
   // Aai
   img_aai_school: "thumb",
-  img_aai_call: "thumb",
   img_aai_diwali: "thumb",
 
   // Gallery pair images
