@@ -35,47 +35,16 @@ echo ""
 echo "  Releasing ${TAG}..."
 echo ""
 
-# ── Generate release notes ────────────────────────────────────────────
+# ── Check release notes ──────────────────────────────────────────────
 
-PREV_TAG=$(git tag --list 'cli-v*' --sort=-version:refname | head -1)
-NOTES_FILE="RELEASE_NOTES.md"
+if [ ! -f "RELEASE_NOTES.md" ]; then
+  echo "RELEASE_NOTES.md not found. Write release notes before running this script." >&2
+  exit 1
+fi
 
-{
-  # Collect commits since last CLI tag, scoped to cli/
-  FEATS=""
-  FIXES=""
-  OTHER=""
-
-  while IFS= read -r line; do
-    case "$line" in
-      feat:*|feat\(*) FEATS="${FEATS}
-- ${line#feat: }" ;;
-      fix:*|fix\(*)   FIXES="${FIXES}
-- ${line#fix: }" ;;
-      release:*|"")   ;;
-      *)              OTHER="${OTHER}
-- ${line}" ;;
-    esac
-  done <<EOF
-$(git log "${PREV_TAG}..HEAD" --pretty=format:'%s' -- . ../cli/)
-EOF
-
-  if [ -n "$FEATS" ]; then
-    printf '### Features\n%s\n\n' "$FEATS"
-  fi
-  if [ -n "$FIXES" ]; then
-    printf '### Fixes\n%s\n\n' "$FIXES"
-  fi
-  if [ -n "$OTHER" ]; then
-    printf '### Other\n%s\n\n' "$OTHER"
-  fi
-
-  echo "**Full Changelog**: https://github.com/whoami-wiki/whoami/compare/${PREV_TAG}...${TAG}"
-} > "$NOTES_FILE"
-
-echo "  Generated release notes:"
+echo "  Release notes:"
 echo ""
-cat "$NOTES_FILE"
+cat RELEASE_NOTES.md
 echo ""
 
 # ── Bump version ───────────────────────────────────────────────────────
@@ -88,7 +57,7 @@ sed -i '' "s/const VERSION = '.*'/const VERSION = '${VERSION}'/" src/index.ts
 
 # ── Commit & tag ───────────────────────────────────────────────────────
 
-git add package.json src/index.ts "$NOTES_FILE"
+git add package.json src/index.ts RELEASE_NOTES.md
 git commit -m "release: ${TAG}"
 git tag "$TAG"
 git push
