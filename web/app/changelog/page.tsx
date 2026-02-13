@@ -66,7 +66,7 @@ export default async function ChangelogPage() {
         )}
 
         <div className="flex flex-col gap-12">
-          {releases.map((release) => (
+          {releases.map((release, releaseIndex) => (
             <article key={release.tag_name} className="flex flex-col gap-3">
               <div className="flex items-baseline gap-3">
                 <span className="font-sans font-medium">
@@ -88,11 +88,15 @@ export default async function ChangelogPage() {
               </div>
 
               {release.body && (
-                <div className="font-sans flex flex-col gap-4 text-neutral-700 dark:text-neutral-300">
+                <div className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert prose-li:m-0 prose-p:m-0 prose-ul:mt-0 prose-code:before:content-none prose-code:after:content-none flex flex-col gap-4">
                   <Markdown components={MarkdownBlocks}>
                     {release.body}
                   </Markdown>
                 </div>
+              )}
+
+              {releaseIndex !== releases.length - 1 && (
+                <div className="w-full h-px bg-neutral-200 dark:bg-neutral-700 mt-10" />
               )}
             </article>
           ))}

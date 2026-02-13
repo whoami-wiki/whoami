@@ -76,7 +76,7 @@ export function WikiWindow({ activePage, zIndex }: Props) {
             >
               {/* Article content — offset right to clear the TOC */}
               <div className="md:ml-52">
-                <h1 className="font-serif text-2xl font-medium mb-1">
+                <h1 className="font-serif text-2xl font-normal mb-1">
                   {activePage.title}
                 </h1>
                 <div className="font-sans text-xs text-muted mb-4">
@@ -111,25 +111,25 @@ export function WikiWindow({ activePage, zIndex }: Props) {
                 </div>
 
                 {/* Intro */}
-                <p className="font-serif text-[15px] leading-[1.7] text-neutral-700 dark:text-neutral-300 mb-4">
+                <p className="font-sans text-sm leading-[1.7] text-neutral-700 dark:text-neutral-300 mb-4">
                   {renderWikiText(activePage.intro)}
                 </p>
 
                 {/* Sections */}
                 {activePage.sections.map((section) => (
                   <div key={section.heading} className="mb-4">
-                    <h2 className="font-serif text-lg font-medium mb-1 text-primary">
+                    <h2 className="font-serif text-lg font-normal mb-1 text-primary">
                       {section.heading}
                     </h2>
                     <div className="h-px bg-neutral-200 dark:bg-neutral-700 mb-2" />
                     {section.images && section.images.length === 1 && (
                       <Thumb id={section.images[0]} />
                     )}
-                    <p className="font-serif text-[15px] leading-[1.7] text-neutral-700 dark:text-neutral-300">
+                    <p className="font-sans text-sm leading-[1.7] text-neutral-700 dark:text-neutral-300">
                       {renderWikiText(section.body)}
                     </p>
                     {section.quote && (
-                      <blockquote className="my-4 ml-2 pl-3 border-l-2 border-neutral-300 dark:border-neutral-600 font-serif text-[15px] text-neutral-700 dark:text-neutral-300">
+                      <blockquote className="my-4 ml-2 pl-3 border-l-2 border-neutral-300 dark:border-neutral-600 font-sans text-sm italic text-neutral-700 dark:text-neutral-300">
                         {renderWikiText(section.quote)}
                         {section.quoteAttrib && (
                           <span className="block mt-0.5 text-sm not-italic text-muted">
