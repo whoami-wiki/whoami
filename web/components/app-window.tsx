@@ -65,7 +65,7 @@ function PhotosContent() {
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
       {/* Sidebar */}
-      <div className="w-[28%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-neutral-300 dark:border-neutral-700 flex flex-col overflow-hidden py-1">
+      <div className="w-[28%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-primary flex flex-col overflow-hidden py-1">
         {sections.map((s, i) => (
           <div
             key={i}
@@ -74,7 +74,7 @@ function PhotosContent() {
             {s.label}
           </div>
         ))}
-        <div className="px-2 pt-1.5 pb-0.5 text-[9px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+        <div className="px-2 pt-1.5 pb-0.5 text-[9px] font-semibold uppercase tracking-wider text-muted">
           Albums
         </div>
         {albums.map((a, i) => (
@@ -154,7 +154,7 @@ function FinderContent() {
   ];
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
-      <div className="w-[30%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-neutral-300 dark:border-neutral-700 flex flex-col overflow-hidden py-1">
+      <div className="w-[30%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-primary flex flex-col overflow-hidden py-1">
         {sidebar.map((s, i) => (
           <div
             key={i}
@@ -168,7 +168,7 @@ function FinderContent() {
       </div>
       {/* File list */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className="flex items-center px-2 py-0.5 border-b border-neutral-200 dark:border-neutral-700 text-[9px] text-neutral-400">
+        <div className="flex items-center px-2 py-0.5 border-b border-muted text-[9px] text-neutral-400">
           <span className="flex-[3]">Name</span>
           <span className="flex-[2]">Date Modified</span>
           <span className="flex-[2]">Kind</span>
@@ -240,7 +240,7 @@ function MessagesContent() {
   ];
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
-      <div className="w-[40%] shrink-0 border-r border-neutral-200 dark:border-neutral-700 flex flex-col overflow-hidden">
+      <div className="w-[40%] shrink-0 border-r border-muted flex flex-col overflow-hidden">
         {conversations.map((c, i) => (
           <div
             key={i}
@@ -264,7 +264,7 @@ function MessagesContent() {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="px-3 py-1.5 border-b border-neutral-200 dark:border-neutral-700 shrink-0">
+        <div className="px-3 py-1.5 border-b border-muted shrink-0">
           <span className="text-xs text-neutral-700 dark:text-neutral-300">
             College Gang
           </span>
@@ -286,7 +286,7 @@ function MessagesContent() {
             </div>
           ))}
         </div>
-        <div className="shrink-0 px-2 py-1.5 border-t border-neutral-200 dark:border-neutral-700">
+        <div className="shrink-0 px-2 py-1.5 border-t border-muted">
           <div className="flex items-center gap-1.5 rounded-full bg-neutral-200/60 dark:bg-neutral-700/60 px-2.5 py-1">
             <span className="text-xs text-neutral-400">Send message...</span>
           </div>
@@ -413,7 +413,7 @@ function NumbersContent() {
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
       {/* Page thumbnails sidebar */}
-      <div className="w-[18%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-neutral-300 dark:border-neutral-700 flex flex-col items-center gap-1.5 py-2 overflow-hidden">
+      <div className="w-[18%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-primary flex flex-col items-center gap-1.5 py-2 overflow-hidden">
         {pages.map((p) => (
           <div key={p} className="flex flex-col items-center gap-0.5">
             <div
@@ -441,7 +441,7 @@ function NumbersContent() {
           Jan 15, 2026 &middot; Thyrocare Labs
         </div>
         <div className="flex-1 overflow-hidden">
-          <div className="flex text-xs text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-0.5 mb-0.5">
+          <div className="flex text-xs text-neutral-400 border-b border-muted pb-0.5 mb-0.5">
             <span className="flex-[3]">Test</span>
             <span className="flex-[2]">Result</span>
             <span className="flex-[3]">Ref. Range</span>
@@ -484,7 +484,7 @@ function VoiceMemosContent() {
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
       {/* Sidebar — recording list */}
-      <div className="w-[40%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-neutral-300 dark:border-neutral-700 flex flex-col overflow-hidden">
+      <div className="w-[40%] shrink-0 bg-neutral-200/60 dark:bg-neutral-800/60 border-r border-primary flex flex-col overflow-hidden">
         {memos.map((m, i) => (
           <div
             key={i}
@@ -580,11 +580,11 @@ function MapsContent() {
   return (
     <div className="flex h-full overflow-hidden font-sans text-xs">
       {/* Timeline sidebar */}
-      <div className="w-[38%] shrink-0 border-r border-neutral-300 dark:border-neutral-700 flex flex-col overflow-hidden bg-white dark:bg-neutral-900">
+      <div className="w-[38%] shrink-0 border-r border-primary flex flex-col overflow-hidden bg-white dark:bg-neutral-900">
         {days.map((day, di) => (
           <div key={di}>
             <div
-              className={`px-2 py-1 border-b border-neutral-200 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400${di > 0 ? " border-t" : ""}`}
+              className={`px-2 py-1 border-b border-muted text-xs text-muted${di > 0 ? " border-t" : ""}`}
             >
               {day.label}
             </div>
@@ -600,7 +600,7 @@ function MapsContent() {
                   </div>
                   <div className="min-w-0">
                     <div
-                      className={`text-xs truncate ${day.dim ? "text-neutral-400 dark:text-neutral-500" : "text-neutral-800 dark:text-neutral-200"}`}
+                      className={`text-xs truncate ${day.dim ? "text-muted" : "text-neutral-800 dark:text-neutral-200"}`}
                     >
                       {t.place}
                     </div>
@@ -714,7 +714,7 @@ export function AppWindow({
 
   return (
     <div
-      className="absolute rounded-xl bg-neutral-100 dark:bg-neutral-900 shadow-xl overflow-hidden flex flex-col border border-neutral-300 dark:border-neutral-700"
+      className="absolute rounded-xl bg-neutral-100 dark:bg-neutral-900 shadow-xl overflow-hidden flex flex-col border border-primary"
       style={{
         top,
         left,
@@ -726,7 +726,7 @@ export function AppWindow({
       onPointerDown={onFocus}
     >
       <div
-        className="flex items-center gap-2 px-2.5 py-1.5 bg-neutral-200/80 dark:bg-neutral-800/80 border-b border-neutral-300 dark:border-neutral-700 shrink-0 cursor-grab active:cursor-grabbing select-none"
+        className="flex items-center gap-2 px-2.5 py-1.5 bg-neutral-200/80 dark:bg-neutral-800/80 border-b border-primary shrink-0 cursor-grab active:cursor-grabbing select-none"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

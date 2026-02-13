@@ -1142,7 +1142,7 @@ export function DesktopScene() {
 
   return (
     <div ref={ref} className="h-[500vh] relative">
-      <div className="sticky top-0 h-dvh w-dvw bg-blue-200 dark:bg-neutral-800 flex items-center justify-center">
+      <div className="sticky top-0 h-dvh w-dvw bg-blue-200 dark:bg-neutral-900 flex items-center justify-center">
         {/* Centered container for app windows — positions resolve against 1440px */}
         <div className="relative w-full max-w-[1440px] h-full overflow-hidden">
           {desktopFiles.map((f) =>

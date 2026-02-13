@@ -42,7 +42,7 @@ export function Footer() {
         <div className="grid grid-cols-3 gap-8">
           {columns.map((col) => (
             <div key={col.heading} className="flex flex-col gap-3">
-              <div className="text-neutral-400 dark:text-neutral-500">
+              <div className="text-muted">
                 {col.heading}
               </div>
               {col.links.map((link) => (
@@ -54,7 +54,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-neutral-200 dark:border-neutral-700 text-neutral-400 dark:text-neutral-500">
+        <div className="flex items-center justify-between border-neutral-200 dark:border-neutral-700 text-muted">
           <span>Made in San Francisco, California</span>
           <button
             onClick={() =>

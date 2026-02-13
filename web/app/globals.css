@@ -5,6 +5,10 @@
 :root {
     --background: #ffffff;
     --foreground: #171717;
+    --text-primary: #171717;
+    --text-muted: #737373;
+    --border-primary: rgb(0 0 0 / 0.15);
+    --border-muted: rgb(0 0 0 / 0.10);
 }
 
 @theme inline {
@@ -16,8 +20,28 @@
 }
 
 .dark {
-    --background: #0a0a0a;
+    --background: #262626;
     --foreground: #ededed;
+    --text-primary: #f5f5f5;
+    --text-muted: #a3a3a3;
+    --border-primary: rgb(255 255 255 / 0.15);
+    --border-muted: rgb(255 255 255 / 0.10);
+}
+
+@utility text-primary {
+    color: var(--text-primary);
+}
+
+@utility text-muted {
+    color: var(--text-muted);
+}
+
+@utility border-primary {
+    border-color: var(--border-primary);
+}
+
+@utility border-muted {
+    border-color: var(--border-muted);
 }
 
 body {

@@ -7,7 +7,7 @@ export default function Home() {
       <div className="max-w-120 flex flex-col gap-8 py-18">
         <div className="">
           <div className="font-sans">whoami.wiki</div>
-          <div className="font-sans text-neutral-500 dark:text-neutral-400">
+          <div className="font-sans text-muted">
             your personal encyclopedia, written by agents
           </div>
         </div>
@@ -82,13 +82,13 @@ export default function Home() {
         <div className="flex flex-1/2 flex-col gap-8 h-fit">
           <dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-6 font-sans">
             <dt className="">Local-first</dt>
-            <dd className="text-neutral-500 dark:text-neutral-400">
+            <dd className="text-muted">
               Everything runs on your machine—MediaWiki in Docker, archive on
               your filesystem. Your data never touches a server unless you put
               it there.
             </dd>
             <dt className="">Works with your tools</dt>
-            <dd className="text-neutral-500 dark:text-neutral-400">
+            <dd className="text-muted">
               Built for{" "}
               <a
                 href="https://docs.anthropic.com/en/docs/claude-code"
@@ -110,24 +110,24 @@ export default function Home() {
               to any AI workflow that can run bash.
             </dd>
             <dt className="">Citations you can click</dt>
-            <dd className="text-neutral-500 dark:text-neutral-400">
+            <dd className="text-muted">
               Every fact links back to its source. Click a citation in the wiki
               and see the original photo, chat message, or document it came
               from.
             </dd>
             <dt className="">Content-addressed</dt>
-            <dd className="text-neutral-500 dark:text-neutral-400">
+            <dd className="text-muted">
               Files are stored by hash and deduplicated automatically. The same
               photo across five exports is stored once.
             </dd>
             <dt className="">Export anytime</dt>
-            <dd className="text-neutral-500 dark:text-neutral-400">
+            <dd className="text-muted">
               Full export to Markdown and original files. Share a single page
               with family or back up everything. No proprietary formats, no
               lock-in.
             </dd>
             <dt className="">Open source</dt>
-            <dd className="text-neutral-500 dark:text-neutral-400">
+            <dd className="text-muted">
               MIT licensed. The core stays open forever. Run it, fork it, extend
               it however you want.
             </dd>
