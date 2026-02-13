@@ -3,6 +3,7 @@
 import type { WikiPage, TocEntry } from "@/components/desktop-scene";
 import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
 import { imageMap } from "@/utils/image-map";
 
 interface Props {
@@ -176,11 +177,14 @@ function WikiImage({ id, className = "" }: { id: string; className?: string }) {
 
   if (entry.src) {
     return (
-      <img
-        src={entry.src}
-        alt={entry.alt}
-        className={`object-cover ${className}`}
-      />
+      <div key={entry.src} className={`relative ${className}`}>
+        <Image
+          src={entry.src}
+          alt={entry.alt}
+          fill
+          className="object-cover"
+        />
+      </div>
     );
   }
 
