@@ -1,6 +1,6 @@
 {
   "name": "wai",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "whoami.wiki cli",
   "type": "module",
   "bin": {
