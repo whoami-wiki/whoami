@@ -3,6 +3,14 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+# ── Guard: must be on main ─────────────────────────────────────────────
+
+BRANCH=$(git branch --show-current)
+if [ "$BRANCH" != "main" ]; then
+  echo "Must be on main to release (currently on ${BRANCH})." >&2
+  exit 1
+fi
+
 # ── Get version ────────────────────────────────────────────────────────
 
 VERSION="$1"
@@ -21,7 +29,7 @@ fi
 
 # Strip leading v if present
 VERSION="${VERSION#v}"
-TAG="v${VERSION}"
+TAG="cli-v${VERSION}"
 
 echo ""
 echo "  Releasing ${TAG}..."

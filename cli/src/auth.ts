@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { AuthError } from './errors.js';
 
-const CONFIG_DIR = join(homedir(), '.config', 'wai');
+const CONFIG_DIR = join(homedir(), '.whoami');
 const CREDENTIALS_FILE = join(CONFIG_DIR, 'credentials.json');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
 
