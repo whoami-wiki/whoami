@@ -104,7 +104,7 @@ export default function Home() {
                 Codex
               </a>
               . Agents use the CLI directly, no plugins required. Add{" "}
-              <span className="font-mono p-0.5 px-1 border border-neutral-300 rounded-md">
+              <span className="font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-600 rounded-md">
                 wai
               </span>{" "}
               to any AI workflow that can run bash.

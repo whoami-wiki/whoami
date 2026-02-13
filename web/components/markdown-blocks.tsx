@@ -16,7 +16,7 @@ export const MarkdownBlocks = {
   },
   code: ({ children }: { children?: ReactNode }) => {
     return (
-      <code className="text-sm font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-800 rounded-md">
+      <code className="text-sm font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-600 rounded-md">
         {children}
       </code>
     );
