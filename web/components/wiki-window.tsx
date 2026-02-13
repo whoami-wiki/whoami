@@ -177,6 +177,7 @@ function WikiImage({ id, className = "" }: { id: string; className?: string }) {
   if (entry.src) {
     return (
       <img
+        key={entry.src}
         src={entry.src}
         alt={entry.alt}
         className={`object-cover ${className}`}
