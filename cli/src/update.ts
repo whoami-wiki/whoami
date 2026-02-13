@@ -83,7 +83,7 @@ function writeCache(cache: UpdateCache): void {
 function fetchLatestVersion(): Promise<string | null> {
   return new Promise((resolve) => {
     const req = https.get(
-      `https://api.github.com/repos/${REPO}/releases/latest`,
+      `https://api.github.com/repos/${REPO}/releases?per_page=10`,
       {
         headers: { 'User-Agent': 'wai-cli', Accept: 'application/vnd.github.v3+json' },
         timeout: 3000,
@@ -97,8 +97,11 @@ function fetchLatestVersion(): Promise<string | null> {
         res.on('data', (chunk: Buffer) => (data += chunk));
         res.on('end', () => {
           try {
-            const tag = JSON.parse(data).tag_name;
-            resolve(tag ? tag.replace(/^v/, '') : null);
+            const releases = JSON.parse(data);
+            const cli = releases.find(
+              (r: any) => r.tag_name?.startsWith('cli-v') && !r.draft && !r.prerelease,
+            );
+            resolve(cli ? cli.tag_name.replace(/^cli-v/, '') : null);
           } catch {
             resolve(null);
           }
