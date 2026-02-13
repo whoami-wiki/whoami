@@ -4,7 +4,7 @@ import { Terminal } from "@/components/terminal";
 export default function Home() {
   return (
     <div className="flex flex-col w-dvw items-center">
-      <div className="max-w-120 flex flex-col gap-8 py-18">
+      <div className="max-w-120 flex flex-col gap-8 py-18 px-6">
         <div className="">
           <div className="font-sans">whoami.wiki</div>
           <div className="font-sans text-muted">
@@ -23,7 +23,7 @@ export default function Home() {
 
       <DesktopScene />
 
-      <div className="max-w-150 flex flex-col gap-24 py-18 border-b border-neutral-200">
+      <div className="max-w-150 flex flex-col gap-24 py-18 px-6 border-b border-neutral-200">
         <div className="flex flex-1/2 flex-col gap-8 h-fit">
           <div className="font-sans font-medium">Add sources</div>
           <div className="font-sans">
@@ -78,7 +78,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-150 flex flex-col gap-24 py-18">
+      <div className="max-w-150 flex flex-col gap-24 py-18 px-6">
         <div className="flex flex-1/2 flex-col gap-8 h-fit">
           <dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-6 font-sans">
             <dt className="">Local-first</dt>
@@ -104,7 +104,7 @@ export default function Home() {
                 Codex
               </a>
               . Agents use the CLI directly, no plugins required. Add{" "}
-              <span className="font-mono p-0.5 px-1 border border-neutral-300 rounded-md">
+              <span className="font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-600 rounded-md">
                 wai
               </span>{" "}
               to any AI workflow that can run bash.

@@ -51,7 +51,7 @@ export default async function ChangelogPage() {
 
   return (
     <div className="flex flex-col w-dvw items-center">
-      <div className="max-w-120 flex flex-col gap-8 py-18">
+      <div className="max-w-120 flex flex-col gap-8 py-18 px-6">
         <div>
           <div className="font-sans">Changelog</div>
           <div className="font-sans text-neutral-500 dark:text-neutral-400">
@@ -72,7 +72,7 @@ export default async function ChangelogPage() {
                 <span className="font-sans font-medium">
                   {tagVersion(release.tag_name)}
                 </span>
-                <span className="font-sans text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-800 rounded-md">
+                <span className="font-sans text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded-md">
                   {tagLabel(release.tag_name)}
                 </span>
                 <time
