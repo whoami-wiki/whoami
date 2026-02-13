@@ -1,12 +1,13 @@
 import {
   app,
   BrowserWindow,
+  Menu,
   WebContentsView,
   ipcMain,
   shell,
 } from 'electron';
 import { join } from 'node:path';
-import { startServer, stopServer, getServerUrl } from './php-server.js';
+import { startServer, stopServer, getServerUrl, getDataPath } from './php-server.js';
 import { isFirstRun, runSetup } from './setup.js';
 import { createTray, destroyTray } from './tray.js';
 import { initAutoUpdater } from './updater.js';
@@ -103,9 +104,10 @@ async function launchWiki(): Promise<void> {
     minWidth: 600,
     minHeight: 400,
     titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 16, y: 16 },
+    trafficLightPosition: { x: 16, y: 18 },
     title: 'Whoami Wiki',
     webPreferences: {
+      preload: join(app.getAppPath(), 'dist', 'src', 'preload-navbar.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -119,7 +121,7 @@ async function launchWiki(): Promise<void> {
   const resizeView = () => {
     if (!mainWindow || !wikiView) return;
     const { width, height } = mainWindow.getContentBounds();
-    const titleBarHeight = 38;
+    const titleBarHeight = 48;
     wikiView.setBounds({
       x: 0,
       y: titleBarHeight,
@@ -131,11 +133,12 @@ async function launchWiki(): Promise<void> {
   mainWindow.on('resize', resizeView);
   resizeView();
 
-  // Update window title based on wiki page
+  // Update window title and navbar based on wiki page
   wikiView.webContents.on('page-title-updated', (_event, title) => {
     // Strip " - Whoami Wiki" suffix if present
     const clean = title.replace(/\s*[-–—]\s*Whoami Wiki$/, '');
     mainWindow?.setTitle(clean || 'Whoami Wiki');
+    mainWindow?.webContents.send('navbar:title-update', clean || 'Whoami Wiki');
   });
 
   // Open external links in the system browser
@@ -157,22 +160,64 @@ async function launchWiki(): Promise<void> {
     }
   });
 
-  // Make the titlebar area draggable
-  mainWindow.loadURL('data:text/html,<html><body style="margin:0"><div style="-webkit-app-region:drag;height:38px"></div></body></html>');
+  // Load the navbar
+  const navbarPath = join(app.getAppPath(), 'renderer', 'navbar.html');
+  mainWindow.loadFile(navbarPath);
 
   wikiView.webContents.loadURL(getServerUrl());
 
-  // Keyboard shortcuts for navigation
-  mainWindow.webContents.on('before-input-event', (_event, input) => {
+  // Send navigation state to navbar on every navigation
+  const sendNavigationState = () => {
+    if (!wikiView || !mainWindow) return;
+    mainWindow.webContents.send('navbar:navigation-state', {
+      canGoBack: wikiView.webContents.canGoBack(),
+      canGoForward: wikiView.webContents.canGoForward(),
+    });
+  };
+  wikiView.webContents.on('did-navigate', sendNavigationState);
+  wikiView.webContents.on('did-navigate-in-page', sendNavigationState);
+
+  // Navbar IPC handlers
+  const onGoBack = () => wikiView?.webContents.goBack();
+  const onGoForward = () => wikiView?.webContents.goForward();
+  const onOpenSettings = (_event: Electron.IpcMainEvent, pos: { x: number; y: number }) => {
+    const menu = Menu.buildFromTemplate([
+      {
+        label: 'Open in Browser',
+        click: () => shell.openExternal(getServerUrl()),
+      },
+      {
+        label: 'Data Folder',
+        click: () => shell.openPath(getDataPath()),
+      },
+      { type: 'separator' },
+      {
+        label: 'Quit',
+        role: 'quit',
+      },
+    ]);
+    menu.popup({ window: mainWindow!, x: pos.x, y: pos.y });
+  };
+  ipcMain.on('navbar:go-back', onGoBack);
+  ipcMain.on('navbar:go-forward', onGoForward);
+  ipcMain.on('navbar:open-settings', onOpenSettings);
+
+  // Keyboard shortcuts for navigation (on both navbar and wiki webContents)
+  const handleKeyboardNav = (_event: Electron.Event, input: Electron.Input) => {
     if (!wikiView) return;
     if (input.meta && input.key === '[') {
       wikiView.webContents.goBack();
     } else if (input.meta && input.key === ']') {
       wikiView.webContents.goForward();
     }
-  });
+  };
+  mainWindow.webContents.on('before-input-event', handleKeyboardNav);
+  wikiView.webContents.on('before-input-event', handleKeyboardNav);
 
   mainWindow.on('closed', () => {
+    ipcMain.removeListener('navbar:go-back', onGoBack);
+    ipcMain.removeListener('navbar:go-forward', onGoForward);
+    ipcMain.removeListener('navbar:open-settings', onOpenSettings);
     mainWindow = null;
     wikiView = null;
     stopServer();
