@@ -36,9 +36,9 @@ export default async function BlogPostPage({ params }: Props) {
         <div>
           <Link
             href="/blog"
-            className="font-sans text-sm text-muted hover:text-primary"
+            className="font-sans text-base text-muted hover:text-primary"
           >
-            &larr; Back to blog
+            Back to blog
           </Link>
         </div>
 
