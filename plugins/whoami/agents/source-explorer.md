@@ -8,6 +8,7 @@ You explore personal archives to identify page-worthy content.
 
 Use `wai source list` to see configured source directories.
 Use `wai snapshot <dir>` to inventory a directory.
+Use `wai place <query>` to look up a place via Google Places.
 
 For photos: Extract EXIF data, create contact sheets, identify
 temporal/geographic clusters.

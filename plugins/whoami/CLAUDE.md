@@ -18,13 +18,20 @@ wai read "Page Name"              # read a page
 wai search "query"                # full-text search
 wai create "Page" -c "content"    # create new page
 wai edit "Page" --old "x" --new "y"  # find-and-replace
+wai edit "Page" --old "x" --new "y" --dry-run  # preview changes
+wai edit "Page" --old "x" --new "y" --replace-all  # replace all occurrences
 wai write "Page" -f draft.wiki    # overwrite page
+wai upload photo.jpg              # upload a file
 wai section list "Page"           # list sections
+wai section read "Page" 3         # read a specific section
+wai section update "Page" 3 -c "content"  # update a section
 wai talk read "Page"              # read talk page
+wai talk read "Page" --thread "Subject"   # read a specific thread
 wai talk create "Page" -s "Subject" -c "content"
 wai link "Page"                   # show links in/out
 wai category                      # list all categories
 wai changes                       # recent changes
+wai place "query"                 # look up a place (Google Places)
 ```
 
 ## Workflow
