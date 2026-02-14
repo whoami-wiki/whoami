@@ -10,3 +10,6 @@ desktop/resources/mediawiki/
 desktop/dist-electron/
 desktop/.build/
 desktop/renderer/
+
+# Mediawiki
+mediawiki/

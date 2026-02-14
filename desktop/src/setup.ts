@@ -273,6 +273,12 @@ define("NS_SOURCE_TALK", 101);
 $wgExtraNamespaces[NS_SOURCE] = "Source";
 $wgExtraNamespaces[NS_SOURCE_TALK] = "Source_talk";
 
+## Task namespace (102/103)
+define("NS_TASK", 102);
+define("NS_TASK_TALK", 103);
+$wgExtraNamespaces[NS_TASK] = "Task";
+$wgExtraNamespaces[NS_TASK_TALK] = "Task_talk";
+
 ## Short URLs
 $wgUsePathInfo = true;
 

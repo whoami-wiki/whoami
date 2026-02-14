@@ -34,6 +34,22 @@ Structure of snapshot.json:
 }
 ```
 
+## Tasks
+
+Tasks are first-class wiki pages in the `Task:` namespace. Each task page has an `{{Infobox Task}}` template with metadata (id, status, source, timestamps) and a description body. Tasks are categorized by status: `[[Category:Pending tasks]]`, `[[Category:In-progress tasks]]`, `[[Category:Done tasks]]`, `[[Category:Failed tasks]]`.
+
+**Lifecycle**: pending → in-progress → done/failed. Failed tasks can be requeued back to pending.
+
+When working from the task queue:
+1. `wai task list` to see pending tasks
+2. `wai task read <id>` to understand what's needed
+3. `wai task claim <id>` to mark it in-progress before starting
+4. Do the work (follow the normal workflow below)
+5. `wai task complete <id> -m "summary of what was done"` on success
+6. `wai task fail <id> -m "reason"` if the task can't be completed — e.g. missing sources, ambiguous scope, blocked by unanswered questions
+
+Tasks may reference a source via the `source` field (e.g. `Source:WhatsApp Rahul`). Always read the linked source page before starting work.
+
 ## Architecture
 - MediaWiki instance at localhost:8080
 - `wai` CLI provides read/write access (see `wai --help`)
@@ -63,6 +79,15 @@ wai place "query"                 # look up a place (Google Places)
 wai snapshot <dir>                # archive a directory into ~/Archive
 wai snapshot <dir> --name "Name"  # archive with custom source page name
 wai snapshot <dir> --dry-run      # preview without writing
+wai task list                     # list pending tasks
+wai task list --status done       # list tasks by status
+wai task read 0001                # read a task
+wai task create -m "description"  # create a new task
+wai task create -m "msg" --source "Source:X"  # create with source ref
+wai task claim 0001               # claim a pending task
+wai task complete 0001 -m "output"  # complete a task
+wai task fail 0001 -m "reason"    # fail a task
+wai task requeue 0001             # requeue a failed task
 ```
 
 ## Workflow

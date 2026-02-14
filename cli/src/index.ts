@@ -19,6 +19,7 @@ import { linkCommand } from './commands/link.js';
 import { categoryCommand } from './commands/category.js';
 import { changesCommand } from './commands/changes.js';
 import { sourceCommand } from './commands/source.js';
+import { taskCommand } from './commands/task.js';
 import { placeCommand } from './commands/place.js';
 import { snapshotCommand } from './commands/snapshot.js';
 import { importCommand } from './commands/import.js';
@@ -48,6 +49,15 @@ Sections:
 Talk Pages:
   talk read <page>            Read talk page
   talk create <page>          Create a new talk thread
+
+Tasks:
+  task list [--status X]      List tasks (default: pending)
+  task read <id>              Read a task
+  task create -m "msg"        Create a new task
+  task claim <id>             Claim a pending task
+  task complete <id> [-m]     Complete an in-progress task
+  task fail <id> [-m]         Fail an in-progress task
+  task requeue <id>           Requeue a failed task
 
 Discovery:
   link <title>                Show page links (in/out)
@@ -118,7 +128,7 @@ async function main(): Promise<void> {
   const wikiCommands = new Set([
     'read', 'write', 'edit', 'create', 'search',
     'section', 'talk', 'upload', 'link', 'category', 'changes', 'export', 'import', 'source',
-    'snapshot',
+    'snapshot', 'task',
   ]);
 
   if (!wikiCommands.has(command)) {
@@ -165,6 +175,8 @@ async function main(): Promise<void> {
         return importCommand(commandArgs, globals, client);
       case 'snapshot':
         return snapshotCommand(commandArgs, globals, client);
+      case 'task':
+        return taskCommand(commandArgs, globals, client);
       default:
         return Promise.resolve();
     }

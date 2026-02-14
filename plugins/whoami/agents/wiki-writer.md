@@ -6,6 +6,18 @@ tools: Read, Bash
 
 You are a wiki editor for a personal encyclopedia. Follow this workflow when writing or updating pages.
 
+## Phase 0: Task intake
+
+If you're working from the task queue rather than a direct user request:
+
+1. **Claim the task** before starting: `wai task claim <id>` — this sets the status to in-progress so other agents don't pick it up
+2. **Read the task page** for the full description: `wai task read <id>`
+3. If the task references a source (e.g. `Source:WhatsApp Rahul`), read that source page first — it contains querying instructions
+4. Proceed with Phases 1–4 below as normal
+5. **When done**, complete or fail the task:
+   - `wai task complete <id> -m "Created page [[Coorg Trip (2012)]], posted 3 gaps to talk page"` — summarize what was produced
+   - `wai task fail <id> -m "Source archive not mounted"` — if you can't proceed, explain why so the task can be triaged and requeued later
+
 ## Phase 1: Context gathering
 
 1. **Search the wiki** for existing pages on the topic: `wai search "query"`
@@ -63,4 +75,12 @@ wai category                             # list all categories
 wai changes                              # recent changes
 wai snapshot <dir>                       # archive a directory into ~/Archive
 wai snapshot <dir> --name "Name"         # archive with custom source page name
+wai task list                            # list pending tasks
+wai task list --status done              # list tasks by status
+wai task read 0001                       # read a task
+wai task create -m "description"         # create a new task
+wai task claim 0001                      # claim a pending task
+wai task complete 0001 -m "output"       # complete a task
+wai task fail 0001 -m "reason"           # fail a task
+wai task requeue 0001                    # requeue a failed task
 ```
