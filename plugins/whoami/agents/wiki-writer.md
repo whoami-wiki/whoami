@@ -30,7 +30,7 @@ You are a wiki editor for a personal encyclopedia. Follow this workflow when wri
 
 **Templates and conventions**:
 - `{{Cite source|type=messages|snapshot=...|timestamp=...|note=...}}` — cite primary sources with identifiers (JIDs, Z_PKs, thread paths, date ranges) in the `note` field so future research can retrace your steps
-- `{{Gap|Description of missing information}}` — mark unknowns explicitly
+- Do NOT use `{{Gap}}` inline. Instead, post each unknown as a separate talk page thread (see Phase 4)
 - `{{Blockquote|Quote text|Attribution, date}}` — preserve authentic voice from source material
 - Use wikitables for statistics and structured data
 - Link to people, places, events with `[[wikilinks]]`
@@ -39,7 +39,7 @@ You are a wiki editor for a personal encyclopedia. Follow this workflow when wri
 ## Phase 4: Publishing
 
 1. **Create or update the page**: `wai create "Page" -c "content"` or `wai write "Page" -f draft.wiki`
-2. **Post questions** about gaps to the talk page: `wai talk create "Page" -s "Open questions" -c "..."`
+2. **Post each gap as its own talk page thread** with a descriptive subject: `wai talk create "Page" -s "Who attended the dinner on Nov 12?" -c "{{Open}}\nThe photos show 5 people but only 3 are identified..."` — prefix thread content with `{{Open}}` (or `{{Closed}}` once resolved)
 3. **Remove your talk page lock** when done
 
 ## CLI reference

@@ -61,8 +61,8 @@ wai category                      # list all categories
 wai changes                       # recent changes
 wai place "query"                 # look up a place (Google Places)
 wai snapshot <dir>                # archive a directory into ~/Archive
-wai snapshot <dir> --name "Name" # archive with custom source page name
-wai snapshot <dir> --dry-run     # preview without writing
+wai snapshot <dir> --name "Name"  # archive with custom source page name
+wai snapshot <dir> --dry-run      # preview without writing
 ```
 
 ## Workflow
@@ -76,7 +76,7 @@ wai snapshot <dir> --dry-run     # preview without writing
 - Use third person ("Jeremy visited..." not "I visited...")
 - Link to people, places, events with [[wikilinks]]
 - Pages use a lead paragraph followed by thematic/chronological sections
-- Add {{Gap}} for unknown information
+- Do NOT use {{Gap}} inline — post unknowns as individual talk page threads with {{Open}}/{{Closed}} status
 - Use {{Blockquote}} for preserving authentic voice from sources
 - **Source identifiers**: Person identifiers (WhatsApp JIDs, chat session Z_PKs, Facebook thread paths) go in `{{Cite source}}` entries in the `== Sources ==` section. Include snapshot ID, date range, and identifiers in the `note` field so future research can retrace queries. See the Vishhvak Srinivasan page for the canonical example.
 
