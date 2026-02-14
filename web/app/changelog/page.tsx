@@ -51,7 +51,7 @@ export default async function ChangelogPage() {
 
   return (
     <div className="flex flex-col w-dvw items-center">
-      <div className="max-w-120 flex flex-col gap-8 py-18 px-6">
+      <div className="w-full max-w-3xl flex flex-col gap-8 py-18 px-6">
         <div>
           <div className="font-sans">Changelog</div>
           <div className="font-sans text-neutral-500 dark:text-neutral-400">
