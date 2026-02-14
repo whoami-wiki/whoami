@@ -4,13 +4,13 @@ import { ReactNode } from "react";
 
 const mdxComponents = {
   h1: ({ children }: { children?: ReactNode }) => (
-    <h1 className="text-3xl font-medium font-serif">{children}</h1>
+    <h1 className="text-3xl font-medium font-sans">{children}</h1>
   ),
   h2: ({ children }: { children?: ReactNode }) => (
-    <h2 className="text-2xl font-medium font-serif mt-8 mb-4">{children}</h2>
+    <h2 className="text-2xl font-medium font-sans mt-8 mb-4">{children}</h2>
   ),
   h3: ({ children }: { children?: ReactNode }) => (
-    <h3 className="text-xl font-medium text-primary font-serif mt-6 mb-3">{children}</h3>
+    <h3 className="text-xl font-medium text-primary font-sans mt-6 mb-3">{children}</h3>
   ),
   p: ({ children }: { children?: ReactNode }) => (
     <p className="leading-7 text-base mb-4">{children}</p>
