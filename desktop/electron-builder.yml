@@ -7,9 +7,7 @@ directories:
 
 files:
   - dist/**/*
-  - renderer/**/*.html
-  - renderer/**/*.css
-  - renderer/**/*.js
+  - renderer/**/*
   - "!src/**/*"
   - "!scripts/**/*"
   - "!.build/**/*"

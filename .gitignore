@@ -9,3 +9,4 @@ desktop/resources/lua/
 desktop/resources/mediawiki/
 desktop/dist-electron/
 desktop/.build/
+desktop/renderer/

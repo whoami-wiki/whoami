@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: "Apercu";
+    src: url("/fonts/apercu_regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Apercu";
+    src: url("/fonts/apercu_medium.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+}
+
+@layer base {
+    html,
+    body {
+        height: 100%;
+        overflow: hidden;
+    }
+    body {
+        font-family:
+            "Apercu",
+            -apple-system,
+            BlinkMacSystemFont,
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+        background: transparent;
+    }
+}
+
+@utility drag {
+    -webkit-app-region: drag;
+}
+
+@utility no-drag {
+    -webkit-app-region: no-drag;
+}
