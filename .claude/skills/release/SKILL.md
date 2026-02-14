@@ -19,9 +19,10 @@ Examples:
 
 ## Packages
 
-| Package   | Tag format       | Script                    |
-|-----------|------------------|---------------------------|
-| cli       | `cli-v{version}` | `cli/scripts/release.sh`  |
+| Package   | Tag format           | Script                        |
+|-----------|----------------------|-------------------------------|
+| cli       | `cli-v{version}`     | `cli/scripts/release.sh`      |
+| desktop   | `desktop-v{version}` | `desktop/scripts/release.sh`  |
 
 ## Steps
 
