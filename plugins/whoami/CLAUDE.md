@@ -7,6 +7,8 @@ wiki pages.
 Sources can be listed with `wai source list`, which returns all
 pages in the wiki's source namespace. Source pages have information about different primary sources of data available that can be used for editorial purposes. Each source page has a unique snapshot id in the infobox that can be used to look up their info in ~/archive
 
+Source pages contain a **Querying** section with instructions for programmatic access to the archive — SQL queries for databases, JSON parsing for exports, file lookup via snapshot hashes. Always read the relevant source page before attempting to extract data.
+
 Structure of ~/archive:
 - objects/
   - 00/
@@ -68,8 +70,10 @@ wai place "query"                 # look up a place (Google Places)
 ## Conventions
 - Use third person ("Jeremy visited..." not "I visited...")
 - Link to people, places, events with [[wikilinks]]
-- Use {{Infobox Trip}}, {{Infobox Person}} templates
+- Pages use a lead paragraph followed by thematic/chronological sections
 - Add {{Gap}} for unknown information
+- Use {{Blockquote}} for preserving authentic voice from sources
+- **Source identifiers**: Person identifiers (WhatsApp JIDs, chat session Z_PKs, Facebook thread paths) go in `{{Cite source}}` entries in the `== Sources ==` section. Include snapshot ID, date range, and identifiers in the `note` field so future research can retrace queries. See the Vishhvak Srinivasan page for the canonical example.
 
 ## When working on a page
 - Check Talk:PageName for any existing context or locks
