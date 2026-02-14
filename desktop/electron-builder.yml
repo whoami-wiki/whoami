@@ -29,6 +29,10 @@ extraResources:
     to: resources/templates
     filter:
       - "**/*"
+  - from: ../cli/dist
+    to: resources
+    filter:
+      - wai.cjs
 
 mac:
   category: public.app-category.productivity

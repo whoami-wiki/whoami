@@ -37,7 +37,7 @@ export async function checkForUpdate(currentVersion: string): Promise<string | n
 }
 
 /**
- * `wai update` command — fetches latest and re-runs the installer.
+ * `wai update` command — downloads the latest release via gh and installs it.
  */
 export async function updateCommand(): Promise<void> {
   const latest = await fetchLatestVersion();
@@ -51,12 +51,21 @@ export async function updateCommand(): Promise<void> {
   console.log('Updating...');
 
   try {
+    const tmpDir = execSync('mktemp -d', { encoding: 'utf-8' }).trim();
     execSync(
-      `curl -fsSL https://raw.githubusercontent.com/${REPO}/main/cli/install.sh | bash`,
-      { stdio: 'inherit' },
+      `gh release download "cli-v${latest}" --repo ${REPO} --pattern "wai-v${latest}.tar.gz" --dir "${tmpDir}"`,
+      { stdio: 'inherit', timeout: 30000 },
     );
+    execSync(`tar -xzf "${tmpDir}/wai-v${latest}.tar.gz" -C "${tmpDir}"`, { stdio: 'inherit' });
+
+    const installDir = join(homedir(), '.local', 'bin');
+    mkdirSync(installDir, { recursive: true });
+    execSync(`cp "${tmpDir}/wai-v${latest}/bin/wai" "${installDir}/wai" && chmod +x "${installDir}/wai"`, { stdio: 'inherit' });
+    execSync(`rm -rf "${tmpDir}"`);
+
+    console.log(`Updated to ${latest}`);
   } catch {
-    console.error('Update failed. Try manually: curl -fsSL https://whoami.wiki/install.sh | bash');
+    console.error('Update failed.');
     process.exitCode = 1;
   }
 }

@@ -28,10 +28,6 @@ jobs:
         run: pnpm build
         working-directory: cli
 
-      - name: Bundle
-        run: pnpm bundle
-        working-directory: cli
-
-      - name: Verify bundle
+      - name: Verify build
         run: node dist/wai.cjs --version
         working-directory: cli

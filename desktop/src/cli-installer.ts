@@ -9,8 +9,8 @@ function getWaiSourcePath(): string {
   // In the packaged app, wai binary lives in the resources
   const resourcesPath = app.isPackaged
     ? join(process.resourcesPath, 'resources')
-    : join(app.getAppPath(), '..', 'cli');
-  return join(resourcesPath, 'wai');
+    : join(app.getAppPath(), '..', 'cli', 'dist');
+  return join(resourcesPath, 'wai.cjs');
 }
 
 export async function installWaiCli(): Promise<void> {

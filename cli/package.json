@@ -4,11 +4,11 @@
   "description": "whoami.wiki cli",
   "type": "module",
   "bin": {
-    "wai": "dist/index.js"
+    "wai": "dist/wai.cjs"
   },
   "scripts": {
-    "build": "tsc",
-    "bundle": "node scripts/bundle.mjs",
+    "build": "node scripts/bundle.mjs",
+    "typecheck": "tsc --noEmit",
     "dev": "tsx src/index.ts",
     "test": "tsx --test test/*.test.ts"
   },
