@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; style-src 'self' 'unsafe-inline'"
+        />
+        <title>Welcome to whoami</title>
+        <link rel="stylesheet" href="setup.css" />
+    </head>
+    <body>
+        <div class="titlebar"></div>
+
+        <main id="app">
+            <div id="form-view">
+                <h1>Welcome to whoami</h1>
+                <p class="subtitle">Your personal encyclopedia.</p>
+
+                <form id="setup-form">
+                    <label for="name">What is your name?</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Jay Prakash"
+                        autocomplete="off"
+                        required
+                    />
+
+                    <label for="username">Wiki username:</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Jay"
+                        autocomplete="off"
+                        required
+                    />
+
+                    <label for="password">Password for your wiki:</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        minlength="8"
+                        required
+                    />
+
+                    <button type="submit" id="submit-btn">Get Started</button>
+                </form>
+            </div>
+
+            <div id="progress-view" class="hidden">
+                <h1>Setting up your wiki...</h1>
+                <ul id="progress-list">
+                    <li data-step="database">
+                        <span class="icon"></span>Created database
+                    </li>
+                    <li data-step="mediawiki">
+                        <span class="icon"></span>Installed MediaWiki
+                    </li>
+                    <li data-step="templates">
+                        <span class="icon"></span>Imported templates
+                    </li>
+                    <li data-step="userpage">
+                        <span class="icon"></span>Created your page
+                    </li>
+                    <li data-step="cli">
+                        <span class="icon"></span>Installed wai CLI
+                    </li>
+                </ul>
+                <p id="error-msg" class="hidden"></p>
+            </div>
+        </main>
+
+        <script src="setup.js"></script>
+    </body>
+</html>

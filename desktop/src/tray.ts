@@ -1,73 +1,29 @@
-import { Tray, Menu, nativeImage, shell, type BrowserWindow } from 'electron';
-import { getDataPath, stopServer, startServer, isRunning, getServerUrl } from './php-server.js';
+import { app, Tray, Menu, nativeImage, type BrowserWindow } from "electron";
+import { join } from "node:path";
 
 let tray: Tray | null = null;
 
 export function createTray(getWindow: () => BrowserWindow | null): Tray {
-  // Use a template image for macOS menu bar (16x16)
-  const icon = nativeImage.createFromNamedImage(
-    'NSImageNameBookmarksTemplate',
-    [-1, 0, 1],
+  const icon = nativeImage.createFromPath(
+    join(app.getAppPath(), "assets", "iconTemplate.png"),
   );
+  icon.setTemplateImage(true);
 
   tray = new Tray(icon);
-  tray.setToolTip('Whoami Wiki');
+  tray.setToolTip("Whoami Wiki");
 
-  const updateMenu = () => {
-    const running = isRunning();
-    const menu = Menu.buildFromTemplate([
-      {
-        label: 'Open Wiki',
-        click: () => {
-          const win = getWindow();
-          if (win) {
-            win.show();
-            win.focus();
-          }
-        },
-      },
-      {
-        label: `Open in Browser`,
-        enabled: running,
-        click: () => {
-          shell.openExternal(getServerUrl());
-        },
-      },
-      { type: 'separator' },
-      {
-        label: running ? 'Stop Wiki' : 'Start Wiki',
-        click: async () => {
-          if (running) {
-            stopServer();
-          } else {
-            await startServer();
-          }
-          updateMenu();
-        },
-      },
-      { type: 'separator' },
-      {
-        label: 'Data Folder',
-        click: () => {
-          shell.openPath(getDataPath());
-        },
-      },
-      {
-        label: 'Quit',
-        role: 'quit',
-      },
-    ]);
-    tray?.setContextMenu(menu);
-  };
+  const menu = Menu.buildFromTemplate([{ label: "Quit whoami", role: "quit" }]);
 
-  updateMenu();
-
-  tray.on('click', () => {
+  tray.on("click", () => {
     const win = getWindow();
     if (win) {
       win.show();
       win.focus();
     }
+  });
+
+  tray.on("right-click", () => {
+    tray?.popUpContextMenu(menu);
   });
 
   return tray;
