@@ -1,16 +1,36 @@
 import { MDXRemote, MDXRemoteProps } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { slugify } from "@/lib/blog";
+
+function textContent(children: ReactNode): string {
+  if (typeof children === "string") return children;
+  if (typeof children === "number") return String(children);
+  if (Array.isArray(children)) return children.map(textContent).join("");
+  if (children && typeof children === "object" && "props" in children)
+    return textContent((children as { props: { children?: ReactNode } }).props.children);
+  return "";
+}
 
 const mdxComponents = {
   h1: ({ children }: { children?: ReactNode }) => (
     <h1 className="text-3xl font-medium font-sans">{children}</h1>
   ),
   h2: ({ children }: { children?: ReactNode }) => (
-    <h2 className="text-2xl font-medium font-sans mt-8 mb-4">{children}</h2>
+    <h2
+      id={slugify(textContent(children))}
+      className="text-2xl font-medium font-sans mt-8 mb-4 scroll-mt-24"
+    >
+      {children}
+    </h2>
   ),
   h3: ({ children }: { children?: ReactNode }) => (
-    <h3 className="text-xl font-medium text-primary font-sans mt-6 mb-3">{children}</h3>
+    <h3
+      id={slugify(textContent(children))}
+      className="text-xl font-medium text-primary font-sans mt-6 mb-3 scroll-mt-24"
+    >
+      {children}
+    </h3>
   ),
   p: ({ children }: { children?: ReactNode }) => (
     <p className="leading-7 text-base mb-4">{children}</p>

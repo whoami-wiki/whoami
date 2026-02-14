@@ -32,6 +32,33 @@ export function getAllPosts(): BlogPost[] {
     .sort((a, b) => (a.date > b.date ? -1 : 1));
 }
 
+export interface TocHeading {
+  text: string;
+  id: string;
+  level: number;
+}
+
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-");
+}
+
+export function extractHeadings(content: string): TocHeading[] {
+  const headingRegex = /^(#{2,3})\s+(.+)$/gm;
+  const headings: TocHeading[] = [];
+  let match;
+  while ((match = headingRegex.exec(content)) !== null) {
+    headings.push({
+      level: match[1].length,
+      text: match[2].trim(),
+      id: slugify(match[2].trim()),
+    });
+  }
+  return headings;
+}
+
 export function getPost(slug: string): BlogPost | undefined {
   const filePath = path.join(BLOG_DIR, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) return undefined;
