@@ -63,7 +63,7 @@ export function Navbar() {
               key={href}
               href={href}
               className={cn(
-                { "text-muted": pathname !== href },
+                { "text-muted": href === "/" ? pathname !== href : !pathname.startsWith(href) },
                 href !== "/" && "hidden md:inline",
               )}
             >
@@ -126,7 +126,7 @@ export function Navbar() {
                   <Link
                     key={href}
                     href={href}
-                    className={cn({ "text-muted": pathname !== href })}
+                    className={cn({ "text-muted": href === "/" ? pathname !== href : !pathname.startsWith(href) })}
                     onClick={close}
                   >
                     {label}
