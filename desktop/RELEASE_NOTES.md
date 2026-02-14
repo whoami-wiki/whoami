@@ -1,4 +1,4 @@
-Task namespace support for new wiki setups.
+Bundle the CLI with the desktop app.
 
 Features:
-- New wiki instances now include the `Task` namespace (NS 102/103) in generated LocalSettings, enabling the CLI task queue system
+- Desktop app now ships `wai` CLI in its resources and installs it to `~/.local/bin/wai` on setup
