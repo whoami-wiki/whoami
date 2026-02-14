@@ -36,7 +36,7 @@ async function getReleases(): Promise<Release[]> {
           Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
         }),
       },
-      next: { revalidate: 300 },
+      next: { revalidate: 300, tags: ["github-releases"] },
     },
   );
   if (!res.ok) return [];
