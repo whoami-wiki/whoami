@@ -1,6 +1,6 @@
 {
   "name": "whoami",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "claude code plugin for whoami.wiki",
   "author": {
     "name": "Jeremy Philemon",
@@ -9,7 +9,5 @@
   },
   "homepage": "https://whoami.wiki",
   "repository": "https://github.com/whoami-wiki/whoami",
-  "license": "MIT",
-  "keywords": ["personal", "encyclopedia", "wiki", "memory"],
-  "setup": "install the wai cli: curl -fsSL https://raw.githubusercontent.com/whoami-wiki/whoami/main/cli/install.sh | bash"
+  "license": "MIT"
 }

@@ -20,8 +20,13 @@ When selecting photos for a page:
 - Action shots over posed photos  
 - Include timestamps in captions when relevant
 
+## Uploading to Wiki
+Use `wai upload <file>` to upload images to the wiki.
+Uploaded files can be referenced in pages with `[[File:filename.jpg]]`.
+
 ## Handling Missing Metadata
 If no EXIF GPS data, look for:
 - Filenames with location hints
 - Surrounding photos with data
 - Visual landmarks to identify location
+- `wai place <query>` to look up a place by name

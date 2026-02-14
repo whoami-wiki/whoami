@@ -13,6 +13,8 @@ Use the `wai` CLI to interact with the wiki:
 - `wai category` — list all categories
 - `wai changes` — see recent edits
 - `wai edit "Page" --old "x" --new "y"` — fix issues
+- `wai edit "Page" --old "x" --new "y" --dry-run` — preview changes before committing
+- `wai edit "Page" --old "x" --new "y" --replace-all` — replace all occurrences
 
 Tasks:
 - Find pages that mention entities without wikilinks

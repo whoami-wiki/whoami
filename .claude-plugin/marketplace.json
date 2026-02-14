@@ -1,7 +1,7 @@
 {
   "name": "whoami-marketplace",
   "version": "1.0.0",
-  "description": "Personal encyclopedia tools. Let AI agents document your life from your digital archives.",
+  "description": "Your personal encyclopedia, written by agents.",
   "owner": {
     "name": "Jeremy Philemon",
     "email": "jrmy@whoami.wiki"
@@ -14,8 +14,8 @@
   "plugins": [
     {
       "name": "whoami",
-      "description": "Personal encyclopedia powered by AI. Agents browse your archives and write wiki pages about your life.",
-      "version": "1.0.0",
+      "description": "Your personal encyclopedia, written by agents.",
+      "version": "1.0.2",
       "author": {
         "name": "Jeremy Philemon",
         "email": "jrmy@whoami.wiki"
