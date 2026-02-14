@@ -2,7 +2,6 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { execSync } from 'node:child_process';
-import https from 'node:https';
 
 const CONFIG_DIR = join(homedir(), '.whoami');
 const CACHE_FILE = join(CONFIG_DIR, 'update-check.json');
@@ -81,39 +80,15 @@ function writeCache(cache: UpdateCache): void {
 }
 
 function fetchLatestVersion(): Promise<string | null> {
-  return new Promise((resolve) => {
-    const req = https.get(
-      `https://api.github.com/repos/${REPO}/releases?per_page=10`,
-      {
-        headers: { 'User-Agent': 'wai-cli', Accept: 'application/vnd.github.v3+json' },
-        timeout: 3000,
-      },
-      (res) => {
-        if (res.statusCode === 302 || res.statusCode === 301) {
-          resolve(null);
-          return;
-        }
-        let data = '';
-        res.on('data', (chunk: Buffer) => (data += chunk));
-        res.on('end', () => {
-          try {
-            const releases = JSON.parse(data);
-            const cli = releases.find(
-              (r: any) => r.tag_name?.startsWith('cli-v') && !r.draft && !r.prerelease,
-            );
-            resolve(cli ? cli.tag_name.replace(/^cli-v/, '') : null);
-          } catch {
-            resolve(null);
-          }
-        });
-      },
-    );
-    req.on('error', () => resolve(null));
-    req.on('timeout', () => {
-      req.destroy();
-      resolve(null);
-    });
-  });
+  try {
+    const out = execSync(
+      `gh api repos/${REPO}/releases --jq '[.[] | select(.tag_name | startswith("cli-v")) | select(.draft | not) | select(.prerelease | not)][0].tag_name'`,
+      { timeout: 10000, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] },
+    ).trim();
+    return Promise.resolve(out ? out.replace(/^cli-v/, '') : null);
+  } catch {
+    return Promise.resolve(null);
+  }
 }
 
 function compareVersions(current: string, latest: string): string | null {
