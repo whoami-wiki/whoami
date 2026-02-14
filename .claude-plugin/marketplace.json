@@ -15,7 +15,7 @@
     {
       "name": "whoami",
       "description": "Your personal encyclopedia, written by agents.",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "Jeremy Philemon",
         "email": "jrmy@whoami.wiki"
