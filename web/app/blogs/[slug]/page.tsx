@@ -58,7 +58,7 @@ export default async function BlogPostPage({ params }: Props) {
 
         <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
 
-        <article className="font-sans text-neutral-700 dark:text-neutral-300">
+        <article className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert">
           <MDXContent source={post.content} />
         </article>
 
