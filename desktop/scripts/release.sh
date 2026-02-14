@@ -35,13 +35,25 @@ echo ""
 echo "  Releasing ${TAG}..."
 echo ""
 
+# ── Check release notes ──────────────────────────────────────────────
+
+if [ ! -f "RELEASE_NOTES.md" ]; then
+  echo "RELEASE_NOTES.md not found. Write release notes before running this script." >&2
+  exit 1
+fi
+
+echo "  Release notes:"
+echo ""
+cat RELEASE_NOTES.md
+echo ""
+
 # ── Bump version ───────────────────────────────────────────────────────
 
 sed -i '' "s/\"version\": \".*\"/\"version\": \"${VERSION}\"/" package.json
 
 # ── Commit & tag ───────────────────────────────────────────────────────
 
-git add package.json
+git add package.json RELEASE_NOTES.md
 git commit -m "release: ${TAG}"
 git tag "$TAG"
 git push
