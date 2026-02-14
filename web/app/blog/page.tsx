@@ -41,7 +41,7 @@ export default function BlogPage() {
                 </p>
               )}
               <time
-                className="font-sans text-sm text-neutral-500 dark:text-neutral-400"
+                className="font-sans text-base text-neutral-500 dark:text-neutral-400"
                 dateTime={post.date}
               >
                 {new Date(post.date).toLocaleDateString("en-US", {
