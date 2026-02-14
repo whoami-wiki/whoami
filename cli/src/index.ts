@@ -110,8 +110,6 @@ async function main(): Promise<void> {
       return run(authCommand(commandArgs, globals), updateNotice);
     case 'place':
       return run(placeCommand(commandArgs, globals), updateNotice);
-    case 'snapshot':
-      return run(snapshotCommand(commandArgs, globals), updateNotice);
     case 'update':
       return updateCommand();
   }
@@ -120,6 +118,7 @@ async function main(): Promise<void> {
   const wikiCommands = new Set([
     'read', 'write', 'edit', 'create', 'search',
     'section', 'talk', 'upload', 'link', 'category', 'changes', 'export', 'import', 'source',
+    'snapshot',
   ]);
 
   if (!wikiCommands.has(command)) {
@@ -164,6 +163,8 @@ async function main(): Promise<void> {
         return exportCommand(commandArgs, globals, client);
       case 'import':
         return importCommand(commandArgs, globals, client);
+      case 'snapshot':
+        return snapshotCommand(commandArgs, globals, client);
       default:
         return Promise.resolve();
     }

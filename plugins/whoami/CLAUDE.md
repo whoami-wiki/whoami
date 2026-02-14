@@ -9,7 +9,9 @@ pages in the wiki's source namespace. Source pages have information about differ
 
 Source pages contain a **Querying** section with instructions for programmatic access to the archive — SQL queries for databases, JSON parsing for exports, file lookup via snapshot hashes. Always read the relevant source page before attempting to extract data.
 
-Structure of ~/archive:
+Use `wai snapshot <dir>` to archive a directory. It hashes files into `~/Archive/objects/`, writes a manifest to `~/Archive/snapshots/`, and creates a `Source:` wiki page.
+
+Structure of ~/Archive:
 - objects/
   - 00/
     - 00b9da...350b19
@@ -58,6 +60,9 @@ wai link "Page"                   # show links in/out
 wai category                      # list all categories
 wai changes                       # recent changes
 wai place "query"                 # look up a place (Google Places)
+wai snapshot <dir>                # archive a directory into ~/Archive
+wai snapshot <dir> --name "Name" # archive with custom source page name
+wai snapshot <dir> --dry-run     # preview without writing
 ```
 
 ## Workflow

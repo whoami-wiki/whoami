@@ -1,70 +1,128 @@
 import { parseArgs } from 'node:util';
-import { readdirSync, statSync } from 'node:fs';
-import { join, relative, extname } from 'node:path';
-import { UsageError, WaiError } from '../errors.js';
+import { readdirSync, statSync, readFileSync, mkdirSync, copyFileSync, writeFileSync, existsSync } from 'node:fs';
+import { join, relative, extname, basename, resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+import { homedir } from 'node:os';
+import { UsageError, WaiError, ConflictError } from '../errors.js';
 import { type GlobalFlags, outputJson } from '../output.js';
+import type { WikiClient } from '../wiki-client.js';
 
-interface FileEntry {
+interface HashedFile {
   path: string;
+  hash: string;
   size: number;
-  modified: string;
-  type: string;
 }
 
-export async function snapshotCommand(args: string[], globals: GlobalFlags): Promise<void> {
+export async function snapshotCommand(
+  args: string[],
+  globals: GlobalFlags,
+  client: WikiClient,
+): Promise<void> {
   const { values, positionals } = parseArgs({
     args,
     options: {
-      limit: { type: 'string', short: 'n' },
+      name: { type: 'string' },
+      'dry-run': { type: 'boolean' },
     },
     allowPositionals: true,
     strict: false,
   });
 
   const dir = positionals[0];
-  if (!dir) throw new UsageError('Usage: wai snapshot <dir>');
+  if (!dir) throw new UsageError('Usage: wai snapshot <dir> [--name "Source Name"] [--dry-run]');
 
-  const files = walkDir(dir);
-  const limit = values.limit ? parseInt(values.limit as string, 10) : undefined;
-  const display = limit ? files.slice(0, limit) : files;
+  const resolvedDir = resolve(dir);
+  const dryRun = values['dry-run'] as boolean | undefined;
+  const sourceName = (values.name as string | undefined) || basename(resolvedDir);
 
-  const summary = {
-    directory: dir,
-    totalFiles: files.length,
-    totalSize: files.reduce((sum, f) => sum + f.size, 0),
-    types: countByType(files),
-    files: display,
+  // 1. Walk directory and hash files
+  const files = walkAndHash(resolvedDir);
+  const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+
+  // 2. Build manifest (path + hash only, sorted by path)
+  const manifest = {
+    files: files
+      .map((f) => ({ path: f.path, hash: f.hash }))
+      .sort((a, b) => a.path.localeCompare(b.path)),
   };
 
-  if (globals.json) {
-    outputJson(summary);
+  // 3. Derive deterministic snapshot ID
+  const manifestJson = JSON.stringify(manifest, null, 2);
+  const snapshotId = createHash('sha256').update(manifestJson).digest('hex').slice(0, 16);
+
+  // 4. Copy files to content-addressable store
+  const archiveDir = join(homedir(), 'Archive');
+  const objectsDir = join(archiveDir, 'objects');
+  const snapshotsDir = join(archiveDir, 'snapshots');
+  let newObjects = 0;
+
+  if (!dryRun) {
+    for (const file of files) {
+      const prefix = file.hash.slice(0, 2);
+      const objectDir = join(objectsDir, prefix);
+      const objectPath = join(objectDir, file.hash);
+      if (!existsSync(objectPath)) {
+        mkdirSync(objectDir, { recursive: true });
+        copyFileSync(join(resolvedDir, file.path), objectPath);
+        newObjects++;
+      }
+    }
+
+    // 5. Write snapshot manifest
+    mkdirSync(snapshotsDir, { recursive: true });
+    writeFileSync(join(snapshotsDir, `${snapshotId}.json`), manifestJson + '\n');
   } else {
-    console.log(`Snapshot of ${dir}`);
-    console.log(`  ${files.length} files, ${formatSize(summary.totalSize)}`);
-    console.log();
+    // Count what would be new
+    for (const file of files) {
+      const prefix = file.hash.slice(0, 2);
+      const objectPath = join(objectsDir, prefix, file.hash);
+      if (!existsSync(objectPath)) newObjects++;
+    }
+  }
 
-    // Type breakdown
-    const types = Object.entries(summary.types).sort((a, b) => b[1] - a[1]);
-    console.log('Types:');
-    for (const [ext, count] of types) {
-      console.log(`  ${ext.padEnd(8)} ${count}`);
-    }
-    console.log();
+  // 6. Create source page
+  const sourceTitle = `Source:${sourceName}`;
+  let sourceCreated = false;
+  let sourceSkipped = false;
 
-    // File listing
-    console.log('Files:');
-    for (const f of display) {
-      console.log(`  ${f.path}  ${formatSize(f.size)}  ${f.modified}`);
+  if (!dryRun) {
+    const pageContent = buildSourcePage(snapshotId, files, totalSize, basename(resolvedDir));
+    try {
+      await client.createPage(sourceTitle, pageContent, `Snapshot ${snapshotId}`);
+      sourceCreated = true;
+    } catch (e) {
+      if (e instanceof ConflictError) {
+        sourceSkipped = true;
+      } else {
+        throw e;
+      }
     }
-    if (limit && files.length > limit) {
-      console.log(`  ... and ${files.length - limit} more`);
-    }
+  }
+
+  // 7. Output
+  if (globals.json) {
+    outputJson({
+      snapshotId,
+      files: files.length,
+      totalSize,
+      newObjects,
+      sourcePage: sourceTitle,
+    });
+  } else {
+    console.log(`Archived ${dir}`);
+    console.log(`  files:    ${files.length}`);
+    console.log(`  size:     ${formatSize(totalSize)}`);
+    console.log(`  new:      ${newObjects} (objects added)`);
+    console.log(`  snapshot: ${snapshotId}`);
+    console.log(`  source:   ${sourceTitle}`);
+    if (dryRun) console.log('  (dry run — nothing written)');
+    if (sourceSkipped) console.log(`  note: ${sourceTitle} already exists, skipped`);
   }
 }
 
-function walkDir(dir: string, base?: string): FileEntry[] {
+function walkAndHash(dir: string, base?: string): HashedFile[] {
   const root = base || dir;
-  const entries: FileEntry[] = [];
+  const entries: HashedFile[] = [];
 
   let items: string[];
   try {
@@ -79,13 +137,14 @@ function walkDir(dir: string, base?: string): FileEntry[] {
     try {
       const stat = statSync(full);
       if (stat.isDirectory()) {
-        entries.push(...walkDir(full, root));
+        entries.push(...walkAndHash(full, root));
       } else if (stat.isFile()) {
+        const content = readFileSync(full);
+        const hash = createHash('sha256').update(content).digest('hex');
         entries.push({
           path: relative(root, full),
+          hash,
           size: stat.size,
-          modified: stat.mtime.toISOString().slice(0, 10),
-          type: extname(name).toLowerCase() || '(none)',
         });
       }
     } catch {
@@ -96,12 +155,27 @@ function walkDir(dir: string, base?: string): FileEntry[] {
   return entries;
 }
 
-function countByType(files: FileEntry[]): Record<string, number> {
-  const counts: Record<string, number> = {};
+function buildSourcePage(
+  snapshotId: string,
+  files: HashedFile[],
+  totalSize: number,
+  dirName: string,
+): string {
+  // Count extensions
+  const extCounts: Record<string, number> = {};
   for (const f of files) {
-    counts[f.type] = (counts[f.type] || 0) + 1;
+    const ext = extname(f.path).toLowerCase() || '(none)';
+    extCounts[ext] = (extCounts[ext] || 0) + 1;
   }
-  return counts;
+  const sortedExts = Object.entries(extCounts).sort((a, b) => b[1] - a[1]);
+
+  let page = `{{Source\n|snapshot=${snapshotId}\n|files=${files.length}\n|size=${formatSize(totalSize)}\n}}\nA data snapshot of ${dirName}.\n\n== File types ==\n{| class="wikitable sortable"\n! Extension !! Count\n`;
+  for (const [ext, count] of sortedExts) {
+    page += `|-\n| ${ext} || ${count}\n`;
+  }
+  page += `|}\n\n[[Category:Sources]]`;
+
+  return page;
 }
 
 function formatSize(bytes: number): string {

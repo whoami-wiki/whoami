@@ -61,4 +61,6 @@ wai talk create "Page" -s "Subject" -c "content"  # post to talk page
 wai link "Page"                          # show links in/out
 wai category                             # list all categories
 wai changes                              # recent changes
+wai snapshot <dir>                       # archive a directory into ~/Archive
+wai snapshot <dir> --name "Name"         # archive with custom source page name
 ```

@@ -61,10 +61,8 @@ of what changed. Focus on user-facing changes. Use this format:
 ```markdown
 Summary sentence of the release.
 
-### <section>
+<section>:
 - Change description
-
-**Full Changelog**: https://github.com/whoami-wiki/whoami/compare/<prev-tag>...<new-tag>
 ```
 
 Group changes into sections like Features, Fixes, Improvements as appropriate.
