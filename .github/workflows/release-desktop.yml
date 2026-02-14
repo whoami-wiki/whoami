@@ -40,6 +40,8 @@ jobs:
       - name: Build
         run: pnpm dist -- --publish never
         working-directory: desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish release
         run: gh release create "$GITHUB_REF_NAME" desktop/dist-electron/*.{dmg,zip} --notes-file desktop/RELEASE_NOTES.md
