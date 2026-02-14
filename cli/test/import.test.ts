@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { parseDump } from '../src/commands/import.js';
+import { parseDump, type ParseDumpResult } from '../src/commands/import.js';
 import { importCommand } from '../src/commands/import.js';
 import type { WikiClient } from '../src/wiki-client.js';
 
@@ -19,10 +19,27 @@ interface TestPage {
   revisions: string[];
 }
 
-function writeDump(dir: string, pages: TestPage[]): string {
+interface NsDecl {
+  id: number;
+  name: string;
+}
+
+function writeDump(dir: string, pages: TestPage[], namespaces?: NsDecl[]): string {
   const path = join(dir, 'dump.xml');
   let xml = '<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.11/">\n';
-  xml += '  <siteinfo><sitename>Test</sitename></siteinfo>\n';
+  xml += '  <siteinfo>\n    <sitename>Test</sitename>\n';
+  if (namespaces) {
+    xml += '    <namespaces>\n';
+    for (const ns of namespaces) {
+      if (ns.name === '') {
+        xml += `      <namespace key="${ns.id}" case="first-letter" />\n`;
+      } else {
+        xml += `      <namespace key="${ns.id}" case="first-letter">${escapeXml(ns.name)}</namespace>\n`;
+      }
+    }
+    xml += '    </namespaces>\n';
+  }
+  xml += '  </siteinfo>\n';
   for (const p of pages) {
     xml += `  <page>\n`;
     xml += `    <title>${escapeXml(p.title)}</title>\n`;
@@ -66,7 +83,7 @@ describe('parseDump', () => {
       { title: 'Page One', revisions: ['Hello world'] },
       { title: 'Page Two', revisions: ['Goodbye world'] },
     ]);
-    const pages = parseDump(path);
+    const { pages } = parseDump(path);
     assert.equal(pages.length, 2);
     assert.equal(pages[0].title, 'Page One');
     assert.equal(pages[0].text, 'Hello world');
@@ -78,7 +95,7 @@ describe('parseDump', () => {
     const path = writeDump(tmp, [
       { title: 'Multi', revisions: ['first', 'second', 'third'] },
     ]);
-    const pages = parseDump(path);
+    const { pages } = parseDump(path);
     assert.equal(pages.length, 1);
     assert.equal(pages[0].text, 'third');
   });
@@ -89,7 +106,7 @@ describe('parseDump', () => {
       { title: 'Talk:Main', ns: 1, revisions: ['talk content'] },
       { title: 'Template:Infobox', ns: 10, revisions: ['template'] },
     ]);
-    const pages = parseDump(path);
+    const { pages } = parseDump(path);
     assert.equal(pages[0].ns, 0);
     assert.equal(pages[1].ns, 1);
     assert.equal(pages[2].ns, 10);
@@ -99,7 +116,7 @@ describe('parseDump', () => {
     const path = writeDump(tmp, [
       { title: 'Empty', revisions: [''] },
     ]);
-    const pages = parseDump(path);
+    const { pages } = parseDump(path);
     assert.equal(pages.length, 1);
     assert.equal(pages[0].text, '');
   });
@@ -109,7 +126,7 @@ describe('parseDump', () => {
     const path = writeDump(tmp, [
       { title: 'Markup', revisions: [wikitext] },
     ]);
-    const pages = parseDump(path);
+    const { pages } = parseDump(path);
     assert.equal(pages[0].text, wikitext);
   });
 
@@ -117,7 +134,7 @@ describe('parseDump', () => {
     const path = writeDump(tmp, [
       { title: "Jane Doe", revisions: ['Text with "quotes" & ampersands'] },
     ]);
-    const pages = parseDump(path);
+    const { pages } = parseDump(path);
     assert.equal(pages[0].title, "Jane Doe");
     assert.equal(pages[0].text, 'Text with "quotes" & ampersands');
   });
@@ -129,8 +146,32 @@ describe('parseDump', () => {
   it('returns empty array for empty dump', () => {
     const path = join(tmp, 'empty.xml');
     writeFileSync(path, '<mediawiki></mediawiki>');
-    const pages = parseDump(path);
+    const { pages } = parseDump(path);
     assert.equal(pages.length, 0);
+  });
+
+  it('returns namespace map from siteinfo', () => {
+    const path = writeDump(tmp, [
+      { title: 'Main Page', ns: 0, revisions: ['hello'] },
+    ], [
+      { id: 0, name: '' },
+      { id: 1, name: 'Talk' },
+      { id: 10, name: 'Template' },
+      { id: 100, name: 'Source' },
+    ]);
+    const { namespaces } = parseDump(path);
+    assert.equal(namespaces.get(0), '');
+    assert.equal(namespaces.get(1), 'Talk');
+    assert.equal(namespaces.get(10), 'Template');
+    assert.equal(namespaces.get(100), 'Source');
+  });
+
+  it('returns empty namespace map when siteinfo has no namespaces', () => {
+    const path = writeDump(tmp, [
+      { title: 'Test', revisions: ['content'] },
+    ]);
+    const { namespaces } = parseDump(path);
+    assert.equal(namespaces.size, 0);
   });
 });
 
@@ -222,5 +263,70 @@ describe('importCommand', () => {
     assert.deepEqual(imported, ['Good', 'Also Good']);
     assert.equal(process.exitCode, 1);
     process.exitCode = origExitCode;
+  });
+
+  it('corrects title missing namespace prefix', async () => {
+    const path = writeDump(tmp, [
+      { title: 'WhatsApp Export', ns: 100, revisions: ['data'] },
+    ], [
+      { id: 0, name: '' },
+      { id: 100, name: 'Source' },
+    ]);
+    const imported: string[] = [];
+    const client = mockClient({
+      importPage: async (title: string) => {
+        imported.push(title);
+        return { title, oldRevid: 0, newRevid: 1, timestamp: '' };
+      },
+    });
+
+    await importCommand([path], { json: false, quiet: true }, client);
+    assert.deepEqual(imported, ['Source:WhatsApp Export']);
+  });
+
+  it('leaves correct namespace-prefixed titles unchanged', async () => {
+    const path = writeDump(tmp, [
+      { title: 'Source:WhatsApp Export', ns: 100, revisions: ['data'] },
+    ], [
+      { id: 0, name: '' },
+      { id: 100, name: 'Source' },
+    ]);
+    const imported: string[] = [];
+    const client = mockClient({
+      importPage: async (title: string) => {
+        imported.push(title);
+        return { title, oldRevid: 0, newRevid: 1, timestamp: '' };
+      },
+    });
+
+    await importCommand([path], { json: false, quiet: true }, client);
+    assert.deepEqual(imported, ['Source:WhatsApp Export']);
+  });
+
+  it('falls back to wiki API when siteinfo lacks namespace', async () => {
+    // Dump has no namespace declarations but page has ns=100
+    const path = writeDump(tmp, [
+      { title: 'WhatsApp Export', ns: 100, revisions: ['data'] },
+    ]);
+    const imported: string[] = [];
+    let apiCalled = false;
+    const client = mockClient({
+      importPage: async (title: string) => {
+        imported.push(title);
+        return { title, oldRevid: 0, newRevid: 1, timestamp: '' };
+      },
+      getNamespaces: async () => {
+        apiCalled = true;
+        return [
+          { id: 0, name: '' },
+          { id: 1, name: 'Talk' },
+          { id: 100, name: 'Source' },
+        ];
+      },
+    });
+
+    await importCommand([path], { json: false, quiet: true }, client);
+    assert.equal(apiCalled, true);
+    assert.deepEqual(imported, ['Source:WhatsApp Export']);
   });
 });

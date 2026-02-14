@@ -11,7 +11,12 @@ export interface DumpPage {
   text: string;
 }
 
-export function parseDump(xmlPath: string): DumpPage[] {
+export interface ParseDumpResult {
+  pages: DumpPage[];
+  namespaces: Map<number, string>;
+}
+
+export function parseDump(xmlPath: string): ParseDumpResult {
   let xml: string;
   try {
     xml = readFileSync(xmlPath, 'utf-8');
@@ -22,9 +27,20 @@ export function parseDump(xmlPath: string): DumpPage[] {
   const parser = new XMLParser({
     ignoreAttributes: false,
     trimValues: false,
-    isArray: (tagName) => tagName === 'page',
+    isArray: (tagName) => tagName === 'page' || tagName === 'namespace',
   });
   const doc = parser.parse(xml);
+
+  // Parse namespace map from siteinfo
+  const namespaces = new Map<number, string>();
+  const rawNs = doc?.mediawiki?.siteinfo?.namespaces?.namespace ?? [];
+  for (const ns of rawNs) {
+    const id = typeof ns['@_key'] === 'number' ? ns['@_key'] : parseInt(ns['@_key'], 10);
+    const name = typeof ns === 'string' ? ns : (ns['#text'] ?? '');
+    if (!isNaN(id)) {
+      namespaces.set(id, name);
+    }
+  }
 
   const rawPages = doc?.mediawiki?.page ?? [];
   const pages: DumpPage[] = [];
@@ -40,7 +56,7 @@ export function parseDump(xmlPath: string): DumpPage[] {
     pages.push({ title, ns, text });
   }
 
-  return pages;
+  return { pages, namespaces };
 }
 
 export async function importCommand(
@@ -72,9 +88,35 @@ export async function importCommand(
     );
   }
 
-  let pages = parseDump(xmlPath);
+  const dump = parseDump(xmlPath);
+  let pages = dump.pages;
   if (nsFilter) {
     pages = pages.filter((p) => nsFilter!.has(p.ns));
+  }
+
+  // Reconcile namespace prefixes for pages with ns > 0
+  let wikiNamespaces: Map<number, string> | null = null;
+  for (const p of pages) {
+    if (p.ns === 0) continue;
+
+    let prefix = dump.namespaces.get(p.ns);
+
+    // Fallback to wiki API if siteinfo is missing this namespace
+    if (prefix === undefined) {
+      if (!wikiNamespaces) {
+        const nsList = await client.getNamespaces();
+        wikiNamespaces = new Map(nsList.map((n) => [n.id, n.name]));
+      }
+      prefix = wikiNamespaces.get(p.ns);
+    }
+
+    if (prefix && !p.title.startsWith(prefix + ':')) {
+      const corrected = `${prefix}:${p.title}`;
+      if (!globals.quiet) {
+        console.warn(`  ⚠ Title corrected: "${p.title}" → "${corrected}"`);
+      }
+      p.title = corrected;
+    }
   }
 
   if (dryRun) {
