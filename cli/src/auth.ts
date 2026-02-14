@@ -14,7 +14,6 @@ export interface Credentials {
 }
 
 export interface WaiConfig {
-  sources?: Array<{ path: string; description: string }>;
   googlePlacesApiKey?: string;
 }
 
