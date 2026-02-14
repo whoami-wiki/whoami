@@ -4,8 +4,8 @@ This is a personal encyclopedia documenting my life through
 wiki pages.
 
 ## Sources
-Sources can be listed with `wai source list`. Each source has a
-path and description of what it contains.
+Sources can be listed with `wai source list`, which returns all
+pages in the wiki's Source namespace.
 
 ## Architecture
 - MediaWiki instance at localhost:8080

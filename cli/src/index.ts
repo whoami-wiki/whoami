@@ -53,7 +53,7 @@ Discovery:
   link <title>                Show page links (in/out)
   category [name]             List categories or pages in one
   changes                     Recent changes
-  source list                 List configured file sources
+  source list                 List pages in the Source namespace
   place <query>               Look up a place (Google Places)
 
 Archive:
@@ -108,8 +108,6 @@ async function main(): Promise<void> {
   switch (command) {
     case 'auth':
       return run(authCommand(commandArgs, globals), updateNotice);
-    case 'source':
-      return run(sourceCommand(commandArgs, globals), updateNotice);
     case 'place':
       return run(placeCommand(commandArgs, globals), updateNotice);
     case 'snapshot':
@@ -121,7 +119,7 @@ async function main(): Promise<void> {
   // Validate command before attempting auth
   const wikiCommands = new Set([
     'read', 'write', 'edit', 'create', 'search',
-    'section', 'talk', 'upload', 'link', 'category', 'changes', 'export', 'import',
+    'section', 'talk', 'upload', 'link', 'category', 'changes', 'export', 'import', 'source',
   ]);
 
   if (!wikiCommands.has(command)) {
@@ -160,6 +158,8 @@ async function main(): Promise<void> {
         return categoryCommand(commandArgs, globals, client);
       case 'changes':
         return changesCommand(commandArgs, globals, client);
+      case 'source':
+        return sourceCommand(commandArgs, globals, client);
       case 'export':
         return exportCommand(commandArgs, globals, client);
       case 'import':
