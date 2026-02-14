@@ -40,7 +40,7 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="font-serif font-medium text-3xl">{post.title}</h1>
+          <h1 className="font-sans font-medium text-3xl">{post.title}</h1>
           <time
             className="font-sans text-sm text-neutral-500 dark:text-neutral-400"
             dateTime={post.date}

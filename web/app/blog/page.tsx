@@ -31,7 +31,7 @@ export default function BlogPage() {
             <article key={post.slug} className="flex flex-col gap-2">
               <Link
                 href={`/blogs/${post.slug}`}
-                className="font-serif font-medium text-xl hover:underline underline-offset-4"
+                className="font-sans font-medium text-xl hover:underline underline-offset-4"
               >
                 {post.title}
               </Link>
