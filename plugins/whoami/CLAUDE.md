@@ -5,7 +5,30 @@ wiki pages.
 
 ## Sources
 Sources can be listed with `wai source list`, which returns all
-pages in the wiki's Source namespace.
+pages in the wiki's source namespace. Source pages have information about different primary sources of data available that can be used for editorial purposes. Each source page has a unique snapshot id in the infobox that can be used to look up their info in ~/archive
+
+Structure of ~/archive:
+- objects/
+  - 00/
+    - 00b9da...350b19
+  - 01/
+  - ...
+- snapshots/
+  - 8af96b7a06247676.json
+
+Structure of snapshot.json:
+
+```
+{
+  "files": [
+    {
+      "path": "18455129814@s.whatsapp.net/0/0/00b35087-9f6e-4b37-8fd3-74caeece3ee7.jpg",
+      "hash": "9b980e25709b348676c2f32b261135b141568d1c45e7dc5a9fd78e17679ea0da"
+    },
+    ...
+  ],
+}
+```
 
 ## Architecture
 - MediaWiki instance at localhost:8080
@@ -14,6 +37,7 @@ pages in the wiki's Source namespace.
 
 ## CLI Quick Reference
 ```bash
+wai source list                   # list all sources
 wai read "Page Name"              # read a page
 wai search "query"                # full-text search
 wai create "Page" -c "content"    # create new page
@@ -61,7 +85,7 @@ You: /write-page Coorg trip November 2012
 
 Claude: I'll explore the relevant sources first.
 
-[Spawns source-explorer subagent]
+[Spawns explore agent team]
 → Found 624 photos in /Photos/2012/coorg/
 → Date range: Nov 15-20, 2012
 → No GPS data, but filenames suggest: Abbey Falls,
