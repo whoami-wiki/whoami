@@ -1,4 +1,4 @@
-name: Release Electron
+name: Release Desktop
 
 on:
   push:
@@ -37,13 +37,11 @@ jobs:
         run: bash scripts/bundle-lua.sh
         working-directory: desktop
 
-      - name: Build & publish
-        run: pnpm dist -- --publish always
+      - name: Build
+        run: pnpm dist -- --publish never
         working-directory: desktop
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update release notes
-        run: gh release edit "$GITHUB_REF_NAME" --notes-file desktop/RELEASE_NOTES.md
+      - name: Publish release
+        run: gh release create "$GITHUB_REF_NAME" desktop/dist-electron/*.{dmg,zip} --notes-file desktop/RELEASE_NOTES.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
