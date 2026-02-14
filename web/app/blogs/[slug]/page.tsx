@@ -62,7 +62,7 @@ export default async function BlogPostPage({ params }: Props) {
           <MDXContent source={post.content} />
         </article>
 
-        <div className="hidden xl:block absolute left-full top-18 ml-12">
+        <div className="hidden xl:block absolute left-full top-18 bottom-0 ml-12">
           <TableOfContents headings={headings} />
         </div>
       </div>
