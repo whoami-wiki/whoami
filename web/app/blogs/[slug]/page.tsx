@@ -29,7 +29,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <div className="flex flex-col w-dvw items-center">
-      <div className="max-w-120 flex flex-col gap-8 py-18 px-6">
+      <div className="max-w-3xl flex flex-col gap-8 py-18 px-6">
         <div>
           <Link
             href="/blog"
