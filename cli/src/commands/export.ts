@@ -17,7 +17,7 @@ function countFiles(dir: string): number {
   return count;
 }
 
-export async function backupCommand(
+export async function exportCommand(
   args: string[],
   globals: GlobalFlags,
 ): Promise<void> {
@@ -31,7 +31,7 @@ export async function backupCommand(
   });
 
   const outPath = positionals[0];
-  if (!outPath) throw new UsageError('Usage: wai backup <file> [--dry-run]');
+  if (!outPath) throw new UsageError('Usage: wai export <file> [--dry-run]');
 
   const dryRun = values['dry-run'] as boolean;
   const dataPath = getDataPath();
@@ -79,7 +79,7 @@ export async function backupCommand(
   }
 
   // Write manifest to temp dir, create archive
-  const tmpDir = mkdtempSync(join(tmpdir(), 'wai-backup-'));
+  const tmpDir = mkdtempSync(join(tmpdir(), 'wai-export-'));
   try {
     writeFileSync(join(tmpDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
@@ -94,7 +94,7 @@ export async function backupCommand(
     if (globals.json) {
       outputJson({ file: resolved, ...manifest });
     } else if (!globals.quiet) {
-      console.log(`Backed up to ${resolved}`);
+      console.log(`Exported to ${resolved}`);
       console.log(`  database: ${formatSize(dbSize)}`);
       console.log(`  images:   ${imageCount}`);
     }

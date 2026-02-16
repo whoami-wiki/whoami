@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
-import { backupCommand } from '../src/commands/backup.js';
+import { exportCommand } from '../src/commands/export.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -33,9 +33,9 @@ function runWithDataPath(dataPath: string, fn: () => Promise<void>): Promise<voi
   });
 }
 
-// ── backupCommand ─────────────────────────────────────────────────────
+// ── exportCommand ─────────────────────────────────────────────────────
 
-describe('backupCommand', () => {
+describe('exportCommand', () => {
   let tmp: string;
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('backupCommand', () => {
 
   it('throws UsageError when no file given', async () => {
     await assert.rejects(
-      () => backupCommand([], { json: false, quiet: false }),
+      () => exportCommand([], { json: false, quiet: false }),
       { name: 'UsageError' },
     );
   });
@@ -56,7 +56,7 @@ describe('backupCommand', () => {
   it('throws when data directory does not exist', async () => {
     await assert.rejects(
       () => runWithDataPath(join(tmp, 'nonexistent'), () =>
-        backupCommand([join(tmp, 'out.tar.gz')], { json: false, quiet: false }),
+        exportCommand([join(tmp, 'out.tar.gz')], { json: false, quiet: false }),
       ),
       { name: 'WaiError' },
     );
@@ -68,7 +68,7 @@ describe('backupCommand', () => {
 
     await assert.rejects(
       () => runWithDataPath(dataPath, () =>
-        backupCommand([join(tmp, 'out.tar.gz')], { json: false, quiet: false }),
+        exportCommand([join(tmp, 'out.tar.gz')], { json: false, quiet: false }),
       ),
       { name: 'WaiError' },
     );
@@ -79,7 +79,7 @@ describe('backupCommand', () => {
     const outPath = join(tmp, 'out.tar.gz');
 
     await runWithDataPath(dataPath, () =>
-      backupCommand([outPath, '--dry-run'], { json: false, quiet: false }),
+      exportCommand([outPath, '--dry-run'], { json: false, quiet: false }),
     );
 
     assert.equal(existsSync(outPath), false);
@@ -94,7 +94,7 @@ describe('backupCommand', () => {
 
     try {
       await runWithDataPath(dataPath, () =>
-        backupCommand([outPath, '--dry-run'], { json: true, quiet: false }),
+        exportCommand([outPath, '--dry-run'], { json: true, quiet: false }),
       );
       const output = JSON.parse(logs[logs.length - 1]);
       assert.equal(output.version, 1);
@@ -111,7 +111,7 @@ describe('backupCommand', () => {
     const outPath = join(tmp, 'out.tar.gz');
 
     await runWithDataPath(dataPath, () =>
-      backupCommand([outPath], { json: false, quiet: true }),
+      exportCommand([outPath], { json: false, quiet: true }),
     );
 
     assert.ok(existsSync(outPath));
@@ -130,7 +130,7 @@ describe('backupCommand', () => {
     const outPath = join(tmp, 'out.tar.gz');
 
     await runWithDataPath(dataPath, () =>
-      backupCommand([outPath], { json: false, quiet: true }),
+      exportCommand([outPath], { json: false, quiet: true }),
     );
 
     const listing = execSync(`tar -tzf '${outPath}'`, { encoding: 'utf-8' });
@@ -146,7 +146,7 @@ describe('backupCommand', () => {
 
     try {
       await runWithDataPath(dataPath, () =>
-        backupCommand([outPath], { json: true, quiet: false }),
+        exportCommand([outPath], { json: true, quiet: false }),
       );
       const output = JSON.parse(logs[logs.length - 1]);
       assert.equal(output.file, outPath);

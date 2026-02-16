@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync, readFileSync
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
-import { restoreCommand } from '../src/commands/restore.js';
+import { importCommand } from '../src/commands/import.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -44,9 +44,9 @@ function runWithDataPath(dataPath: string, fn: () => Promise<void>): Promise<voi
   });
 }
 
-// ── restoreCommand ────────────────────────────────────────────────────
+// ── importCommand ────────────────────────────────────────────────────
 
-describe('restoreCommand', () => {
+describe('importCommand', () => {
   let tmp: string;
 
   beforeEach(() => {
@@ -59,14 +59,14 @@ describe('restoreCommand', () => {
 
   it('throws UsageError when no file given', async () => {
     await assert.rejects(
-      () => restoreCommand([], { json: false, quiet: false }),
+      () => importCommand([], { json: false, quiet: false }),
       { name: 'UsageError' },
     );
   });
 
   it('throws when archive does not exist', async () => {
     await assert.rejects(
-      () => restoreCommand([join(tmp, 'nope.tar.gz')], { json: false, quiet: false }),
+      () => importCommand([join(tmp, 'nope.tar.gz')], { json: false, quiet: false }),
       { name: 'WaiError' },
     );
   });
@@ -79,7 +79,7 @@ describe('restoreCommand', () => {
     execSync(`tar -czf '${badArchive}' -C '${staging}' junk.txt`);
 
     await assert.rejects(
-      () => restoreCommand([badArchive], { json: false, quiet: false }),
+      () => importCommand([badArchive], { json: false, quiet: false }),
       { name: 'WaiError', message: /no manifest.json/ },
     );
   });
@@ -89,7 +89,7 @@ describe('restoreCommand', () => {
     const dataPath = join(tmp, 'data');
 
     await runWithDataPath(dataPath, () =>
-      restoreCommand([archivePath, '--dry-run'], { json: false, quiet: false }),
+      importCommand([archivePath, '--dry-run'], { json: false, quiet: false }),
     );
 
     assert.equal(existsSync(dataPath), false);
@@ -103,7 +103,7 @@ describe('restoreCommand', () => {
 
     try {
       await runWithDataPath(join(tmp, 'data'), () =>
-        restoreCommand([archivePath, '--dry-run'], { json: true, quiet: false }),
+        importCommand([archivePath, '--dry-run'], { json: true, quiet: false }),
       );
       const output = JSON.parse(logs[logs.length - 1]);
       assert.equal(output.version, 1);
@@ -122,7 +122,7 @@ describe('restoreCommand', () => {
 
     await assert.rejects(
       () => runWithDataPath(dataPath, () =>
-        restoreCommand([archivePath], { json: false, quiet: false }),
+        importCommand([archivePath], { json: false, quiet: false }),
       ),
       { name: 'WaiError', message: /--force/ },
     );
@@ -135,7 +135,7 @@ describe('restoreCommand', () => {
     writeFileSync(join(dataPath, 'wiki.db'), 'old-data');
 
     await runWithDataPath(dataPath, () =>
-      restoreCommand([archivePath, '--force'], { json: false, quiet: true }),
+      importCommand([archivePath, '--force'], { json: false, quiet: true }),
     );
 
     const restored = readFileSync(join(dataPath, 'wiki.db'), 'utf-8');
@@ -147,7 +147,7 @@ describe('restoreCommand', () => {
     const dataPath = join(tmp, 'data');
 
     await runWithDataPath(dataPath, () =>
-      restoreCommand([archivePath], { json: false, quiet: true }),
+      importCommand([archivePath], { json: false, quiet: true }),
     );
 
     assert.ok(existsSync(join(dataPath, 'wiki.db')));
@@ -164,7 +164,7 @@ describe('restoreCommand', () => {
     const dataPath = join(tmp, 'nested', 'deep', 'data');
 
     await runWithDataPath(dataPath, () =>
-      restoreCommand([archivePath], { json: false, quiet: true }),
+      importCommand([archivePath], { json: false, quiet: true }),
     );
 
     assert.ok(existsSync(join(dataPath, 'wiki.db')));
@@ -179,7 +179,7 @@ describe('restoreCommand', () => {
 
     try {
       await runWithDataPath(dataPath, () =>
-        restoreCommand([archivePath], { json: true, quiet: false }),
+        importCommand([archivePath], { json: true, quiet: false }),
       );
       const output = JSON.parse(logs[logs.length - 1]);
       assert.equal(output.restored, true);

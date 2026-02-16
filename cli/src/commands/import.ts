@@ -7,7 +7,7 @@ import { getDataPath } from '../data-path.js';
 import { UsageError, WaiError } from '../errors.js';
 import { type GlobalFlags, outputJson } from '../output.js';
 
-export async function restoreCommand(
+export async function importCommand(
   args: string[],
   globals: GlobalFlags,
 ): Promise<void> {
@@ -22,7 +22,7 @@ export async function restoreCommand(
   });
 
   const archivePath = positionals[0];
-  if (!archivePath) throw new UsageError('Usage: wai restore <file> [--force] [--dry-run]');
+  if (!archivePath) throw new UsageError('Usage: wai import <file> [--force] [--dry-run]');
 
   const resolved = resolve(archivePath);
   if (!existsSync(resolved)) {
@@ -51,7 +51,7 @@ export async function restoreCommand(
   }
 
   if (manifest.version !== 1) {
-    throw new WaiError(`Unsupported backup version: ${manifest.version}`, 1);
+    throw new WaiError(`Unsupported archive version: ${manifest.version}`, 1);
   }
 
   if (dryRun) {
@@ -96,7 +96,7 @@ export async function restoreCommand(
   if (globals.json) {
     outputJson({ restored: true, dataPath, ...manifest });
   } else if (!globals.quiet) {
-    console.log(`Restored to ${dataPath}`);
+    console.log(`Imported to ${dataPath}`);
     console.log(`  database: ${formatSize(manifest.dbSize)}`);
     console.log(`  images:   ${manifest.imageCount}`);
   }
