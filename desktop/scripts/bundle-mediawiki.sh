@@ -105,6 +105,14 @@ cat > "$OUT/router.php" << 'ROUTER'
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $filePath = __DIR__ . $path;
 
+// Check data directory for uploaded files (images/, thumb/)
+if ($path !== '/' && !is_file($filePath) && getenv('MW_DATA_PATH')) {
+    $dataFilePath = getenv('MW_DATA_PATH') . $path;
+    if (is_file($dataFilePath)) {
+        $filePath = $dataFilePath;
+    }
+}
+
 // Serve static (non-PHP) files directly
 if ($path !== '/' && is_file($filePath)) {
     $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
@@ -123,7 +131,13 @@ if ($path !== '/' && is_file($filePath)) {
         if (isset($types[$ext])) {
             header('Content-Type: ' . $types[$ext]);
         }
-        return false;
+        // Files outside the document root must be served manually;
+        // return false only works for files under the document root.
+        if (strpos($filePath, __DIR__) === 0) {
+            return false;
+        }
+        readfile($filePath);
+        return true;
     }
 }
 
