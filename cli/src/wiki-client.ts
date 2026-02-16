@@ -20,6 +20,7 @@ export interface EditResult {
   oldRevid: number;
   newRevid: number;
   timestamp: string;
+  noChange?: boolean;
 }
 
 export interface SearchResult {
@@ -174,11 +175,13 @@ export class WikiClient {
     const res = await this.client.post(this.api, new URLSearchParams(params));
     this.handleEditError(res.data);
     const edit = res.data.edit;
+    const noChange = edit.nochange !== undefined;
     return {
       title: edit.title,
       oldRevid,
-      newRevid: edit.newrevid ?? edit.oldrevid,
+      newRevid: noChange ? oldRevid : (edit.newrevid ?? oldRevid),
       timestamp: edit.newtimestamp ?? '',
+      noChange,
     };
   }
 

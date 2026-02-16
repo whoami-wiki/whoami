@@ -1,6 +1,8 @@
-import { UsageError } from '../errors.js';
+import { WaiError } from '../errors.js';
 import { type GlobalFlags, outputJson, outputTable } from '../output.js';
 import type { WikiClient } from '../wiki-client.js';
+
+const SUBCOMMANDS = ['list'] as const;
 
 export async function sourceCommand(
   args: string[],
@@ -9,7 +11,10 @@ export async function sourceCommand(
 ): Promise<void> {
   const sub = args[0];
   if (sub !== 'list') {
-    throw new UsageError('Usage: wai source list');
+    const hint = sub
+      ? `Unknown subcommand: "${sub}". Did you mean: ${SUBCOMMANDS.join(', ')}?`
+      : `Missing subcommand. Available: ${SUBCOMMANDS.join(', ')}`;
+    throw new WaiError(hint, 1);
   }
 
   const namespaces = await client.getNamespaces();
