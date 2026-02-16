@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Markdown from "react-markdown";
-import { MarkdownBlocks } from "@/components/markdown-blocks";
+import { ChangelogTabs } from "./changelog-tabs";
 
 const REPO = "whoami-wiki/whoami";
 
@@ -14,16 +13,6 @@ interface Release {
   body: string;
   published_at: string;
   html_url: string;
-}
-
-function tagLabel(tag: string): string {
-  if (tag.startsWith("desktop-v")) return "Desktop";
-  if (tag.startsWith("cli-v")) return "CLI";
-  return tag;
-}
-
-function tagVersion(tag: string): string {
-  return tag.replace(/^(desktop|cli)-v/, "v");
 }
 
 async function getReleases(): Promise<Release[]> {
@@ -41,9 +30,16 @@ async function getReleases(): Promise<Release[]> {
   );
   if (!res.ok) return [];
   const all: Release[] = await res.json();
-  return all.filter(
-    (r) => r.tag_name.startsWith("desktop-v") || r.tag_name.startsWith("cli-v"),
-  );
+  return all
+    .filter(
+      (r) =>
+        r.tag_name.startsWith("desktop-v") || r.tag_name.startsWith("cli-v"),
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.published_at).getTime() -
+        new Date(a.published_at).getTime(),
+    );
 }
 
 export default async function ChangelogPage() {
@@ -59,48 +55,7 @@ export default async function ChangelogPage() {
           </div>
         </div>
 
-        <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
-
-        {releases.length === 0 && (
-          <div className="font-sans text-neutral-500">No releases yet.</div>
-        )}
-
-        <div className="flex flex-col gap-12">
-          {releases.map((release, releaseIndex) => (
-            <article key={release.tag_name} className="flex flex-col gap-3">
-              <div className="flex items-baseline gap-3">
-                <span className="font-sans font-medium">
-                  {tagVersion(release.tag_name)}
-                </span>
-                <span className="font-sans text-xs px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded-md">
-                  {tagLabel(release.tag_name)}
-                </span>
-                <time
-                  className="font-sans text-sm text-neutral-500 dark:text-neutral-400"
-                  dateTime={release.published_at}
-                >
-                  {new Date(release.published_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </time>
-              </div>
-
-              {release.body && (
-                <div className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert prose-li:m-0 prose-p:m-0 prose-ul:mt-0 prose-code:before:content-none prose-code:after:content-none flex flex-col gap-4">
-                  <Markdown components={MarkdownBlocks}>
-                    {release.body}
-                  </Markdown>
-                </div>
-              )}
-
-              {releaseIndex !== releases.length - 1 && (
-                <div className="w-full h-px bg-neutral-200 dark:bg-neutral-700 mt-10" />
-              )}
-            </article>
-          ))}
-        </div>
+        <ChangelogTabs releases={releases} />
       </div>
     </div>
   );
