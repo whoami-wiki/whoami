@@ -35,7 +35,7 @@ Usage:
 
 Pages:
   read <title>                Read a wiki page
-  write <title>               Write (overwrite) entire page
+  write <title> [file]         Write (overwrite) entire page
   edit <title>                Edit a page (find and replace)
   create <title>              Create a new page
   search <query>              Full-text search

@@ -23,7 +23,7 @@ export async function createCommand(
   const title = positionals[0];
   if (!title) throw new UsageError('Usage: wai create <title> [-c content | -f file | stdin] [-m summary]');
 
-  const content = resolveContent({
+  const content = await resolveContent({
     content: values.content as string | undefined,
     file: values.file as string | undefined,
   });

@@ -71,7 +71,7 @@ async function talkCreate(args: string[], globals: GlobalFlags, client: WikiClie
     throw new UsageError('Usage: wai talk create <page> -s <subject> [-c content | -f file | stdin] [-m summary]');
   }
 
-  const content = resolveContent({
+  const content = await resolveContent({
     content: values.content as string | undefined,
     file: values.file as string | undefined,
   });
