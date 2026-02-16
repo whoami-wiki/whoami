@@ -1,9 +1,11 @@
-Consolidate build to single esbuild bundle and fix auto-updater for private repos.
+Replace XML export/import with full wiki backup and improve write reliability.
+
+Features:
+- `wai export <dir>` creates a portable `.tar` archive of the full wiki data directory (SQLite databases, secrets, uploaded images) with a dated filename (`whoami-YYYY-MM-DD.tar`)
+- `wai import <file>` restores from an archive, with `--force` to overwrite existing data
+- Both commands work without auth or a running server — useful for disaster recovery
+- `--dry-run` support for both commands
 
 Fixes:
-- `wai update` now uses `gh release download` instead of unauthenticated curl, fixing updates for private repos
-
-Improvements:
-- Single build artifact (`dist/wai.cjs`) replaces separate tsc + esbuild steps, fixing version drift between builds
-- Removed unused `install.sh`
-- CI and release workflows simplified to single build step
+- Reject empty or whitespace-only content in `wai write` before hitting the API
+- Improve error messages for file read failures and API errors
