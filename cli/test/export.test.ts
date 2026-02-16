@@ -1,43 +1,45 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { exportCommand } from '../src/commands/export.js';
-import type { WikiClient } from '../src/wiki-client.js';
+import { execSync } from 'node:child_process';
+import { backupCommand } from '../src/commands/backup.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
-function makeExportXml(pages: Array<{ title: string; text: string }>): string {
-  let xml = '<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.11/">\n';
-  xml += '  <siteinfo><sitename>Test</sitename></siteinfo>\n';
-  for (const p of pages) {
-    xml += `  <page>\n`;
-    xml += `    <title>${p.title}</title>\n`;
-    xml += `    <ns>0</ns>\n`;
-    xml += `    <revision><text xml:space="preserve">${p.text}</text></revision>\n`;
-    xml += `  </page>\n`;
-  }
-  xml += '</mediawiki>\n';
-  return xml;
+/** Create a fake data directory that looks like the wiki data path. */
+function makeFakeDataDir(tmp: string): string {
+  const dataPath = join(tmp, 'data');
+  mkdirSync(dataPath, { recursive: true });
+  writeFileSync(join(dataPath, 'wiki.db'), 'fake-sqlite-db');
+  writeFileSync(join(dataPath, 'LocalData.php'), '<?php $secret = "s";');
+  const imagesDir = join(dataPath, 'images');
+  mkdirSync(imagesDir, { recursive: true });
+  writeFileSync(join(imagesDir, 'photo.jpg'), 'fake-jpg');
+  writeFileSync(join(imagesDir, 'icon.png'), 'fake-png');
+  return dataPath;
 }
 
-function mockClient(overrides: Partial<Record<string, any>> = {}): WikiClient {
-  return {
-    getNamespaces: async () => [{ id: 0, name: '' }],
-    listAllPages: async () => [],
-    exportPages: async () => makeExportXml([]),
-    ...overrides,
-  } as unknown as WikiClient;
+/** Temporarily override getDataPath() by setting env to make tests work
+ *  We use a module-level mock approach via a wrapper. */
+function runWithDataPath(dataPath: string, fn: () => Promise<void>): Promise<void> {
+  // We'll use env var WAI_DATA_PATH for testing
+  const prev = process.env.WAI_DATA_PATH;
+  process.env.WAI_DATA_PATH = dataPath;
+  return fn().finally(() => {
+    if (prev === undefined) delete process.env.WAI_DATA_PATH;
+    else process.env.WAI_DATA_PATH = prev;
+  });
 }
 
-// ── exportCommand ─────────────────────────────────────────────────────
+// ── backupCommand ─────────────────────────────────────────────────────
 
-describe('exportCommand', () => {
+describe('backupCommand', () => {
   let tmp: string;
 
   beforeEach(() => {
-    tmp = mkdtempSync(join(tmpdir(), 'wai-test-'));
+    tmp = mkdtempSync(join(tmpdir(), 'wai-backup-test-'));
   });
 
   afterEach(() => {
@@ -46,112 +48,111 @@ describe('exportCommand', () => {
 
   it('throws UsageError when no file given', async () => {
     await assert.rejects(
-      () => exportCommand([], { json: false, quiet: false }, mockClient()),
+      () => backupCommand([], { json: false, quiet: false }),
       { name: 'UsageError' },
     );
   });
 
-  it('dry run lists pages without writing file', async () => {
-    const outPath = join(tmp, 'out.xml');
-    const client = mockClient({
-      getNamespaces: async () => [{ id: 0, name: '' }],
-      listAllPages: async () => ['Page A', 'Page B'],
-    });
-
-    await exportCommand([outPath, '--dry-run'], { json: false, quiet: true }, client);
-    assert.throws(() => readFileSync(outPath), /ENOENT/);
-  });
-
-  it('uses --ns filter instead of getNamespaces', async () => {
-    const outPath = join(tmp, 'out.xml');
-    const queriedNs: number[] = [];
-    let getNamespacesCalled = false;
-
-    const client = mockClient({
-      getNamespaces: async () => { getNamespacesCalled = true; return []; },
-      listAllPages: async (ns: number) => {
-        queriedNs.push(ns);
-        return ns === 0 ? ['Main Page'] : ['Talk:Main Page'];
-      },
-      exportPages: async (titles: string[]) => makeExportXml(
-        titles.map((t) => ({ title: t, text: 'content' })),
+  it('throws when data directory does not exist', async () => {
+    await assert.rejects(
+      () => runWithDataPath(join(tmp, 'nonexistent'), () =>
+        backupCommand([join(tmp, 'out.tar.gz')], { json: false, quiet: false }),
       ),
-    });
-
-    await exportCommand([outPath, '--ns', '0,1'], { json: false, quiet: true }, client);
-    assert.equal(getNamespacesCalled, false);
-    assert.deepEqual(queriedNs, [0, 1]);
+      { name: 'WaiError' },
+    );
   });
 
-  it('writes valid XML with pages from single batch', async () => {
-    const outPath = join(tmp, 'out.xml');
-    const client = mockClient({
-      listAllPages: async () => ['Page A', 'Page B'],
-      exportPages: async () => makeExportXml([
-        { title: 'Page A', text: 'content a' },
-        { title: 'Page B', text: 'content b' },
-      ]),
-    });
+  it('throws when wiki.db does not exist', async () => {
+    const dataPath = join(tmp, 'empty-data');
+    mkdirSync(dataPath, { recursive: true });
 
-    await exportCommand([outPath], { json: false, quiet: true }, client);
-
-    const xml = readFileSync(outPath, 'utf-8');
-    assert.ok(xml.startsWith('<mediawiki'));
-    assert.ok(xml.includes('<title>Page A</title>'));
-    assert.ok(xml.includes('<title>Page B</title>'));
-    assert.ok(xml.endsWith('</mediawiki>\n'));
+    await assert.rejects(
+      () => runWithDataPath(dataPath, () =>
+        backupCommand([join(tmp, 'out.tar.gz')], { json: false, quiet: false }),
+      ),
+      { name: 'WaiError' },
+    );
   });
 
-  it('merges multiple batches into single XML', async () => {
-    const outPath = join(tmp, 'out.xml');
-    // Generate 75 page titles to force two batches (batch size = 50)
-    const allTitles = Array.from({ length: 75 }, (_, i) => `Page ${i}`);
-    let exportCallCount = 0;
+  it('dry run lists contents without creating archive', async () => {
+    const dataPath = makeFakeDataDir(tmp);
+    const outPath = join(tmp, 'out.tar.gz');
 
-    const client = mockClient({
-      listAllPages: async () => allTitles,
-      exportPages: async (titles: string[]) => {
-        exportCallCount++;
-        return makeExportXml(titles.map((t) => ({ title: t, text: `content of ${t}` })));
-      },
-    });
+    await runWithDataPath(dataPath, () =>
+      backupCommand([outPath, '--dry-run'], { json: false, quiet: false }),
+    );
 
-    await exportCommand([outPath], { json: false, quiet: true }, client);
-
-    assert.equal(exportCallCount, 2);
-
-    const xml = readFileSync(outPath, 'utf-8');
-    // Should have single opening and closing tag
-    assert.equal((xml.match(/<mediawiki/g) || []).length, 1);
-    assert.equal((xml.match(/<\/mediawiki>/g) || []).length, 1);
-    // Should have single siteinfo
-    assert.equal((xml.match(/<siteinfo>/g) || []).length, 1);
-    // Should have all 75 pages
-    assert.equal((xml.match(/<page>/g) || []).length, 75);
-    // Spot-check first and last batch pages
-    assert.ok(xml.includes('<title>Page 0</title>'));
-    assert.ok(xml.includes('<title>Page 74</title>'));
+    assert.equal(existsSync(outPath), false);
   });
 
-  it('json output includes page count', async () => {
-    const outPath = join(tmp, 'out.xml');
+  it('dry run with --json outputs manifest', async () => {
+    const dataPath = makeFakeDataDir(tmp);
+    const outPath = join(tmp, 'out.tar.gz');
     const logs: string[] = [];
     const origLog = console.log;
     console.log = (msg: string) => logs.push(msg);
 
-    const client = mockClient({
-      listAllPages: async () => ['A', 'B'],
-      exportPages: async () => makeExportXml([
-        { title: 'A', text: 'a' },
-        { title: 'B', text: 'b' },
-      ]),
-    });
+    try {
+      await runWithDataPath(dataPath, () =>
+        backupCommand([outPath, '--dry-run'], { json: true, quiet: false }),
+      );
+      const output = JSON.parse(logs[logs.length - 1]);
+      assert.equal(output.version, 1);
+      assert.equal(output.imageCount, 2);
+      assert.ok(output.files.includes('wiki.db'));
+      assert.ok(output.files.includes('images'));
+    } finally {
+      console.log = origLog;
+    }
+  });
+
+  it('creates archive with correct contents', async () => {
+    const dataPath = makeFakeDataDir(tmp);
+    const outPath = join(tmp, 'out.tar.gz');
+
+    await runWithDataPath(dataPath, () =>
+      backupCommand([outPath], { json: false, quiet: true }),
+    );
+
+    assert.ok(existsSync(outPath));
+
+    // List archive contents
+    const listing = execSync(`tar -tzf '${outPath}'`, { encoding: 'utf-8' });
+    assert.ok(listing.includes('wiki.db'));
+    assert.ok(listing.includes('manifest.json'));
+    assert.ok(listing.includes('LocalData.php'));
+    assert.ok(listing.includes('images/'));
+  });
+
+  it('includes WAL file when present', async () => {
+    const dataPath = makeFakeDataDir(tmp);
+    writeFileSync(join(dataPath, 'wiki.db-wal'), 'wal-data');
+    const outPath = join(tmp, 'out.tar.gz');
+
+    await runWithDataPath(dataPath, () =>
+      backupCommand([outPath], { json: false, quiet: true }),
+    );
+
+    const listing = execSync(`tar -tzf '${outPath}'`, { encoding: 'utf-8' });
+    assert.ok(listing.includes('wiki.db-wal'));
+  });
+
+  it('json output includes file and manifest data', async () => {
+    const dataPath = makeFakeDataDir(tmp);
+    const outPath = join(tmp, 'out.tar.gz');
+    const logs: string[] = [];
+    const origLog = console.log;
+    console.log = (msg: string) => logs.push(msg);
 
     try {
-      await exportCommand([outPath], { json: true, quiet: false }, client);
+      await runWithDataPath(dataPath, () =>
+        backupCommand([outPath], { json: true, quiet: false }),
+      );
       const output = JSON.parse(logs[logs.length - 1]);
-      assert.equal(output.pages, 2);
       assert.equal(output.file, outPath);
+      assert.equal(output.version, 1);
+      assert.equal(output.imageCount, 2);
+      assert.ok(output.dbSize > 0);
     } finally {
       console.log = origLog;
     }

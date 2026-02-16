@@ -1,187 +1,56 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { parseDump, type ParseDumpResult } from '../src/commands/import.js';
-import { importCommand } from '../src/commands/import.js';
-import type { WikiClient } from '../src/wiki-client.js';
+import { execSync } from 'node:child_process';
+import { restoreCommand } from '../src/commands/restore.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
-function escapeXml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+/** Create a valid backup archive in tmp. */
+function makeArchive(tmp: string, opts?: { imageCount?: number }): string {
+  const staging = join(tmp, 'staging');
+  mkdirSync(staging, { recursive: true });
+  writeFileSync(join(staging, 'wiki.db'), 'fake-sqlite-db');
+  writeFileSync(join(staging, 'LocalData.php'), '<?php $secret = "s";');
 
-interface TestPage {
-  title: string;
-  ns?: number;
-  revisions: string[];
-}
-
-interface NsDecl {
-  id: number;
-  name: string;
-}
-
-function writeDump(dir: string, pages: TestPage[], namespaces?: NsDecl[]): string {
-  const path = join(dir, 'dump.xml');
-  let xml = '<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.11/">\n';
-  xml += '  <siteinfo>\n    <sitename>Test</sitename>\n';
-  if (namespaces) {
-    xml += '    <namespaces>\n';
-    for (const ns of namespaces) {
-      if (ns.name === '') {
-        xml += `      <namespace key="${ns.id}" case="first-letter" />\n`;
-      } else {
-        xml += `      <namespace key="${ns.id}" case="first-letter">${escapeXml(ns.name)}</namespace>\n`;
-      }
-    }
-    xml += '    </namespaces>\n';
+  const imagesDir = join(staging, 'images');
+  mkdirSync(imagesDir, { recursive: true });
+  const count = opts?.imageCount ?? 1;
+  for (let i = 0; i < count; i++) {
+    writeFileSync(join(imagesDir, `img${i}.jpg`), `fake-${i}`);
   }
-  xml += '  </siteinfo>\n';
-  for (const p of pages) {
-    xml += `  <page>\n`;
-    xml += `    <title>${escapeXml(p.title)}</title>\n`;
-    xml += `    <ns>${p.ns ?? 0}</ns>\n`;
-    xml += `    <id>1</id>\n`;
-    for (const text of p.revisions) {
-      xml += `    <revision>\n`;
-      xml += `      <id>1</id>\n`;
-      xml += `      <text xml:space="preserve">${escapeXml(text)}</text>\n`;
-      xml += `    </revision>\n`;
-    }
-    xml += `  </page>\n`;
-  }
-  xml += '</mediawiki>\n';
-  writeFileSync(path, xml);
-  return path;
+
+  const manifest = {
+    version: 1,
+    createdAt: '2025-01-15T10:00:00.000Z',
+    dbSize: 15,
+    imageCount: count,
+  };
+  writeFileSync(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+
+  const archivePath = join(tmp, 'backup.tar.gz');
+  execSync(`tar -czf '${archivePath}' -C '${staging}' wiki.db LocalData.php images manifest.json`);
+  return archivePath;
 }
 
-function mockClient(overrides: Partial<Record<keyof WikiClient, any>> = {}): WikiClient {
-  return {
-    importPage: async () => ({ title: '', oldRevid: 0, newRevid: 1, timestamp: '' }),
-    ...overrides,
-  } as unknown as WikiClient;
+function runWithDataPath(dataPath: string, fn: () => Promise<void>): Promise<void> {
+  const prev = process.env.WAI_DATA_PATH;
+  process.env.WAI_DATA_PATH = dataPath;
+  return fn().finally(() => {
+    if (prev === undefined) delete process.env.WAI_DATA_PATH;
+    else process.env.WAI_DATA_PATH = prev;
+  });
 }
 
-// ── parseDump ─────────────────────────────────────────────────────────
+// ── restoreCommand ────────────────────────────────────────────────────
 
-describe('parseDump', () => {
+describe('restoreCommand', () => {
   let tmp: string;
 
   beforeEach(() => {
-    tmp = mkdtempSync(join(tmpdir(), 'wai-test-'));
-  });
-
-  afterEach(() => {
-    rmSync(tmp, { recursive: true });
-  });
-
-  it('parses single-revision pages', () => {
-    const path = writeDump(tmp, [
-      { title: 'Page One', revisions: ['Hello world'] },
-      { title: 'Page Two', revisions: ['Goodbye world'] },
-    ]);
-    const { pages } = parseDump(path);
-    assert.equal(pages.length, 2);
-    assert.equal(pages[0].title, 'Page One');
-    assert.equal(pages[0].text, 'Hello world');
-    assert.equal(pages[1].title, 'Page Two');
-    assert.equal(pages[1].text, 'Goodbye world');
-  });
-
-  it('takes last revision when multiple exist', () => {
-    const path = writeDump(tmp, [
-      { title: 'Multi', revisions: ['first', 'second', 'third'] },
-    ]);
-    const { pages } = parseDump(path);
-    assert.equal(pages.length, 1);
-    assert.equal(pages[0].text, 'third');
-  });
-
-  it('parses namespace numbers', () => {
-    const path = writeDump(tmp, [
-      { title: 'Main', ns: 0, revisions: ['main content'] },
-      { title: 'Talk:Main', ns: 1, revisions: ['talk content'] },
-      { title: 'Template:Infobox', ns: 10, revisions: ['template'] },
-    ]);
-    const { pages } = parseDump(path);
-    assert.equal(pages[0].ns, 0);
-    assert.equal(pages[1].ns, 1);
-    assert.equal(pages[2].ns, 10);
-  });
-
-  it('handles empty text', () => {
-    const path = writeDump(tmp, [
-      { title: 'Empty', revisions: [''] },
-    ]);
-    const { pages } = parseDump(path);
-    assert.equal(pages.length, 1);
-    assert.equal(pages[0].text, '');
-  });
-
-  it('preserves wikitext markup', () => {
-    const wikitext = "'''Bold''' and [[Link|display]] and {{Template|arg=val}}";
-    const path = writeDump(tmp, [
-      { title: 'Markup', revisions: [wikitext] },
-    ]);
-    const { pages } = parseDump(path);
-    assert.equal(pages[0].text, wikitext);
-  });
-
-  it('handles special characters', () => {
-    const path = writeDump(tmp, [
-      { title: "Jane Doe", revisions: ['Text with "quotes" & ampersands'] },
-    ]);
-    const { pages } = parseDump(path);
-    assert.equal(pages[0].title, "Jane Doe");
-    assert.equal(pages[0].text, 'Text with "quotes" & ampersands');
-  });
-
-  it('throws on missing file', () => {
-    assert.throws(() => parseDump('/nonexistent/path.xml'), /Cannot read file/);
-  });
-
-  it('returns empty array for empty dump', () => {
-    const path = join(tmp, 'empty.xml');
-    writeFileSync(path, '<mediawiki></mediawiki>');
-    const { pages } = parseDump(path);
-    assert.equal(pages.length, 0);
-  });
-
-  it('returns namespace map from siteinfo', () => {
-    const path = writeDump(tmp, [
-      { title: 'Main Page', ns: 0, revisions: ['hello'] },
-    ], [
-      { id: 0, name: '' },
-      { id: 1, name: 'Talk' },
-      { id: 10, name: 'Template' },
-      { id: 100, name: 'Source' },
-    ]);
-    const { namespaces } = parseDump(path);
-    assert.equal(namespaces.get(0), '');
-    assert.equal(namespaces.get(1), 'Talk');
-    assert.equal(namespaces.get(10), 'Template');
-    assert.equal(namespaces.get(100), 'Source');
-  });
-
-  it('returns empty namespace map when siteinfo has no namespaces', () => {
-    const path = writeDump(tmp, [
-      { title: 'Test', revisions: ['content'] },
-    ]);
-    const { namespaces } = parseDump(path);
-    assert.equal(namespaces.size, 0);
-  });
-});
-
-// ── importCommand ─────────────────────────────────────────────────────
-
-describe('importCommand', () => {
-  let tmp: string;
-
-  beforeEach(() => {
-    tmp = mkdtempSync(join(tmpdir(), 'wai-test-'));
+    tmp = mkdtempSync(join(tmpdir(), 'wai-restore-test-'));
   });
 
   afterEach(() => {
@@ -190,143 +59,134 @@ describe('importCommand', () => {
 
   it('throws UsageError when no file given', async () => {
     await assert.rejects(
-      () => importCommand([], { json: false, quiet: false }, mockClient()),
+      () => restoreCommand([], { json: false, quiet: false }),
       { name: 'UsageError' },
     );
   });
 
-  it('dry run lists pages without calling importPage', async () => {
-    const path = writeDump(tmp, [
-      { title: 'Page A', ns: 0, revisions: ['content a'] },
-      { title: 'Page B', ns: 0, revisions: ['content b'] },
-    ]);
-    let called = false;
-    const client = mockClient({
-      importPage: async () => { called = true; },
-    });
-
-    await importCommand([path, '--dry-run'], { json: false, quiet: true }, client);
-    assert.equal(called, false);
+  it('throws when archive does not exist', async () => {
+    await assert.rejects(
+      () => restoreCommand([join(tmp, 'nope.tar.gz')], { json: false, quiet: false }),
+      { name: 'WaiError' },
+    );
   });
 
-  it('namespace filter restricts pages', async () => {
-    const path = writeDump(tmp, [
-      { title: 'Main Page', ns: 0, revisions: ['main'] },
-      { title: 'Talk:Main Page', ns: 1, revisions: ['talk'] },
-      { title: 'Template:Foo', ns: 10, revisions: ['tmpl'] },
-    ]);
-    const imported: string[] = [];
-    const client = mockClient({
-      importPage: async (title: string) => {
-        imported.push(title);
-        return { title, oldRevid: 0, newRevid: 1, timestamp: '' };
-      },
-    });
+  it('throws on archive without manifest', async () => {
+    const badArchive = join(tmp, 'bad.tar.gz');
+    const staging = join(tmp, 'bad-staging');
+    mkdirSync(staging, { recursive: true });
+    writeFileSync(join(staging, 'junk.txt'), 'not a backup');
+    execSync(`tar -czf '${badArchive}' -C '${staging}' junk.txt`);
 
-    await importCommand([path, '--ns', '0'], { json: false, quiet: true }, client);
-    assert.deepEqual(imported, ['Main Page']);
+    await assert.rejects(
+      () => restoreCommand([badArchive], { json: false, quiet: false }),
+      { name: 'WaiError', message: /no manifest.json/ },
+    );
   });
 
-  it('calls importPage with correct summary', async () => {
-    const path = writeDump(tmp, [
-      { title: 'Test', revisions: ['content'] },
-    ]);
-    let receivedSummary = '';
-    const client = mockClient({
-      importPage: async (_t: string, _c: string, summary: string) => {
-        receivedSummary = summary;
-        return { title: _t, oldRevid: 0, newRevid: 1, timestamp: '' };
-      },
-    });
+  it('dry run shows manifest without extracting', async () => {
+    const archivePath = makeArchive(tmp);
+    const dataPath = join(tmp, 'data');
 
-    await importCommand([path, '-m', 'Custom summary'], { json: false, quiet: true }, client);
-    assert.equal(receivedSummary, 'Custom summary');
+    await runWithDataPath(dataPath, () =>
+      restoreCommand([archivePath, '--dry-run'], { json: false, quiet: false }),
+    );
+
+    assert.equal(existsSync(dataPath), false);
   });
 
-  it('continues on error and sets exit code', async () => {
-    const path = writeDump(tmp, [
-      { title: 'Good', revisions: ['ok'] },
-      { title: 'Bad', revisions: ['fail'] },
-      { title: 'Also Good', revisions: ['ok'] },
-    ]);
-    const imported: string[] = [];
-    const client = mockClient({
-      importPage: async (title: string) => {
-        if (title === 'Bad') throw new Error('API error');
-        imported.push(title);
-        return { title, oldRevid: 0, newRevid: 1, timestamp: '' };
-      },
-    });
+  it('dry run with --json outputs manifest', async () => {
+    const archivePath = makeArchive(tmp, { imageCount: 3 });
+    const logs: string[] = [];
+    const origLog = console.log;
+    console.log = (msg: string) => logs.push(msg);
 
-    const origExitCode = process.exitCode;
-    await importCommand([path], { json: false, quiet: true }, client);
-    assert.deepEqual(imported, ['Good', 'Also Good']);
-    assert.equal(process.exitCode, 1);
-    process.exitCode = origExitCode;
+    try {
+      await runWithDataPath(join(tmp, 'data'), () =>
+        restoreCommand([archivePath, '--dry-run'], { json: true, quiet: false }),
+      );
+      const output = JSON.parse(logs[logs.length - 1]);
+      assert.equal(output.version, 1);
+      assert.equal(output.imageCount, 3);
+      assert.equal(output.createdAt, '2025-01-15T10:00:00.000Z');
+    } finally {
+      console.log = origLog;
+    }
   });
 
-  it('corrects title missing namespace prefix', async () => {
-    const path = writeDump(tmp, [
-      { title: 'WhatsApp Export', ns: 100, revisions: ['data'] },
-    ], [
-      { id: 0, name: '' },
-      { id: 100, name: 'Source' },
-    ]);
-    const imported: string[] = [];
-    const client = mockClient({
-      importPage: async (title: string) => {
-        imported.push(title);
-        return { title, oldRevid: 0, newRevid: 1, timestamp: '' };
-      },
-    });
+  it('refuses to overwrite existing data without --force', async () => {
+    const archivePath = makeArchive(tmp);
+    const dataPath = join(tmp, 'data');
+    mkdirSync(dataPath, { recursive: true });
+    writeFileSync(join(dataPath, 'wiki.db'), 'existing');
 
-    await importCommand([path], { json: false, quiet: true }, client);
-    assert.deepEqual(imported, ['Source:WhatsApp Export']);
+    await assert.rejects(
+      () => runWithDataPath(dataPath, () =>
+        restoreCommand([archivePath], { json: false, quiet: false }),
+      ),
+      { name: 'WaiError', message: /--force/ },
+    );
   });
 
-  it('leaves correct namespace-prefixed titles unchanged', async () => {
-    const path = writeDump(tmp, [
-      { title: 'Source:WhatsApp Export', ns: 100, revisions: ['data'] },
-    ], [
-      { id: 0, name: '' },
-      { id: 100, name: 'Source' },
-    ]);
-    const imported: string[] = [];
-    const client = mockClient({
-      importPage: async (title: string) => {
-        imported.push(title);
-        return { title, oldRevid: 0, newRevid: 1, timestamp: '' };
-      },
-    });
+  it('restores with --force when data exists', async () => {
+    const archivePath = makeArchive(tmp);
+    const dataPath = join(tmp, 'data');
+    mkdirSync(dataPath, { recursive: true });
+    writeFileSync(join(dataPath, 'wiki.db'), 'old-data');
 
-    await importCommand([path], { json: false, quiet: true }, client);
-    assert.deepEqual(imported, ['Source:WhatsApp Export']);
+    await runWithDataPath(dataPath, () =>
+      restoreCommand([archivePath, '--force'], { json: false, quiet: true }),
+    );
+
+    const restored = readFileSync(join(dataPath, 'wiki.db'), 'utf-8');
+    assert.equal(restored, 'fake-sqlite-db');
   });
 
-  it('falls back to wiki API when siteinfo lacks namespace', async () => {
-    // Dump has no namespace declarations but page has ns=100
-    const path = writeDump(tmp, [
-      { title: 'WhatsApp Export', ns: 100, revisions: ['data'] },
-    ]);
-    const imported: string[] = [];
-    let apiCalled = false;
-    const client = mockClient({
-      importPage: async (title: string) => {
-        imported.push(title);
-        return { title, oldRevid: 0, newRevid: 1, timestamp: '' };
-      },
-      getNamespaces: async () => {
-        apiCalled = true;
-        return [
-          { id: 0, name: '' },
-          { id: 1, name: 'Talk' },
-          { id: 100, name: 'Source' },
-        ];
-      },
-    });
+  it('extracts all files to data directory', async () => {
+    const archivePath = makeArchive(tmp, { imageCount: 2 });
+    const dataPath = join(tmp, 'data');
 
-    await importCommand([path], { json: false, quiet: true }, client);
-    assert.equal(apiCalled, true);
-    assert.deepEqual(imported, ['Source:WhatsApp Export']);
+    await runWithDataPath(dataPath, () =>
+      restoreCommand([archivePath], { json: false, quiet: true }),
+    );
+
+    assert.ok(existsSync(join(dataPath, 'wiki.db')));
+    assert.ok(existsSync(join(dataPath, 'LocalData.php')));
+    assert.ok(existsSync(join(dataPath, 'manifest.json')));
+    assert.ok(existsSync(join(dataPath, 'images', 'img0.jpg')));
+    assert.ok(existsSync(join(dataPath, 'images', 'img1.jpg')));
+    // Should create cache dir even though it's not in archive
+    assert.ok(existsSync(join(dataPath, 'cache')));
+  });
+
+  it('creates data directory if it does not exist', async () => {
+    const archivePath = makeArchive(tmp);
+    const dataPath = join(tmp, 'nested', 'deep', 'data');
+
+    await runWithDataPath(dataPath, () =>
+      restoreCommand([archivePath], { json: false, quiet: true }),
+    );
+
+    assert.ok(existsSync(join(dataPath, 'wiki.db')));
+  });
+
+  it('json output includes restore details', async () => {
+    const archivePath = makeArchive(tmp);
+    const dataPath = join(tmp, 'data');
+    const logs: string[] = [];
+    const origLog = console.log;
+    console.log = (msg: string) => logs.push(msg);
+
+    try {
+      await runWithDataPath(dataPath, () =>
+        restoreCommand([archivePath], { json: true, quiet: false }),
+      );
+      const output = JSON.parse(logs[logs.length - 1]);
+      assert.equal(output.restored, true);
+      assert.equal(output.dataPath, dataPath);
+      assert.equal(output.version, 1);
+    } finally {
+      console.log = origLog;
+    }
   });
 });

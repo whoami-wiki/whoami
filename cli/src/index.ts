@@ -24,6 +24,8 @@ import { placeCommand } from './commands/place.js';
 import { snapshotCommand } from './commands/snapshot.js';
 import { importCommand } from './commands/import.js';
 import { exportCommand } from './commands/export.js';
+import { backupCommand } from './commands/backup.js';
+import { restoreCommand } from './commands/restore.js';
 import { checkForUpdate, updateCommand } from './update.js';
 
 const VERSION = '1.0.6';
@@ -67,6 +69,8 @@ Discovery:
   place <query>               Look up a place (Google Places)
 
 Archive:
+  backup <file>               Create a full wiki backup
+  restore <file>              Restore from a backup
   export <file>               Export to MediaWiki XML dump
   import <file>               Import from MediaWiki XML dump
   snapshot <dir>              Archive a directory
@@ -120,6 +124,10 @@ async function main(): Promise<void> {
       return run(authCommand(commandArgs, globals), updateNotice);
     case 'place':
       return run(placeCommand(commandArgs, globals), updateNotice);
+    case 'backup':
+      return run(backupCommand(commandArgs, globals), updateNotice);
+    case 'restore':
+      return run(restoreCommand(commandArgs, globals), updateNotice);
     case 'update':
       return updateCommand();
   }
