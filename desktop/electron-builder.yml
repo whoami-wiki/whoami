@@ -25,6 +25,10 @@ extraResources:
     to: resources/mediawiki
     filter:
       - "**/*"
+  - from: resources/ffmpeg
+    to: resources/ffmpeg
+    filter:
+      - "**/*"
   - from: resources/templates
     to: resources/templates
     filter:

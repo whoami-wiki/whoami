@@ -76,6 +76,37 @@ else
   echo "All extensions already exist — skipping"
 fi
 
+# 2b. Download TimedMediaHandler from GitHub (not on ExtDist for 1.43)
+TMH_DIR="$OUT/extensions/TimedMediaHandler"
+if [ ! -d "$TMH_DIR" ]; then
+  echo "==> Downloading TimedMediaHandler (REL1_43 from GitHub)..."
+  TMH_TARBALL="$ROOT/.build/TimedMediaHandler-REL1_43.tar.gz"
+  if [ ! -f "$TMH_TARBALL" ]; then
+    curl -L -o "$TMH_TARBALL" \
+      "https://github.com/wikimedia/mediawiki-extensions-TimedMediaHandler/archive/refs/heads/REL1_43.tar.gz"
+  fi
+  mkdir -p "$TMH_DIR"
+  tar xzf "$TMH_TARBALL" --strip-components=1 -C "$TMH_DIR"
+
+  # Install composer dependencies
+  COMPOSER_PHAR="$ROOT/.build/composer.phar"
+  if [ ! -f "$COMPOSER_PHAR" ]; then
+    echo "==> Downloading composer.phar..."
+    curl -sS -o "$COMPOSER_PHAR" https://getcomposer.org/download/latest-stable/composer.phar
+  fi
+
+  PHP="$ROOT/resources/php/bin/php"
+  if [ ! -f "$PHP" ]; then
+    echo "ERROR: PHP must be built before bundling TimedMediaHandler (composer needs it)"
+    exit 1
+  fi
+
+  echo "==> Installing TimedMediaHandler composer dependencies..."
+  "$PHP" "$COMPOSER_PHAR" install --no-dev --no-interaction --working-dir="$TMH_DIR"
+else
+  echo "TimedMediaHandler already exists — skipping"
+fi
+
 # 3. Download Vector skin if missing
 if [ ! -d "$OUT/skins/Vector" ]; then
   echo "==> Downloading Vector skin"
@@ -127,6 +158,14 @@ if ($path !== '/' && is_file($filePath)) {
             'ico' => 'image/x-icon',
             'woff' => 'font/woff',
             'woff2' => 'font/woff2',
+            'mp3' => 'audio/mpeg',
+            'mp4' => 'video/mp4',
+            'ogg' => 'audio/ogg',
+            'ogv' => 'video/ogg',
+            'opus' => 'audio/opus',
+            'wav' => 'audio/wav',
+            'webm' => 'video/webm',
+            'flac' => 'audio/flac',
         ];
         if (isset($types[$ext])) {
             header('Content-Type: ' . $types[$ext]);

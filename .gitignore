@@ -7,6 +7,7 @@ dist/
 desktop/resources/php/
 desktop/resources/lua/
 desktop/resources/mediawiki/
+desktop/resources/ffmpeg/
 desktop/dist-electron/
 desktop/.build/
 desktop/renderer/
