@@ -1,166 +1,114 @@
 import { parseArgs } from 'node:util';
-import { readFileSync } from 'node:fs';
-import { XMLParser } from 'fast-xml-parser';
-import { WikiClient } from '../wiki-client.js';
+import { existsSync, mkdirSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { resolve } from 'node:path';
+import { join } from 'node:path';
+import { getDataPath } from '../data-path.js';
 import { UsageError, WaiError } from '../errors.js';
 import { type GlobalFlags, outputJson } from '../output.js';
-
-export interface DumpPage {
-  title: string;
-  ns: number;
-  text: string;
-}
-
-export interface ParseDumpResult {
-  pages: DumpPage[];
-  namespaces: Map<number, string>;
-}
-
-export function parseDump(xmlPath: string): ParseDumpResult {
-  let xml: string;
-  try {
-    xml = readFileSync(xmlPath, 'utf-8');
-  } catch (e: any) {
-    throw new WaiError(`Cannot read file: ${xmlPath} (${e.message})`, 1);
-  }
-
-  const parser = new XMLParser({
-    ignoreAttributes: false,
-    trimValues: false,
-    isArray: (tagName) => tagName === 'page' || tagName === 'namespace',
-  });
-  const doc = parser.parse(xml);
-
-  // Parse namespace map from siteinfo
-  const namespaces = new Map<number, string>();
-  const rawNs = doc?.mediawiki?.siteinfo?.namespaces?.namespace ?? [];
-  for (const ns of rawNs) {
-    const id = typeof ns['@_key'] === 'number' ? ns['@_key'] : parseInt(ns['@_key'], 10);
-    const name = typeof ns === 'string' ? ns : (ns['#text'] ?? '');
-    if (!isNaN(id)) {
-      namespaces.set(id, name);
-    }
-  }
-
-  const rawPages = doc?.mediawiki?.page ?? [];
-  const pages: DumpPage[] = [];
-
-  for (const p of rawPages) {
-    const title = p.title ?? '';
-    const ns = typeof p.ns === 'number' ? p.ns : parseInt(p.ns, 10) || 0;
-    const revs = p.revision;
-    const rev = Array.isArray(revs) ? revs[revs.length - 1] : revs;
-    const text = typeof rev?.text === 'string'
-      ? rev.text
-      : rev?.text?.['#text'] ?? '';
-    pages.push({ title, ns, text });
-  }
-
-  return { pages, namespaces };
-}
 
 export async function importCommand(
   args: string[],
   globals: GlobalFlags,
-  client: WikiClient,
 ): Promise<void> {
   const { values, positionals } = parseArgs({
     args,
     options: {
-      ns: { type: 'string' },
       'dry-run': { type: 'boolean', default: false },
-      m: { type: 'string' },
+      force: { type: 'boolean', default: false },
     },
     allowPositionals: true,
     strict: false,
   });
 
-  const xmlPath = positionals[0];
-  if (!xmlPath) throw new UsageError('Usage: wai import <file> [--ns 0,4] [--dry-run] [-m summary]');
+  const archivePath = positionals[0];
+  if (!archivePath) throw new UsageError('Usage: wai import <file> [--force] [--dry-run]');
 
-  const summary = (values.m as string) || 'Imported from XML dump';
+  const resolved = resolve(archivePath);
+  if (!existsSync(resolved)) {
+    throw new WaiError(`Archive not found: ${resolved}`, 1);
+  }
+
   const dryRun = values['dry-run'] as boolean;
+  const force = values.force as boolean;
 
-  let nsFilter: Set<number> | null = null;
-  if (values.ns) {
-    nsFilter = new Set(
-      (values.ns as string).split(',').map((n) => parseInt(n.trim(), 10)),
+  // Extract and validate manifest
+  let manifestJson: string;
+  try {
+    manifestJson = execSync(
+      `tar -xf ${shellEscape(resolved)} -O manifest.json`,
+      { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] },
     );
+  } catch {
+    throw new WaiError('Invalid archive: no manifest.json found', 1);
   }
 
-  const dump = parseDump(xmlPath);
-  let pages = dump.pages;
-  if (nsFilter) {
-    pages = pages.filter((p) => nsFilter!.has(p.ns));
+  let manifest: { version: number; createdAt: string; dbSize: number; imageCount: number };
+  try {
+    manifest = JSON.parse(manifestJson);
+  } catch {
+    throw new WaiError('Invalid archive: corrupt manifest.json', 1);
   }
 
-  // Reconcile namespace prefixes for pages with ns > 0
-  let wikiNamespaces: Map<number, string> | null = null;
-  for (const p of pages) {
-    if (p.ns === 0) continue;
-
-    let prefix = dump.namespaces.get(p.ns);
-
-    // Fallback to wiki API if siteinfo is missing this namespace
-    if (prefix === undefined) {
-      if (!wikiNamespaces) {
-        const nsList = await client.getNamespaces();
-        wikiNamespaces = new Map(nsList.map((n) => [n.id, n.name]));
-      }
-      prefix = wikiNamespaces.get(p.ns);
-    }
-
-    if (prefix && !p.title.startsWith(prefix + ':')) {
-      const corrected = `${prefix}:${p.title}`;
-      if (!globals.quiet) {
-        console.warn(`  ⚠ Title corrected: "${p.title}" → "${corrected}"`);
-      }
-      p.title = corrected;
-    }
+  if (manifest.version !== 1) {
+    throw new WaiError(`Unsupported archive version: ${manifest.version}`, 1);
   }
 
   if (dryRun) {
     if (globals.json) {
-      outputJson(pages.map((p) => ({ title: p.title, ns: p.ns, size: p.text.length })));
+      outputJson(manifest);
     } else {
-      console.log(`Dry run: ${pages.length} pages`);
-      for (const p of pages) {
-        console.log(`  [ns ${p.ns}] ${p.title} (${p.text.length} bytes)`);
-      }
+      console.log('Archive contents:');
+      console.log(`  created:  ${manifest.createdAt}`);
+      console.log(`  database: ${formatSize(manifest.dbSize)}`);
+      console.log(`  images:   ${manifest.imageCount}`);
     }
     return;
   }
 
-  const failures: { title: string; error: string }[] = [];
-  let imported = 0;
+  const dataPath = getDataPath();
 
-  for (const p of pages) {
-    try {
-      await client.importPage(p.title, p.text, summary);
-      imported++;
-      if (!globals.quiet) {
-        console.log(`  ✓ ${p.title}`);
-      }
-    } catch (e: any) {
-      const msg = e.message ?? String(e);
-      failures.push({ title: p.title, error: msg });
-      if (!globals.quiet) {
-        console.error(`  ✗ ${p.title}: ${msg}`);
-      }
-    }
+  // Check for existing data
+  if (existsSync(join(dataPath, 'wiki.sqlite')) && !force) {
+    throw new WaiError(
+      `Data directory already has a wiki database. Use --force to overwrite.`,
+      1,
+    );
   }
+
+  // Create data directory if needed
+  mkdirSync(dataPath, { recursive: true });
+
+  // Extract archive
+  try {
+    execSync(
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)}`,
+      { stdio: 'pipe' },
+    );
+  } catch (e: any) {
+    throw new WaiError(`Failed to extract archive: ${e.message}`, 1);
+  }
+
+  // Ensure expected directories exist
+  mkdirSync(join(dataPath, 'images'), { recursive: true });
+  mkdirSync(join(dataPath, 'cache'), { recursive: true });
 
   if (globals.json) {
-    outputJson({ imported, failed: failures.length, total: pages.length, failures });
+    outputJson({ restored: true, dataPath, ...manifest });
   } else if (!globals.quiet) {
-    console.log();
-    console.log(`Imported ${imported}/${pages.length} pages`);
-    if (failures.length > 0) {
-      console.log(`Failed: ${failures.length}`);
-    }
+    console.log(`Imported to ${dataPath}`);
+    console.log(`  database: ${formatSize(manifest.dbSize)}`);
+    console.log(`  images:   ${manifest.imageCount}`);
   }
+}
 
-  if (failures.length > 0) {
-    process.exitCode = 1;
-  }
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes}B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}K`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}M`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)}G`;
+}
+
+function shellEscape(s: string): string {
+  return `'${s.replace(/'/g, "'\\''")}'`;
 }

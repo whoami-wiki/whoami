@@ -22,8 +22,8 @@ import { sourceCommand } from './commands/source.js';
 import { taskCommand } from './commands/task.js';
 import { placeCommand } from './commands/place.js';
 import { snapshotCommand } from './commands/snapshot.js';
-import { importCommand } from './commands/import.js';
 import { exportCommand } from './commands/export.js';
+import { importCommand } from './commands/import.js';
 import { checkForUpdate, updateCommand } from './update.js';
 
 const VERSION = '1.0.6';
@@ -67,8 +67,8 @@ Discovery:
   place <query>               Look up a place (Google Places)
 
 Archive:
-  export <file>               Export to MediaWiki XML dump
-  import <file>               Import from MediaWiki XML dump
+  export <dir>                Export full wiki backup
+  import <file>               Import from a backup
   snapshot <dir>              Archive a directory
 
 Auth:
@@ -120,6 +120,10 @@ async function main(): Promise<void> {
       return run(authCommand(commandArgs, globals), updateNotice);
     case 'place':
       return run(placeCommand(commandArgs, globals), updateNotice);
+    case 'export':
+      return run(exportCommand(commandArgs, globals), updateNotice);
+    case 'import':
+      return run(importCommand(commandArgs, globals), updateNotice);
     case 'update':
       return updateCommand();
   }
@@ -127,7 +131,7 @@ async function main(): Promise<void> {
   // Validate command before attempting auth
   const wikiCommands = new Set([
     'read', 'write', 'edit', 'create', 'search',
-    'section', 'talk', 'upload', 'link', 'category', 'changes', 'export', 'import', 'source',
+    'section', 'talk', 'upload', 'link', 'category', 'changes', 'source',
     'snapshot', 'task',
   ]);
 
@@ -169,10 +173,6 @@ async function main(): Promise<void> {
         return changesCommand(commandArgs, globals, client);
       case 'source':
         return sourceCommand(commandArgs, globals, client);
-      case 'export':
-        return exportCommand(commandArgs, globals, client);
-      case 'import':
-        return importCommand(commandArgs, globals, client);
       case 'snapshot':
         return snapshotCommand(commandArgs, globals, client);
       case 'task':
