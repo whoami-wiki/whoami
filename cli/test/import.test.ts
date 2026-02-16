@@ -12,7 +12,7 @@ import { importCommand } from '../src/commands/import.js';
 function makeArchive(tmp: string, opts?: { imageCount?: number }): string {
   const staging = join(tmp, 'staging');
   mkdirSync(staging, { recursive: true });
-  writeFileSync(join(staging, 'wiki.db'), 'fake-sqlite-db');
+  writeFileSync(join(staging, 'wiki.sqlite'), 'fake-sqlite-db');
   writeFileSync(join(staging, 'LocalData.php'), '<?php $secret = "s";');
 
   const imagesDir = join(staging, 'images');
@@ -31,7 +31,7 @@ function makeArchive(tmp: string, opts?: { imageCount?: number }): string {
   writeFileSync(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
   const archivePath = join(tmp, 'backup.tar.gz');
-  execSync(`tar -czf '${archivePath}' -C '${staging}' wiki.db LocalData.php images manifest.json`);
+  execSync(`tar -czf '${archivePath}' -C '${staging}' wiki.sqlite LocalData.php images manifest.json`);
   return archivePath;
 }
 
@@ -118,7 +118,7 @@ describe('importCommand', () => {
     const archivePath = makeArchive(tmp);
     const dataPath = join(tmp, 'data');
     mkdirSync(dataPath, { recursive: true });
-    writeFileSync(join(dataPath, 'wiki.db'), 'existing');
+    writeFileSync(join(dataPath, 'wiki.sqlite'), 'existing');
 
     await assert.rejects(
       () => runWithDataPath(dataPath, () =>
@@ -132,13 +132,13 @@ describe('importCommand', () => {
     const archivePath = makeArchive(tmp);
     const dataPath = join(tmp, 'data');
     mkdirSync(dataPath, { recursive: true });
-    writeFileSync(join(dataPath, 'wiki.db'), 'old-data');
+    writeFileSync(join(dataPath, 'wiki.sqlite'), 'old-data');
 
     await runWithDataPath(dataPath, () =>
       importCommand([archivePath, '--force'], { json: false, quiet: true }),
     );
 
-    const restored = readFileSync(join(dataPath, 'wiki.db'), 'utf-8');
+    const restored = readFileSync(join(dataPath, 'wiki.sqlite'), 'utf-8');
     assert.equal(restored, 'fake-sqlite-db');
   });
 
@@ -150,7 +150,7 @@ describe('importCommand', () => {
       importCommand([archivePath], { json: false, quiet: true }),
     );
 
-    assert.ok(existsSync(join(dataPath, 'wiki.db')));
+    assert.ok(existsSync(join(dataPath, 'wiki.sqlite')));
     assert.ok(existsSync(join(dataPath, 'LocalData.php')));
     assert.ok(existsSync(join(dataPath, 'manifest.json')));
     assert.ok(existsSync(join(dataPath, 'images', 'img0.jpg')));
@@ -167,7 +167,7 @@ describe('importCommand', () => {
       importCommand([archivePath], { json: false, quiet: true }),
     );
 
-    assert.ok(existsSync(join(dataPath, 'wiki.db')));
+    assert.ok(existsSync(join(dataPath, 'wiki.sqlite')));
   });
 
   it('json output includes restore details', async () => {

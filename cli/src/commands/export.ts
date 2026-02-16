@@ -40,15 +40,22 @@ export async function exportCommand(
     throw new WaiError(`Data directory not found: ${dataPath}`, 1);
   }
 
-  const dbPath = join(dataPath, 'wiki.db');
+  const dbPath = join(dataPath, 'wiki.sqlite');
   if (!existsSync(dbPath)) {
     throw new WaiError(`No wiki database found at: ${dbPath}`, 1);
   }
 
   // Collect files to archive
-  const entries: string[] = ['wiki.db'];
-  if (existsSync(join(dataPath, 'wiki.db-wal'))) entries.push('wiki.db-wal');
-  if (existsSync(join(dataPath, 'wiki.db-shm'))) entries.push('wiki.db-shm');
+  const entries: string[] = [];
+
+  // All .sqlite databases and their WAL/SHM files
+  const dataFiles = readdirSync(dataPath);
+  for (const name of dataFiles) {
+    if (name.endsWith('.sqlite') || name.endsWith('.sqlite-wal') || name.endsWith('.sqlite-shm')) {
+      entries.push(name);
+    }
+  }
+
   if (existsSync(join(dataPath, 'LocalData.php'))) entries.push('LocalData.php');
 
   const imagesDir = join(dataPath, 'images');

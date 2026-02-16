@@ -12,7 +12,7 @@ import { exportCommand } from '../src/commands/export.js';
 function makeFakeDataDir(tmp: string): string {
   const dataPath = join(tmp, 'data');
   mkdirSync(dataPath, { recursive: true });
-  writeFileSync(join(dataPath, 'wiki.db'), 'fake-sqlite-db');
+  writeFileSync(join(dataPath, 'wiki.sqlite'), 'fake-sqlite-db');
   writeFileSync(join(dataPath, 'LocalData.php'), '<?php $secret = "s";');
   const imagesDir = join(dataPath, 'images');
   mkdirSync(imagesDir, { recursive: true });
@@ -62,7 +62,7 @@ describe('exportCommand', () => {
     );
   });
 
-  it('throws when wiki.db does not exist', async () => {
+  it('throws when wiki.sqlite does not exist', async () => {
     const dataPath = join(tmp, 'empty-data');
     mkdirSync(dataPath, { recursive: true });
 
@@ -99,7 +99,7 @@ describe('exportCommand', () => {
       const output = JSON.parse(logs[logs.length - 1]);
       assert.equal(output.version, 1);
       assert.equal(output.imageCount, 2);
-      assert.ok(output.files.includes('wiki.db'));
+      assert.ok(output.files.includes('wiki.sqlite'));
       assert.ok(output.files.includes('images'));
     } finally {
       console.log = origLog;
@@ -118,7 +118,7 @@ describe('exportCommand', () => {
 
     // List archive contents
     const listing = execSync(`tar -tzf '${outPath}'`, { encoding: 'utf-8' });
-    assert.ok(listing.includes('wiki.db'));
+    assert.ok(listing.includes('wiki.sqlite'));
     assert.ok(listing.includes('manifest.json'));
     assert.ok(listing.includes('LocalData.php'));
     assert.ok(listing.includes('images/'));
@@ -126,7 +126,7 @@ describe('exportCommand', () => {
 
   it('includes WAL file when present', async () => {
     const dataPath = makeFakeDataDir(tmp);
-    writeFileSync(join(dataPath, 'wiki.db-wal'), 'wal-data');
+    writeFileSync(join(dataPath, 'wiki.sqlite-wal'), 'wal-data');
     const outPath = join(tmp, 'out.tar.gz');
 
     await runWithDataPath(dataPath, () =>
@@ -134,7 +134,7 @@ describe('exportCommand', () => {
     );
 
     const listing = execSync(`tar -tzf '${outPath}'`, { encoding: 'utf-8' });
-    assert.ok(listing.includes('wiki.db-wal'));
+    assert.ok(listing.includes('wiki.sqlite-wal'));
   });
 
   it('json output includes file and manifest data', async () => {

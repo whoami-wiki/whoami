@@ -69,7 +69,7 @@ export async function importCommand(
   const dataPath = getDataPath();
 
   // Check for existing data
-  if (existsSync(join(dataPath, 'wiki.db')) && !force) {
+  if (existsSync(join(dataPath, 'wiki.sqlite')) && !force) {
     throw new WaiError(
       `Data directory already has a wiki database. Use --force to overwrite.`,
       1,
