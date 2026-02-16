@@ -47,7 +47,7 @@ export function ChangelogTabs({ releases }: { releases: Release[] }) {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`font-sans text-sm px-3 py-1.5 rounded-md transition-colors cursor-pointer ${
+            className={`font-sans text-sm px-3 py-1.5 rounded-md cursor-pointer ${
               activeTab === tab.key
                 ? "bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100"
                 : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
