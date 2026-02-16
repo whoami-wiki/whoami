@@ -10,6 +10,7 @@
     "generate-images": "tsx scripts/generate-images.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "ai": "^6.0.78",
     "classnames": "^2.5.1",
     "gray-matter": "^4.0.3",
