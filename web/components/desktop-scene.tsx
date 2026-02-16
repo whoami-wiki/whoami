@@ -17,6 +17,16 @@ export interface ContentSection {
   images?: string[]; // image IDs from image-map
   quote?: string; // blockquote text
   quoteAttrib?: string; // attribution, e.g. "— Sid, 2019"
+  table?: {
+    caption?: string;
+    headers: string[];
+    rows: string[][];
+  };
+  audio?: {
+    title: string;
+    duration: string; // e.g. "0:47"
+    transcription: string;
+  };
 }
 
 export interface WikiPage {
@@ -56,7 +66,7 @@ const windows: WindowGroup[] = [
     zIndex: 2,
     items: [
       {
-        hideAt: 0.12,
+        hideAt: 0.02,
         page: {
           title: "Canon PowerShot A2300",
           toc: [
@@ -86,19 +96,19 @@ const windows: WindowGroup[] = [
           sections: [
             {
               heading: "History",
-              body: "Appa bought the A2300 from a Croma in Pune (ironically, the same branch as [[The Croma Heist]]) in March 2008, specifically for a family trip to Rajasthan planned that summer. It cost ₹6,500. He read the entire manual on the Pune–Jaipur train while [[Aai]] managed two kids in the next berth. For the next decade it was the default camera at every birthday, Diwali, school function, and family gathering. Aai kept it in a blue pouch in the living room cupboard.",
+              body: "Appa bought the A2300 from a Croma in Pune (ironically, the same branch as [[The Croma Heist]]) in March 2008{{cite|1}}, specifically for a family trip to Rajasthan planned that summer. It cost ₹6,500{{cite|2}}. He read the entire manual on the Pune–Jaipur train while [[Aai]] managed two kids in the next berth. For the next decade it was the default camera at every birthday, Diwali, school function, and family gathering. Aai kept it in a blue pouch in the living room cupboard.",
               quote: "Is the camera still working?",
               quoteAttrib:
                 "— Appa, every six months, knowing Jay hasn't used it in years",
             },
             {
               heading: "The Rajasthan Trip (2008)",
-              body: "The camera's first outing. Jay was nine. The family drove from Pune to Jaipur, Jodhpur, and Udaipur over two weeks. Appa took 400 photos — the first real photo archive in the family. Jay was allowed to use it exactly once, at Mehrangarh Fort, and the resulting photo is blurry but still in the collection.",
+              body: "The camera's first outing. Jay was nine. The family drove from Pune to Jaipur, Jodhpur, and Udaipur over two weeks. Appa took 400 photos{{cite|3}} — the first real photo archive in the family. Jay was allowed to use it exactly once, at Mehrangarh Fort, and the resulting photo is blurry but still in the collection.",
               images: ["img_canon_rajasthan"],
             },
             {
               heading: "Family events",
-              body: "Between 2008 and 2018, the camera documented roughly 12,000 photos of family life: Diwali celebrations, [[Aai|Kavya's]] school annual days, Nana and Nani visiting from Kolhapur, the annual Ganesh Chaturthi setup on the balcony, and Jay's science fair second-place trophy ceremony at St. Vincent's. The EXIF timestamps form an unbroken record of a decade of family weekends.",
+              body: "Between 2008 and 2018, the camera documented roughly 12,000 photos{{cite|4}} of family life: Diwali celebrations, [[Aai|Kavya's]] school annual days, Nana and Nani visiting from Kolhapur, the annual Ganesh Chaturthi setup on the balcony, and Jay's science fair second-place trophy ceremony at St. Vincent's. The EXIF timestamps form an unbroken record of a decade of family weekends.",
               images: ["img_canon_family"],
             },
             {
@@ -113,7 +123,7 @@ const windows: WindowGroup[] = [
         },
       },
       {
-        hideAt: 0.2,
+        hideAt: 0.18,
         page: {
           title: "Mumbai Dance Competition",
           toc: [
@@ -135,7 +145,7 @@ const windows: WindowGroup[] = [
             { label: "Photos", value: "340" },
           ],
           intro:
-            "In February 2018, Jay's college dance crew went to a competition in Mumbai. They didn't win — they didn't even place — but the train ride, the backstage panic, and the post-competition Marine Drive walk became one of those stories. [[Sid]] choreographed. Priya did the music. Jay was technically the weakest dancer but had the most enthusiasm.",
+            "In February 2018, Jay's college dance crew went to a competition in Mumbai. They didn't win — they didn't even place{{cite|1}} — but the train ride, the backstage panic, and the post-competition Marine Drive walk became one of those stories. [[Sid]] choreographed. Priya did the music. Jay was technically the weakest dancer but had the most enthusiasm.",
           scrollTop: 120,
           sections: [
             {
@@ -144,7 +154,7 @@ const windows: WindowGroup[] = [
             },
             {
               heading: "Rehearsals at BITS",
-              body: "Three months of rehearsals in the hostel common room after 10 PM, when the space was free. [[Sid]] took choreography seriously — he'd watched YouTube tutorials for weeks. Jay's contribution was mostly energy and willingness to look foolish. Priya assembled the music mix on Audacity. The setlist was three Bollywood songs mashed together. Nobody agreed on the ending until the night before departure.",
+              body: "Three months of rehearsals in the hostel common room after 10 PM, when the space was free. [[Sid]] took choreography seriously — he'd watched YouTube tutorials for weeks{{cite|2}}. Jay's contribution was mostly energy and willingness to look foolish. Priya assembled the music mix on Audacity. The setlist was three Bollywood songs mashed together. Nobody agreed on the ending until the night before departure.",
               images: ["img_mumbai_train"],
             },
             {
@@ -169,7 +179,7 @@ const windows: WindowGroup[] = [
         },
       },
       {
-        hideAt: 0.38,
+        hideAt: 0.42,
         page: {
           title: "The Goa Trip",
           toc: [
@@ -198,12 +208,12 @@ const windows: WindowGroup[] = [
             { label: "Duration", value: "7 days" },
           ],
           intro:
-            "December 2019, Assagao villa. Six people who'd been threatening to take a trip since BITS. Vik booked the villa without telling anyone. Rohit made a spreadsheet nobody followed. Priya drove the entire week. The pool light incident on night two. The Dosa Incident in Mapusa that birthed the phrase \"server's down again.\" 847 photos across three phones and one [[Canon PowerShot A2300]].",
+            "December 2019, Assagao villa. Six people who'd been threatening to take a trip since BITS. Vik booked the villa without telling anyone. Rohit made a spreadsheet nobody followed. Priya drove the entire week. The pool light incident on night two. The Dosa Incident in Mapusa that birthed the phrase \"server's down again.\" 847 photos across three phones{{cite|1}} and one [[Canon PowerShot A2300]].",
           scrollTop: 90,
           sections: [
             {
               heading: "Planning",
-              body: 'The trip had been "planned" since graduation in 2021. In practice, nothing happened until Vik booked an Assagao villa in October 2019 and dropped the confirmation in the College Gang group with "booked, figure out flights." Rohit responded with a 14-tab Google Sheet covering budgets, meal plans, and a "day-by-day itinerary" that was abandoned by hour three of day one. Flights were booked separately, resulting in arrivals spread across 14 hours.',
+              body: 'The trip had been "planned" since graduation in 2021. In practice, nothing happened until Vik booked an Assagao villa in October 2019 and dropped the confirmation in the College Gang group with "booked, figure out flights." Rohit responded with a 14-tab Google Sheet{{cite|2}} covering budgets, meal plans, and a "day-by-day itinerary" that was abandoned by hour three of day one. Flights were booked separately, resulting in arrivals spread across 14 hours.',
               quote: "Booked. Figure out flights.",
               quoteAttrib: "— Vik, College Gang group, Oct 2019",
             },
@@ -224,7 +234,7 @@ const windows: WindowGroup[] = [
             },
             {
               heading: "Photos",
-              body: "847 photos across three phones and the [[Canon PowerShot A2300]], which Jay had borrowed from Appa. The camera's last real outing. A shared Google Photos album was created and never properly organized. The best group shot — all six on the villa steps — was taken by Priya on a self-timer after 11 attempts.",
+              body: "847 photos across three phones and the [[Canon PowerShot A2300]], which Jay had borrowed from Appa. The camera's last real outing. A shared Google Photos album was created and never properly organized. The best group shot — all six on the villa steps — was taken by Priya on a self-timer after 11 attempts{{cite|3}}.",
               images: ["img_goa_group"],
             },
             {
@@ -246,7 +256,7 @@ const windows: WindowGroup[] = [
     zIndex: 5,
     items: [
       {
-        hideAt: 0.22,
+        hideAt: 0.25,
         page: {
           title: "Astral Projection (band)",
           toc: [
@@ -271,8 +281,8 @@ const windows: WindowGroup[] = [
             { label: "Status", value: "Dissolved" },
           ],
           intro:
-            'A band that existed for exactly four months in second year at BITS. Jay on guitar (badly — he\'d had an Ibanez GRX20 for six months), [[Sid]] on drums (a practice pad, not real drums), Meera singing, and a fourth-year named Kartik on bass who graduated and ended the whole thing. They played one show at the hostel common room. The WhatsApp group "Astral Projection Official" has 847 messages and the last one is from 2019.',
-          scrollTop: 240,
+            'A band that existed for exactly four months{{cite|1}} in second year at BITS. Jay on guitar (badly — he\'d had an Ibanez GRX20 for six months), [[Sid]] on drums (a practice pad, not real drums), Meera singing, and a fourth-year named Kartik on bass who graduated and ended the whole thing. They played one show at the hostel common room. The WhatsApp group "Astral Projection Official" has 847 messages{{cite|2}} and the last one is from 2019.',
+          scrollTop: 420,
           sections: [
             {
               heading: "Formation",
@@ -281,14 +291,24 @@ const windows: WindowGroup[] = [
             },
             {
               heading: "The one show",
-              body: 'October 2018, hostel common room, open mic night. The setlist was three covers — "Wonderwall" (of course), "Tera Hone Laga Hoon" (Meera\'s choice), and "Come As You Are" (Jay\'s only other song). Plus the original. Roughly 40 people watched. Jay broke a string during "Come As You Are" and played the rest with five strings. [[Sid]] kept time on a practice pad balanced on a chair. Kartik was the only one who looked like a real musician.',
+              body: 'October 2018, hostel common room, open mic night. The setlist was three covers — "Wonderwall" (of course), "Tera Hone Laga Hoon" (Meera\'s choice), and "Come As You Are" (Jay\'s only other song). Plus the original. Roughly 40 people watched{{cite|3}}. Jay broke a string during "Come As You Are" and played the rest with five strings. [[Sid]] kept time on a practice pad balanced on a chair. Kartik was the only one who looked like a real musician.',
               images: ["img_band_show"],
+              audio: {
+                title: "Open mic night — crowd recording",
+                duration: "0:38",
+                transcription: "...[muffled guitar, string snaps] ...oh no... [laughter from crowd] ...it's fine it's fine... [Jay continues playing with five strings, Sid counting under his breath] ...one two three four...",
+              },
             },
             {
               heading: "The original song",
-              body: 'Meera wrote a song called "3 AM Chai" about late-night hostel conversations over instant Wagh Bakri chai. It was genuinely good — three verses, a bridge, and a chorus that people actually hummed afterward. Jay played the same four chords throughout (Em–G–D–C, the only progression he knew). Meera refuses to acknowledge the song exists and changes the subject whenever it comes up. The only recording is a 47-second phone video that [[Sid]] posted in the group chat. Priya once suggested Meera record a proper version; Meera said she\'d "rather do another PhD."',
+              body: 'Meera wrote a song called "3 AM Chai"{{cite|3}} about late-night hostel conversations over instant Wagh Bakri chai. It was genuinely good — three verses, a bridge, and a chorus that people actually hummed afterward. Jay played the same four chords throughout{{cite|4}} (Em–G–D–C, the only progression he knew). Meera refuses to acknowledge the song exists and changes the subject whenever it comes up. The only recording is a 47-second phone video that [[Sid]] posted in the group chat. Priya once suggested Meera record a proper version; Meera said she\'d "rather do another PhD."',
               quote: "I'd rather do another PhD.",
               quoteAttrib: "— Meera, when asked to record '3 AM Chai' properly",
+              audio: {
+                title: "3 AM Chai — C-204 recording",
+                duration: "0:47",
+                transcription: "...chai ke bahaane, raat ke fasaane, koi sun raha hai kya... [guitar, Em–G–D–C] ...hum yahan hain, bas yahan hain, kal ka pata nahin...",
+              },
             },
             {
               heading: "Dissolution",
@@ -305,62 +325,6 @@ const windows: WindowGroup[] = [
           ],
         },
       },
-      {
-        hideAt: 0.48,
-        page: {
-          title: "The Croma Heist",
-          toc: [
-            { label: "The plan" },
-            {
-              label: "The execution",
-              children: [
-                { label: "Jay freezes" },
-                { label: "Sid and the washing machines" },
-              ],
-            },
-            { label: "The batteries" },
-            { label: "Discovery (2022)" },
-            { label: "Annual retelling" },
-          ],
-          infoboxImage: "img_ib_croma",
-          infobox: [
-            { label: "Date", value: "Jul 2014" },
-            { label: "Location", value: "Croma, Pune" },
-            { label: "Participants", value: "4" },
-            { label: "Items stolen", value: "0" },
-            { label: "Items purchased", value: "AA batteries (₹120)" },
-          ],
-          intro:
-            'The legendary failed "heist" — four 15-year-olds trying to steal a PS3 controller from the Pune Croma in July 2014. Nobody actually stole anything. The plan fell apart when Jay got nervous and bought a pack of batteries to "look normal." [[Sid]] was the lookout. The entire story lives in WhatsApp messages and gets retold with increasing exaggeration every year.',
-          scrollTop: 40,
-          sections: [
-            {
-              heading: "The plan",
-              body: "Summer 2014. Jay, [[Sid]], and two school friends — Ankit and Devesh, both of whom Jay has since lost touch with — wanted a PS3 controller but nobody had ₹2,500. The plan was simple: one person distracts the staff, one grabs the controller, two act as lookouts. They spent three days planning over Frooti boxes in Sid's room while his parents were at work. The plan was written on the back of a Croma flyer. In retrospect, it had no exit strategy and relied on the assumption that Croma had no security cameras (it did).",
-              images: ["img_croma_store"],
-            },
-            {
-              heading: "The execution",
-              body: "They entered the store on a Tuesday afternoon. Jay was supposed to ask a staff member about laptops while Sid grabbed the controller. Instead, Jay froze at the entrance, wandered into the wrong aisle, and spent ten minutes staring at batteries while his heart rate doubled. Sid, seeing Jay had gone off-script, panicked and pretended to browse washing machines. The other two waited outside the whole time.",
-            },
-            {
-              heading: "The batteries",
-              body: 'After 15 minutes of aimless wandering, Jay bought a pack of Eveready AA batteries for ₹120 to "look normal" on the way out. He already had batteries at home. Sid bought nothing. Ankit and Devesh had been waiting outside the whole time eating vada pav from a cart. They reconvened at the Shree Krishna chai stall across the street and collectively decided the heist was off. Nobody mentioned it for three years. Jay eventually saved up and bought the controller legitimately in October.',
-              images: ["img_croma_batteries"],
-            },
-            {
-              heading: "Discovery (2022)",
-              body: 'In 2022, during a Diwali visit to Pune, [[Aai]] overheard Jay and Sid retelling the story and asked what "the Croma thing" was. Jay tried to explain. Aai was more confused than angry — "you went to steal a controller and bought batteries?" She brought it up at dinner with Appa, who laughed for five minutes.',
-              quote: "You went to steal a controller and bought batteries?",
-              quoteAttrib: "— Aai, 2022",
-            },
-            {
-              heading: "Annual retelling",
-              body: "The Croma Heist has been retold at least once a year since 2017, each time with escalating details. In Sid's version, a security guard chased them. In Jay's version, he made eye contact with a camera and panicked. The College Gang group chat has at least four written retellings. Meera, who wasn't there, tells the best version.",
-            },
-          ],
-        },
-      },
     ],
   },
   {
@@ -373,7 +337,7 @@ const windows: WindowGroup[] = [
     zIndex: 3,
     items: [
       {
-        hideAt: 0.25,
+        hideAt: 0.33,
         page: {
           title: "The Indiranagar Apartment",
           toc: [
@@ -401,12 +365,12 @@ const windows: WindowGroup[] = [
             { label: "Roommate", value: "Sid" },
           ],
           intro:
-            "The current flat. A 2BHK in Indiranagar that Jay and [[Sid]] found in August 2021 after a three-week search that generated 58 apartment listing screenshots, 14 Google Maps distance calculations, and one spreadsheet comparing rent-to-commute ratios. The winning factor was the balcony (Sid wanted it for plants, Jay wanted it for morning coffee).",
+            "The current flat. A 2BHK in Indiranagar that Jay and [[Sid]] found in August 2021{{cite|1}} after a three-week search that generated 58 apartment listing screenshots{{cite|2}}, 14 Google Maps distance calculations, and one spreadsheet comparing rent-to-commute ratios. The winning factor was the balcony (Sid wanted it for plants, Jay wanted it for morning coffee).",
           scrollTop: 180,
           sections: [
             {
               heading: "The search",
-              body: "After [[March 2020 – June 2021|moving to Bangalore together]], Jay and Sid spent three weeks on NoBroker and 99acres, visiting 11 apartments across Indiranagar, Koramangala, and HSR Layout. One place in Koramangala had a bathroom window opening directly into the neighbor's kitchen. Jay built a spreadsheet comparing rent, commute distance to both offices (Jay's fintech in Whitefield, Sid's data science firm near MG Road), and \"vibe\" (rated 1–5). Sid added a column for \"natural light\" that ended up being the deciding factor. 58 listing screenshots survive in Jay's phone gallery.",
+              body: "After [[March 2020 – June 2021|moving to Bangalore together]], Jay and Sid spent three weeks on NoBroker and 99acres, visiting 11 apartments{{cite|3}} across Indiranagar, Koramangala, and HSR Layout. One place in Koramangala had a bathroom window opening directly into the neighbor's kitchen. Jay built a spreadsheet comparing rent, commute distance to both offices (Jay's fintech in Whitefield, Sid's data science firm near MG Road), and \"vibe\" (rated 1–5). Sid added a column for \"natural light\" that ended up being the deciding factor. 58 listing screenshots survive in Jay's phone gallery.",
             },
             {
               heading: "Moving in",
@@ -433,7 +397,7 @@ const windows: WindowGroup[] = [
         },
       },
       {
-        hideAt: 0.3,
+        hideAt: 0.38,
         page: {
           title: "Hot Wheels Collection",
           toc: [
@@ -460,13 +424,24 @@ const windows: WindowGroup[] = [
             { label: "Storage", value: "3 display cases + 2 shoeboxes" },
           ],
           intro:
-            "A spreadsheet-tracked collection of 247 Hot Wheels cars spanning 2005 to present. What started as a childhood hobby never stopped — it just got a spreadsheet. The collection is split between Appa's house in Pune (childhood cars, two shoeboxes) and three display cases in [[The Indiranagar Apartment]].",
+            "A spreadsheet-tracked collection of 247 Hot Wheels cars{{cite|1}} spanning 2005 to present. What started as a childhood hobby never stopped — it just got a spreadsheet. The collection is split between Appa's house in Pune (childhood cars, two shoeboxes) and three display cases in [[The Indiranagar Apartment]].",
           scrollTop: 280,
           sections: [
             {
               heading: "The spreadsheet",
               body: 'The tracking spreadsheet has columns for model, year, series, condition, acquisition date, cost, and notes. The notes column is the most entertaining part: "birthday gift from Kavya, she doesn\'t know what a Treasure Hunt is but she tried" and "Vik said this was ugly, Vik is wrong" and "found at a stall in Goa, technically a [[The Goa Trip]] souvenir." Meera once described the spreadsheet as "genuinely concerning."',
               images: ["img_hw_spreadsheet"],
+              table: {
+                caption: "Sample rows from the collection spreadsheet",
+                headers: ["Model", "Year", "Source", "Notes"],
+                rows: [
+                  ["'67 Camaro Super TH", "2015", "Flea market, Bangalore", "₹150. Worth ~₹8,000. Best find."],
+                  ["Honda Civic (custom)", "2024", "Sid", "Custom. Sid. Best one."],
+                  ["Dodge Viper (red)", "2005", "Jagtap's Toy Store, Pune", "First car. Slightly chipped."],
+                  ["Mystery car (blue)", "2022", "Kavya, Pilani", "She doesn't know what a TH is but she tried."],
+                  ["Jeep Wrangler", "2019", "Mapusa flea market, Goa", "Technically a Goa Trip souvenir."],
+                ],
+              },
             },
             {
               heading: "Childhood era (2005–2015)",
@@ -478,78 +453,15 @@ const windows: WindowGroup[] = [
             },
             {
               heading: "Notable cars",
-              body: "The crown jewel is a 2015 '67 Camaro Super Treasure Hunt, found at a flea market in Bangalore for ₹150 (worth roughly ₹8,000). The most sentimental is the birthday Civic that [[Sid]] custom-painted in Jay's favorite colors. The oldest is the original red Dodge Viper from 2005, slightly chipped but still in the collection.",
+              body: "The crown jewel is a 2015 '67 Camaro Super Treasure Hunt, found at a flea market in Bangalore for ₹150 (worth roughly ₹8,000){{cite|2}}. The most sentimental is the birthday Civic that [[Sid]] custom-painted in Jay's favorite colors. The oldest is the original red Dodge Viper from 2005, slightly chipped but still in the collection.",
               images: ["img_hw_camaro"],
             },
             {
               heading: "The group chat's reaction",
-              body: "The College Gang group has mixed feelings about the collection. Sid is supportive (he painted the birthday Civic). Priya thinks it's sweet. Vik once asked \"aren't you 26?\" Meera's position is that the spreadsheet is weirder than the collection. Rohit made a graph of Jay's acquisition rate over time, which Jay immediately added to the spreadsheet.",
+              body: "The College Gang group has mixed feelings about the collection. Sid is supportive (he painted the birthday Civic). Priya thinks it's sweet. Vik once asked \"aren't you 26?\" Meera's position is that the spreadsheet is weirder than the collection. Rohit made a graph{{cite|3}} of Jay's acquisition rate over time, which Jay immediately added to the spreadsheet.",
               images: ["img_hw_display"],
               quote: "The spreadsheet is weirder than the collection.",
               quoteAttrib: "— Meera",
-            },
-          ],
-        },
-      },
-      {
-        hideAt: 0.42,
-        page: {
-          title: "prakash-smp",
-          toc: [
-            { label: "Origin (lockdown week 1)" },
-            {
-              label: "The world",
-              children: [
-                { label: "Spawn village" },
-                { label: "The Nether hub" },
-              ],
-            },
-            { label: "Server ops" },
-            { label: "Vik's arson" },
-            {
-              label: "Notable builds",
-              children: [
-                { label: "Mountain fortress" },
-                { label: "Sid's railway" },
-              ],
-            },
-          ],
-          infoboxImage: "img_ib_mc",
-          infobox: [
-            { label: "Server", value: "prakash-smp" },
-            { label: "Since", value: "Mar 2020" },
-            { label: "Players", value: "8 (peak 12)" },
-            { label: "Uptime", value: "99.2%" },
-            { label: "World size", value: "4.2 GB" },
-          ],
-          intro:
-            "A Minecraft survival server that Jay set up in March 2020 when the first lockdown hit. [[Sid]] is co-admin. Peaked at 12 players, settled to 4–5 core. Runs on a Hetzner VPS (€8/month). The world has never been reset. Vik joined and immediately burned down Sid's house — the \"server's down again\" meme from [[The Goa Trip]] was reborn.",
-          scrollTop: 200,
-          sections: [
-            {
-              heading: "Origin (lockdown week 1)",
-              body: "March 25, 2020 — five days into India's first COVID lockdown. Jay was at [[Aai|Appa's house in Pune]], the startup had just folded (see [[March 2020 – June 2021]]), and he needed a project. He spun up a Minecraft server on his laptop, posted the IP in the College Gang group, and six people joined within an hour. By the end of week one, there were 12 players and the server had been migrated to a Hetzner VPS.",
-            },
-            {
-              heading: "The world",
-              body: "The world has never been reset — four years of continuous civilization. Spawn has evolved from a dirt hut to a proper village with farms, an enchanting library, and a communal storage hall that [[Sid]] maintains with terrifying organization. The Nether has a hub system that Sid built. The End was defeated in month three but nobody goes there anymore.",
-              images: ["img_mc_spawn"],
-            },
-            {
-              heading: "Server ops",
-              body: "Jay handles server administration. [[Sid]] handles builds and community management. The server runs Paper MC on a Hetzner CX21 (€8/month, split between Jay and Sid). Backups run daily. The one real outage — 16 hours in June 2021 — was caused by a plugin conflict during an update. Jay was at work and didn't notice until Vik texted \"server's down again\" in the main group.",
-              images: ["img_mc_railway"],
-            },
-            {
-              heading: "Vik's arson",
-              body: 'Vik joined prakash-smp in April 2020 and within two hours had "accidentally" burned down [[Sid]]\'s first house using a flint and steel near a wooden wall. Sid\'s reaction in the [[College Gang]] group was a single message: "Vik." Rohit called an emergency server meeting on Discord — the only time anyone has used voice chat for Minecraft governance. The event is referenced every time anything goes wrong on the server. Vik has since been responsible for two more fires, a creeper farm malfunction, the loss of Meera\'s horse (named Murakami, after her favorite author), and flooding the Nether hub during what he described as "an experiment."',
-              quote: "Vik.",
-              quoteAttrib: "— Sid, College Gang group, after the fire",
-            },
-            {
-              heading: "Notable builds",
-              body: "Jay's mountain fortress is the server's largest build — a multi-level base carved into a mountain, including a [[Hot Wheels Collection|Hot Wheels display room]] recreated in Minecraft with item frames and colored blocks. Sid's railway system connects every major build across 3,000 blocks. Meera built a pixel art of the [[Astral Projection (band)|Astral Projection]] logo at spawn, which nobody asked for but nobody wants to remove.",
-              images: ["img_mc_mountain", "img_mc_nether"],
             },
           ],
         },
@@ -566,62 +478,7 @@ const windows: WindowGroup[] = [
     zIndex: 1,
     items: [
       {
-        hideAt: 0.32,
-        page: {
-          title: "March 2020 – June 2021",
-          toc: [
-            { label: "The startup folds" },
-            { label: "Moving home" },
-            {
-              label: "The Pune months",
-              children: [
-                { label: "prakash-smp" },
-                { label: "The guitar" },
-                { label: "Hot Wheels revival" },
-              ],
-            },
-            { label: "Moving to Bangalore with Sid" },
-            { label: "What survived" },
-          ],
-          infoboxImage: "img_ib_lockdown",
-          infobox: [
-            { label: "Period", value: "Mar 2020 – Jun 2021" },
-            { label: "Locations", value: "Pune → Bangalore" },
-            { label: "Jobs", value: "1 lost, 1 gained" },
-            { label: "Minecraft hours", value: "~400" },
-          ],
-          intro:
-            "The lockdown period. Jay's startup folded two weeks in. He picked up the fintech job remotely. Moved back to Pune for four months, then to Bangalore with [[Sid]]. Started [[prakash-smp]]. Finally learned the \"Comfortably Numb\" solo on the Ibanez. [[Aai]]'s Sunday calls became daily for three months.",
-          scrollTop: 60,
-          sections: [
-            {
-              heading: "The startup folds",
-              body: "Jay had been at Brevity, a SaaS startup building invoicing tools for freelancers, for eighteen months when COVID hit. They were six people in a WeWork in Koramangala. By April 10, 2020, the Series A fell through, the Slack went quiet, and Jay found out via a two-paragraph email from the founder. The fintech job at PayGrid came through a BITS alumni referral — a senior engineer named Tanvi who'd been two years above Jay — three weeks later. He started remotely from his childhood bedroom in Pune, debugging payment APIs while Kavya attended online lectures in the next room.",
-              images: ["img_lockdown_desk"],
-            },
-            {
-              heading: "Moving home",
-              body: "Jay moved back to Pune in the first week of lockdown, before the trains stopped. Four months in his old room. [[Aai]]'s Sunday 11 AM calls became daily calls at all hours. Appa set up a desk in the spare room. Kavya was finishing her degree online from the next room. The location history shows a single dot for 127 consecutive days.",
-              images: ["img_lockdown_pune"],
-            },
-            {
-              heading: "The Pune months",
-              body: 'Unexpectedly productive in some ways. Jay set up [[prakash-smp]] in week one. Found the [[Hot Wheels Collection|Hot Wheels shoeboxes]] at Appa\'s house and revived the collection. Spent evenings learning guitar from a YouTube channel called JustinGuitar — the Ibanez GRX20 from the [[Astral Projection (band)|Astral Projection]] era finally got serious use. By September 2020, he could play the "Comfortably Numb" solo cleanly. [[Aai]] tolerated the noise but drew the line at anything past 9:30 PM. He also stress-baked exactly twice — both times producing inedible banana bread that Appa politely ate.',
-            },
-            {
-              heading: "Moving to Bangalore with Sid",
-              body: "In June 2021, with offices partially reopening, Jay and [[Sid]] decided to move to Bangalore together. Sid was also working remotely from Pune. They found [[The Indiranagar Apartment]] after a three-week search. The move marked the end of the longest stretch Jay had lived at home since leaving for BITS in 2017.",
-              images: ["img_lockdown_move"],
-            },
-            {
-              heading: "What survived",
-              body: "The lockdown period produced things that lasted: [[prakash-smp]] is still running. The [[Hot Wheels Collection]] spreadsheet is still maintained. The guitar skills stuck — Jay plays most evenings, working through a Radiohead phase that [[Sid]] tolerates with headphones. The fintech job became a career; he's now a senior engineer. And the daily calls with [[Aai]] eventually settled back to Sundays, but something about the rhythm had shifted — they talk more easily now.",
-            },
-          ],
-        },
-      },
-      {
-        hideAt: 0.52,
+        hideAt: 0.50,
         page: {
           title: "Sid",
           toc: [
@@ -657,7 +514,7 @@ const windows: WindowGroup[] = [
           sections: [
             {
               heading: "BITS years",
-              body: "Jay and Sid met during BITS orientation week in 2017 and discovered they were both from Pune. By second week they were sharing mess meals daily. By second month, Sid had moved into C-204. Sid choreographed the [[Mumbai Dance Competition]], played drums (practice pad) in [[Astral Projection (band)]], and was the person Jay called at 2 AM when the first-semester physics exam went badly.",
+              body: "Jay and Sid met during BITS orientation week in 2017{{cite|1}} and discovered they were both from Pune. By second week they were sharing mess meals daily. By second month, Sid had moved into C-204. Sid choreographed the [[Mumbai Dance Competition]], played drums (practice pad) in [[Astral Projection (band)]], and was the person Jay called at 2 AM when the first-semester physics exam went badly.",
               images: ["img_sid_bits"],
             },
             {
@@ -675,7 +532,7 @@ const windows: WindowGroup[] = [
             },
             {
               heading: "The birthday Civic",
-              body: "For Jay's 25th birthday in 2024, Sid hand-painted a Hot Wheels Honda Civic in Jay's favorite color scheme — dark green with gold accents. He'd watched YouTube tutorials for two weeks. The paint job is slightly uneven but it's Jay's favorite car in the [[Hot Wheels Collection|collection]]. It sits front-center in the main display case. The spreadsheet entry notes: \"Custom. Sid. Best one.\"",
+              body: "For Jay's 25th birthday in 2024, Sid hand-painted a Hot Wheels Honda Civic in Jay's favorite color scheme — dark green with gold accents{{cite|2}}. He'd watched YouTube tutorials for two weeks{{cite|3}}. The paint job is slightly uneven but it's Jay's favorite car in the [[Hot Wheels Collection|collection]]. It sits front-center in the main display case. The spreadsheet entry notes: \"Custom. Sid. Best one.\"",
               images: ["img_sid_civic"],
               quote: "Custom. Sid. Best one.",
               quoteAttrib: "— Hot Wheels spreadsheet, entry #247",
@@ -695,7 +552,7 @@ const windows: WindowGroup[] = [
     zIndex: 4,
     items: [
       {
-        hideAt: 0.56,
+        hideAt: 0.58,
         page: {
           title: "Nandi Hills",
           toc: [
@@ -721,8 +578,8 @@ const windows: WindowGroup[] = [
             { label: "Partner", value: "Priya" },
           ],
           intro:
-            'A cycling tradition that started in October 2022 when Priya texted "want to ride to Nandi Hills Friday?" 34 rides and counting. 62 km from [[The Indiranagar Apartment|Indiranagar]] to the summit, 4:30 AM departure, sunrise dosa at the top.',
-          scrollTop: 160,
+            'A cycling tradition that started in October 2022 when Priya texted "want to ride to Nandi Hills Friday?" 34 rides{{cite|1}} and counting. 62 km{{cite|2}} from [[The Indiranagar Apartment|Indiranagar]] to the summit, 4:30 AM departure, sunrise dosa at the top.',
+          scrollTop: 700,
           sections: [
             {
               heading: "The first ride",
@@ -741,7 +598,18 @@ const windows: WindowGroup[] = [
             },
             {
               heading: "Stats (Strava)",
-              body: "34 rides logged on Strava since October 2022. Best time: 2h 04m (Priya's record is 1h 52m — she doesn't let Jay forget this). Average: 2h 28m. Total elevation gained: 20,400m. Jay's Strava bio says \"chasing Priya's PR.\" He has never beaten it.",
+              body: "34 rides logged on Strava since October 2022. Best time: 2h 04m{{cite|3}} (Priya's record is 1h 52m — she doesn't let Jay forget this). Average: 2h 28m. Total elevation gained: 20,400m. Jay's Strava bio says \"chasing Priya's PR.\" He has never beaten it.",
+              table: {
+                caption: "Selected ride milestones",
+                headers: ["Ride", "Date", "Time", "Notes"],
+                rows: [
+                  ["#1", "Oct 2022", "3h 20m", "First ride. Couldn't walk for two days."],
+                  ["#10", "Mar 2023", "2h 31m", "First sub-2:30 attempt. Missed by 1 min."],
+                  ["#18", "Sep 2023", "2h 12m", "New bike tires. Huge improvement."],
+                  ["#27", "Apr 2024", "2h 04m", "Current PR. Still 12 min behind Priya."],
+                  ["#34", "Jan 2026", "2h 19m", "Most recent. Cold morning start."],
+                ],
+              },
             },
             {
               heading: "The group chat negotiations",
@@ -751,7 +619,12 @@ const windows: WindowGroup[] = [
             },
             {
               heading: "Gear",
-              body: "Jay rides a Btwin Riverside 500, bought secondhand for ₹8,000 from a guy in Koramangala who'd used it twice. Priya rides a Triban RC520 that she maintains with the discipline of a pro mechanic — she can change a tube in under four minutes and judges Jay for not knowing how. Jay's gear knowledge is limited — he knows his tire pressure and that's about it. On ride 14, Jay got a flat near Devanahalli and Priya fixed it while he held the flashlight and apologized. One voice memo is titled \"Nandi Hills gear idea\" and is 47 seconds of Jay talking himself into buying clipless pedals. He hasn't bought them yet. [[Sid]] joined exactly once, in January 2023, and declared \"never again\" at the base of the climb.",
+              body: "Jay rides a Btwin Riverside 500, bought secondhand for ₹8,000 from a guy in Koramangala{{cite|4}} who'd used it twice. Priya rides a Triban RC520 that she maintains with the discipline of a pro mechanic — she can change a tube in under four minutes and judges Jay for not knowing how. Jay's gear knowledge is limited — he knows his tire pressure and that's about it. On ride 14, Jay got a flat near Devanahalli and Priya fixed it while he held the flashlight and apologized. One voice memo is titled \"Nandi Hills gear idea\" and is 47 seconds of Jay talking himself into buying clipless pedals. He hasn't bought them yet. [[Sid]] joined exactly once, in January 2023, and declared \"never again\" at the base of the climb.",
+              audio: {
+                title: "Nandi Hills gear idea",
+                duration: "0:47",
+                transcription: "...okay so Priya keeps saying clipless pedals would shave like ten minutes off the climb and I looked them up and honestly they're not even that expensive, the Shimano ones are like four thousand rupees, and I could probably learn to clip in on the flat before trying the hill, the only thing is if I fall over at a traffic light that's... that's embarrassing, but like, ten minutes...",
+              },
             },
           ],
         },
@@ -768,7 +641,7 @@ const windows: WindowGroup[] = [
     zIndex: 0,
     items: [
       {
-        hideAt: 0.6,
+        hideAt: 0.66,
         page: {
           title: "Aai",
           toc: [
@@ -805,12 +678,12 @@ const windows: WindowGroup[] = [
             },
             {
               heading: "Education and teaching",
-              body: "B.Ed from Shivaji University, Kolhapur. Started teaching Marathi and Hindi at Jnana Prabodhini school in Kothrud in 1998 — the same year Jay was born. She's been there 28 years now, teaching classes 5 through 8. Her students call her Sunita-bai. She's the teacher who stays late for the slow readers, who organizes the annual Marathi Day recitation competition, and who keeps a jar of Parle-G biscuits in her desk drawer for kids who forget their lunch. Jay once visited the school and was startled by how many students knew his name — she talks about her children more than she realizes.",
+              body: "B.Ed from Shivaji University, Kolhapur{{cite|1}}. Started teaching Marathi and Hindi at Jnana Prabodhini school in Kothrud in 1998 — the same year Jay was born. She's been there 28 years now{{cite|2}}, teaching classes 5 through 8. Her students call her Sunita-bai. She's the teacher who stays late for the slow readers, who organizes the annual Marathi Day recitation competition, and who keeps a jar of Parle-G biscuits in her desk drawer for kids who forget their lunch. Jay once visited the school and was startled by how many students knew his name — she talks about her children more than she realizes.",
               images: ["img_aai_school"],
             },
             {
               heading: "The Sunday call",
-              body: 'Every Sunday at 11 AM, without exception since Jay moved to Bangalore. The call always opens with "khana khaya?" regardless of the time. If Jay doesn\'t pick up by 11:05, a WhatsApp message arrives: "busy?" If he doesn\'t respond to that, Kavya texts: "call Aai." The calls run 15–40 minutes. Topics cycle through: work ("how\'s office?" — she doesn\'t fully understand what backend engineering is but asks anyway), food (always, with comparisons to Pune food that Bangalore can never win), weather (comparative Pune vs Bangalore), and whether Jay has "met anyone" (tactfully asked roughly every third call, less tactfully relayed to Kavya afterward).',
+              body: 'Every Sunday at 11 AM, without exception since Jay moved to Bangalore. The call always opens with "khana khaya?" regardless of the time. If Jay doesn\'t pick up by 11:05, a WhatsApp message arrives: "busy?" If he doesn\'t respond to that, Kavya texts: "call Aai." The calls run 15–40 minutes{{cite|3}}. Topics cycle through: work ("how\'s office?" — she doesn\'t fully understand what backend engineering is but asks anyway), food (always, with comparisons to Pune food that Bangalore can never win), weather (comparative Pune vs Bangalore), and whether Jay has "met anyone" (tactfully asked roughly every third call, less tactfully relayed to Kavya afterward).',
             },
             {
               heading: "Lockdown calls",
@@ -873,7 +746,7 @@ const desktopFiles: {
 // Pages that appear after all windows and files have closed
 const standalonePages: WindowItem[] = [
   {
-    hideAt: 0.68,
+    hideAt: 0.74,
     page: {
       title: "Priya",
       toc: [
@@ -912,18 +785,18 @@ const standalonePages: WindowItem[] = [
         },
         {
           heading: "Cycling partner",
-          body: "The [[Nandi Hills]] tradition is Priya's creation. She'd been cycling seriously for a year before texting Jay. Her Triban RC520 is better-maintained than Jay's entire apartment. She holds the Nandi Hills PR at 1h 52m and brings it up at least once per ride. She tracks everything on Strava with the precision of a professional athlete, which she is not — she designs onboarding flows for a fintech app.",
+          body: "The [[Nandi Hills]] tradition is Priya's creation. She'd been cycling seriously for a year before texting Jay. Her Triban RC520{{cite|1}} is better-maintained than Jay's entire apartment. She holds the Nandi Hills PR at 1h 52m{{cite|2}} and brings it up at least once per ride. She tracks everything on Strava with the precision of a professional athlete, which she is not — she designs onboarding flows for a fintech app.",
           images: ["img_nh_bikes"],
         },
         {
           heading: "The reliable one",
-          body: "Priya is the person who remembers birthdays without Facebook, who shows up 10 minutes early, and who once drove across Bangalore at midnight because Meera's flight from Chennai was cancelled. She organized Jay's surprise 25th birthday, kept [[Sid]]'s gift a secret for two weeks, and coordinated Vik flying in from Mumbai without a single leak. The [[College Gang]] group's running joke is that Priya is the only functional adult among them. She disagrees. Her counter-evidence is that she has watched every season of Temptation Island and gets genuinely invested in the outcomes.",
+          body: "Priya is the person who remembers birthdays without Facebook, who shows up 10 minutes early, and who once drove across Bangalore at midnight because Meera's flight from Chennai was cancelled. She organized Jay's surprise 25th birthday, kept [[Sid]]'s gift a secret for two weeks, and coordinated Vik flying in from Mumbai without a single leak. The [[College Gang]] group's running joke is that Priya is the only functional adult among them. She disagrees. Her counter-evidence is that she has watched every season of Temptation Island{{cite|3}} and gets genuinely invested in the outcomes.",
         },
       ],
     },
   },
   {
-    hideAt: 0.76,
+    hideAt: 0.82,
     page: {
       title: "College Gang",
       toc: [
@@ -953,16 +826,32 @@ const standalonePages: WindowItem[] = [
         { label: "Trips planned", value: "7" },
       ],
       intro:
-        'The WhatsApp group that holds everything together. Six people: Jay, [[Sid]], Priya, Rohit, Vik, and Meera. Active since 2017, 94,000 messages, one completed trip ([[The Goa Trip]]), and six more that never made it past the planning stage. The group where "server\'s down again" means anything from [[prakash-smp]] being offline to someone having a bad day.',
-      scrollTop: 200,
+        'The WhatsApp group that holds everything together. Six people: Jay, [[Sid]], Priya, Rohit, Vik, and Meera. Active since 2017, 94,000 messages{{cite|1}}, one completed trip ([[The Goa Trip]]), and six more{{cite|2}} that never made it past the planning stage. The group where "server\'s down again" means anything from [[prakash-smp]] being offline to someone having a bad day.',
+      scrollTop: 420,
       sections: [
         {
           heading: "Members",
           body: 'Jay (backend engineer at PayGrid, Bangalore). [[Sid]] (data science at an ML startup near MG Road, Bangalore — the quiet one). Priya (UX designer at a fintech, HSR Layout, Bangalore — the reliable one). Rohit (product manager at a SaaS company, Hyderabad — the planner who nobody listens to). Vik (sales at a pharma company, Mumbai — chaotic, voice-notes-only, once sent a 7-minute voice note about a parking ticket). Meera (PhD in computational linguistics, IIT Madras, Chennai — quiet but funniest one-liners, once silenced a 40-message argument with "lol"). They met at BITS between 2017–2018 and have been inseparable since, despite living in four different cities.',
+          table: {
+            headers: ["Name", "City", "Role", "Known for"],
+            rows: [
+              ["Jay", "Bangalore", "Backend engineer", "Hot Wheels, cycling, confident mistakes"],
+              ["Sid", "Bangalore", "Data scientist", "The quiet one who's always there"],
+              ["Priya", "Bangalore", "UX designer", "Designated driver, Nandi Hills PR holder"],
+              ["Rohit", "Hyderabad", "Product manager", "Spreadsheets nobody follows"],
+              ["Vik", "Mumbai", "Pharma sales", "Voice notes, booking things without asking"],
+              ["Meera", "Chennai", "PhD candidate", 'One-word replies that end arguments'],
+            ],
+          },
         },
         {
           heading: "The group chat",
-          body: '94,000 messages since 2017. Peak activity: December 2019 ([[The Goa Trip]]). Quietest month: July 2020. The chat has survived two accidental exits (Vik, both times), one name change prank (Vik renamed it to "Vik\'s Fan Club" at 3 AM), and one sincere conversation about mental health that nobody has ever referenced again but everyone remembers.',
+          body: '94,000 messages{{cite|3}} since 2017. Peak activity: December 2019 ([[The Goa Trip]]). Quietest month: July 2020. The chat has survived two accidental exits (Vik, both times), one name change prank (Vik renamed it to "Vik\'s Fan Club" at 3 AM){{cite|4}}, and one sincere conversation about mental health that nobody has ever referenced again but everyone remembers.',
+          audio: {
+            title: "Vik's parking ticket rant",
+            duration: "1:47",
+            transcription: "...so the guy just PUTS the ticket on my windshield while I'm literally IN the car, I'm sitting right there, I said bhai I'm in the car, he said sir the system has already generated the challan, WHAT system, I can see you writing it by hand right now...",
+          },
         },
         {
           heading: "Recurring bits",
@@ -976,53 +865,7 @@ const standalonePages: WindowItem[] = [
     },
   },
   {
-    hideAt: 0.84,
-    page: {
-      title: "Kavya",
-      toc: [
-        { label: "The younger sister" },
-        {
-          label: "BITS (following Jay)",
-          children: [{ label: "C-204 pilgrimage" }],
-        },
-        { label: "The Hot Wheels birthday" },
-        { label: "The family mediator" },
-      ],
-      infoboxImage: "img_ib_kavya",
-      infobox: [
-        { label: "Relation", value: "Younger sister" },
-        { label: "Age", value: "22" },
-        { label: "College", value: "BITS Pilani (final year)" },
-        { label: "Known for", value: '"call Aai"' },
-      ],
-      intro:
-        "Jay's younger sister, 22, final year at BITS. The person who texts \"call Aai\" when Jay doesn't pick up the Sunday call. Knew about [[The Croma Heist]] for years before [[Aai]] found out. Bought Jay a [[Hot Wheels Collection|Hot Wheels car]] for his birthday without knowing what a Treasure Hunt was, but she tried.",
-      scrollTop: 0,
-      sections: [
-        {
-          heading: "The younger sister",
-          body: "Four years younger than Jay. Grew up watching him collect [[Hot Wheels Collection|Hot Wheels]], fail to learn guitar, leave for BITS, and somehow turn into an adult with an apartment and a job. By the time she was in high school, Jay was already a voice on the phone who sent money on Paytm for her birthday. The sibling relationship is conducted almost entirely through Instagram reels, the Prakash Family WhatsApp group (four members, 80% [[Aai]]'s forwards), and Kavya's role as unofficial relay between Jay and their parents.",
-        },
-        {
-          heading: "BITS (following Jay)",
-          body: "Kavya got into BITS Pilani in 2022 — the same campus Jay attended. She refuses to acknowledge this is related to Jay's influence. She's studying electrical engineering, not CS. She lives in a different hostel. She has, however, found C-204 and sent Jay a photo of the room where [[Astral Projection (band)]] used to practice. He didn't ask her to.",
-        },
-        {
-          heading: "The Hot Wheels birthday",
-          body: "For Jay's 24th birthday, Kavya bought him a Hot Wheels car from a toy store in Pilani. She didn't know the model, the series, or what a Treasure Hunt was — she picked it because it was blue and Jay likes blue. The spreadsheet entry reads: \"birthday gift from Kavya, she doesn't know what a Treasure Hunt is but she tried.\" It's in the display case.",
-          quote:
-            "Birthday gift from Kavya. She doesn't know what a Treasure Hunt is but she tried.",
-          quoteAttrib: "— Hot Wheels spreadsheet",
-        },
-        {
-          heading: "The family mediator",
-          body: "Kavya is the unofficial communication bridge in the Prakash family. When [[Aai]]'s Sunday call goes unanswered, Kavya texts Jay. When Appa wants to ask Jay something but won't call, he tells Kavya. When Jay wants to know how Appa is actually doing (not the \"I'm fine\" version), he asks Kavya. She manages this without complaint, mostly because she finds her family entertaining.",
-        },
-      ],
-    },
-  },
-  {
-    hideAt: 0.92,
+    hideAt: 0.90,
     page: {
       title: "Appa",
       toc: [
@@ -1054,17 +897,17 @@ const standalonePages: WindowItem[] = [
         },
         {
           heading: "Education",
-          body: 'B.Com from Garware College, Pune (class of 1988). Appa was not a remarkable student by his own admission — "I passed, that was enough" — but he cleared the Bank of Maharashtra entrance exam on his first attempt, which in the late \'80s was considered a lifetime achievement in middle-class Pune. He joined as a probationary officer in 1989 and never looked anywhere else. The decision to stay at one bank for 34 years was not loyalty so much as contentment: the work made sense to him, the numbers balanced, and he could walk to the Kothrud branch in twelve minutes.',
+          body: 'B.Com from Garware College, Pune{{cite|2}} (class of 1988{{cite|3}}). Appa was not a remarkable student by his own admission — "I passed, that was enough" — but he cleared the Bank of Maharashtra entrance exam on his first attempt, which in the late \'80s was considered a lifetime achievement in middle-class Pune. He joined as a probationary officer in 1989 and never looked anywhere else. The decision to stay at one bank for 34 years was not loyalty so much as contentment: the work made sense to him, the numbers balanced, and he could walk to the Kothrud branch in twelve minutes.',
           quote: "I passed. That was enough.",
           quoteAttrib: "— Appa, on his Garware College years",
         },
         {
           heading: "The bank officer",
-          body: "Appa worked at Bank of Maharashtra for 34 years — the Kothrud branch, then the Deccan Gymkhana branch, then back to Kothrud — retiring in 2022. Jay inherited the spreadsheet habit from him: Appa tracked household expenses in ruled ledger books with the precision of a man who spent his career reconciling accounts. He commuted by the same PMPML bus route for three decades. The location history for Pune, if it existed, would be a single line.",
+          body: "Appa worked at Bank of Maharashtra for 34 years{{cite|1}} — the Kothrud branch, then the Deccan Gymkhana branch, then back to Kothrud — retiring in 2022. Jay inherited the spreadsheet habit from him: Appa tracked household expenses in ruled ledger books with the precision of a man who spent his career reconciling accounts. He commuted by the same PMPML bus route for three decades. The location history for Pune, if it existed, would be a single line.",
         },
         {
           heading: "Retirement",
-          body: "Appa retired in March 2022 and immediately needed a project. He reorganized the entire house, including Jay's old room (the [[Hot Wheels Collection|Hot Wheels shoeboxes]] were relocated twice). He digitized the ledger books into an Excel file — 34 years of household expenses, formatted immaculately. He started a walk every morning at 6 AM to Sahakar Nagar park, where he's joined a group of retired men who discuss cricket and municipal politics. [[Aai]] says he's calmer now. Kavya says he's the same but with more free time to have opinions about things — he once called Jay to discuss the IPL retention rules for twenty minutes.",
+          body: "Appa retired in March 2022{{cite|4}} and immediately needed a project. He reorganized the entire house, including Jay's old room (the [[Hot Wheels Collection|Hot Wheels shoeboxes]] were relocated twice). He digitized the ledger books into an Excel file — 34 years of household expenses, formatted immaculately. He started a walk every morning at 6 AM to Sahakar Nagar park, where he's joined a group of retired men who discuss cricket and municipal politics. [[Aai]] says he's calmer now. Kavya says he's the same but with more free time to have opinions about things — he once called Jay to discuss the IPL retention rules for twenty minutes.",
         },
         {
           heading: "The hospital, 2023",
@@ -1133,15 +976,24 @@ export function DesktopScene() {
   }, [offsets]);
 
   // Active page = last consumed item across all windows + standalone
+  // revealProgress = 0→1 sub-progress within the active page's range
   let activePage: WikiPage | null = null;
-  for (const item of allItemsByHideAt) {
-    if (progress >= item.hideAt) {
-      activePage = item.page;
+  let revealProgress = 1;
+
+  for (let i = 0; i < allItemsByHideAt.length; i++) {
+    if (progress >= allItemsByHideAt[i].hideAt) {
+      activePage = allItemsByHideAt[i].page;
+      const start = allItemsByHideAt[i].hideAt;
+      const end = allItemsByHideAt[i + 1]?.hideAt ?? 1.0;
+      revealProgress = Math.min(
+        (progress - start) / ((end - start) * 0.9),
+        1,
+      );
     }
   }
 
   return (
-    <div ref={ref} className="h-[500vh] relative">
+    <div ref={ref} className="h-[1200vh] relative">
       <div className="sticky top-0 h-dvh w-dvw bg-blue-200 dark:bg-neutral-900 flex items-center justify-center">
         {/* Centered container for app windows — positions resolve against 1440px */}
         <div className="relative w-full max-w-[1440px] h-full overflow-hidden">
@@ -1181,7 +1033,7 @@ export function DesktopScene() {
           })}
         </div>
 
-        <WikiWindow activePage={activePage} zIndex={topZ + 1} />
+        <WikiWindow activePage={activePage} revealProgress={revealProgress} zIndex={topZ + 1} />
       </div>
     </div>
   );

@@ -124,23 +124,6 @@ export const imageMap: Record<string, ImageEntry> = {
     color: "bg-green-100",
   },
 
-  // — prakash-smp —
-  img_mc_spawn: {
-    src: "/images/img_mc_spawn.png",
-    alt: "Spawn village, prakash-smp",
-    color: "bg-emerald-200",
-  },
-  img_mc_mountain: {
-    src: "/images/img_mc_mountain.png",
-    alt: "Mountain fortress (Jay's base)",
-    color: "bg-stone-200",
-  },
-  img_mc_railway: {
-    src: "/images/img_mc_railway.png",
-    alt: "Sid's railway system",
-    color: "bg-blue-100",
-  },
-
   // — March 2020 – June 2021 —
   img_lockdown_pune: {
     src: "/images/img_lockdown_pune.png",
@@ -245,11 +228,6 @@ export const imageMap: Record<string, ImageEntry> = {
     alt: "Hot Wheels Collection",
     color: "bg-amber-50",
   },
-  img_ib_mc: {
-    src: "/images/img_ib_mc.png",
-    alt: "prakash-smp",
-    color: "bg-emerald-100",
-  },
   img_ib_lockdown: {
     src: "/images/img_ib_lockdown.png",
     alt: "March 2020 – June 2021",
@@ -296,11 +274,6 @@ export const imageMap: Record<string, ImageEntry> = {
     src: "/images/img_mumbai_night.png",
     alt: "Marine Drive at night",
     color: "bg-indigo-200",
-  },
-  img_mc_nether: {
-    src: "/images/img_mc_nether.png",
-    alt: "The Nether hub",
-    color: "bg-red-200",
   },
 
   // — Photos app: Rajasthan 2008 camera roll —
