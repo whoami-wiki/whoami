@@ -1,0 +1,33 @@
+<includeonly><table class="infobox">
+<caption>{{{name|{{PAGENAME}}}}}</caption>
+{{#if:{{{image|}}}|<tr><td colspan="2" class="infobox-image">[[File:{{{image}}}|frameless|220px]]{{#if:{{{caption|}}}|<div style="font-size:90%">{{{caption}}}</div>}}</td></tr>}}
+{{#if:{{{other_names|}}}|<tr><th>Other names</th><td>{{{other_names}}}</td></tr>}}
+{{#if:{{{birth_date|}}}|<tr><th>Born</th><td>{{{birth_date}}}{{#if:{{{birth_place|}}}|<br />{{{birth_place}}}}}</td></tr>}}
+{{#if:{{{death_date|}}}|<tr><th>Died</th><td>{{{death_date}}}{{#if:{{{death_place|}}}|<br />{{{death_place}}}}}</td></tr>}}
+{{#if:{{{nationality|}}}|<tr><th>Nationality</th><td>{{{nationality}}}</td></tr>}}
+{{#if:{{{home_town|}}}|<tr><th>Home town</th><td>{{{home_town}}}</td></tr>}}
+{{#if:{{{education|}}}|<tr><th>Education</th><td>{{{education}}}</td></tr>}}
+{{#if:{{{alma_mater|}}}|<tr><th>Alma mater</th><td>{{{alma_mater}}}</td></tr>}}
+{{#if:{{{occupation|}}}|<tr><th>Occupation</th><td>{{{occupation}}}</td></tr>}}
+{{#if:{{{known_for|}}}|<tr><th>Known for</th><td>{{{known_for}}}</td></tr>}}
+{{#if:{{{relatives|}}}|<tr><th>Relatives</th><td>{{{relatives}}}</td></tr>}}
+</table></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Infobox person
+| name        = John Smith
+| image       = Photo.jpg
+| caption     = At the park, 2020
+| birth_date  = 1990
+| birth_place = Pune
+| home_town   = Bangalore
+| education   = BSc Computer Science
+| occupation  = Engineer
+| known_for   = Something notable
+}}
+</pre>
+
+Uses the same parameter names as [[wikipedia:Template:Infobox person|Wikipedia's Infobox person]]. This is a lightweight fallback — import the full Wikipedia template for complete functionality.
+
+[[Category:Templates]]
+</noinclude>

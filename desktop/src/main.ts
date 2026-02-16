@@ -13,7 +13,7 @@ import {
   getServerUrl,
   getDataPath,
 } from "./php-server.js";
-import { isFirstRun, runSetup } from "./setup.js";
+import { isFirstRun, runSetup, refreshLocalSettings } from "./setup.js";
 import { createTray, destroyTray } from "./tray.js";
 import { initAutoUpdater } from "./updater.js";
 
@@ -114,6 +114,7 @@ function showSetupWizard(): void {
 // ── Wiki window ─────────────────────────────────────────────────────────
 
 async function launchWiki(): Promise<void> {
+  refreshLocalSettings();
   await startServer();
 
   mainWindow = new BrowserWindow({
