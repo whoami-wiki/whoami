@@ -36,7 +36,7 @@ export async function importCommand(
   let manifestJson: string;
   try {
     manifestJson = execSync(
-      `tar -xzf ${shellEscape(resolved)} -O manifest.json`,
+      `tar -xf ${shellEscape(resolved)} -O manifest.json`,
       { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] },
     );
   } catch {
@@ -82,7 +82,7 @@ export async function importCommand(
   // Extract archive
   try {
     execSync(
-      `tar -xzf ${shellEscape(resolved)} -C ${shellEscape(dataPath)}`,
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)}`,
       { stdio: 'pipe' },
     );
   } catch (e: any) {

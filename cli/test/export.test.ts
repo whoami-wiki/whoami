@@ -1,12 +1,14 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
 import { exportCommand } from '../src/commands/export.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────
+
+const TAR_NAME = `whoami-${new Date().toISOString().slice(0, 10)}.tar`;
 
 /** Create a fake data directory that looks like the wiki data path. */
 function makeFakeDataDir(tmp: string): string {
@@ -21,10 +23,7 @@ function makeFakeDataDir(tmp: string): string {
   return dataPath;
 }
 
-/** Temporarily override getDataPath() by setting env to make tests work
- *  We use a module-level mock approach via a wrapper. */
 function runWithDataPath(dataPath: string, fn: () => Promise<void>): Promise<void> {
-  // We'll use env var WAI_DATA_PATH for testing
   const prev = process.env.WAI_DATA_PATH;
   process.env.WAI_DATA_PATH = dataPath;
   return fn().finally(() => {
@@ -39,24 +38,25 @@ describe('exportCommand', () => {
   let tmp: string;
 
   beforeEach(() => {
-    tmp = mkdtempSync(join(tmpdir(), 'wai-backup-test-'));
+    tmp = mkdtempSync(join(tmpdir(), 'wai-export-test-'));
   });
 
   afterEach(() => {
     rmSync(tmp, { recursive: true });
   });
 
-  it('throws UsageError when no file given', async () => {
+  it('throws UsageError when no dir given', async () => {
     await assert.rejects(
       () => exportCommand([], { json: false, quiet: false }),
       { name: 'UsageError' },
     );
   });
 
-  it('throws when data directory does not exist', async () => {
+  it('throws when destination directory does not exist', async () => {
+    const dataPath = makeFakeDataDir(tmp);
     await assert.rejects(
-      () => runWithDataPath(join(tmp, 'nonexistent'), () =>
-        exportCommand([join(tmp, 'out.tar.gz')], { json: false, quiet: false }),
+      () => runWithDataPath(dataPath, () =>
+        exportCommand([join(tmp, 'nonexistent')], { json: false, quiet: false }),
       ),
       { name: 'WaiError' },
     );
@@ -65,10 +65,12 @@ describe('exportCommand', () => {
   it('throws when wiki.sqlite does not exist', async () => {
     const dataPath = join(tmp, 'empty-data');
     mkdirSync(dataPath, { recursive: true });
+    const outDir = join(tmp, 'out');
+    mkdirSync(outDir);
 
     await assert.rejects(
       () => runWithDataPath(dataPath, () =>
-        exportCommand([join(tmp, 'out.tar.gz')], { json: false, quiet: false }),
+        exportCommand([outDir], { json: false, quiet: false }),
       ),
       { name: 'WaiError' },
     );
@@ -76,25 +78,27 @@ describe('exportCommand', () => {
 
   it('dry run lists contents without creating archive', async () => {
     const dataPath = makeFakeDataDir(tmp);
-    const outPath = join(tmp, 'out.tar.gz');
+    const outDir = join(tmp, 'out');
+    mkdirSync(outDir);
 
     await runWithDataPath(dataPath, () =>
-      exportCommand([outPath, '--dry-run'], { json: false, quiet: false }),
+      exportCommand([outDir, '--dry-run'], { json: false, quiet: false }),
     );
 
-    assert.equal(existsSync(outPath), false);
+    assert.equal(readdirSync(outDir).length, 0);
   });
 
   it('dry run with --json outputs manifest', async () => {
     const dataPath = makeFakeDataDir(tmp);
-    const outPath = join(tmp, 'out.tar.gz');
+    const outDir = join(tmp, 'out');
+    mkdirSync(outDir);
     const logs: string[] = [];
     const origLog = console.log;
     console.log = (msg: string) => logs.push(msg);
 
     try {
       await runWithDataPath(dataPath, () =>
-        exportCommand([outPath, '--dry-run'], { json: true, quiet: false }),
+        exportCommand([outDir, '--dry-run'], { json: true, quiet: false }),
       );
       const output = JSON.parse(logs[logs.length - 1]);
       assert.equal(output.version, 1);
@@ -106,18 +110,19 @@ describe('exportCommand', () => {
     }
   });
 
-  it('creates archive with correct contents', async () => {
+  it('creates YYYY-MM-DD.tar with correct contents', async () => {
     const dataPath = makeFakeDataDir(tmp);
-    const outPath = join(tmp, 'out.tar.gz');
+    const outDir = join(tmp, 'out');
+    mkdirSync(outDir);
 
     await runWithDataPath(dataPath, () =>
-      exportCommand([outPath], { json: false, quiet: true }),
+      exportCommand([outDir], { json: false, quiet: true }),
     );
 
-    assert.ok(existsSync(outPath));
+    const tarPath = join(outDir, TAR_NAME);
+    assert.ok(existsSync(tarPath));
 
-    // List archive contents
-    const listing = execSync(`tar -tzf '${outPath}'`, { encoding: 'utf-8' });
+    const listing = execSync(`tar -tf '${tarPath}'`, { encoding: 'utf-8' });
     assert.ok(listing.includes('wiki.sqlite'));
     assert.ok(listing.includes('manifest.json'));
     assert.ok(listing.includes('LocalData.php'));
@@ -127,29 +132,32 @@ describe('exportCommand', () => {
   it('includes WAL file when present', async () => {
     const dataPath = makeFakeDataDir(tmp);
     writeFileSync(join(dataPath, 'wiki.sqlite-wal'), 'wal-data');
-    const outPath = join(tmp, 'out.tar.gz');
+    const outDir = join(tmp, 'out');
+    mkdirSync(outDir);
 
     await runWithDataPath(dataPath, () =>
-      exportCommand([outPath], { json: false, quiet: true }),
+      exportCommand([outDir], { json: false, quiet: true }),
     );
 
-    const listing = execSync(`tar -tzf '${outPath}'`, { encoding: 'utf-8' });
+    const tarPath = join(outDir, TAR_NAME);
+    const listing = execSync(`tar -tf '${tarPath}'`, { encoding: 'utf-8' });
     assert.ok(listing.includes('wiki.sqlite-wal'));
   });
 
-  it('json output includes file and manifest data', async () => {
+  it('json output includes file path and manifest data', async () => {
     const dataPath = makeFakeDataDir(tmp);
-    const outPath = join(tmp, 'out.tar.gz');
+    const outDir = join(tmp, 'out');
+    mkdirSync(outDir);
     const logs: string[] = [];
     const origLog = console.log;
     console.log = (msg: string) => logs.push(msg);
 
     try {
       await runWithDataPath(dataPath, () =>
-        exportCommand([outPath], { json: true, quiet: false }),
+        exportCommand([outDir], { json: true, quiet: false }),
       );
       const output = JSON.parse(logs[logs.length - 1]);
-      assert.equal(output.file, outPath);
+      assert.ok(output.file.endsWith(TAR_NAME));
       assert.equal(output.version, 1);
       assert.equal(output.imageCount, 2);
       assert.ok(output.dbSize > 0);

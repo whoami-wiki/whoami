@@ -30,8 +30,16 @@ export async function exportCommand(
     strict: false,
   });
 
-  const outPath = positionals[0];
-  if (!outPath) throw new UsageError('Usage: wai export <file> [--dry-run]');
+  const destDir = positionals[0];
+  if (!destDir) throw new UsageError('Usage: wai export <dir> [--dry-run]');
+
+  const resolvedDir = resolve(destDir);
+  if (!existsSync(resolvedDir)) {
+    throw new WaiError(`Destination directory not found: ${resolvedDir}`, 1);
+  }
+
+  const date = new Date().toISOString().slice(0, 10);
+  const outPath = join(resolvedDir, `whoami-${date}.tar`);
 
   const dryRun = values['dry-run'] as boolean;
   const dataPath = getDataPath();
@@ -90,18 +98,15 @@ export async function exportCommand(
   try {
     writeFileSync(join(tmpDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-    const tarEntries = entries.map((e) => `--include='${e}' --include='${e}/*'`).join(' ');
-    const resolved = resolve(outPath);
-
     execSync(
-      `tar -czf ${shellEscape(resolved)} -C ${shellEscape(dataPath)} ${entries.join(' ')} -C ${shellEscape(tmpDir)} manifest.json`,
+      `tar -cf ${shellEscape(outPath)} -C ${shellEscape(dataPath)} ${entries.join(' ')} -C ${shellEscape(tmpDir)} manifest.json`,
       { stdio: 'pipe' },
     );
 
     if (globals.json) {
-      outputJson({ file: resolved, ...manifest });
+      outputJson({ file: outPath, ...manifest });
     } else if (!globals.quiet) {
-      console.log(`Exported to ${resolved}`);
+      console.log(`Exported to ${outPath}`);
       console.log(`  database: ${formatSize(dbSize)}`);
       console.log(`  images:   ${imageCount}`);
     }

@@ -30,8 +30,8 @@ function makeArchive(tmp: string, opts?: { imageCount?: number }): string {
   };
   writeFileSync(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-  const archivePath = join(tmp, 'backup.tar.gz');
-  execSync(`tar -czf '${archivePath}' -C '${staging}' wiki.sqlite LocalData.php images manifest.json`);
+  const archivePath = join(tmp, 'backup.tar');
+  execSync(`tar -cf '${archivePath}' -C '${staging}' wiki.sqlite LocalData.php images manifest.json`);
   return archivePath;
 }
 
@@ -72,11 +72,11 @@ describe('importCommand', () => {
   });
 
   it('throws on archive without manifest', async () => {
-    const badArchive = join(tmp, 'bad.tar.gz');
+    const badArchive = join(tmp, 'bad.tar');
     const staging = join(tmp, 'bad-staging');
     mkdirSync(staging, { recursive: true });
     writeFileSync(join(staging, 'junk.txt'), 'not a backup');
-    execSync(`tar -czf '${badArchive}' -C '${staging}' junk.txt`);
+    execSync(`tar -cf '${badArchive}' -C '${staging}' junk.txt`);
 
     await assert.rejects(
       () => importCommand([badArchive], { json: false, quiet: false }),

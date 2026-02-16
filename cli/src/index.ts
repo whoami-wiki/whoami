@@ -67,7 +67,7 @@ Discovery:
   place <query>               Look up a place (Google Places)
 
 Archive:
-  export <file>               Export full wiki backup
+  export <dir>                Export full wiki backup
   import <file>               Import from a backup
   snapshot <dir>              Archive a directory
 
