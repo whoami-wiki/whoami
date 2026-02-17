@@ -1,0 +1,39 @@
+---
+title: Messages & Chats
+description: "Working with messaging and chat data"
+---
+
+Chat logs and messages provide personal context that no other data source can match. They capture conversations, emotions, inside jokes, and the day-to-day texture of relationships.
+
+## Supported platforms
+
+Agents can process chat exports from:
+
+- **WhatsApp** — exported `.txt` files or full data exports
+- **iMessage** — via `chat.db` SQLite database
+- **Facebook Messenger** — JSON exports from data download
+- **Telegram** — JSON exports from desktop app
+- **Discord** — data package request
+- **SMS** — various backup formats (XML, CSV)
+
+## What agents extract
+
+From messaging data, agents can identify:
+
+- **Relationship arcs** — how friendships and conversations evolve over time
+- **Key life events** — discussions about moves, jobs, milestones
+- **Shared experiences** — references to trips, activities, and memories
+- **People and nicknames** — building a cast of characters for your encyclopedia
+
+## Privacy considerations
+
+Chat data is sensitive. A few things to keep in mind:
+
+- All processing happens locally on your machine
+- No data is sent to external servers beyond the model API calls
+- You can exclude specific conversations from processing
+- The resulting wiki pages are stored only in your local MediaWiki instance
+
+## Combining with other sources
+
+Messages become more powerful when combined with other data. An agent might use a photo's timestamp to find the messages you sent that day, connecting visual memories with the conversations happening around them.

@@ -1,0 +1,48 @@
+---
+title: Installation
+description: "How to install and set up whoami.wiki"
+---
+
+whoami.wiki runs locally on your machine. You'll need Docker to run the MediaWiki instance and Node.js for the CLI tools.
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) (for MediaWiki)
+- [Node.js](https://nodejs.org/) 18 or later
+- An API key for your preferred language model
+
+## Install the CLI
+
+```bash
+npm install -g whoami-wiki
+```
+
+Or with pnpm:
+
+```bash
+pnpm add -g whoami-wiki
+```
+
+## Start MediaWiki
+
+The CLI includes a command to spin up a local MediaWiki instance via Docker:
+
+```bash
+whoami setup
+```
+
+This will pull the MediaWiki Docker image, configure it with the necessary extensions, and start the server at `http://localhost:8080`.
+
+## Verify the installation
+
+Once setup is complete, verify everything is working:
+
+```bash
+whoami status
+```
+
+You should see confirmation that both the MediaWiki instance and the CLI are ready.
+
+## Next steps
+
+Head to the [Quick Start](/docs/quick-start) guide to create your first encyclopedia page.

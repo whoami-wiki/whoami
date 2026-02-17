@@ -1,0 +1,24 @@
+import type { Metadata } from "next";
+import { DocsSidebar } from "@/components/docs-sidebar";
+
+export const metadata: Metadata = {
+  title: "Docs — whoami.wiki",
+  description: "Documentation for whoami.wiki",
+};
+
+export default function DocsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col w-dvw items-center">
+      <div className="w-full max-w-5xl flex flex-row gap-12 py-18 px-6">
+        <div className="hidden md:block">
+          <DocsSidebar />
+        </div>
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
+    </div>
+  );
+}

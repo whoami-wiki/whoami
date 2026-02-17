@@ -1,0 +1,58 @@
+---
+title: MediaWiki Setup
+description: "Configuring your local MediaWiki instance"
+---
+
+whoami.wiki runs on a local MediaWiki instance managed via Docker. This page covers configuration and customization.
+
+## Default configuration
+
+The `whoami setup` command creates a MediaWiki instance with:
+
+- **Visual Editor** for WYSIWYG editing
+- **Cite** extension for references and citations
+- **CategoryTree** for browsing page categories
+- **ParserFunctions** for template logic
+- Custom skin optimized for personal encyclopedias
+
+## Accessing MediaWiki
+
+After setup, your wiki is available at:
+
+```
+http://localhost:8080
+```
+
+The default admin credentials are printed during setup. You can change them in the MediaWiki admin panel.
+
+## Data storage
+
+All wiki data is stored in a Docker volume on your machine:
+
+- **Database**: MariaDB with page content, revision history, and metadata
+- **Images**: Uploaded files stored in the `images/` volume
+- **Configuration**: `LocalSettings.php` in the config volume
+
+## Backups
+
+To back up your entire encyclopedia:
+
+```bash
+whoami backup --output ~/whoami-backup.tar.gz
+```
+
+This creates a compressed archive of the database and all uploaded files. To restore:
+
+```bash
+whoami restore --input ~/whoami-backup.tar.gz
+```
+
+## Extensions
+
+You can install additional MediaWiki extensions by editing the Docker configuration:
+
+```bash
+whoami config edit
+```
+
+This opens the configuration file where you can add extensions, change settings, or modify the wiki's appearance.

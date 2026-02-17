@@ -1,0 +1,40 @@
+---
+title: Models
+description: "Configuring which language models to use"
+---
+
+whoami.wiki works with any language model that supports tool use. You can configure which model to use for different tasks.
+
+## Supported providers
+
+- **Anthropic** — Claude models (recommended)
+- **OpenAI** — GPT models
+- Any provider with an OpenAI-compatible API
+
+## Configuration
+
+Set your preferred model in the configuration:
+
+```bash
+whoami config set model claude-sonnet-4-20250514
+whoami config set api-key sk-ant-...
+```
+
+Or set environment variables:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+export WHOAMI_MODEL=claude-sonnet-4-20250514
+```
+
+## Model selection
+
+Different tasks benefit from different models:
+
+- **Page writing** — Use a capable model (Claude Sonnet or above) for best quality prose and cross-referencing
+- **Photo analysis** — Requires a model with vision capabilities
+- **Quick edits** — A faster model works well for small refinements
+
+## API key management
+
+API keys are stored locally in your configuration file and are never sent anywhere except to the model provider's API. You can verify this in the source code — whoami.wiki is fully open source.

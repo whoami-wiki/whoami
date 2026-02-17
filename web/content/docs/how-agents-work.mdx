@@ -1,0 +1,40 @@
+---
+title: How Agents Work
+description: "Understanding the AI agents that write your encyclopedia"
+---
+
+whoami.wiki uses AI agents to do the editorial work of browsing your data, cross-referencing sources, and drafting encyclopedia pages. Here's how they operate.
+
+## The editorial process
+
+Agents follow a process similar to how a Wikipedia editor would work:
+
+1. **Browse** — Survey the available data to understand scope and content
+2. **Research** — Extract metadata, identify people and places, build a timeline
+3. **Cross-reference** — Match data across sources (photos to locations, transactions to venues)
+4. **Draft** — Write a structured page using Wikipedia conventions
+5. **Refine** — Incorporate your feedback and fill in gaps
+
+## Why Wikipedia conventions?
+
+Language models have extensive training on Wikipedia content, which means they already understand:
+
+- How to structure an article with a lead paragraph, sections, and subsections
+- When to use infoboxes, categories, and citations
+- How to write neutral, encyclopedic prose
+- How to link between related articles
+
+This shared understanding means agents produce well-structured pages with minimal configuration.
+
+## Tool use
+
+Agents use tools to interact with your data:
+
+- **ImageMagick** for creating contact sheets and processing images
+- **ExifTool** for extracting photo metadata
+- **File system tools** for reading data exports
+- **MediaWiki API** for creating and editing pages
+
+## Iterative improvement
+
+Pages aren't written in one pass. Agents make multiple passes, each time incorporating new data sources or your corrections. The MediaWiki revision history tracks every change, so you can see how a page evolved.
