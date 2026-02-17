@@ -14,8 +14,11 @@ const navItems = [
   { label: "Docs", href: "/docs" },
   { label: "Blog", href: "/blog" },
   { label: "Changelog", href: "/changelog" },
-  { label: "Discord", href: DISCORD_INVITE_LINK, external: true },
-  { label: "GitHub", href: GITHUB_REPO_LINK, external: true },
+];
+
+const externalItems = [
+  { label: "Discord", href: DISCORD_INVITE_LINK },
+  { label: "GitHub", href: GITHUB_REPO_LINK },
 ];
 
 function ThemeToggle() {
@@ -65,16 +68,14 @@ export function Navbar() {
     <>
       <nav className="navbar font-sans px-6 py-6 flex flex-row items-center justify-between max-w-360 mx-auto w-full">
         <div className="flex flex-row gap-4 text-sm">
-          {navItems.map(({ label, href, external }) => (
+          {navItems.map(({ label, href }) => (
             <Link
               key={href}
               href={href}
-              {...(external ? { target: "_blank" } : {})}
               className={cn(
                 {
-                  "text-muted": external
-                    ? true
-                    : href === "/"
+                  "text-muted":
+                    href === "/"
                       ? pathname !== href
                       : !pathname.startsWith(href),
                 },
@@ -86,7 +87,17 @@ export function Navbar() {
           ))}
         </div>
 
-        <div className="hidden md:flex flex-row items-center">
+        <div className="hidden md:flex flex-row items-center gap-4 text-sm">
+          {externalItems.map(({ label, href }) => (
+            <Link
+              key={href}
+              href={href}
+              target="_blank"
+              className="text-muted"
+            >
+              {label}
+            </Link>
+          ))}
           <ThemeToggle />
         </div>
 
@@ -133,18 +144,27 @@ export function Navbar() {
               </div>
 
               <div className="flex flex-col gap-4 font-sans text-sm">
-                {navItems.map(({ label, href, external }) => (
+                {navItems.map(({ label, href }) => (
                   <Link
                     key={href}
                     href={href}
-                    {...(external ? { target: "_blank" } : {})}
                     className={cn({
-                      "text-muted": external
-                        ? true
-                        : href === "/"
+                      "text-muted":
+                        href === "/"
                           ? pathname !== href
                           : !pathname.startsWith(href),
                     })}
+                    onClick={close}
+                  >
+                    {label}
+                  </Link>
+                ))}
+                {externalItems.map(({ label, href }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    target="_blank"
+                    className="text-muted"
                     onClick={close}
                   >
                     {label}
