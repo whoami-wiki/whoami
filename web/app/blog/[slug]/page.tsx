@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAllPosts, getPost, extractHeadings } from "@/lib/blog";
+import { getAllPosts, getPost } from "@/lib/blog";
 import { MDXContent } from "@/components/mdx-content";
-import { TableOfContents } from "@/components/table-of-contents";
+import Image from "next/image";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -28,22 +28,34 @@ export default async function BlogPostPage({ params }: Props) {
   const post = getPost(slug);
   if (!post) notFound();
 
-  const headings = extractHeadings(post.content);
-
   return (
     <div className="flex flex-col w-dvw items-center">
-      <div className="relative max-w-3xl w-full flex flex-col gap-8 py-18 px-6">
-        <div>
-          <Link
-            href="/blog"
-            className="font-sans text-base text-muted hover:text-primary"
-          >
-            Back to blog
-          </Link>
+      <div className="max-w-2xl w-full flex flex-col gap-8 py-18 px-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-sans text-xl">{post.title}</h1>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <h1 className="font-sans font-medium text-3xl">{post.title}</h1>
+        <div className="flex flex-row gap-2 items-center w-full justify-between">
+          <div className="flex flex-row gap-2 items-center">
+            <Image
+              src="/avatars/jeremy.png"
+              alt="Jeremy"
+              width={28}
+              height={28}
+              className="size-7 rounded-full bg-neutral-100 dark:bg-neutral-800"
+            />
+            <div className="font-sans text-neutral-500 dark:text-neutral-400 flex flex-row gap-1.5 items-center">
+              <div>Posted by</div>
+              <Link
+                href="https://x.com/jrmyphlmn"
+                target="_blank"
+                className="flex items-center gap-3 hover:underline underline-offset-4"
+              >
+                Jeremy
+              </Link>
+            </div>
+          </div>
+
           <time
             className="font-sans text-base text-neutral-500 dark:text-neutral-400"
             dateTime={post.date}
@@ -58,13 +70,9 @@ export default async function BlogPostPage({ params }: Props) {
 
         <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
 
-        <article className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert">
+        <article className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert prose-p:leading-6.5 prose-img:rounded-xl">
           <MDXContent source={post.content} />
         </article>
-
-        <div className="hidden xl:block absolute left-full top-18 bottom-0 ml-12">
-          <TableOfContents headings={headings} />
-        </div>
       </div>
     </div>
   );

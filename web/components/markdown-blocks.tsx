@@ -9,7 +9,11 @@ export const MarkdownBlocks = {
     return <h2 className="text-2xl font-medium font-serif">{children}</h2>;
   },
   h3: ({ children }: { children?: ReactNode }) => {
-    return <h3 className="text-xl font-medium text-primary font-serif">{children}</h3>;
+    return (
+      <h3 className="text-xl font-medium text-primary font-serif">
+        {children}
+      </h3>
+    );
   },
   p: ({ children }: { children?: ReactNode }) => {
     return <p className="leading-6 text-base">{children}</p>;

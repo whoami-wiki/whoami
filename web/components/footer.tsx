@@ -4,20 +4,24 @@ import cn from "classnames";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { DISCORD_INVITE_LINK } from "@/utils/constants";
 
 const columns = [
   {
     heading: "Product",
     links: [
       { label: "Home", href: "/" },
-      { label: "Install", href: "/install" },
       { label: "Docs", href: "/docs" },
+      { label: "Blog", href: "/blog" },
       { label: "Changelog", href: "/changelog" },
     ],
   },
   {
     heading: "Resources",
-    links: [{ label: "GitHub", href: "https://github.com/whoami-wiki/whoami" }],
+    links: [
+      { label: "GitHub", href: "https://github.com/whoami-wiki/whoami" },
+      { label: "Discord", href: DISCORD_INVITE_LINK },
+    ],
   },
   {
     heading: "Legal",
@@ -38,13 +42,11 @@ export function Footer() {
 
   return (
     <footer className="font-sans text-sm border-t border-neutral-200 dark:border-neutral-700 px-6 pt-6 pb-6">
-      <div className="flex flex-col gap-10 max-w-[1440px] mx-auto w-full">
+      <div className="flex flex-col gap-10 max-w-360 mx-auto w-full">
         <div className="grid grid-cols-3 gap-8">
           {columns.map((col) => (
             <div key={col.heading} className="flex flex-col gap-3">
-              <div className="text-muted">
-                {col.heading}
-              </div>
+              <div className="text-muted">{col.heading}</div>
               {col.links.map((link) => (
                 <Link key={link.href} href={link.href}>
                   {link.label}
@@ -60,10 +62,15 @@ export function Footer() {
             onClick={() =>
               setTheme(resolvedTheme === "dark" ? "light" : "dark")
             }
-            className={cn("size-4.5 shrink-0 rounded-full cursor-pointer", {
-              "bg-indigo-400": mounted && resolvedTheme === "light",
-              "bg-amber-500": mounted && resolvedTheme === "dark",
-            })}
+            className={cn(
+              "size-4.5 rounded-full cursor-pointer active:scale-95 focus:outline-3",
+              {
+                "bg-amber-500 focus:outline-amber-500/50":
+                  mounted && resolvedTheme === "light",
+                "bg-purple-300 focus:outline-purple-300/50":
+                  mounted && resolvedTheme === "dark",
+              },
+            )}
             aria-label="Toggle theme"
           />
         </div>

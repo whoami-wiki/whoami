@@ -1,14 +1,27 @@
 import { DesktopScene } from "@/components/desktop-scene";
 import { Terminal } from "@/components/terminal";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="flex flex-col w-dvw items-center">
       <div className="max-w-120 flex flex-col gap-8 py-18 px-6">
-        <div className="">
-          <div className="font-sans">whoami.wiki</div>
-          <div className="font-sans text-muted">
-            your personal encyclopedia, written by agents
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-1">
+            <div className="font-sans text-lg">whoami.wiki</div>
+            <div className="font-sans text-md text-muted">
+              Your personal encyclopedia, written by agents
+            </div>
+          </div>
+
+          <div className="flex flex-row gap-2">
+            <Link href="/download" tabIndex={-1}>
+              <Button text="Download Now" accent="primary" isCircular />
+            </Link>
+            <Link href="/blog/personal-encyclopedias" tabIndex={-1}>
+              <Button text="Learn More" accent="secondary" isCircular />
+            </Link>
           </div>
         </div>
 

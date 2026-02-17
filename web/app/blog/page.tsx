@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { getAllPosts } from "@/lib/blog";
 
@@ -16,7 +17,7 @@ export default function BlogPage() {
         <div>
           <div className="font-sans">Blog</div>
           <div className="font-sans text-neutral-500 dark:text-neutral-400">
-            News, updates, and stories from the team.
+            Some thoughts that have shaped the tools we build.
           </div>
         </div>
 
@@ -28,28 +29,35 @@ export default function BlogPage() {
 
         <div className="flex flex-col gap-10">
           {posts.map((post) => (
-            <article key={post.slug} className="flex flex-col gap-2">
-              <Link
-                href={`/blogs/${post.slug}`}
-                className="font-sans font-medium text-xl hover:underline underline-offset-4"
-              >
-                {post.title}
-              </Link>
-              {post.description && (
-                <p className="font-sans text-neutral-600 dark:text-neutral-400 text-base">
-                  {post.description}
-                </p>
-              )}
-              <time
-                className="font-sans text-base text-neutral-500 dark:text-neutral-400"
-                dateTime={post.date}
-              >
-                {new Date(post.date).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </time>
+            <article
+              key={post.slug}
+              className="flex flex-row items-start justify-between"
+            >
+              <div className="flex flex-col">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="font-sans text hover:underline underline-offset-4"
+                >
+                  {post.title}
+                </Link>
+                <time
+                  className="font-sans text-base text-neutral-500 dark:text-neutral-400"
+                  dateTime={post.date}
+                >
+                  {new Date(post.date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </time>
+              </div>
+              <Image
+                src="/avatars/jeremy.png"
+                alt="Jeremy"
+                width={28}
+                height={28}
+                className="size-7 rounded-full bg-neutral-100 dark:bg-neutral-800"
+              />
             </article>
           ))}
         </div>

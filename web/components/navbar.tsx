@@ -23,10 +23,15 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className={cn("size-4.5 shrink-0 rounded-full cursor-pointer", {
-        "bg-indigo-400": mounted && resolvedTheme === "light",
-        "bg-amber-500": mounted && resolvedTheme === "dark",
-      })}
+      className={cn(
+        "size-4.5 rounded-full cursor-pointer active:scale-95 focus:outline-3",
+        {
+          "bg-amber-500 focus:outline-amber-500/50":
+            mounted && resolvedTheme === "light",
+          "bg-purple-300 focus:outline-purple-300/50":
+            mounted && resolvedTheme === "dark",
+        },
+      )}
       aria-label="Toggle theme"
     />
   );
@@ -55,15 +60,19 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="navbar font-sans px-6 py-6 flex flex-row items-center justify-between max-w-[1440px] mx-auto w-full">
-        {/* Nav links — non-Home links hidden on mobile */}
+      <nav className="navbar font-sans px-6 py-6 flex flex-row items-center justify-between max-w-360 mx-auto w-full">
         <div className="flex flex-row gap-4 text-sm">
           {navItems.map(({ label, href }) => (
             <Link
               key={href}
               href={href}
               className={cn(
-                { "text-muted": href === "/" ? pathname !== href : !pathname.startsWith(href) },
+                {
+                  "text-muted":
+                    href === "/"
+                      ? pathname !== href
+                      : !pathname.startsWith(href),
+                },
                 href !== "/" && "hidden md:inline",
               )}
             >
@@ -72,12 +81,10 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* Desktop theme toggle */}
         <div className="hidden md:flex flex-row items-center">
           <ThemeToggle />
         </div>
 
-        {/* Mobile menu button */}
         <button
           onClick={() => setOpen(true)}
           className="md:hidden cursor-pointer"
@@ -87,7 +94,6 @@ export function Navbar() {
         </button>
       </nav>
 
-      {/* Mobile drawer overlay */}
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-50 md:hidden" onClick={close}>
@@ -126,7 +132,12 @@ export function Navbar() {
                   <Link
                     key={href}
                     href={href}
-                    className={cn({ "text-muted": href === "/" ? pathname !== href : !pathname.startsWith(href) })}
+                    className={cn({
+                      "text-muted":
+                        href === "/"
+                          ? pathname !== href
+                          : !pathname.startsWith(href),
+                    })}
                     onClick={close}
                   >
                     {label}
