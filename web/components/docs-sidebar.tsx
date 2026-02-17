@@ -25,7 +25,7 @@ export function DocsSidebar() {
                   key={item.slug}
                   href={href}
                   className={cn(
-                    "py-1 text-sm transition-colors",
+                    "py-1 text-sm",
                     isActive
                       ? "text-neutral-900 dark:text-neutral-100 font-medium"
                       : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"

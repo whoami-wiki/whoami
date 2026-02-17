@@ -40,7 +40,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
           <li key={heading.id}>
             <a
               href={`#${heading.id}`}
-              className={`block font-sans text-sm leading-snug transition-colors ${
+              className={`block font-sans text-sm leading-snug ${
                 heading.level === 3 ? "pl-6" : "pl-3"
               } ${
                 activeId === heading.id
