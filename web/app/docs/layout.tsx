@@ -14,7 +14,7 @@ export default function DocsLayout({
   return (
     <div className="flex flex-col w-dvw items-center">
       <div className="w-full max-w-5xl flex flex-row gap-8 py-18 px-6">
-        <div className="hidden md:block">
+        <div className="hidden md:block self-start sticky top-18">
           <DocsSidebar />
         </div>
         <main className="min-w-0 flex-1">{children}</main>

@@ -10,7 +10,7 @@ export function DocsSidebar() {
 
   return (
     <nav className="w-56 shrink-0 font-sans text-sm">
-      <div className="sticky top-24 flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
         {sidebarConfig.map((section) => (
           <div key={section.title} className="flex flex-col gap-1">
             <div className="font-medium text-primary text-sm mb-1">
