@@ -2,6 +2,7 @@ import { MDXRemote, MDXRemoteProps } from "next-mdx-remote/rsc";
 import { ReactNode } from "react";
 import { slugify } from "@/lib/blog";
 import { MarkdownBlocks } from "@/components/markdown-blocks";
+import { Features } from "@/components/features";
 
 function textContent(children: ReactNode): string {
   if (typeof children === "string") return children;
@@ -65,6 +66,7 @@ const mdxComponents = {
       {content}
     </div>
   ),
+  Features,
   ThemedImage: ({
     light,
     dark,
