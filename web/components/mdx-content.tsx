@@ -8,7 +8,9 @@ function textContent(children: ReactNode): string {
   if (typeof children === "number") return String(children);
   if (Array.isArray(children)) return children.map(textContent).join("");
   if (children && typeof children === "object" && "props" in children)
-    return textContent((children as { props: { children?: ReactNode } }).props.children);
+    return textContent(
+      (children as { props: { children?: ReactNode } }).props.children,
+    );
   return "";
 }
 
@@ -39,7 +41,9 @@ const mdxComponents = {
     <ol className="leading-7 list-decimal pl-6 mb-4">{children}</ol>
   ),
   ul: ({ children }: { children?: ReactNode }) => (
-    <ul className="leading-7 flex flex-col gap-1 list-disc pl-6 mb-4">{children}</ul>
+    <ul className="leading-7 flex flex-col gap-1 list-disc pl-6 mb-4">
+      {children}
+    </ul>
   ),
   li: ({ children }: { children?: ReactNode }) => (
     <li className="leading-7 text-base">{children}</li>
@@ -57,7 +61,7 @@ const mdxComponents = {
   a: ({ children, href = "" }: { children?: ReactNode; href?: string }) => (
     <Link
       href={href}
-      className="text-neutral-900 dark:text-neutral-100 hover:text-blue-600 hover:dark:text-blue-400 hover:underline underline underline-offset-4"
+      className="text-neutral-900 dark:text-neutral-100 hover:text-blue-600 hover:dark:text-blue-400 hover:underline font-normal underline underline-offset-4"
       target={href.startsWith("http") ? "_blank" : undefined}
     >
       {children}
@@ -69,6 +73,25 @@ const mdxComponents = {
     </blockquote>
   ),
   hr: () => <hr className="my-8 border-neutral-200 dark:border-neutral-700" />,
+  Placeholder: ({ content }: { content: string }) => (
+    <div className="w-full dark:bg-neutral-700 bg-neutral-100 h-80 rounded-md text-center text-sm text-muted flex flex-row items-center justify-center">
+      {content}
+    </div>
+  ),
+  ThemedImage: ({
+    light,
+    dark,
+    alt = "",
+  }: {
+    light: string;
+    dark: string;
+    alt?: string;
+  }) => (
+    <>
+      <img src={light} alt={alt} className="w-full dark:hidden" />
+      <img src={dark} alt={alt} className="hidden dark:block w-full" />
+    </>
+  ),
 };
 
 export function MDXContent({ source }: { source: string }) {

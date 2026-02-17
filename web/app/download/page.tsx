@@ -1,4 +1,6 @@
+import { Button } from "@/components/ui/button";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 const REPO = "whoami-wiki/whoami";
 
@@ -18,18 +20,15 @@ interface Release {
 }
 
 async function getLatestDesktopRelease(): Promise<Release | null> {
-  const res = await fetch(
-    `https://api.github.com/repos/${REPO}/releases`,
-    {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        ...(process.env.GITHUB_TOKEN && {
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        }),
-      },
-      next: { revalidate: 300, tags: ["github-releases"] },
+  const res = await fetch(`https://api.github.com/repos/${REPO}/releases`, {
+    headers: {
+      Accept: "application/vnd.github.v3+json",
+      ...(process.env.GITHUB_TOKEN && {
+        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      }),
     },
-  );
+    next: { revalidate: 300, tags: ["github-releases"] },
+  });
   if (!res.ok) return null;
   const releases: Release[] = await res.json();
   return releases.find((r) => r.tag_name.startsWith("desktop-v")) ?? null;
@@ -61,12 +60,9 @@ export default async function DownloadPage() {
 
         {dmg ? (
           <div className="flex flex-row items-center justify-between">
-            <a
-              href={dmg.browser_download_url}
-              className="font-sans text-sm inline-flex items-center justify-center px-4 py-2 rounded-md bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 hover:opacity-80 transition-opacity"
-            >
-              Download for macOS
-            </a>
+            <Link href={dmg.browser_download_url} tabIndex={-1}>
+              <Button accent="tertiary" text="Download for macOS" />
+            </Link>
             <div className="font-sans text-sm text-neutral-500 dark:text-neutral-400">
               {version} &middot; {date}
             </div>

@@ -5,8 +5,14 @@ import { useEffect, useState, useCallback } from "react";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { MenuIcon, CloseIcon } from "@/components/icons";
+import {
+  MenuIcon,
+  CloseIcon,
+  DiscordIcon,
+  GithubIcon,
+} from "@/components/icons";
 import { motion, AnimatePresence } from "motion/react";
+import { DISCORD_INVITE_LINK, GITHUB_REPO_LINK } from "@/utils/constants";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -23,10 +29,15 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className={cn("size-4.5 shrink-0 rounded-full cursor-pointer", {
-        "bg-indigo-400": mounted && resolvedTheme === "light",
-        "bg-amber-500": mounted && resolvedTheme === "dark",
-      })}
+      className={cn(
+        "size-4.5 rounded-full cursor-pointer active:scale-95 focus:outline-3",
+        {
+          "bg-amber-500 focus:outline-amber-500/50":
+            mounted && resolvedTheme === "light",
+          "bg-purple-300 focus:outline-purple-300/50":
+            mounted && resolvedTheme === "dark",
+        },
+      )}
       aria-label="Toggle theme"
     />
   );
@@ -55,15 +66,19 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="navbar font-sans px-6 py-6 flex flex-row items-center justify-between max-w-[1440px] mx-auto w-full">
-        {/* Nav links — non-Home links hidden on mobile */}
+      <nav className="navbar font-sans px-6 py-6 flex flex-row items-center justify-between max-w-360 mx-auto w-full">
         <div className="flex flex-row gap-4 text-sm">
           {navItems.map(({ label, href }) => (
             <Link
               key={href}
               href={href}
               className={cn(
-                { "text-muted": href === "/" ? pathname !== href : !pathname.startsWith(href) },
+                {
+                  "text-muted":
+                    href === "/"
+                      ? pathname !== href
+                      : !pathname.startsWith(href),
+                },
                 href !== "/" && "hidden md:inline",
               )}
             >
@@ -72,12 +87,26 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* Desktop theme toggle */}
-        <div className="hidden md:flex flex-row items-center">
-          <ThemeToggle />
+        <div className="hidden md:flex flex-row items-center gap-4">
+          <Link
+            href={DISCORD_INVITE_LINK}
+            target="_blank"
+            className="shrink-0 dark:text-muted text-indigo-500 rounded-md cursor-pointer active:scale-95"
+          >
+            <DiscordIcon size={18} />
+          </Link>
+          <Link
+            href={GITHUB_REPO_LINK}
+            target="_blank"
+            className="shrink-0 dark:text-muted text-primary rounded-md cursor-pointer active:scale-95"
+          >
+            <GithubIcon size={18} />
+          </Link>
+          <div className="shrink-0 flex flex-row items-center justify-center">
+            <ThemeToggle />
+          </div>
         </div>
 
-        {/* Mobile menu button */}
         <button
           onClick={() => setOpen(true)}
           className="md:hidden cursor-pointer"
@@ -87,7 +116,6 @@ export function Navbar() {
         </button>
       </nav>
 
-      {/* Mobile drawer overlay */}
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-50 md:hidden" onClick={close}>
@@ -126,7 +154,12 @@ export function Navbar() {
                   <Link
                     key={href}
                     href={href}
-                    className={cn({ "text-muted": href === "/" ? pathname !== href : !pathname.startsWith(href) })}
+                    className={cn({
+                      "text-muted":
+                        href === "/"
+                          ? pathname !== href
+                          : !pathname.startsWith(href),
+                    })}
                     onClick={close}
                   >
                     {label}

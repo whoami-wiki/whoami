@@ -36,14 +36,33 @@ const apercuMono = localFont({
 const signifier = localFont({
   variable: "--font-signifier",
   src: [
-    { path: "./fonts/TestSignifier-Regular.otf", weight: "400", style: "normal" },
-    { path: "./fonts/TestSignifier-Medium.otf", weight: "500", style: "normal" },
+    {
+      path: "./fonts/TestSignifier-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/TestSignifier-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
   ],
 });
 
 export const metadata: Metadata = {
   title: "whoami.wiki",
   description: "your personal encyclopedia, written by agents",
+  openGraph: {
+    title: "whoami.wiki",
+    description: "your personal encyclopedia, written by agents",
+    images: [{ url: "/og.webp", width: 1208, height: 683 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "whoami.wiki",
+    description: "your personal encyclopedia, written by agents",
+    images: ["/og.webp"],
+  },
 };
 
 export default function RootLayout({
@@ -53,7 +72,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${apercu.variable} ${apercuMono.variable} ${signifier.variable}`}>
+      <body
+        className={`${apercu.variable} ${apercuMono.variable} ${signifier.variable}`}
+      >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Navbar />
           {children}
