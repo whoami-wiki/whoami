@@ -2,6 +2,38 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDoc, getAllDocs } from "@/lib/docs";
 import { MDXContent } from "@/components/mdx-content";
+import { slugify } from "@/lib/blog";
+import { ReactNode } from "react";
+
+function textContent(children: ReactNode): string {
+  if (typeof children === "string") return children;
+  if (typeof children === "number") return String(children);
+  if (Array.isArray(children)) return children.map(textContent).join("");
+  if (children && typeof children === "object" && "props" in children)
+    return textContent(
+      (children as { props: { children?: ReactNode } }).props.children,
+    );
+  return "";
+}
+
+const docsComponents = {
+  h2: ({ children }: { children?: ReactNode }) => (
+    <h2
+      id={slugify(textContent(children))}
+      className="text-lg font-medium font-sans mt-8 mb-4 scroll-mt-24"
+    >
+      {children}
+    </h2>
+  ),
+  h3: ({ children }: { children?: ReactNode }) => (
+    <h3
+      id={slugify(textContent(children))}
+      className="text-base font-medium text-primary font-sans mt-6 mb-3 scroll-mt-24"
+    >
+      {children}
+    </h3>
+  ),
+};
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -31,7 +63,7 @@ export default async function DocPage({ params }: Props) {
       <h1 className="font-sans text-2xl font-medium">{doc.title}</h1>
       <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
       <article className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert prose-p:leading-6.5 prose-img:rounded-xl">
-        <MDXContent source={doc.content} />
+        <MDXContent source={doc.content} components={docsComponents} />
       </article>
     </div>
   );

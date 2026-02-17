@@ -94,11 +94,19 @@ const mdxComponents = {
   ),
 };
 
-export function MDXContent({ source }: { source: string }) {
+export function MDXContent({
+  source,
+  components,
+}: {
+  source: string;
+  components?: Record<string, React.ComponentType<any>>;
+}) {
   return (
     <MDXRemote
       source={source}
-      components={mdxComponents as MDXRemoteProps["components"]}
+      components={
+        { ...mdxComponents, ...components } as MDXRemoteProps["components"]
+      }
     />
   );
 }
