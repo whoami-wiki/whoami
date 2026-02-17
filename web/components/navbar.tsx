@@ -5,8 +5,14 @@ import { useEffect, useState, useCallback } from "react";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { MenuIcon, CloseIcon } from "@/components/icons";
+import {
+  MenuIcon,
+  CloseIcon,
+  DiscordIcon,
+  GithubIcon,
+} from "@/components/icons";
 import { motion, AnimatePresence } from "motion/react";
+import { DISCORD_INVITE_LINK, GITHUB_REPO_LINK } from "@/utils/constants";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -81,8 +87,24 @@ export function Navbar() {
           ))}
         </div>
 
-        <div className="hidden md:flex flex-row items-center">
-          <ThemeToggle />
+        <div className="hidden md:flex flex-row items-center gap-4">
+          <Link
+            href={DISCORD_INVITE_LINK}
+            target="_blank"
+            className="shrink-0 dark:text-muted text-indigo-500 rounded-md cursor-pointer active:scale-95"
+          >
+            <DiscordIcon size={18} />
+          </Link>
+          <Link
+            href={GITHUB_REPO_LINK}
+            target="_blank"
+            className="shrink-0 dark:text-muted text-primary rounded-md cursor-pointer active:scale-95"
+          >
+            <GithubIcon size={18} />
+          </Link>
+          <div className="shrink-0 flex flex-row items-center justify-center">
+            <ThemeToggle />
+          </div>
         </div>
 
         <button
