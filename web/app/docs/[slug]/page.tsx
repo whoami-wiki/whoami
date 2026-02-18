@@ -21,7 +21,7 @@ const docsComponents = {
   h2: ({ children }: { children?: ReactNode }) => (
     <h2
       id={slugify(textContent(children))}
-      className="text-lg font-medium font-sans mt-8 mb-4 scroll-mt-24"
+      className="text-lg font-medium font-sans scroll-mt-24"
     >
       {children}
     </h2>
@@ -29,7 +29,7 @@ const docsComponents = {
   h3: ({ children }: { children?: ReactNode }) => (
     <h3
       id={slugify(textContent(children))}
-      className="text-base font-medium text-primary font-sans mt-6 mb-3 scroll-mt-24"
+      className="text-base font-medium text-primary font-sans scroll-mt-24"
     >
       {children}
     </h3>
