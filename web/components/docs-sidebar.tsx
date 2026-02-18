@@ -34,12 +34,12 @@ export function DocsSidebar({ sections }: { sections: SidebarSection[] }) {
                     {item.title}
                   </Link>
                   {isActive && item.headings.length > 0 && (
-                    <div className="flex flex-col gap-0.5 ml-3 border-l border-neutral-200 dark:border-neutral-700 pl-3">
+                    <div className="flex flex-col gap-1 ml-3 border-l border-neutral-200 dark:border-neutral-700 pl-3">
                       {item.headings.map((heading) => (
                         <Link
                           key={heading.id}
                           href={`${href}#${heading.id}`}
-                          className="py-0.5 text-xs text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+                          className="py-0.5 text-sm text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
                         >
                           {heading.title}
                         </Link>
