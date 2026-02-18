@@ -1,8 +1,10 @@
 import { MDXRemote, MDXRemoteProps } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import { ReactNode } from "react";
 import { slugify } from "@/lib/blog";
 import { MarkdownBlocks } from "@/components/markdown-blocks";
 import { Features } from "@/components/features";
+import { ScoreTable } from "@/components/score-table";
 
 function textContent(children: ReactNode): string {
   if (typeof children === "string") return children;
@@ -67,6 +69,7 @@ const mdxComponents = {
     </div>
   ),
   Features,
+  ScoreTable,
   ThemedImage: ({
     light,
     dark,
@@ -93,6 +96,7 @@ export function MDXContent({
   return (
     <MDXRemote
       source={source}
+      options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
       components={
         { ...mdxComponents, ...components } as MDXRemoteProps["components"]
       }

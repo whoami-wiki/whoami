@@ -32,7 +32,7 @@ export default async function BlogPostPage({ params }: Props) {
     <div className="flex flex-col w-dvw items-center">
       <div className="max-w-2xl w-full flex flex-col gap-8 py-18 px-6">
         <div className="flex flex-col gap-1">
-          <h1 className="font-sans text-xl">{post.title}</h1>
+          <h1 className="font-sans font-medium text-2xl">{post.title}</h1>
         </div>
 
         <div className="flex flex-row gap-2 items-center w-full justify-between">
