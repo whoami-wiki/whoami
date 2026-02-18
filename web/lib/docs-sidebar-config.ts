@@ -31,7 +31,6 @@ export const sidebarConfig: SidebarSection[] = [
     title: "Reference",
     items: [
       { title: "CLI", slug: "cli" },
-      { title: "Import/Export", slug: "import-export" },
       { title: "Evals", slug: "evals" },
     ],
   },
