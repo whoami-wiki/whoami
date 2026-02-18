@@ -1,6 +1,9 @@
+import { getDoc, type DocHeading } from "./docs";
+
 export interface SidebarItem {
   title: string;
   slug: string;
+  headings: DocHeading[];
 }
 
 export interface SidebarSection {
@@ -8,7 +11,17 @@ export interface SidebarSection {
   items: SidebarItem[];
 }
 
-export const sidebarConfig: SidebarSection[] = [
+interface SidebarItemConfig {
+  title: string;
+  slug: string;
+}
+
+interface SidebarSectionConfig {
+  title: string;
+  items: SidebarItemConfig[];
+}
+
+const sidebarLayout: SidebarSectionConfig[] = [
   {
     title: "Getting Started",
     items: [
@@ -35,3 +48,17 @@ export const sidebarConfig: SidebarSection[] = [
     ],
   },
 ];
+
+export function getSidebarConfig(): SidebarSection[] {
+  return sidebarLayout.map((section) => ({
+    title: section.title,
+    items: section.items.map((item) => {
+      const doc = getDoc(item.slug);
+      return {
+        title: item.title,
+        slug: item.slug,
+        headings: doc?.headings ?? [],
+      };
+    }),
+  }));
+}

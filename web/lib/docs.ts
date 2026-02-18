@@ -4,11 +4,29 @@ import matter from "gray-matter";
 
 const DOCS_DIR = path.join(process.cwd(), "content/docs");
 
+function extractHeadings(content: string): DocHeading[] {
+  const matches = content.matchAll(/^## (.+)$/gm);
+  return Array.from(matches, (m) => {
+    const title = m[1].trim();
+    const id = title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+    return { title, id };
+  });
+}
+
+export interface DocHeading {
+  title: string;
+  id: string;
+}
+
 export interface DocPage {
   slug: string;
   title: string;
   description: string;
   content: string;
+  headings: DocHeading[];
 }
 
 export function getDoc(slug: string): DocPage | undefined {
@@ -23,6 +41,7 @@ export function getDoc(slug: string): DocPage | undefined {
     title: data.title ?? slug,
     description: data.description ?? "",
     content,
+    headings: extractHeadings(content),
   };
 }
 
@@ -41,6 +60,7 @@ export function getAllDocs(): DocPage[] {
       title: data.title ?? slug,
       description: data.description ?? "",
       content,
+      headings: extractHeadings(content),
     };
   });
 }
