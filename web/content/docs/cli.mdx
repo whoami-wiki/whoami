@@ -1,0 +1,172 @@
+---
+title: CLI
+description: "Complete reference for all wai commands"
+---
+
+The `wai` command-line tool is the primary interface for managing your whoami.wiki instance. It handles data ingestion, wiki management, and task queue operations.
+
+## General
+
+### `wai status`
+
+Show the status of the wiki, CLI, and agent harness connection.
+
+```bash
+wai status
+```
+
+### `wai doctor`
+
+Run diagnostics to verify everything is configured correctly.
+
+```bash
+wai doctor
+wai doctor --verbose  # include detailed output for bug reports
+```
+
+### `wai config`
+
+View or modify configuration.
+
+```bash
+wai config list              # show all settings
+wai config set <key> <value> # set a value
+wai config get <key>         # get a value
+```
+
+## Data
+
+### `wai snapshot`
+
+Ingest a data source into the archive.
+
+```bash
+wai snapshot <path>
+wai snapshot ~/Photos/summer-2023
+wai snapshot ~/exports/whatsapp-chat.txt
+wai snapshot ~/exports/bank-transactions.csv --batch-size 100
+```
+
+**Flags**:
+- `--batch-size <n>` — process files in batches of n (useful for large datasets)
+
+### `wai search`
+
+Search across your archived data.
+
+```bash
+wai search "tokyo 2023"
+wai search --type photos "birthday"
+```
+
+**Flags**:
+- `--type <type>` — filter by data type (photos, messages, voice, location, financial)
+
+## Wiki
+
+### `wai wiki restart`
+
+Restart the local MediaWiki instance.
+
+```bash
+wai wiki restart
+```
+
+### `wai wiki backup`
+
+Create a backup of your entire encyclopedia.
+
+```bash
+wai wiki backup --output ~/whoami-backup.tar.gz
+```
+
+### `wai wiki restore`
+
+Restore from a backup.
+
+```bash
+wai wiki restore --input ~/whoami-backup.tar.gz
+```
+
+## Task queue
+
+Agents use the task queue to coordinate work. These commands are primarily used by agent harness plugins, but you can also use them directly.
+
+### `wai task list`
+
+List tasks in the queue.
+
+```bash
+wai task list
+wai task list --status pending
+wai task list --status claimed
+```
+
+### `wai task read`
+
+Read the details of a specific task.
+
+```bash
+wai task read <task-id>
+```
+
+### `wai task create`
+
+Create a new task.
+
+```bash
+wai task create --title "Write page about summer trip" --type write
+```
+
+### `wai task claim`
+
+Claim a pending task for processing.
+
+```bash
+wai task claim <task-id>
+```
+
+### `wai task complete`
+
+Mark a task as completed.
+
+```bash
+wai task complete <task-id>
+```
+
+### `wai task fail`
+
+Mark a task as failed with a reason.
+
+```bash
+wai task fail <task-id> --reason "Missing location data"
+```
+
+### `wai task requeue`
+
+Return a claimed or failed task to the pending queue.
+
+```bash
+wai task requeue <task-id>
+```
+
+## Plugin
+
+### `wai plugin install`
+
+Install an agent harness plugin.
+
+```bash
+wai plugin install claude-code
+wai plugin install codex
+wai plugin install opencode
+wai plugin install claude-code --force  # reinstall
+```
+
+### `wai plugin list`
+
+List installed plugins.
+
+```bash
+wai plugin list
+```

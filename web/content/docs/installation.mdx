@@ -1,48 +1,75 @@
 ---
 title: Installation
-description: "How to install and set up whoami.wiki"
+description: "Install the whoami.wiki desktop app, CLI, and agent harness plugin"
 ---
 
-whoami.wiki runs locally on your machine. You'll need Docker to run the MediaWiki instance and Node.js for the CLI tools.
+whoami.wiki has three components that work together:
 
-## Prerequisites
+- **Wiki** — a local MediaWiki instance that stores your encyclopedia
+- **CLI** — the `wai` command-line tool for snapshotting data and managing tasks
+- **Agent harness** — a plugin for your AI coding tool that lets agents read and write wiki pages
 
-- [Docker](https://docs.docker.com/get-docker/) (for MediaWiki)
-- [Node.js](https://nodejs.org/) 18 or later
-- An API key for your preferred language model
+<Placeholder label="Diagram: wiki ↔ CLI ↔ agent harness" />
 
-## Install the CLI
+## Install the desktop app
 
-```bash
-npm install -g whoami-wiki
-```
+The desktop app sets up both the wiki and the CLI in one step.
 
-Or with pnpm:
+Download the installer for your platform:
 
-```bash
-pnpm add -g whoami-wiki
-```
+- [macOS (Apple Silicon)](https://github.com/whoami-wiki/whoami/releases/latest)
+- [macOS (Intel)](https://github.com/whoami-wiki/whoami/releases/latest)
+- [Windows](https://github.com/whoami-wiki/whoami/releases/latest)
+- [Linux (.deb)](https://github.com/whoami-wiki/whoami/releases/latest)
 
-## Start MediaWiki
+After installation, the app will:
 
-The CLI includes a command to spin up a local MediaWiki instance via Docker:
-
-```bash
-whoami setup
-```
-
-This will pull the MediaWiki Docker image, configure it with the necessary extensions, and start the server at `http://localhost:8080`.
-
-## Verify the installation
-
-Once setup is complete, verify everything is working:
+1. Start a local MediaWiki instance
+2. Install the `wai` CLI to your PATH
+3. Verify everything is connected
 
 ```bash
-whoami status
+wai status
 ```
 
-You should see confirmation that both the MediaWiki instance and the CLI are ready.
+You should see confirmation that both the wiki and CLI are ready.
+
+## Install the agent harness plugin
+
+The agent harness connects your AI coding tool to your wiki. Install the plugin for your tool of choice:
+
+### Claude Code
+
+```bash
+wai plugin install claude-code
+```
+
+This registers the whoami.wiki MCP server with Claude Code, giving it access to wiki tools.
+
+### Codex
+
+```bash
+wai plugin install codex
+```
+
+### OpenCode
+
+```bash
+wai plugin install opencode
+```
+
+## Verify the setup
+
+Run a quick check to confirm everything is connected:
+
+```bash
+wai doctor
+```
+
+This verifies the wiki is running, the CLI is installed, and the agent harness can communicate with both.
 
 ## Next steps
 
-Head to the [Quick Start](/docs/quick-start) guide to create your first encyclopedia page.
+Head to [Writing Your First Page](/docs/writing-your-first-page) to create your first encyclopedia page.
+
+Having issues? Check the [Troubleshooting](/docs/troubleshooting) guide.

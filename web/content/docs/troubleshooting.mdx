@@ -1,0 +1,85 @@
+---
+title: Troubleshooting
+description: "Solutions to common setup and usage issues"
+---
+
+Common issues and how to fix them.
+
+## Wiki not starting
+
+**Symptom**: `wai status` shows the wiki as offline, or `http://localhost:8080` is unreachable.
+
+**Fix**: Make sure Docker is running, then restart the wiki:
+
+```bash
+wai wiki restart
+```
+
+If the port is already in use, you can change it:
+
+```bash
+wai config set wiki.port 8081
+```
+
+## CLI not found in PATH
+
+**Symptom**: Running `wai` returns "command not found."
+
+**Fix**: The desktop app installer should add `wai` to your PATH automatically. If it didn't, add it manually:
+
+```bash
+# macOS / Linux
+export PATH="$HOME/.whoami/bin:$PATH"
+```
+
+Add this line to your shell profile (`~/.zshrc`, `~/.bashrc`) to make it permanent.
+
+## Agent harness failing to connect
+
+**Symptom**: The agent can't find whoami.wiki tools or returns connection errors when trying to use them.
+
+**Fix**: Verify the plugin is installed and the wiki is reachable:
+
+```bash
+wai doctor
+```
+
+If the plugin is installed but not detected, try reinstalling:
+
+```bash
+wai plugin install claude-code --force
+```
+
+Make sure you restart your agent harness after installing the plugin.
+
+## Permission errors on snapshot
+
+**Symptom**: `wai snapshot` fails with permission denied errors.
+
+**Fix**: Ensure the data directory is readable:
+
+```bash
+ls -la ~/Photos/grandma
+```
+
+On macOS, you may need to grant terminal access to the Photos directory in System Settings → Privacy & Security → Files and Folders.
+
+## Snapshot is slow or uses too much memory
+
+**Symptom**: `wai snapshot` takes a very long time or your machine runs out of memory with large data sets.
+
+**Fix**: Process in smaller batches:
+
+```bash
+wai snapshot ~/Photos/grandma/2020 --batch-size 100
+```
+
+## Still stuck?
+
+Run diagnostics and include the output when reporting an issue:
+
+```bash
+wai doctor --verbose
+```
+
+File issues at [github.com/whoami-wiki/whoami/issues](https://github.com/whoami-wiki/whoami/issues).

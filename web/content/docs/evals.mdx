@@ -1,0 +1,53 @@
+---
+title: Evals
+description: "Compatibility scores and tradeoffs for different agent harnesses"
+---
+
+whoami.wiki works with several AI coding tools as agent harnesses. Each has different strengths and tradeoffs. This page documents compatibility and helps you pick the right tool.
+
+## Compatibility matrix
+
+| Capability | Claude Code | Codex | OpenCode |
+|---|---|---|---|
+| Page writing | Yes | Yes | Yes |
+| Photo analysis | Yes | Yes | Partial |
+| Multi-source cross-referencing | Strong | Moderate | Moderate |
+| Task queue operations | Yes | Yes | Yes |
+| Interactive refinement | Strong | Moderate | Moderate |
+| Long context handling | Strong | Strong | Moderate |
+
+## Claude Code
+
+**Strengths**: Best overall quality for page writing. Strong at cross-referencing multiple data sources and producing well-structured encyclopedia prose. Excellent at incorporating feedback during interactive refinement sessions. Handles the full citation system reliably.
+
+**Tradeoffs**: Requires an Anthropic API key. Slower for simple tasks compared to lighter-weight tools.
+
+**Best for**: Initial page creation from complex, multi-source data. Interactive sessions where you're refining pages with the agent.
+
+## Codex
+
+**Strengths**: Fast execution for batch operations. Good at processing large volumes of data efficiently. Strong task queue integration.
+
+**Tradeoffs**: Less nuanced at editorial judgment — may need more human review on tone and structure. Photo analysis is capable but less detailed than Claude Code.
+
+**Best for**: Batch processing — snapshotting large archives, creating initial drafts for many pages at once, queue-based workflows.
+
+## OpenCode
+
+**Strengths**: Flexible model selection — can use any OpenAI-compatible provider. Good for users who want to use specific models or local models.
+
+**Tradeoffs**: Photo analysis depends on the underlying model's vision capabilities. Cross-referencing quality varies by model. May require more explicit prompting for Wikipedia-style output.
+
+**Best for**: Users who want model flexibility or need to use specific providers. Works well when paired with strong vision models for photo-heavy workflows.
+
+## Scoring methodology
+
+Compatibility scores are based on end-to-end tests that evaluate:
+
+- **Completeness** — Does the output include all expected sections (lead, infobox, body, citations)?
+- **Accuracy** — Are facts correctly extracted and cited from source data?
+- **Structure** — Does the page follow Wikipedia conventions?
+- **Cross-referencing** — Are connections made across multiple data sources?
+- **Citation quality** — Are citations correctly formatted and linked to archive hashes?
+
+Scores are updated as agent harnesses and underlying models evolve.

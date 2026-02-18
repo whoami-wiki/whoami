@@ -1,0 +1,132 @@
+---
+title: Import/Export
+description: "Step-by-step guides for ingesting data and exporting wiki content"
+---
+
+This page covers how to get data into whoami.wiki from specific platforms and how to export your wiki content.
+
+## Importing data
+
+### Google Photos
+
+1. Go to [Google Takeout](https://takeout.google.com/)
+2. Deselect all, then select only "Google Photos"
+3. Choose your export format (ZIP recommended) and file size
+4. Download and extract the archive
+5. Snapshot the extracted folder:
+
+```bash
+wai snapshot ~/Downloads/Takeout/Google\ Photos
+```
+
+### Google Maps Timeline
+
+1. Go to [Google Takeout](https://takeout.google.com/)
+2. Select "Location History"
+3. Download and extract
+
+```bash
+wai snapshot ~/Downloads/Takeout/Location\ History
+```
+
+### WhatsApp
+
+1. Open WhatsApp → Settings → Chats → Export Chat
+2. Select the conversation and choose "Include Media"
+3. Save the exported ZIP file
+
+```bash
+wai snapshot ~/Downloads/WhatsApp\ Chat\ -\ Alice.zip
+```
+
+### iMessage
+
+iMessage data is stored in a SQLite database on macOS:
+
+```bash
+wai snapshot ~/Library/Messages/chat.db
+```
+
+You may need to grant Full Disk Access to your terminal in System Settings → Privacy & Security.
+
+### Instagram
+
+1. Go to Settings → Your Activity → Download Your Information
+2. Request your data in JSON format
+3. Download and extract
+
+```bash
+wai snapshot ~/Downloads/instagram-export
+```
+
+### Facebook
+
+1. Go to Settings → Your Information → Download Your Information
+2. Select JSON format and the data types you want
+3. Download and extract
+
+```bash
+wai snapshot ~/Downloads/facebook-export
+```
+
+### Bank transactions
+
+Most banks let you export transaction history as CSV from their web dashboard.
+
+```bash
+wai snapshot ~/Downloads/transactions-2023.csv
+```
+
+### Voice notes
+
+Standalone audio files or voice messages extracted from chat exports:
+
+```bash
+wai snapshot ~/VoiceNotes/
+```
+
+Supported formats: M4A, MP3, OGG, WAV, OPUS.
+
+## Exporting wiki content
+
+### Full wiki backup
+
+Export the entire wiki (database, files, and configuration) as an archive:
+
+```bash
+wai wiki backup --output ~/whoami-backup.tar.gz
+```
+
+### Individual pages
+
+Export a single page as wikitext:
+
+```bash
+wai wiki export --page "Grandmother" --format wikitext > grandmother.wiki
+```
+
+Or as HTML:
+
+```bash
+wai wiki export --page "Grandmother" --format html > grandmother.html
+```
+
+### Bulk export
+
+Export all pages in the wiki:
+
+```bash
+wai wiki export --all --format wikitext --output ~/wiki-export/
+```
+
+## Large archives
+
+For data exports larger than a few gigabytes, process in batches to avoid memory issues:
+
+```bash
+wai snapshot ~/Photos/2020 --batch-size 100
+wai snapshot ~/Photos/2021 --batch-size 100
+wai snapshot ~/Photos/2022 --batch-size 100
+```
+
+Or snapshot year by year to keep imports manageable and let agents process incrementally.

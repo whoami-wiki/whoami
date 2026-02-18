@@ -12,31 +12,27 @@ export const sidebarConfig: SidebarSection[] = [
   {
     title: "Getting Started",
     items: [
-      { title: "Introduction", slug: "introduction" },
       { title: "Installation", slug: "installation" },
-      { title: "Quick Start", slug: "quick-start" },
+      { title: "Writing Your First Page", slug: "writing-your-first-page" },
+      { title: "Troubleshooting", slug: "troubleshooting" },
     ],
   },
   {
-    title: "Data Sources",
+    title: "Learn More",
     items: [
-      { title: "Overview", slug: "data-sources" },
-      { title: "Photos & Videos", slug: "photos-and-videos" },
-      { title: "Messages & Chats", slug: "messages-and-chats" },
+      { title: "Concepts", slug: "concepts" },
+      { title: "Page Types", slug: "page-types" },
+      { title: "Editorial Standards", slug: "editorial-standards" },
+      { title: "Data Sources", slug: "data-sources" },
+      { title: "Citation System", slug: "citation-system" },
     ],
   },
   {
-    title: "Agents",
+    title: "Reference",
     items: [
-      { title: "How Agents Work", slug: "how-agents-work" },
-      { title: "Writing Pages", slug: "writing-pages" },
-    ],
-  },
-  {
-    title: "Configuration",
-    items: [
-      { title: "MediaWiki Setup", slug: "mediawiki-setup" },
-      { title: "Models", slug: "models" },
+      { title: "CLI", slug: "cli" },
+      { title: "Import/Export", slug: "import-export" },
+      { title: "Evals", slug: "evals" },
     ],
   },
 ];

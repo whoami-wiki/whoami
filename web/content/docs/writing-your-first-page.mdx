@@ -1,0 +1,61 @@
+---
+title: Writing Your First Page
+description: "Go from zero to a published wiki page in minutes"
+---
+
+This tutorial walks you through creating your first encyclopedia page end-to-end. By the end, you'll have a real page in your wiki written by an AI agent from your own data.
+
+## Snapshot your data
+
+First, ingest a data source using the `wai snapshot` command. We'll use a folder of photos as an example — say, photos of a family member.
+
+```bash
+wai snapshot ~/Photos/grandma
+```
+
+This indexes the photos, extracts metadata (dates, locations, camera info), and makes them available to agents. You should see a summary of what was ingested.
+
+## Prompt the agent to write a page
+
+Open your agent harness (Claude Code, Codex, or OpenCode) and prompt it to create a page from the snapshot:
+
+```
+Use the whoami.wiki tools to write an encyclopedia page about my
+grandmother from the photos I just snapshotted.
+```
+
+The agent will:
+
+1. Browse the snapshotted photos using contact sheets
+2. Extract dates, locations, and people from EXIF data and visual content
+3. Cross-reference details across photos to build a timeline
+4. Draft a Wikipedia-style page with an infobox, sections, citations, and linked references
+5. Publish the draft to your local wiki
+
+## Review the result
+
+Open your wiki at `http://localhost:8080` to see the published page. You'll find:
+
+- A **lead paragraph** summarizing who your grandmother is
+- An **infobox** with key facts (name, birth date, locations)
+- **Sections** organized chronologically or thematically
+- **Citations** linking back to the source photos
+- **Red links** for people and places mentioned but not yet documented
+
+## Refine with more context
+
+The first draft works from data alone. You can improve it by giving the agent more context:
+
+```
+The woman in the red dress in the 1987 photos is my aunt Maria.
+She's grandma's youngest daughter. Also, grandma grew up in
+Thessaloniki, not Athens.
+```
+
+The agent will update the page with your corrections and additional details.
+
+## Next steps
+
+- Add more data sources to enrich the page — see [Data Sources](/docs/data-sources)
+- Learn about the different [Page Types](/docs/page-types) you can create
+- Explore the [CLI reference](/docs/cli) for all available commands

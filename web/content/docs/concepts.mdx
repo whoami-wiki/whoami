@@ -1,0 +1,45 @@
+---
+title: Concepts
+description: "Architecture and design philosophy behind whoami.wiki"
+---
+
+whoami.wiki is a personal encyclopedia written by AI agents. This page explains the ideas behind its design.
+
+## Why MediaWiki?
+
+Language models are trained extensively on Wikipedia. They already understand how to structure articles with lead paragraphs, infoboxes, citations, categories, and linked references. By using MediaWiki as the storage format, we get well-structured output without having to teach agents a new format.
+
+A page about your grandmother works the same way as a page about a historical figure. A page about your road trip works the same way as a page about a famous expedition. The conventions are already learned.
+
+## Content-addressed archive
+
+Your raw data (photos, messages, voice notes, documents) is stored in a content-addressed archive. Each file is identified by its hash, which provides:
+
+- **Immutability** — source data can't be accidentally modified
+- **Deduplication** — the same photo imported from multiple sources is stored once
+- **Provenance** — citations in wiki pages link back to exact source files
+
+The archive is the foundation that wiki pages are built on. Pages come and go, get rewritten and restructured, but the underlying data remains intact.
+
+## Dual-purpose encyclopedia
+
+The wiki serves two purposes simultaneously:
+
+1. **AI output** — agents write encyclopedia pages from your data
+2. **AI input** — agents read existing pages to understand context when writing new ones
+
+A page about your grandmother becomes context when an agent writes a page about a family reunion. A page about a city you lived in becomes context for a page about your daily life there. The encyclopedia grows richer as more pages are added because each page informs future pages.
+
+## The bitter lesson
+
+The system is designed around letting agents do what they're good at rather than over-constraining them. Rather than building elaborate pipelines and templates, whoami.wiki gives agents raw data and a wiki to write in, and lets them figure out the editorial approach.
+
+This means agents can surprise you. They find connections across data sources that you didn't anticipate. They choose structures that fit the content rather than forcing everything into a rigid template. The tradeoff is less predictability, but the output is often better than what a rigid system would produce.
+
+## Task queue
+
+Agents interact with whoami.wiki through a task queue. Rather than running a single monolithic job, work is broken into discrete tasks (write a page, review a draft, add citations) that agents can claim, complete, or fail. This allows:
+
+- Multiple agents to work in parallel
+- Failed tasks to be retried or reassigned
+- Human oversight at each step

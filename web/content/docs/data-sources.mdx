@@ -1,49 +1,59 @@
 ---
-title: Data Sources Overview
-description: "Supported data sources and how to export them"
+title: Data Sources
+description: "Supported input types and what each contributes to your encyclopedia"
 ---
 
 whoami.wiki agents can work with many types of personal data. The more sources you provide, the richer and more accurate your encyclopedia pages become.
 
-## Supported formats
+## Photos
 
-Agents can process most common file formats:
+The most common starting point. Agents extract EXIF metadata (dates, GPS coordinates, camera info) and analyze visual content to identify people, places, and events.
 
-- **Images**: JPEG, PNG, HEIC, WebP, TIFF
-- **Video**: MP4, MOV, AVI
-- **Text**: JSON, CSV, TXT, HTML
-- **Archives**: ZIP (will be extracted automatically)
+**Formats**: JPEG, PNG, HEIC, WebP, TIFF
 
-## Data export guides
+Photos with GPS data are especially valuable — they can be cross-referenced with maps and location databases to identify venues and neighborhoods.
 
-Most platforms let you export your data. Here are some common ones:
+## Videos
 
-### Google
+Processed frame-by-frame at key intervals. Agents extract still frames for visual analysis, read visible text, identify scene changes, and use audio transcription.
 
-- **Google Photos**: [Google Takeout](https://takeout.google.com/) — select "Google Photos"
-- **Google Maps Timeline**: Google Takeout — select "Location History"
-- **Gmail**: Google Takeout — select "Mail"
+**Formats**: MP4, MOV, AVI
 
-### Social media
+## Messages and chats
 
-- **Facebook**: Settings → Your Information → Download Your Information
-- **Instagram**: Settings → Your Activity → Download Your Information
-- **WhatsApp**: Settings → Chats → Export Chat (per conversation)
+Chat logs capture conversations, emotions, and the day-to-day texture of relationships. Agents identify relationship arcs, key life events, shared experiences, and people.
 
-### Financial
+**Supported platforms**: WhatsApp (`.txt` exports), iMessage (`chat.db`), Facebook Messenger (JSON), Telegram (JSON), Discord (data package), SMS (XML/CSV)
 
-- Most banks offer CSV exports of transaction history from their web dashboard
+## Voice notes
 
-### Music
+Audio recordings — standalone voice memos or voice messages from chat platforms. Transcribed and analyzed for content, context, and the people involved.
 
-- **Shazam**: Settings → My Music → Export as CSV
-- **Spotify**: Request data from Privacy Settings
+## Location data
 
-## How agents use your data
+GPS timelines and check-in data. Provides the spatial dimension — where things happened, travel routes, daily patterns.
 
-When given multiple data sources, agents cross-reference them to build richer narratives. For example, an agent processing a trip might:
+**Sources**: Google Maps Timeline (via Takeout), Apple location data, Swarm/Foursquare check-ins
+
+## Financial data
+
+Bank and card transactions. Identifies restaurants, shops, transit, and venues visited. Especially useful for reconstructing trips when cross-referenced with photos and location data.
+
+**Format**: CSV exports from most banks
+
+## Social media archives
+
+Full data exports from social platforms. Provides posts, stories, likes, comments, and metadata.
+
+**Sources**: Instagram, Facebook, Twitter/X — request your data download from each platform's privacy settings
+
+## How agents cross-reference
+
+When given multiple data sources, agents combine them to build richer narratives. An agent processing a trip might:
 
 1. Use photos for visual context and timestamps
 2. Use location history for precise routes and durations
 3. Use bank transactions to identify restaurants and venues
 4. Use messages for personal context and conversations that happened during the trip
+
+The more sources overlap in time, the more connections agents can make.
