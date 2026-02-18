@@ -1,9 +1,8 @@
 import { parseArgs } from 'node:util';
 import { existsSync, mkdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
-import { resolve } from 'node:path';
-import { join } from 'node:path';
-import { getDataPath } from '../data-path.js';
+import { resolve, join, dirname } from 'node:path';
+import { getDataPath, getArchivePath } from '../data-path.js';
 import { UsageError, WaiError } from '../errors.js';
 import { type GlobalFlags, outputJson } from '../output.js';
 
@@ -43,7 +42,7 @@ export async function importCommand(
     throw new WaiError('Invalid archive: no manifest.json found', 1);
   }
 
-  let manifest: { version: number; createdAt: string; dbSize: number; imageCount: number };
+  let manifest: { version: number; createdAt: string; dbSize: number; imageCount: number; objectCount?: number; snapshotCount?: number };
   try {
     manifest = JSON.parse(manifestJson);
   } catch {
@@ -59,9 +58,11 @@ export async function importCommand(
       outputJson(manifest);
     } else {
       console.log('Archive contents:');
-      console.log(`  created:  ${manifest.createdAt}`);
-      console.log(`  database: ${formatSize(manifest.dbSize)}`);
-      console.log(`  images:   ${manifest.imageCount}`);
+      console.log(`  created:   ${manifest.createdAt}`);
+      console.log(`  database:  ${formatSize(manifest.dbSize)}`);
+      console.log(`  images:    ${manifest.imageCount}`);
+      if (manifest.objectCount) console.log(`  objects:   ${manifest.objectCount}`);
+      if (manifest.snapshotCount) console.log(`  snapshots: ${manifest.snapshotCount}`);
     }
     return;
   }
@@ -79,14 +80,26 @@ export async function importCommand(
   // Create data directory if needed
   mkdirSync(dataPath, { recursive: true });
 
-  // Extract archive
+  // Extract wiki data (exclude archive/ which goes elsewhere)
   try {
     execSync(
-      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)}`,
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)} --exclude=archive`,
       { stdio: 'pipe' },
     );
   } catch (e: any) {
     throw new WaiError(`Failed to extract archive: ${e.message}`, 1);
+  }
+
+  // Extract snapshot archive if present in backup
+  const snapshotArchivePath = getArchivePath();
+  mkdirSync(dirname(snapshotArchivePath), { recursive: true });
+  try {
+    execSync(
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dirname(snapshotArchivePath))} archive`,
+      { stdio: 'pipe' },
+    );
+  } catch {
+    // Not present in older backups — OK
   }
 
   // Ensure expected directories exist
@@ -97,8 +110,10 @@ export async function importCommand(
     outputJson({ restored: true, dataPath, ...manifest });
   } else if (!globals.quiet) {
     console.log(`Imported to ${dataPath}`);
-    console.log(`  database: ${formatSize(manifest.dbSize)}`);
-    console.log(`  images:   ${manifest.imageCount}`);
+    console.log(`  database:  ${formatSize(manifest.dbSize)}`);
+    console.log(`  images:    ${manifest.imageCount}`);
+    if (manifest.objectCount) console.log(`  objects:   ${manifest.objectCount}`);
+    if (manifest.snapshotCount) console.log(`  snapshots: ${manifest.snapshotCount}`);
   }
 }
 

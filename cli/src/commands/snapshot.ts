@@ -2,8 +2,8 @@ import { parseArgs } from 'node:util';
 import { readdirSync, statSync, readFileSync, mkdirSync, copyFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, relative, extname, basename, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
-import { homedir } from 'node:os';
 import { UsageError, WaiError, ConflictError } from '../errors.js';
+import { getArchivePath } from '../data-path.js';
 import { type GlobalFlags, outputJson } from '../output.js';
 import type { WikiClient } from '../wiki-client.js';
 
@@ -51,7 +51,7 @@ export async function snapshotCommand(
   const snapshotId = createHash('sha256').update(manifestJson).digest('hex').slice(0, 16);
 
   // 4. Copy files to content-addressable store
-  const archiveDir = join(homedir(), 'Archive');
+  const archiveDir = getArchivePath();
   const objectsDir = join(archiveDir, 'objects');
   const snapshotsDir = join(archiveDir, 'snapshots');
   let newObjects = 0;

@@ -1,9 +1,9 @@
 import { parseArgs } from 'node:util';
 import { existsSync, statSync, readdirSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { execSync } from 'node:child_process';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { getDataPath } from '../data-path.js';
+import { getDataPath, getArchivePath } from '../data-path.js';
 import { UsageError, WaiError } from '../errors.js';
 import { type GlobalFlags, outputJson } from '../output.js';
 
@@ -70,14 +70,24 @@ export async function exportCommand(
   const imageCount = countFiles(imagesDir);
   if (existsSync(imagesDir)) entries.push('images');
 
+  // Check for snapshot archive
+  const archivePath = getArchivePath();
+  const hasArchive = existsSync(archivePath);
+  const objectCount = hasArchive ? countFiles(join(archivePath, 'objects')) : 0;
+  const snapshotCount = hasArchive ? countFiles(join(archivePath, 'snapshots')) : 0;
+
   // Build manifest
   const dbSize = statSync(dbPath).size;
-  const manifest = {
+  const manifest: Record<string, unknown> = {
     version: 1,
     createdAt: new Date().toISOString(),
     dbSize,
     imageCount,
   };
+  if (hasArchive) {
+    manifest.objectCount = objectCount;
+    manifest.snapshotCount = snapshotCount;
+  }
 
   if (dryRun) {
     if (globals.json) {
@@ -87,8 +97,13 @@ export async function exportCommand(
       for (const e of entries) {
         console.log(`  ${e}`);
       }
-      console.log(`\n  database: ${formatSize(dbSize)}`);
-      console.log(`  images:   ${imageCount}`);
+      if (hasArchive) console.log('  archive/');
+      console.log(`\n  database:  ${formatSize(dbSize)}`);
+      console.log(`  images:    ${imageCount}`);
+      if (hasArchive) {
+        console.log(`  objects:   ${objectCount}`);
+        console.log(`  snapshots: ${snapshotCount}`);
+      }
     }
     return;
   }
@@ -98,17 +113,23 @@ export async function exportCommand(
   try {
     writeFileSync(join(tmpDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-    execSync(
-      `tar -cf ${shellEscape(outPath)} -C ${shellEscape(dataPath)} ${entries.join(' ')} -C ${shellEscape(tmpDir)} manifest.json`,
-      { stdio: 'pipe' },
-    );
+    let tarCmd = `tar -cf ${shellEscape(outPath)} -C ${shellEscape(dataPath)} ${entries.join(' ')}`;
+    if (hasArchive) {
+      tarCmd += ` -C ${shellEscape(dirname(archivePath))} archive`;
+    }
+    tarCmd += ` -C ${shellEscape(tmpDir)} manifest.json`;
+    execSync(tarCmd, { stdio: 'pipe' });
 
     if (globals.json) {
       outputJson({ file: outPath, ...manifest });
     } else if (!globals.quiet) {
       console.log(`Exported to ${outPath}`);
-      console.log(`  database: ${formatSize(dbSize)}`);
-      console.log(`  images:   ${imageCount}`);
+      console.log(`  database:  ${formatSize(dbSize)}`);
+      console.log(`  images:    ${imageCount}`);
+      if (hasArchive) {
+        console.log(`  objects:   ${objectCount}`);
+        console.log(`  snapshots: ${snapshotCount}`);
+      }
     }
   } catch (e: any) {
     throw new WaiError(`Failed to create archive: ${e.message}`, 1);
