@@ -62,5 +62,13 @@ export default async function DocPage({ params }: Props) {
   const doc = getDoc(slug);
   if (!doc) notFound();
 
-  return <div />;
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="font-sans text-2xl font-medium">{doc.title}</h1>
+      <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
+      <article className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert prose-p:leading-6.5 prose-img:rounded-xl prose-li:m-0 prose-p:m-0 prose-ul:mt-0 flex flex-col gap-4">
+        <MDXContent source={doc.content} components={docsComponents} />
+      </article>
+    </div>
+  );
 }
