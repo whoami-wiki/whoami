@@ -36,7 +36,7 @@ export function DocsMobileNav({ sections }: { sections: SidebarSection[] }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="md:hidden sticky top-12 z-30 flex flex-row items-center gap-2 w-full bg-background border-b border-muted px-6 py-3 cursor-pointer"
+        className="md:hidden sticky top-0 z-30 flex flex-row items-center gap-2 w-full bg-background border-b border-muted px-6 py-3 cursor-pointer"
       >
         <svg
           width="1em"
