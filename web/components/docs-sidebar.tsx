@@ -39,6 +39,14 @@ export function DocsSidebar({ sections }: { sections: SidebarSection[] }) {
                         <Link
                           key={heading.id}
                           href={`${href}#${heading.id}`}
+                          onClick={(e) => {
+                            const el = document.getElementById(heading.id);
+                            if (el) {
+                              e.preventDefault();
+                              el.scrollIntoView({ behavior: "smooth" });
+                              window.history.replaceState(null, "", `${href}#${heading.id}`);
+                            }
+                          }}
                           className="py-0.5 text-sm text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
                         >
                           {heading.title}
