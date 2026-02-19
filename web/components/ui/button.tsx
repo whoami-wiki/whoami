@@ -41,7 +41,7 @@ export function Button(props: Props) {
         }
       }}
       className={cn(
-        "flex flex-row gap-1 items-center w-fit h-fit px-3.5 py-2 cursor-pointer active:scale-98 select-none focus:outline-3 font-sans",
+        "flex flex-row gap-1 items-center w-fit h-fit px-3.5 py-2 cursor-pointer select-none focus:outline-3 font-sans",
         {
           "rounded-full": isCircular,
           "rounded-lg": !isCircular,
