@@ -1,0 +1,157 @@
+---
+title: Glossary
+description: "Definitions for every term used in whoami.wiki"
+---
+
+Canonical definitions for the nouns and concepts used across the CLI, documentation, and agent instructions.
+
+## Encyclopedia structure
+
+### Page
+
+A wiki article in the main namespace. The fundamental unit of the encyclopedia. Has a title, content written in wikitext, a revision history, and belongs to one or more categories.
+
+### Page type
+
+One of five structural templates that determine how a page is organized:
+
+- **Person** — biographical page about someone in your life
+- **Episode** — narrative page about a specific event or time-bounded experience
+- **Conversation** — page built from chat messages, voice notes, or interviews
+- **Reflection** — introspective page synthesized from patterns across multiple data sources
+- **Task** — operational page tracking editorial work
+
+### Section
+
+A subdivision within a page, delimited by `== Heading ==` syntax. Sections can be listed, read, and updated independently via `wai section`.
+
+### Lead paragraph
+
+The opening prose before the first section heading. Summarizes the page topic and front-loads the most important information. Every page should have one.
+
+### Infobox
+
+A structured sidebar template at the top of a page containing key-value facts. Format: `{{Infobox Type | field=value}}`. Each page type has its own infobox template.
+
+### Category
+
+A tag grouping pages by type or theme. Syntax: `[[Category:Name]]`. Pages can belong to multiple categories. Use `wai category` to browse.
+
+### Wikilink
+
+An internal link between pages. Syntax: `[[Page Name]]`. Wikilinks are how the encyclopedia cross-references itself.
+
+### Red link
+
+A wikilink to a page that doesn't exist yet. Indicates a gap in the encyclopedia — a person, place, or event that's been mentioned but not yet documented.
+
+## Discussion
+
+### Talk page
+
+A discussion page paired with a main page, in the `Talk:` namespace (e.g., `Talk:Coorg Trip (2012)`). Used for editorial notes, open questions, and coordination between agents and humans. Not to be confused with the Conversation page type.
+
+### Thread
+
+A topic within a talk page. Each thread has a subject line and content, and can be marked `{{Open}}` or `{{Closed}}`.
+
+## Data and storage
+
+### Vault
+
+The content-addressed store on disk where source files are kept. Contains two subdirectories:
+
+- `objects/` — individual files stored by their SHA-256 hash
+- `snapshots/` — manifest files describing captured datasets
+
+Files in the vault are immutable and deduplicated. The same file imported from multiple sources is stored only once.
+
+### Object
+
+A single file stored in the vault, identified by its SHA-256 hash. Stored at `objects/{prefix}/{hash}` where prefix is the first two characters of the hash. Immutable once written.
+
+### Snapshot
+
+A captured copy of a directory at a point in time. Created by `wai snapshot <dir>`. Produces:
+
+1. **Objects** — individual files hashed and stored in the vault
+2. **Manifest** — a JSON file mapping file paths to their hashes
+3. **Source page** — a wiki page in the `Source:` namespace documenting the dataset
+
+Identified by a deterministic snapshot ID.
+
+### Snapshot ID
+
+A 16-character hex string derived from the SHA-256 hash of a snapshot's manifest. Uniquely identifies a snapshot and its contents.
+
+### Manifest
+
+A JSON file listing all files in a snapshot with their relative paths and SHA-256 hashes. Stored in `vault/snapshots/{snapshotId}.json`. Deterministic — the same set of files always produces the same manifest.
+
+### Source page
+
+A wiki page in the `Source:` namespace (e.g., `Source:WhatsApp Alice`) documenting an ingested dataset. Created automatically by `wai snapshot`. Contains metadata (snapshot ID, file count, total size, file type breakdown) and querying instructions for programmatic access to the archived data.
+
+### Data source
+
+A type of raw personal data that can be snapshotted and used to write pages. Supported types: photos, videos, messages and chats, voice notes, location data, financial data, and social media archives. See [Data Sources](/docs/data-sources) for details on each.
+
+## Citations
+
+### Citation
+
+A reference linking a factual claim in a page to a specific piece of evidence in the vault. Uses `<ref>{{cite type | params}}</ref>` syntax with type-specific templates: `cite message`, `cite voice`, `cite photo`, `cite video`. Each citation includes a `hash` field pointing to an immutable object.
+
+### Reference
+
+A collected citation displayed in the `== References ==` section at the bottom of a page via `{{reflist}}`. References are numbered footnotes rendered by MediaWiki.
+
+### Hash
+
+The SHA-256 content-addressed identifier of a file in the vault. Used in citations to link claims to specific, immutable source files. Even if the original file is moved or renamed, the hash still resolves.
+
+## Tasks
+
+### Task
+
+A work item tracking editorial work, stored as a page in the `Task:` namespace (e.g., `Task:0001`). Contains an `{{Infobox Task}}` with metadata and a description of what needs to be done.
+
+### Task queue
+
+The system of Task pages and category-based status tracking used to coordinate work between agents and humans. Enables parallel work, retry on failure, and human oversight.
+
+### Task lifecycle
+
+The state machine a task moves through:
+
+- **pending** — waiting to be picked up
+- **in-progress** — claimed by an agent or human, work underway
+- **done** — completed successfully
+- **failed** — could not be completed (can be requeued back to pending)
+
+## System components
+
+### Wiki
+
+The local MediaWiki instance that stores the encyclopedia. Runs at `http://localhost:8080`. Stores pages, revisions, images, and categories in a SQLite database.
+
+### CLI (`wai`)
+
+The command-line tool for managing the wiki, snapshotting data, and operating the task queue. The primary interface for both humans and agent harnesses.
+
+### Agent harness
+
+An MCP (Model Context Protocol) server that gives AI coding tools read/write access to the wiki via `wai` commands. The bridge between an AI agent and the encyclopedia.
+
+### Plugin
+
+The installable package that provides the agent harness for a specific coding tool. Installed via `wai plugin install <tool>` (e.g., `claude-code`, `codex`, `opencode`).
+
+### Namespace
+
+A MediaWiki organizational prefix for pages. The project uses four namespaces:
+
+- **Main** (no prefix) — regular encyclopedia pages
+- **Talk** (`Talk:`) — editorial discussion pages
+- **Source** (`Source:`) — documentation of ingested datasets
+- **Task** (`Task:`) — editorial work items

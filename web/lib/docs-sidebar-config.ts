@@ -45,6 +45,7 @@ const sidebarLayout: SidebarSectionConfig[] = [
     title: "Reference",
     items: [
       { title: "CLI", slug: "cli" },
+      { title: "Glossary", slug: "glossary" },
       { title: "Evals", slug: "evals" },
     ],
   },
