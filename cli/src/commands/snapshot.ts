@@ -51,7 +51,11 @@ export async function snapshotCommand(
   const snapshotId = createHash('sha256').update(manifestJson).digest('hex').slice(0, 16);
 
   // 4. Copy files to content-addressable store
+<<<<<<< Updated upstream
   const archiveDir = getArchivePath();
+=======
+  const archiveDir = process.env.WAI_ARCHIVE_PATH || join(homedir(), 'Archive');
+>>>>>>> Stashed changes
   const objectsDir = join(archiveDir, 'objects');
   const snapshotsDir = join(archiveDir, 'snapshots');
   let newObjects = 0;
@@ -63,14 +67,33 @@ export async function snapshotCommand(
       const objectPath = join(objectDir, file.hash);
       if (!existsSync(objectPath)) {
         mkdirSync(objectDir, { recursive: true });
-        copyFileSync(join(resolvedDir, file.path), objectPath);
+        const srcPath = join(resolvedDir, file.path);
+        copyFileSync(srcPath, objectPath);
+        // Verify the copy landed on disk
+        const written = statSync(objectPath, { throwIfNoEntry: false });
+        if (!written || written.size !== file.size) {
+          throw new WaiError(
+            `Failed to write object ${file.hash} (expected ${file.size} bytes, got ${written?.size ?? 0})`,
+            1,
+          );
+        }
         newObjects++;
       }
     }
 
     // 5. Write snapshot manifest
     mkdirSync(snapshotsDir, { recursive: true });
-    writeFileSync(join(snapshotsDir, `${snapshotId}.json`), manifestJson + '\n');
+    const snapshotPath = join(snapshotsDir, `${snapshotId}.json`);
+    const snapshotContent = manifestJson + '\n';
+    writeFileSync(snapshotPath, snapshotContent);
+    // Verify the snapshot was written correctly
+    const writtenSnapshot = statSync(snapshotPath, { throwIfNoEntry: false });
+    if (!writtenSnapshot || writtenSnapshot.size !== Buffer.byteLength(snapshotContent)) {
+      throw new WaiError(
+        `Failed to write snapshot ${snapshotId}.json (expected ${Buffer.byteLength(snapshotContent)} bytes, got ${writtenSnapshot?.size ?? 0})`,
+        1,
+      );
+    }
   } else {
     // Count what would be new
     for (const file of files) {
@@ -147,8 +170,8 @@ function walkAndHash(dir: string, base?: string): HashedFile[] {
           size: stat.size,
         });
       }
-    } catch {
-      // Skip unreadable files
+    } catch (e: any) {
+      console.warn(`warning: skipping ${full}: ${e.message}`);
     }
   }
 
