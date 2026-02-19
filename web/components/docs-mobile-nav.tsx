@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { CloseIcon } from "@/components/icons";
+import { MenuLeftIcon, CloseIcon } from "@/components/icons";
 import { DocsSidebar } from "@/components/docs-sidebar";
 import type { SidebarSection } from "@/lib/docs-sidebar-config";
 
@@ -38,15 +38,7 @@ export function DocsMobileNav({ sections }: { sections: SidebarSection[] }) {
         onClick={() => setOpen(true)}
         className="md:hidden sticky top-0 z-30 flex flex-row items-center gap-2 w-full bg-background border-b border-muted px-6 py-3 cursor-pointer"
       >
-        <svg
-          width="1em"
-          height="1em"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="size-4 text-muted"
-        >
-          <path d="M21 8a1 1 0 0 0-1-1H4a1 1 0 0 0 0 2h16a1 1 0 0 0 1-1Zm0 8a1 1 0 0 0-1-1H10a1 1 0 1 0 0 2h10a1 1 0 0 0 1-1Z" />
-        </svg>
+        <MenuLeftIcon className="size-4 text-muted" />
         <span className="font-sans text-sm text-muted">
           {activeItem?.title ?? "Menu"}
         </span>
