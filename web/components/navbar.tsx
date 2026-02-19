@@ -30,7 +30,7 @@ function ThemeToggle() {
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className={cn(
-        "size-4.5 rounded-full cursor-pointer active:scale-95 focus:outline-3",
+        "size-4.5 rounded-full cursor-pointer focus:outline-3",
         {
           "bg-amber-500 focus:outline-amber-500/50":
             mounted && resolvedTheme === "light",
