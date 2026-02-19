@@ -51,11 +51,7 @@ export async function snapshotCommand(
   const snapshotId = createHash('sha256').update(manifestJson).digest('hex').slice(0, 16);
 
   // 4. Copy files to content-addressable store
-<<<<<<< Updated upstream
   const archiveDir = getArchivePath();
-=======
-  const archiveDir = process.env.WAI_ARCHIVE_PATH || join(homedir(), 'Archive');
->>>>>>> Stashed changes
   const objectsDir = join(archiveDir, 'objects');
   const snapshotsDir = join(archiveDir, 'snapshots');
   let newObjects = 0;
