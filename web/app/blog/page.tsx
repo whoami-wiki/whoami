@@ -12,7 +12,7 @@ export default function BlogPage() {
   const posts = getAllPosts();
 
   return (
-    <div className="flex flex-col w-dvw items-center min-h-screen">
+    <div className="flex flex-col w-dvw items-center min-h-[85dvh]">
       <div className="w-full max-w-3xl flex flex-col gap-8 py-18 px-6">
         <div>
           <div className="font-sans">Blog</div>
