@@ -76,7 +76,7 @@ describe('exportCommand', () => {
     );
   });
 
-  it('dry run lists contents without creating archive', async () => {
+  it('dry run lists contents without creating backup', async () => {
     const dataPath = makeFakeDataDir(tmp);
     const outDir = join(tmp, 'out');
     mkdirSync(outDir);

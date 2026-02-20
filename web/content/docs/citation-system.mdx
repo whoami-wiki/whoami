@@ -3,11 +3,11 @@ title: Citation System
 description: "How citations link wiki content back to source material"
 ---
 
-Citations are how wiki pages reference the underlying source data. Every factual claim in a page should link back to a specific piece of evidence in the archive.
+Citations are how wiki pages reference the underlying source data. Every factual claim in a page should link back to a specific piece of evidence in the vault.
 
 ## How citations work
 
-Citations use MediaWiki's `<ref>` syntax with custom templates that identify the source type and archive location. When rendered, they appear as numbered footnotes with links back to the source material.
+Citations use MediaWiki's `<ref>` syntax with custom templates that identify the source type and vault location. When rendered, they appear as numbered footnotes with links back to the source material.
 
 ## Citation templates
 
@@ -24,7 +24,7 @@ For citing a specific message or conversation:
 }}</ref>
 ```
 
-Renders as a footnote linking to the archived message, showing the platform, participants, and date.
+Renders as a footnote linking to the stored message, showing the platform, participants, and date.
 
 ### Voice notes
 
@@ -65,9 +65,9 @@ For citing video recordings:
 }}</ref>
 ```
 
-## Archive hashes
+## Vault hashes
 
-Each citation includes a `hash` field — the content-addressed identifier of the source file in the archive. This ensures citations point to a specific, immutable piece of data. Even if the original file is moved or renamed, the citation still resolves.
+Each citation includes a `hash` field — the content-addressed identifier of the source file in the vault. This ensures citations point to a specific, immutable piece of data. Even if the original file is moved or renamed, the citation still resolves.
 
 ## Footnotes section
 

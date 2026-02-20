@@ -2,7 +2,7 @@ import { parseArgs } from 'node:util';
 import { existsSync, mkdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { resolve, join, dirname } from 'node:path';
-import { getDataPath, getArchivePath } from '../data-path.js';
+import { getDataPath, getVaultPath } from '../data-path.js';
 import { UsageError, WaiError } from '../errors.js';
 import { type GlobalFlags, outputJson } from '../output.js';
 
@@ -20,12 +20,12 @@ export async function importCommand(
     strict: false,
   });
 
-  const archivePath = positionals[0];
-  if (!archivePath) throw new UsageError('Usage: wai import <file> [--force] [--dry-run]');
+  const backupPath = positionals[0];
+  if (!backupPath) throw new UsageError('Usage: wai import <file> [--force] [--dry-run]');
 
-  const resolved = resolve(archivePath);
+  const resolved = resolve(backupPath);
   if (!existsSync(resolved)) {
-    throw new WaiError(`Archive not found: ${resolved}`, 1);
+    throw new WaiError(`Backup not found: ${resolved}`, 1);
   }
 
   const dryRun = values['dry-run'] as boolean;
@@ -39,25 +39,25 @@ export async function importCommand(
       { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] },
     );
   } catch {
-    throw new WaiError('Invalid archive: no manifest.json found', 1);
+    throw new WaiError('Invalid backup: no manifest.json found', 1);
   }
 
   let manifest: { version: number; createdAt: string; dbSize: number; imageCount: number; objectCount?: number; snapshotCount?: number };
   try {
     manifest = JSON.parse(manifestJson);
   } catch {
-    throw new WaiError('Invalid archive: corrupt manifest.json', 1);
+    throw new WaiError('Invalid backup: corrupt manifest.json', 1);
   }
 
   if (manifest.version !== 1) {
-    throw new WaiError(`Unsupported archive version: ${manifest.version}`, 1);
+    throw new WaiError(`Unsupported backup version: ${manifest.version}`, 1);
   }
 
   if (dryRun) {
     if (globals.json) {
       outputJson(manifest);
     } else {
-      console.log('Archive contents:');
+      console.log('Backup contents:');
       console.log(`  created:   ${manifest.createdAt}`);
       console.log(`  database:  ${formatSize(manifest.dbSize)}`);
       console.log(`  images:    ${manifest.imageCount}`);
@@ -80,22 +80,22 @@ export async function importCommand(
   // Create data directory if needed
   mkdirSync(dataPath, { recursive: true });
 
-  // Extract wiki data (exclude archive/ which goes elsewhere)
+  // Extract wiki data (exclude vault/ which goes elsewhere)
   try {
     execSync(
-      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)} --exclude=archive`,
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)} --exclude=vault`,
       { stdio: 'pipe' },
     );
   } catch (e: any) {
-    throw new WaiError(`Failed to extract archive: ${e.message}`, 1);
+    throw new WaiError(`Failed to extract backup: ${e.message}`, 1);
   }
 
-  // Extract snapshot archive if present in backup
-  const snapshotArchivePath = getArchivePath();
-  mkdirSync(dirname(snapshotArchivePath), { recursive: true });
+  // Extract vault if present in backup
+  const vaultPath = getVaultPath();
+  mkdirSync(dirname(vaultPath), { recursive: true });
   try {
     execSync(
-      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dirname(snapshotArchivePath))} archive`,
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dirname(vaultPath))} vault`,
       { stdio: 'pipe' },
     );
   } catch {

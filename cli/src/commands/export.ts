@@ -3,7 +3,7 @@ import { existsSync, statSync, readdirSync, writeFileSync, mkdtempSync, rmSync }
 import { execSync } from 'node:child_process';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { getDataPath, getArchivePath } from '../data-path.js';
+import { getDataPath, getVaultPath } from '../data-path.js';
 import { UsageError, WaiError } from '../errors.js';
 import { type GlobalFlags, outputJson } from '../output.js';
 
@@ -53,7 +53,7 @@ export async function exportCommand(
     throw new WaiError(`No wiki database found at: ${dbPath}`, 1);
   }
 
-  // Collect files to archive
+  // Collect files to export
   const entries: string[] = [];
 
   // All .sqlite databases and their WAL/SHM files
@@ -70,11 +70,11 @@ export async function exportCommand(
   const imageCount = countFiles(imagesDir);
   if (existsSync(imagesDir)) entries.push('images');
 
-  // Check for snapshot archive
-  const archivePath = getArchivePath();
-  const hasArchive = existsSync(archivePath);
-  const objectCount = hasArchive ? countFiles(join(archivePath, 'objects')) : 0;
-  const snapshotCount = hasArchive ? countFiles(join(archivePath, 'snapshots')) : 0;
+  // Check for snapshot vault
+  const vaultPath = getVaultPath();
+  const hasVault = existsSync(vaultPath);
+  const objectCount = hasVault ? countFiles(join(vaultPath, 'objects')) : 0;
+  const snapshotCount = hasVault ? countFiles(join(vaultPath, 'snapshots')) : 0;
 
   // Build manifest
   const dbSize = statSync(dbPath).size;
@@ -84,7 +84,7 @@ export async function exportCommand(
     dbSize,
     imageCount,
   };
-  if (hasArchive) {
+  if (hasVault) {
     manifest.objectCount = objectCount;
     manifest.snapshotCount = snapshotCount;
   }
@@ -93,14 +93,14 @@ export async function exportCommand(
     if (globals.json) {
       outputJson({ ...manifest, files: entries });
     } else {
-      console.log('Would archive:');
+      console.log('Would export:');
       for (const e of entries) {
         console.log(`  ${e}`);
       }
-      if (hasArchive) console.log('  archive/');
+      if (hasVault) console.log('  vault/');
       console.log(`\n  database:  ${formatSize(dbSize)}`);
       console.log(`  images:    ${imageCount}`);
-      if (hasArchive) {
+      if (hasVault) {
         console.log(`  objects:   ${objectCount}`);
         console.log(`  snapshots: ${snapshotCount}`);
       }
@@ -108,14 +108,14 @@ export async function exportCommand(
     return;
   }
 
-  // Write manifest to temp dir, create archive
+  // Write manifest to temp dir, create backup
   const tmpDir = mkdtempSync(join(tmpdir(), 'wai-export-'));
   try {
     writeFileSync(join(tmpDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
     let tarCmd = `tar -cf ${shellEscape(outPath)} -C ${shellEscape(dataPath)} ${entries.join(' ')}`;
-    if (hasArchive) {
-      tarCmd += ` -C ${shellEscape(dirname(archivePath))} archive`;
+    if (hasVault) {
+      tarCmd += ` -C ${shellEscape(dirname(vaultPath))} vault`;
     }
     tarCmd += ` -C ${shellEscape(tmpDir)} manifest.json`;
     execSync(tarCmd, { stdio: 'pipe' });
@@ -126,13 +126,13 @@ export async function exportCommand(
       console.log(`Exported to ${outPath}`);
       console.log(`  database:  ${formatSize(dbSize)}`);
       console.log(`  images:    ${imageCount}`);
-      if (hasArchive) {
+      if (hasVault) {
         console.log(`  objects:   ${objectCount}`);
         console.log(`  snapshots: ${snapshotCount}`);
       }
     }
   } catch (e: any) {
-    throw new WaiError(`Failed to create archive: ${e.message}`, 1);
+    throw new WaiError(`Failed to create backup: ${e.message}`, 1);
   } finally {
     rmSync(tmpDir, { recursive: true });
   }

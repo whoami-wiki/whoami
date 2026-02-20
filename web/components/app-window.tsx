@@ -114,7 +114,7 @@ function FinderContent() {
   const files = [
     {
       icon: "bg-blue-400",
-      name: "Archive",
+      name: "Vault",
       date: "Feb 7, 2026",
       kind: "Folder",
     },

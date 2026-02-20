@@ -5,13 +5,13 @@ wiki pages.
 
 ## Sources
 Sources can be listed with `wai source list`, which returns all
-pages in the wiki's source namespace. Source pages have information about different primary sources of data available that can be used for editorial purposes. Each source page has a unique snapshot id in the infobox that can be used to look up their info in ~/archive
+pages in the wiki's source namespace. Source pages have information about different primary sources of data available that can be used for editorial purposes. Each source page has a unique snapshot id in the infobox that can be used to look up their info in the vault
 
-Source pages contain a **Querying** section with instructions for programmatic access to the archive — SQL queries for databases, JSON parsing for exports, file lookup via snapshot hashes. Always read the relevant source page before attempting to extract data.
+Source pages contain a **Querying** section with instructions for programmatic access to the vault (located in Application Support/whoami/vault) — SQL queries for databases, JSON parsing for exports, file lookup via snapshot hashes. Always read the relevant source page before attempting to extract data.
 
-Use `wai snapshot <dir>` to archive a directory. It hashes files into `~/Archive/objects/`, writes a manifest to `~/Archive/snapshots/`, and creates a `Source:` wiki page.
+Use `wai snapshot <dir>` to snapshot a directory. It hashes files into `vault/objects/`, writes a manifest to `vault/snapshots/`, and creates a `Source:` wiki page. The vault is located at `~/Library/Application Support/whoami/vault` (configurable via `WAI_VAULT_PATH`).
 
-Structure of ~/Archive:
+Structure of the vault:
 - objects/
   - 00/
     - 00b9da...350b19
@@ -76,8 +76,8 @@ wai link "Page"                   # show links in/out
 wai category                      # list all categories
 wai changes                       # recent changes
 wai place "query"                 # look up a place (Google Places)
-wai snapshot <dir>                # archive a directory into ~/Archive
-wai snapshot <dir> --name "Name"  # archive with custom source page name
+wai snapshot <dir>                # snapshot a directory into the vault
+wai snapshot <dir> --name "Name"  # snapshot with custom source page name
 wai snapshot <dir> --dry-run      # preview without writing
 wai task list                     # list pending tasks
 wai task list --status done       # list tasks by status
