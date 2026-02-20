@@ -66,10 +66,12 @@ Discovery:
   source list                 List pages in the Source namespace
   place <query>               Look up a place (Google Places)
 
-Archive:
+Data:
+  snapshot <dir>              Snapshot a directory into the vault
+
+Backup:
   export <dir>                Export full wiki backup
   import <file>               Import from a backup
-  snapshot <dir>              Archive a directory
 
 Auth:
   auth login                  Store wiki credentials

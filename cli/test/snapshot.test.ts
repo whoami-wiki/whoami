@@ -18,12 +18,12 @@ function mockClient(overrides: Partial<Record<string, any>> = {}): WikiClient {
 
 const globals = { json: false, quiet: false };
 
-function runWithArchivePath(archivePath: string, fn: () => Promise<void>): Promise<void> {
-  const prev = process.env.WAI_ARCHIVE_PATH;
-  process.env.WAI_ARCHIVE_PATH = archivePath;
+function runWithVaultPath(vaultPath: string, fn: () => Promise<void>): Promise<void> {
+  const prev = process.env.WAI_VAULT_PATH;
+  process.env.WAI_VAULT_PATH = vaultPath;
   return fn().finally(() => {
-    if (prev === undefined) delete process.env.WAI_ARCHIVE_PATH;
-    else process.env.WAI_ARCHIVE_PATH = prev;
+    if (prev === undefined) delete process.env.WAI_VAULT_PATH;
+    else process.env.WAI_VAULT_PATH = prev;
   });
 }
 
@@ -52,21 +52,21 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'hello.txt'), 'hello world');
 
-    const archiveDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'archive');
 
-    await runWithArchivePath(archiveDir, () =>
+    await runWithVaultPath(vaultDir, () =>
       snapshotCommand([sourceDir], { json: false, quiet: true }, mockClient()),
     );
 
     // Snapshot JSON should exist
-    const snapshotsDir = join(archiveDir, 'snapshots');
+    const snapshotsDir = join(vaultDir, 'snapshots');
     assert.ok(existsSync(snapshotsDir), 'snapshots dir should exist');
     const snapshots = readdirSync(snapshotsDir);
     assert.equal(snapshots.length, 1);
     assert.ok(snapshots[0].endsWith('.json'));
 
     // Object file should exist
-    const objectsDir = join(archiveDir, 'objects');
+    const objectsDir = join(vaultDir, 'objects');
     assert.ok(existsSync(objectsDir), 'objects dir should exist');
 
     // Verify the object content is addressable by hash
@@ -84,13 +84,13 @@ describe('snapshotCommand', () => {
     writeFileSync(join(sourceDir, 'a.txt'), 'aaa');
     writeFileSync(join(sourceDir, 'b.txt'), 'bbb');
 
-    const archiveDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'archive');
 
-    await runWithArchivePath(archiveDir, () =>
+    await runWithVaultPath(vaultDir, () =>
       snapshotCommand([sourceDir], { json: false, quiet: true }, mockClient()),
     );
 
-    const snapshotsDir = join(archiveDir, 'snapshots');
+    const snapshotsDir = join(vaultDir, 'snapshots');
     const snapshotFile = readdirSync(snapshotsDir)[0];
     const manifest = JSON.parse(readFileSync(join(snapshotsDir, snapshotFile), 'utf-8'));
 
@@ -104,13 +104,13 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'hello.txt'), 'hello world');
 
-    const archiveDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'archive');
 
-    await runWithArchivePath(archiveDir, () =>
+    await runWithVaultPath(vaultDir, () =>
       snapshotCommand([sourceDir, '--dry-run'], { json: false, quiet: true }, mockClient()),
     );
 
-    assert.equal(existsSync(archiveDir), false, 'archive dir should not be created on dry run');
+    assert.equal(existsSync(vaultDir), false, 'vault dir should not be created on dry run');
   });
 
   it('skips existing objects (deduplication)', async () => {
@@ -118,10 +118,10 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'hello.txt'), 'hello world');
 
-    const archiveDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'archive');
 
     // Run twice
-    await runWithArchivePath(archiveDir, () =>
+    await runWithVaultPath(vaultDir, () =>
       snapshotCommand([sourceDir], { json: false, quiet: true }, mockClient()),
     );
 
@@ -129,7 +129,7 @@ describe('snapshotCommand', () => {
     const origLog = console.log;
     console.log = (msg: string) => logs.push(msg);
     try {
-      await runWithArchivePath(archiveDir, () =>
+      await runWithVaultPath(vaultDir, () =>
         snapshotCommand([sourceDir], globals, mockClient()),
       );
       const newLine = logs.find((l) => l.includes('new:'));
@@ -147,13 +147,13 @@ describe('snapshotCommand', () => {
     writeFileSync(join(sourceDir, 'bad.txt'), 'secret');
     chmodSync(join(sourceDir, 'bad.txt'), 0o000);
 
-    const archiveDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'archive');
 
     const warnings: string[] = [];
     const origWarn = console.warn;
     console.warn = (msg: string) => warnings.push(msg);
     try {
-      await runWithArchivePath(archiveDir, () =>
+      await runWithVaultPath(vaultDir, () =>
         snapshotCommand([sourceDir], { json: false, quiet: true }, mockClient()),
       );
       assert.ok(warnings.length > 0, 'should emit a warning for unreadable file');
@@ -170,13 +170,13 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'hello.txt'), 'hello world');
 
-    const archiveDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'archive');
 
     const logs: string[] = [];
     const origLog = console.log;
     console.log = (msg: string) => logs.push(msg);
     try {
-      await runWithArchivePath(archiveDir, () =>
+      await runWithVaultPath(vaultDir, () =>
         snapshotCommand([sourceDir], { json: true, quiet: false }, mockClient()),
       );
       const output = JSON.parse(logs[logs.length - 1]);
@@ -194,7 +194,7 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'data.csv'), 'a,b,c');
 
-    const archiveDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'archive');
 
     let createdTitle = '';
     let createdContent = '';
@@ -206,7 +206,7 @@ describe('snapshotCommand', () => {
       },
     });
 
-    await runWithArchivePath(archiveDir, () =>
+    await runWithVaultPath(vaultDir, () =>
       snapshotCommand([sourceDir], { json: false, quiet: true }, client),
     );
 
@@ -221,13 +221,13 @@ describe('snapshotCommand', () => {
     writeFileSync(join(sourceDir, 'visible.txt'), 'yes');
     writeFileSync(join(sourceDir, '.hidden'), 'no');
 
-    const archiveDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'archive');
 
     const logs: string[] = [];
     const origLog = console.log;
     console.log = (msg: string) => logs.push(msg);
     try {
-      await runWithArchivePath(archiveDir, () =>
+      await runWithVaultPath(vaultDir, () =>
         snapshotCommand([sourceDir], { json: true, quiet: false }, mockClient()),
       );
       const output = JSON.parse(logs[logs.length - 1]);

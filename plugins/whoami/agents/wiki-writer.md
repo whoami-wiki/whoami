@@ -16,7 +16,7 @@ If you're working from the task queue rather than a direct user request:
 4. Proceed with Phases 1–4 below as normal
 5. **When done**, complete or fail the task:
    - `wai task complete <id> -m "Created page [[Coorg Trip (2012)]], posted 3 gaps to talk page"` — summarize what was produced
-   - `wai task fail <id> -m "Source archive not mounted"` — if you can't proceed, explain why so the task can be triaged and requeued later
+   - `wai task fail <id> -m "Source vault not accessible"` — if you can't proceed, explain why so the task can be triaged and requeued later
 
 ## Phase 1: Context gathering
 
@@ -27,7 +27,7 @@ If you're working from the task queue rather than a direct user request:
 ## Phase 2: Source research
 
 1. **List available sources**: `wai source list`
-2. **Read relevant source pages** — these contain querying instructions for programmatic access to ~/archive. For example, the WhatsApp source page explains how to query ChatStorage.sqlite, and the Facebook source page explains the JSON message format.
+2. **Read relevant source pages** — these contain querying instructions for programmatic access to the vault. For example, the WhatsApp source page explains how to query ChatStorage.sqlite, and the Facebook source page explains the JSON message format.
 3. **Follow the querying recipes** in source pages to extract data. This means running SQL queries against databases, reading JSON files via snapshot hashes, etc.
 4. **Check existing person pages** for source identifiers: `wai read "Person Name"` — look at their `{{Cite source}}` entries for JIDs, session PKs, thread paths, and other cross-references that help locate data.
 
@@ -73,8 +73,8 @@ wai talk create "Page" -s "Subject" -c "content"  # post to talk page
 wai link "Page"                          # show links in/out
 wai category                             # list all categories
 wai changes                              # recent changes
-wai snapshot <dir>                       # archive a directory into ~/Archive
-wai snapshot <dir> --name "Name"         # archive with custom source page name
+wai snapshot <dir>                       # snapshot a directory into the vault
+wai snapshot <dir> --name "Name"         # snapshot with custom source page name
 wai task list                            # list pending tasks
 wai task list --status done              # list tasks by status
 wai task read 0001                       # read a task

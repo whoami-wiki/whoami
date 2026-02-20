@@ -2,7 +2,7 @@ import { parseArgs } from 'node:util';
 import { existsSync, mkdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { resolve, join, dirname } from 'node:path';
-import { getDataPath, getArchivePath } from '../data-path.js';
+import { getDataPath, getVaultPath } from '../data-path.js';
 import { UsageError, WaiError } from '../errors.js';
 import { type GlobalFlags, outputJson } from '../output.js';
 
@@ -20,10 +20,10 @@ export async function importCommand(
     strict: false,
   });
 
-  const archivePath = positionals[0];
-  if (!archivePath) throw new UsageError('Usage: wai import <file> [--force] [--dry-run]');
+  const backupPath = positionals[0];
+  if (!backupPath) throw new UsageError('Usage: wai import <file> [--force] [--dry-run]');
 
-  const resolved = resolve(archivePath);
+  const resolved = resolve(backupPath);
   if (!existsSync(resolved)) {
     throw new WaiError(`Archive not found: ${resolved}`, 1);
   }
@@ -80,26 +80,39 @@ export async function importCommand(
   // Create data directory if needed
   mkdirSync(dataPath, { recursive: true });
 
-  // Extract wiki data (exclude archive/ which goes elsewhere)
+  // Extract wiki data (exclude vault/ and archive/ which go elsewhere)
   try {
     execSync(
-      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)} --exclude=archive`,
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)} --exclude=vault --exclude=archive`,
       { stdio: 'pipe' },
     );
   } catch (e: any) {
     throw new WaiError(`Failed to extract archive: ${e.message}`, 1);
   }
 
-  // Extract snapshot archive if present in backup
-  const snapshotArchivePath = getArchivePath();
-  mkdirSync(dirname(snapshotArchivePath), { recursive: true });
+  // Extract snapshot vault if present in backup
+  const vaultPath = getVaultPath();
+  mkdirSync(dirname(vaultPath), { recursive: true });
   try {
     execSync(
-      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dirname(snapshotArchivePath))} archive`,
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dirname(vaultPath))} vault`,
       { stdio: 'pipe' },
     );
   } catch {
-    // Not present in older backups — OK
+    // Try legacy archive/ entry for old backups
+    try {
+      execSync(
+        `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dirname(vaultPath))} archive`,
+        { stdio: 'pipe' },
+      );
+      // Rename extracted archive/ to vault path
+      execSync(
+        `mv ${shellEscape(join(dirname(vaultPath), 'archive'))} ${shellEscape(vaultPath)}`,
+        { stdio: 'pipe' },
+      );
+    } catch {
+      // Not present in older backups — OK
+    }
   }
 
   // Ensure expected directories exist

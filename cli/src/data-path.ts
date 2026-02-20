@@ -18,7 +18,8 @@ export function getDataPath(): string {
   return join(getAppDir(), 'data');
 }
 
-export function getArchivePath(): string {
+export function getVaultPath(): string {
+  if (process.env.WAI_VAULT_PATH) return process.env.WAI_VAULT_PATH;
   if (process.env.WAI_ARCHIVE_PATH) return process.env.WAI_ARCHIVE_PATH;
-  return join(getAppDir(), 'archive');
+  return join(getAppDir(), 'vault');
 }

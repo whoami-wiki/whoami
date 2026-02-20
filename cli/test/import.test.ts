@@ -30,9 +30,9 @@ function makeArchive(tmp: string, opts?: { imageCount?: number }): string {
   };
   writeFileSync(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-  const archivePath = join(tmp, 'backup.tar');
-  execSync(`tar -cf '${archivePath}' -C '${staging}' wiki.sqlite LocalData.php images manifest.json`);
-  return archivePath;
+  const backupPath = join(tmp, 'backup.tar');
+  execSync(`tar -cf '${backupPath}' -C '${staging}' wiki.sqlite LocalData.php images manifest.json`);
+  return backupPath;
 }
 
 function runWithDataPath(dataPath: string, fn: () => Promise<void>): Promise<void> {
