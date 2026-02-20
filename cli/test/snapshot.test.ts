@@ -52,7 +52,7 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'hello.txt'), 'hello world');
 
-    const vaultDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'vault');
 
     await runWithVaultPath(vaultDir, () =>
       snapshotCommand([sourceDir], { json: false, quiet: true }, mockClient()),
@@ -84,7 +84,7 @@ describe('snapshotCommand', () => {
     writeFileSync(join(sourceDir, 'a.txt'), 'aaa');
     writeFileSync(join(sourceDir, 'b.txt'), 'bbb');
 
-    const vaultDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'vault');
 
     await runWithVaultPath(vaultDir, () =>
       snapshotCommand([sourceDir], { json: false, quiet: true }, mockClient()),
@@ -104,7 +104,7 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'hello.txt'), 'hello world');
 
-    const vaultDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'vault');
 
     await runWithVaultPath(vaultDir, () =>
       snapshotCommand([sourceDir, '--dry-run'], { json: false, quiet: true }, mockClient()),
@@ -118,7 +118,7 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'hello.txt'), 'hello world');
 
-    const vaultDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'vault');
 
     // Run twice
     await runWithVaultPath(vaultDir, () =>
@@ -147,7 +147,7 @@ describe('snapshotCommand', () => {
     writeFileSync(join(sourceDir, 'bad.txt'), 'secret');
     chmodSync(join(sourceDir, 'bad.txt'), 0o000);
 
-    const vaultDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'vault');
 
     const warnings: string[] = [];
     const origWarn = console.warn;
@@ -170,7 +170,7 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'hello.txt'), 'hello world');
 
-    const vaultDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'vault');
 
     const logs: string[] = [];
     const origLog = console.log;
@@ -194,7 +194,7 @@ describe('snapshotCommand', () => {
     mkdirSync(sourceDir);
     writeFileSync(join(sourceDir, 'data.csv'), 'a,b,c');
 
-    const vaultDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'vault');
 
     let createdTitle = '';
     let createdContent = '';
@@ -221,7 +221,7 @@ describe('snapshotCommand', () => {
     writeFileSync(join(sourceDir, 'visible.txt'), 'yes');
     writeFileSync(join(sourceDir, '.hidden'), 'no');
 
-    const vaultDir = join(tmp, 'archive');
+    const vaultDir = join(tmp, 'vault');
 
     const logs: string[] = [];
     const origLog = console.log;

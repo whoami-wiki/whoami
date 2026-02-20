@@ -53,7 +53,7 @@ export async function exportCommand(
     throw new WaiError(`No wiki database found at: ${dbPath}`, 1);
   }
 
-  // Collect files to archive
+  // Collect files to export
   const entries: string[] = [];
 
   // All .sqlite databases and their WAL/SHM files
@@ -108,7 +108,7 @@ export async function exportCommand(
     return;
   }
 
-  // Write manifest to temp dir, create archive
+  // Write manifest to temp dir, create backup
   const tmpDir = mkdtempSync(join(tmpdir(), 'wai-export-'));
   try {
     writeFileSync(join(tmpDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
@@ -132,7 +132,7 @@ export async function exportCommand(
       }
     }
   } catch (e: any) {
-    throw new WaiError(`Failed to create archive: ${e.message}`, 1);
+    throw new WaiError(`Failed to create backup: ${e.message}`, 1);
   } finally {
     rmSync(tmpDir, { recursive: true });
   }

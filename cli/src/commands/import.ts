@@ -25,7 +25,7 @@ export async function importCommand(
 
   const resolved = resolve(backupPath);
   if (!existsSync(resolved)) {
-    throw new WaiError(`Archive not found: ${resolved}`, 1);
+    throw new WaiError(`Backup not found: ${resolved}`, 1);
   }
 
   const dryRun = values['dry-run'] as boolean;
@@ -39,25 +39,25 @@ export async function importCommand(
       { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] },
     );
   } catch {
-    throw new WaiError('Invalid archive: no manifest.json found', 1);
+    throw new WaiError('Invalid backup: no manifest.json found', 1);
   }
 
   let manifest: { version: number; createdAt: string; dbSize: number; imageCount: number; objectCount?: number; snapshotCount?: number };
   try {
     manifest = JSON.parse(manifestJson);
   } catch {
-    throw new WaiError('Invalid archive: corrupt manifest.json', 1);
+    throw new WaiError('Invalid backup: corrupt manifest.json', 1);
   }
 
   if (manifest.version !== 1) {
-    throw new WaiError(`Unsupported archive version: ${manifest.version}`, 1);
+    throw new WaiError(`Unsupported backup version: ${manifest.version}`, 1);
   }
 
   if (dryRun) {
     if (globals.json) {
       outputJson(manifest);
     } else {
-      console.log('Archive contents:');
+      console.log('Backup contents:');
       console.log(`  created:   ${manifest.createdAt}`);
       console.log(`  database:  ${formatSize(manifest.dbSize)}`);
       console.log(`  images:    ${manifest.imageCount}`);
@@ -80,17 +80,17 @@ export async function importCommand(
   // Create data directory if needed
   mkdirSync(dataPath, { recursive: true });
 
-  // Extract wiki data (exclude vault/ and archive/ which go elsewhere)
+  // Extract wiki data (exclude vault/ which goes elsewhere)
   try {
     execSync(
-      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)} --exclude=vault --exclude=archive`,
+      `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dataPath)} --exclude=vault`,
       { stdio: 'pipe' },
     );
   } catch (e: any) {
-    throw new WaiError(`Failed to extract archive: ${e.message}`, 1);
+    throw new WaiError(`Failed to extract backup: ${e.message}`, 1);
   }
 
-  // Extract snapshot vault if present in backup
+  // Extract vault if present in backup
   const vaultPath = getVaultPath();
   mkdirSync(dirname(vaultPath), { recursive: true });
   try {
@@ -99,20 +99,7 @@ export async function importCommand(
       { stdio: 'pipe' },
     );
   } catch {
-    // Try legacy archive/ entry for old backups
-    try {
-      execSync(
-        `tar -xf ${shellEscape(resolved)} -C ${shellEscape(dirname(vaultPath))} archive`,
-        { stdio: 'pipe' },
-      );
-      // Rename extracted archive/ to vault path
-      execSync(
-        `mv ${shellEscape(join(dirname(vaultPath), 'archive'))} ${shellEscape(vaultPath)}`,
-        { stdio: 'pipe' },
-      );
-    } catch {
-      // Not present in older backups — OK
-    }
+    // Not present in older backups — OK
   }
 
   // Ensure expected directories exist

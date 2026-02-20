@@ -8,8 +8,8 @@ import { importCommand } from '../src/commands/import.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
-/** Create a valid backup archive in tmp. */
-function makeArchive(tmp: string, opts?: { imageCount?: number }): string {
+/** Create a valid backup tar in tmp. */
+function makeBackup(tmp: string, opts?: { imageCount?: number }): string {
   const staging = join(tmp, 'staging');
   mkdirSync(staging, { recursive: true });
   writeFileSync(join(staging, 'wiki.sqlite'), 'fake-sqlite-db');
@@ -64,46 +64,46 @@ describe('importCommand', () => {
     );
   });
 
-  it('throws when archive does not exist', async () => {
+  it('throws when backup does not exist', async () => {
     await assert.rejects(
       () => importCommand([join(tmp, 'nope.tar.gz')], { json: false, quiet: false }),
       { name: 'WaiError' },
     );
   });
 
-  it('throws on archive without manifest', async () => {
-    const badArchive = join(tmp, 'bad.tar');
+  it('throws on backup without manifest', async () => {
+    const badBackup = join(tmp, 'bad.tar');
     const staging = join(tmp, 'bad-staging');
     mkdirSync(staging, { recursive: true });
     writeFileSync(join(staging, 'junk.txt'), 'not a backup');
-    execSync(`tar -cf '${badArchive}' -C '${staging}' junk.txt`);
+    execSync(`tar -cf '${badBackup}' -C '${staging}' junk.txt`);
 
     await assert.rejects(
-      () => importCommand([badArchive], { json: false, quiet: false }),
+      () => importCommand([badBackup], { json: false, quiet: false }),
       { name: 'WaiError', message: /no manifest.json/ },
     );
   });
 
   it('dry run shows manifest without extracting', async () => {
-    const archivePath = makeArchive(tmp);
+    const backupPath = makeBackup(tmp);
     const dataPath = join(tmp, 'data');
 
     await runWithDataPath(dataPath, () =>
-      importCommand([archivePath, '--dry-run'], { json: false, quiet: false }),
+      importCommand([backupPath, '--dry-run'], { json: false, quiet: false }),
     );
 
     assert.equal(existsSync(dataPath), false);
   });
 
   it('dry run with --json outputs manifest', async () => {
-    const archivePath = makeArchive(tmp, { imageCount: 3 });
+    const backupPath = makeBackup(tmp, { imageCount: 3 });
     const logs: string[] = [];
     const origLog = console.log;
     console.log = (msg: string) => logs.push(msg);
 
     try {
       await runWithDataPath(join(tmp, 'data'), () =>
-        importCommand([archivePath, '--dry-run'], { json: true, quiet: false }),
+        importCommand([backupPath, '--dry-run'], { json: true, quiet: false }),
       );
       const output = JSON.parse(logs[logs.length - 1]);
       assert.equal(output.version, 1);
@@ -115,27 +115,27 @@ describe('importCommand', () => {
   });
 
   it('refuses to overwrite existing data without --force', async () => {
-    const archivePath = makeArchive(tmp);
+    const backupPath = makeBackup(tmp);
     const dataPath = join(tmp, 'data');
     mkdirSync(dataPath, { recursive: true });
     writeFileSync(join(dataPath, 'wiki.sqlite'), 'existing');
 
     await assert.rejects(
       () => runWithDataPath(dataPath, () =>
-        importCommand([archivePath], { json: false, quiet: false }),
+        importCommand([backupPath], { json: false, quiet: false }),
       ),
       { name: 'WaiError', message: /--force/ },
     );
   });
 
   it('restores with --force when data exists', async () => {
-    const archivePath = makeArchive(tmp);
+    const backupPath = makeBackup(tmp);
     const dataPath = join(tmp, 'data');
     mkdirSync(dataPath, { recursive: true });
     writeFileSync(join(dataPath, 'wiki.sqlite'), 'old-data');
 
     await runWithDataPath(dataPath, () =>
-      importCommand([archivePath, '--force'], { json: false, quiet: true }),
+      importCommand([backupPath, '--force'], { json: false, quiet: true }),
     );
 
     const restored = readFileSync(join(dataPath, 'wiki.sqlite'), 'utf-8');
@@ -143,11 +143,11 @@ describe('importCommand', () => {
   });
 
   it('extracts all files to data directory', async () => {
-    const archivePath = makeArchive(tmp, { imageCount: 2 });
+    const backupPath = makeBackup(tmp, { imageCount: 2 });
     const dataPath = join(tmp, 'data');
 
     await runWithDataPath(dataPath, () =>
-      importCommand([archivePath], { json: false, quiet: true }),
+      importCommand([backupPath], { json: false, quiet: true }),
     );
 
     assert.ok(existsSync(join(dataPath, 'wiki.sqlite')));
@@ -155,23 +155,23 @@ describe('importCommand', () => {
     assert.ok(existsSync(join(dataPath, 'manifest.json')));
     assert.ok(existsSync(join(dataPath, 'images', 'img0.jpg')));
     assert.ok(existsSync(join(dataPath, 'images', 'img1.jpg')));
-    // Should create cache dir even though it's not in archive
+    // Should create cache dir even though it's not in backup
     assert.ok(existsSync(join(dataPath, 'cache')));
   });
 
   it('creates data directory if it does not exist', async () => {
-    const archivePath = makeArchive(tmp);
+    const backupPath = makeBackup(tmp);
     const dataPath = join(tmp, 'nested', 'deep', 'data');
 
     await runWithDataPath(dataPath, () =>
-      importCommand([archivePath], { json: false, quiet: true }),
+      importCommand([backupPath], { json: false, quiet: true }),
     );
 
     assert.ok(existsSync(join(dataPath, 'wiki.sqlite')));
   });
 
   it('json output includes restore details', async () => {
-    const archivePath = makeArchive(tmp);
+    const backupPath = makeBackup(tmp);
     const dataPath = join(tmp, 'data');
     const logs: string[] = [];
     const origLog = console.log;
@@ -179,7 +179,7 @@ describe('importCommand', () => {
 
     try {
       await runWithDataPath(dataPath, () =>
-        importCommand([archivePath], { json: true, quiet: false }),
+        importCommand([backupPath], { json: true, quiet: false }),
       );
       const output = JSON.parse(logs[logs.length - 1]);
       assert.equal(output.restored, true);
