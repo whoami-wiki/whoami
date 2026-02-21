@@ -4,35 +4,37 @@ An audit of every noun and term used as a concept in the whoami.wiki project, id
 
 ## Summary of findings
 
-The archive → vault rename is fully resolved. The remaining issues are:
+Most naming issues from earlier audits are now resolved. The remaining issues are:
 
 1. **"Source" still means four different things** depending on context, though the dual-section citation structure is now clarified
-2. **cli.mdx documentation** is substantially out of sync with the actual CLI — and the same phantom commands appear in installation.mdx and troubleshooting.mdx
-3. **evals.mdx uses `== Sources ==`** where it means `== References ==`
-4. **evals.mdx references a stale page type list**
+2. **Glossary says "four page types"** but page-types.mdx now says "two reader-facing page types" — the definition of "page type" needs settling
+3. **evals.mdx has two stale references**: `== Sources ==` where it means `== References ==`, and "all four page types" which doesn't match the new two-type framing
+4. **Phantom commands in installation.mdx and troubleshooting.mdx** — cli.mdx is fixed, but these pages still reference non-existent commands
 
 ---
 
 ## Resolved: "Archive" → "Vault"
 
-The archive → vault rename is clean. One straggler remains:
+Clean. One straggler remains:
 
 - **citation-system.mdx line 70** says "the content-addressed archive snapshot hash" — should be "vault" or just "snapshot hash"
 
-Otherwise the current state is correct:
+---
 
-- **Vault** — the content-addressed store (`getVaultPath()`, `WAI_VAULT_PATH`)
-- **Backup** — the tar file produced by `wai export` / consumed by `wai import`
-- **Snapshot** (verb) — the action of running `wai snapshot`, output says "Snapshotted"
-- CLI help groups are now **Data** (snapshot) and **Backup** (export, import)
+## Resolved: cli.mdx rewritten
+
+cli.mdx has been completely rewritten to match the actual CLI. All phantom commands (`wai status`, `wai doctor`, `wai config`, `wai wiki restart/backup/restore`, `wai plugin install/list`) and wrong flags (`--batch-size`, `--type`, `--status claimed`, `--title`, `--reason`) are gone. The new cli.mdx documents every real command with correct flags.
 
 ---
 
-## Resolved: page types aligned
+## Resolved: page-types.mdx and namespaces.mdx split
 
-page-types.mdx and the glossary now agree on four page types: **Person**, **Episode**, **Talk**, **Task**. The Conversation and Reflection types have been removed.
+Content has been cleanly split:
 
-One stale reference remains: **evals.mdx line 28** says test cases span "all four page types (Person, Episode, Talk, Task)" — the list happens to be correct now, but should be verified against the actual test suite if Conversation/Reflection test cases existed.
+- **page-types.mdx** — documents the two reader-facing page types (Person, Episode)
+- **namespaces.mdx** — documents all four namespaces (Main, Talk, Source, Task) with their structure and conventions
+
+Talk and Task documentation moved from page-types.mdx to namespaces.mdx. This is a clean separation.
 
 ---
 
@@ -49,7 +51,7 @@ One stale reference remains: **evals.mdx line 28** says test cases span "all fou
 
 ### Clarification from updated docs
 
-citation-system.mdx now explicitly defines a **dual-section structure** at the bottom of pages:
+citation-system.mdx explicitly defines a **dual-section structure** at the bottom of pages:
 
 ```wikitext
 == References ==
@@ -62,7 +64,7 @@ citation-system.mdx now explicitly defines a **dual-section structure** at the b
 - **References** = numbered footnotes from `<ref>` tags (inline citations)
 - **Sources** = bibliography-style `{{Cite source}}` entries (archives consulted)
 
-This means `== Sources ==` is intentional and correct in wiki-writer.md — it's the bibliography section, not the footnotes section. The old audit incorrectly recommended replacing all `== Sources ==` with `== References ==`.
+This means `== Sources ==` is intentional and correct in wiki-writer.md — it's the bibliography section, not the footnotes section.
 
 ### What's still wrong
 
@@ -78,36 +80,30 @@ evals.mdx line 58 says the completeness grader checks for `== Sources ==` with `
 
 ---
 
-## Problem 2: cli.mdx is out of sync
+## Problem 2: glossary "page type" definition doesn't match page-types.mdx
 
-The reference documentation in `web/content/docs/cli.mdx` documents commands that don't exist in the actual CLI, and has wrong flags for commands that do exist. **This is unchanged from the previous audit.**
+The glossary defines "page type" as one of four structural templates: **Person**, **Episode**, **Talk**, **Task**.
 
-### Commands in cli.mdx that don't exist
+But page-types.mdx now says "two reader-facing page types" and only documents Person and Episode. Talk and Task are documented as namespaces in namespaces.mdx, not as page types.
 
-| Documented command | Status |
-|---|---|
-| `wai status` | Does not exist |
-| `wai doctor` | Does not exist |
-| `wai config list/set/get` | Does not exist |
-| `wai wiki restart` | Does not exist |
-| `wai wiki backup` | Does not exist (actual: `wai export`) |
-| `wai wiki restore` | Does not exist (actual: `wai import`) |
-| `wai plugin install` | Does not exist |
-| `wai plugin list` | Does not exist |
+This creates an ambiguity: are Talk and Task "page types" or just "namespaces with conventions"?
 
-### Wrong flags / syntax in cli.mdx
+Additionally, evals.mdx line 27 says test cases span "all four page types (Person, Episode, Talk, Task)" — this uses the old four-type framing.
 
-| Documented | Actual |
-|---|---|
-| `wai snapshot --batch-size 100` | `wai snapshot --name "Name" --dry-run` |
-| `wai search --type photos` | `wai search <query>` (no --type flag) |
-| `wai task list --status claimed` | `--status in-progress` |
-| `wai task create --title "..." --type write` | `wai task create -m "..." [--source X]` |
-| `wai task fail --reason "..."` | `wai task fail <id> -m "..."` |
+### Recommendation
 
-### Same phantom commands appear elsewhere
+Decide whether "page type" means:
 
-The non-existent commands are not confined to cli.mdx:
+- **(a) Reader-facing content types** — Person and Episode only. Talk and Task are namespaces with their own conventions but not "page types." Update the glossary to match page-types.mdx.
+- **(b) Any page with a defined structure** — Person, Episode, Talk, and Task. Update page-types.mdx to list all four again (possibly in two groups: reader-facing and operational).
+
+Either way, the glossary and page-types.mdx should agree.
+
+---
+
+## Problem 3: phantom commands in installation.mdx and troubleshooting.mdx
+
+cli.mdx is now fixed, but the same non-existent commands still appear in two other pages:
 
 | File | Phantom commands used |
 |---|---|
@@ -116,7 +112,7 @@ The non-existent commands are not confined to cli.mdx:
 
 ### Recommendation
 
-Rewrite cli.mdx to match the actual `index.ts:31-87` help text. Audit installation.mdx and troubleshooting.mdx for the same phantom commands. Consider generating cli.mdx from the actual command implementations to prevent future drift.
+Audit both pages against the actual CLI. Either remove references to unimplemented commands or replace them with real equivalents (e.g., `wai auth status` instead of `wai status`).
 
 ---
 
@@ -124,13 +120,9 @@ Rewrite cli.mdx to match the actual `index.ts:31-87` help text. Audit installati
 
 ### "Ingest" / "index" as verbs
 
-The tutorial (writing-your-first-page.mdx line 16) says `wai snapshot` "indexes the photos, extracts metadata." The actual command just hashes files and copies them to the vault — it doesn't parse, index, or extract metadata. cli.mdx says "Ingest a data source into the vault."
+writing-your-first-page.mdx line 16 says `wai snapshot` "indexes the photos, extracts metadata." The actual command just hashes files and copies them to the vault — it doesn't parse, index, or extract metadata.
 
-**Recommendation**: Use **"snapshot"** as the verb. "Snapshot a directory" = hash its files and register them as a source. Don't say "ingest" or "index" unless the command actually does that.
-
-### "Agent harness" vs "plugin"
-
-installation.mdx says "Agent harness — a plugin for your AI coding tool" and references `wai plugin install`. The system uses both terms to refer to the MCP integration. This is fine as-is: "agent harness" is the concept, "plugin" is the implementation mechanism. Just note that `wai plugin install` doesn't exist yet (see Problem 3).
+**Recommendation**: Use **"snapshot"** as the verb. Don't say "ingest" or "index" unless the command actually does that.
 
 ### Command group placement
 
@@ -144,7 +136,7 @@ Consider moving `source list` from **Discovery** to **Data** in the CLI help, si
 |---|---|---|
 | Fix evals.mdx completeness grader | `evals.mdx` | Low — documentation only |
 | Fix citation-system.mdx "archive" straggler | `citation-system.mdx` | Low — one word |
-| Rewrite cli.mdx | `cli.mdx` | Low — documentation only |
+| Settle "page type" definition | `glossary.mdx` or `page-types.mdx`, `evals.mdx` | Low — documentation only |
 | Fix phantom commands in installation/troubleshooting | `installation.mdx`, `troubleshooting.mdx` | Low — documentation only |
 | Use "data source" consistently | Multiple docs | Low — wording only |
 | Move `source list` to Data group | `index.ts` | Low — cosmetic |
