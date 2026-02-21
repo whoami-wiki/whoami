@@ -58,7 +58,7 @@ const mdxComponents = {
     </pre>
   ),
   blockquote: ({ children }: { children?: ReactNode }) => (
-    <blockquote className="border-l-2 border-neutral-300 dark:border-neutral-600 pl-4 italic text-muted mb-4">
+    <blockquote className="border-l-2 border-neutral-300 dark:border-neutral-600 pl-4 text-muted mb-4 [quotes:none]">
       {children}
     </blockquote>
   ),

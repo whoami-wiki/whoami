@@ -25,7 +25,7 @@ export const MarkdownBlocks = {
     return <ul className="leading-6 flex flex-col gap-1">{children}</ul>;
   },
   li: ({ children }: { children?: ReactNode }) => {
-    return <li className="leading-6 text-base list-disc">{children}</li>;
+    return <li className="leading-6.5 text-base list-disc">{children}</li>;
   },
   code: ({ children }: { children?: ReactNode }) => {
     return (

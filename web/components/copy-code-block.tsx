@@ -18,7 +18,7 @@ export function CopyCodeBlock({ children }: { children?: ReactNode }) {
     <div className="relative group flex flex-row items-start w-full bg-neutral-900 rounded-lg pr-3">
       <pre
         ref={preRef}
-        className="text-sm font-mono p-4 overflow-x-auto  text-neutral-100 [&_code]:border-none [&_code]:p-0 [&_code]:bg-transparent [&_code]:text-inherit w-full bg-transparent"
+        className="text-sm font-mono p-4 overflow-x-auto text-neutral-100 [&_code]:border-none [&_code]:p-0 [&_code]:bg-transparent [&_code]:text-inherit min-w-0 flex-1 bg-transparent"
       >
         {children}
       </pre>
