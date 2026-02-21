@@ -65,10 +65,10 @@ jobs:
           ulimit -n 65536
           pnpm dist -- --arm64 --x64
         working-directory: desktop
-        # env:
-        #   APPLE_ID: ${{ secrets.APPLE_ID }}
-        #   APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-        #   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
 
       - name: Publish release
         run: gh release create "$GITHUB_REF_NAME" desktop/dist-electron/*.{dmg,zip} --title "$GITHUB_REF_NAME" --notes-file desktop/RELEASE_NOTES.md
