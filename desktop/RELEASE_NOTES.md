@@ -1,9 +1,7 @@
-Code signing, inline media playback, and dual architecture builds.
-
-Features:
-- Inline audio and video playback in wiki pages via bundled ffmpeg
-- Split wiki local settings for cleaner configuration
+Trim MediaWiki bundle from 462MB to 128MB to fix code signing failures on CI.
 
 Improvements:
-- App is now signed with Developer ID certificate and notarized (pending Apple service recovery)
-- Release builds include both Apple Silicon (arm64) and Intel (x64) artifacts
+- Remove unused extensions, skins, languages, and test/doc artifacts from MediaWiki bundle
+- Bundle shrinks from 462MB / 29k files to 128MB / 10k files
+- DMG size reduced from 208MB to 132MB
+- Resolves EMFILE (too many open files) errors during code signing

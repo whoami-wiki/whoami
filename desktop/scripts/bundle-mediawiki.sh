@@ -153,6 +153,10 @@ for dir in "$OUT"/extensions/*/i18n "$OUT"/skins/*/i18n; do
   [ -d "$dir" ] && find "$dir" -name '*.json' ! -name 'en.json' ! -name 'qqq.json' -delete
 done
 
+# Delete Scribunto's bundled Lua binaries (app uses its own Lua; these are
+# built against macOS 10.7 SDK which Apple rejects during notarization)
+rm -rf "$OUT/extensions/Scribunto/includes/Engines/LuaStandalone/binaries"
+
 # Delete docs, tests, and dev artifacts
 rm -rf "$OUT/tests" "$OUT/docs"
 for dir in "$OUT"/extensions/*/tests "$OUT"/skins/*/tests; do

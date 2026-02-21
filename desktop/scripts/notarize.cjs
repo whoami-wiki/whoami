@@ -26,10 +26,32 @@ exports.default = async function notarize(context) {
   execSync(`ditto -c -k --keepParent "${appPath}" "${zipPath}"`);
 
   try {
-    execSync(
+    const result = execSync(
       `xcrun notarytool submit "${zipPath}" --apple-id "${appleId}" --password "${password}" --team-id "${teamId}" --wait`,
-      { stdio: "inherit" }
+      { stdio: "pipe", encoding: "utf-8" }
     );
+    process.stdout.write(result);
+
+    // Extract submission ID for potential log retrieval
+    const idMatch = result.match(/id:\s*([0-9a-f-]+)/);
+    const submissionId = idMatch ? idMatch[1] : null;
+
+    if (result.includes("status: Invalid") || result.includes("status: Rejected")) {
+      if (submissionId) {
+        console.log("\n  • fetching notarization log...");
+        try {
+          const log = execSync(
+            `xcrun notarytool log "${submissionId}" --apple-id "${appleId}" --password "${password}" --team-id "${teamId}"`,
+            { encoding: "utf-8" }
+          );
+          console.log(log);
+        } catch (e) {
+          console.log("  • failed to fetch notarization log:", e.message);
+        }
+      }
+      throw new Error("Notarization failed with status: Invalid");
+    }
+
     execSync(`xcrun stapler staple "${appPath}"`, { stdio: "inherit" });
   } finally {
     fs.rmSync(zipPath, { force: true });
