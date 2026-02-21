@@ -1,50 +1,115 @@
 ---
 title: Editorial Standards
-description: "Guidelines for tone, structure, and quality in wiki content"
+description: "Editorial principles, writing style, and quoting conventions for wiki content"
 ---
 
-These standards guide how pages should be written — both by AI agents and human contributors. The goal is a consistent, readable encyclopedia that treats personal history with the same rigor as any other subject.
+These standards guide how pages should be written by AI agents. The goal is a consistent, readable encyclopedia that treats personal history with the same rigor as any other subject.
 
-## Tone
+## One canonical home
 
-Pages are written in **neutral, encyclopedic prose**. The tone is informative and third-person, not sentimental or editorializing.
+Every piece of content lives in exactly one place. Other pages link to it, they don't duplicate it. If a voice note transcription appears on an episode page, it doesn't also appear on the research notes section of the talk page. The talk page just references the episode page.
 
-- Write "Smith traveled to Tokyo in March 2019" not "I had an amazing trip to Tokyo"
-- State facts and let the reader draw conclusions
-- Use past tense for events, present tense for ongoing states
+## Pages are cheap, links are structure
 
-## Structure
+When in doubt, make a new page. A story that takes more than two paragraphs to tell properly deserves its own page. The person page becomes a hub of links, not a monolith of content.
 
-Every page should have:
+## Documentary voice on person pages
 
-- **Lead paragraph** — a concise summary of the topic before any section headings, front-loading the most important information
-- **Infobox** — a structured sidebar with key facts (dates, locations, people involved)
-- **Sections** — the body, organized chronologically or thematically with clear headings
-- **Citations** — references linking claims back to source data
-- **Categories** — tags grouping the page by type and theme
+Third person, past tense, factual. The person page reads like a Wikipedia article. "Jane attended Humboldt University" not "She went to this school called Humboldt." No direct address to the reader. No editorial commentary on whether something was good or bad.
 
-## Sourcing
+## Episode pages can breathe
 
-All factual claims should be cited. A citation links a statement to a specific piece of source data in the vault — a photo, a message, a transaction, a voice note.
+Episode pages have more latitude in voice. They're still third-person and factual, but they can be more narrative: setting scenes, building to punchlines, letting the voice notes speak at length. They're the difference between an encyclopedia entry and a well-told story.
 
-- Prefer primary sources (the actual photo, message, or document) over inferred information
-- When information is inferred or uncertain, note it on the talk page
-- Never fabricate details that aren't supported by the data
+## Agents should create episode pages as follow-up tasks
 
-## Handling incomplete data
+When an agent is processing a message thread and encounters a rich narrative sequence (typically 3+ voice notes telling a story, or a sustained back-and-forth about a specific event), it should note this on the talk page and create a follow-up task to build an episode page for it. The person page gets a one-sentence summary with a link; the episode page gets the full treatment.
 
-Not every page will have complete information. When data is missing:
+## The em dash problem
 
-- State what is known and leave gaps rather than speculating
-- Use red links for people and places that don't have their own page yet
-- Add notes on the talk page about what additional data could improve the page
+Em dashes should be rare. Agents tend to use them as a Swiss Army knife for parenthetical asides, quote attributions, dramatic pauses, inline lists, and clause connectors. When one punctuation mark does every job, it stops doing any job.
 
-## Quality expectations
+Rules for em dashes:
 
-A good page:
+- Maximum roughly 1 per paragraph, and many paragraphs should have zero
+- Never use double em dashes (X -- Y -- Z) to create a parenthetical. Use actual parentheses, or restructure into two sentences
+- Never use em dashes to connect a quote to its attribution. Use a colon, or integrate the quote into the sentence grammatically
+- If you're tempted to use an em dash, first try: a period and new sentence, a colon, parentheses, or restructuring the clause order. If none of those work, the em dash is probably justified
 
-- Can be understood by someone with no prior context
-- Has at least one citation per major claim
-- Links to related pages in the encyclopedia
-- Is categorized correctly by type and theme
-- Has a talk page with any editorial notes or open questions
+Before:
+
+> She initially intended to study medicine -- her grandfather's influence and family pressure pointed that direction -- but walked away from it entirely.
+
+After:
+
+> She initially intended to study medicine (her grandfather had been a doctor, and several relatives followed the same path) but walked away from it entirely.
+
+Before:
+
+> The conversation took off on 15 April with over 300 messages. The key moment came when she mentioned her hometown. His response -- "wait, I'm from there too" -- changed everything.
+
+After:
+
+> The conversation reached 300 messages on 15 April. The turning point was discovering they were from the same hometown: she mentioned it offhand, and he replied "wait, I'm from there too."
+
+## No editorializing
+
+An encyclopedia states facts. It does not tell the reader how to feel about them. Words like "staggering," "extraordinary," "harrowing," "spectacular," "pivotal," "ecstatic," and "surgical precision" are editorial judgments. Replace them with specifics.
+
+Before:
+
+> The conversation density during this period was staggering: 1,800 messages in five days.
+
+After:
+
+> They exchanged 1,800 messages in five days, averaging 360 per day.
+
+Before:
+
+> His findings, presented with surgical precision.
+
+After:
+
+> His findings were detailed.
+
+Or better: just present the findings and let the reader see the precision for themselves. "Show don't tell" applies to encyclopedias too.
+
+**Words to avoid:** staggering, extraordinary, remarkable, harrowing, spectacular, pivotal, ecstatic, surgical, devastating, profound, masterful, breathtaking, unmistakable, undeniable. If you catch yourself reaching for one of these, you're editorializing. State the fact instead.
+
+## Sentence length
+
+Keep sentences short and direct. If a sentence exceeds roughly 40 words, it probably needs to be split.
+
+Before:
+
+> Jane Doe (born 3 May 1997) is a Berlin-based photographer and former classmate whom the wiki owner befriended over Instagram DMs in 2021, and their conversation -- spanning 6,200 messages across 14 months -- represents the largest thread in the archive, evolving from a casual exchange about film cameras into a deeply personal friendship culminating in a visit to Berlin and a collaborative zine.
+
+After:
+
+> Jane Doe (born 3 May 1997) is a Berlin-based photographer and former classmate. She and the wiki owner exchanged 6,200 Instagram DMs between March 2021 and May 2022, the largest thread in the archive. They connected over film photography, collaborated on a zine, and met in person in Berlin in November 2021. The conversation faded after Jane moved to Tokyo in early 2022.
+
+## Avoid "genuine," "genuinely"
+
+These are common LLM verbal tics. Cut them everywhere. If something is genuine, the facts will show that without the label.
+
+## Voice and register
+
+Person pages use encyclopedic voice: third person, past tense, neutral. No rhetorical questions. No direct address. No "what began as X evolved into Y" narrative framing. State what happened, in what order, with what evidence.
+
+Episode pages can be more narrative but should still avoid editorializing. The storytelling comes from sequencing, detail, and well-chosen quotes, not from the writer's adjectives.
+
+## Quoting conventions
+
+Direct quotes from messages and voice notes are valuable primary source material. Use them when:
+
+- The person's exact words matter (confessions, self-descriptions, turning points)
+- The phrasing is distinctive and can't be paraphrased without losing character
+- The quote is short (under ~30 words)
+
+Don't use quotes for:
+
+- Routine factual statements that can be paraphrased
+- Padding: three quotes in a row saying similar things
+- Showing off the archive ("look how much data we have")
+
+Integrate quotes grammatically into sentences where possible, rather than using blockquote templates. Save `{{Blockquote}}` for extended passages (2+ sentences) that need to stand alone.

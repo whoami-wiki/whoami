@@ -3,79 +3,125 @@ title: Citation System
 description: "How citations link wiki content back to source material"
 ---
 
-Citations are how wiki pages reference the underlying source data. Every factual claim in a page should link back to a specific piece of evidence in the vault.
+On Wikipedia, citations exist for public verifiability. Here, the sources are private archives. Citations serve a different purpose: traceability. When a future agent (or the wiki owner) reads a claim and wants to find the original context, the citation should point them to a specific, locatable place in the archive.
 
-## How citations work
+## MediaWiki's native ref system
 
-Citations use MediaWiki's `<ref>` syntax with custom templates that identify the source type and vault location. When rendered, they appear as numbered footnotes with links back to the source material.
+All inline citations use `<ref>` tags, rendered via `<references />` at the bottom of the page in a `== References ==` section. This is standard MediaWiki and requires no custom extensions.
+
+```wikitext
+Jane was born in Munich and moved to Berlin at eighteen.<ref name="ig-2021-04-15">
+{{Cite message|snapshot=a1b2c3d4e5f6|date=2021-04-15
+|thread=janedoe_12345|note=Family background exchange}}</ref>
+```
 
 ## Citation templates
 
-### Messages
+Four templates, matching common source types in personal archives.
 
-For citing a specific message or conversation:
+### Cite message
 
-```wikitext
-<ref>{{cite message
-  |platform=WhatsApp
-  |participants=Alice, Bob
-  |date=2023-03-15
-  |hash=abc123def456
-}}</ref>
-```
-
-Renders as a footnote linking to the stored message, showing the platform, participants, and date.
-
-### Voice notes
-
-For citing audio recordings:
+For text message content (DMs, chats).
 
 ```wikitext
-<ref>{{cite voice
-  |speaker=Alice
-  |date=2023-06-20
-  |duration=2:34
-  |hash=def789ghi012
-}}</ref>
+{{Cite message|snapshot=a1b2c3d4e5f6|date=2021-04-15
+|thread=janedoe_12345|note=Family background exchange}}
 ```
 
-### Photos
+Renders as: Instagram DM, 15 April 2021 (snapshot a1b2c3d4)
 
-For citing a specific photograph:
+### Cite voice note
+
+For voice note content.
 
 ```wikitext
-<ref>{{cite photo
-  |date=2023-07-04
-  |location=Central Park, New York
-  |hash=ghi345jkl678
-}}</ref>
+{{Cite voice note|number=7|date=2021-06-03|speaker=Jane
+|snapshot=a1b2c3d4e5f6|note=Darkroom discovery story}}
 ```
 
-Renders with a thumbnail preview of the photo and its metadata.
+Renders as: Voice note #7, Jane, 3 June 2021
 
-### Videos
+### Cite photo
 
-For citing video recordings:
+For facts derived from photos or screenshots.
 
 ```wikitext
-<ref>{{cite video
-  |date=2023-12-25
-  |duration=1:15:30
-  |hash=jkl901mno234
-}}</ref>
+{{Cite photo|file=IMG_2847.jpg|hash=...|date=2021-05-20
+|snapshot=a1b2c3d4e5f6|note=University ID confirming enrollment}}
 ```
 
-## Vault hashes
+Renders as: Photo: IMG\_2847.jpg, 20 May 2021
 
-Each citation includes a `hash` field — the content-addressed identifier of the source file in the vault. This ensures citations point to a specific, immutable piece of data. Even if the original file is moved or renamed, the citation still resolves.
+### Cite video
 
-## Footnotes section
+For video content.
 
-Pages include a footnotes section at the bottom that collects all citations:
+```wikitext
+{{Cite video|file=berlin_gallery_opening.mp4|date=2021-11-12
+|snapshot=a1b2c3d4e5f6|note=Gallery opening footage}}
+```
+
+Renders as: Video: berlin\_gallery\_opening.mp4, 12 November 2021
+
+### Common fields
+
+All templates include:
+
+- **snapshot** — the content-addressed archive snapshot hash (first 8 chars is fine for display)
+- **date** — the date of the source material
+- **note** — brief human-readable description of what this citation supports
+
+## Granularity
+
+Not every sentence needs a citation. The goal is traceability, not exhaustiveness.
+
+### Always cite
+
+- Biographical facts (birth place, school name, family details). These are scattered across thousands of messages and hard to relocate without a pointer
+- Direct quotes and blockquotes. Cite the date and message source or voice note number
+- Dates of specific events ("they met on 12 November"). Cite the source confirming the date
+- Statistics and counts. Cite how they were derived
+- Claims that were corrected or disputed on the talk page. Cite the resolution source
+
+### Don't need individual citations
+
+- Broadly sourced observations ("photography became a recurring topic") that emerge across the entire thread
+- Information already attributed inline ("On 15 April, Jane said...") where the date itself serves as the locator
+- Content on episode pages where the entire page draws from a defined set of voice notes listed at the top
+
+## Named refs for reuse
+
+Many facts from the same conversation session share a source. Use named refs:
+
+```wikitext
+Jane's mother is from Munich.<ref name="ig-2021-04-15" />
+Her father works in Zurich.<ref name="ig-2021-05-02">
+{{Cite message|snapshot=a1b2c3d4e5f6|date=2021-05-02
+|thread=janedoe_12345|note=Family details, father in Zurich}}</ref>
+She has a younger brother named Max.<ref name="ig-2021-04-15" />
+```
+
+## Page structure for references
+
+Every person page and episode page ends with two sections:
 
 ```wikitext
 == References ==
-{{reflist}}
+<references />
+
+== Sources ==
+{{Cite source|type=messages|snapshot=a1b2c3d4e5f6
+|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread...}}
 ```
 
-This renders as a numbered list of all sources cited in the page, similar to a Wikipedia references section.
+The **References** section contains the auto-generated numbered footnotes from `<ref>` tags. The **Sources** section contains bibliography-style `{{Cite source}}` entries describing the full archives consulted. References are inline citations; Sources are the bibliography. Both are needed.
+
+## Migration
+
+Existing pages should add citations incrementally. An agent doesn't need to cite every claim in one pass. A reasonable approach:
+
+1. **First pass** — cite all biographical facts in the Background section and all direct quotes/blockquotes
+2. **Second pass** — cite date-specific events in the chronological arc
+3. **Third pass** — cite anything flagged as corrected or disputed on the talk page
+
+This can be spread across multiple tasks.

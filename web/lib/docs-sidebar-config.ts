@@ -33,7 +33,7 @@ const sidebarLayout: SidebarSectionConfig[] = [
   {
     title: "Learn More",
     items: [
-      { title: "Concepts", slug: "concepts" },
+      { title: "Design", slug: "design" },
       { title: "Page Types", slug: "page-types" },
       { title: "Editorial Standards", slug: "editorial-standards" },
       { title: "Data Sources", slug: "data-sources" },
