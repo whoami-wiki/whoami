@@ -3,94 +3,242 @@ title: CLI
 description: "Complete reference for all wai commands"
 ---
 
-The `wai` command-line tool is the primary interface for managing your whoami.wiki instance. It handles data ingestion, wiki management, and task queue operations.
+The `wai` command-line tool is the primary interface for interacting with your whoami.wiki instance. It handles page editing, data ingestion, task management, and backup operations.
 
-## General
+## Global flags
 
-### `wai status`
+These flags are available on every command:
 
-Show the status of the wiki, CLI, and agent harness connection.
+- `-j, --json` — output as JSON
+- `-q, --quiet` — suppress non-essential output
+- `-h, --help` — show help
+- `-V, --version` — show version
 
-```bash
-wai status
-```
+## Pages
 
-### `wai doctor`
+### `wai read`
 
-Run diagnostics to verify everything is configured correctly.
-
-```bash
-wai doctor
-wai doctor --verbose  # include detailed output for bug reports
-```
-
-### `wai config`
-
-View or modify configuration.
+Read a wiki page.
 
 ```bash
-wai config list              # show all settings
-wai config set <key> <value> # set a value
-wai config get <key>         # get a value
-```
-
-## Data
-
-### `wai snapshot`
-
-Ingest a data source into the vault.
-
-```bash
-wai snapshot <path>
-wai snapshot ~/Photos/summer-2023
-wai snapshot ~/exports/whatsapp-chat.txt
-wai snapshot ~/exports/bank-transactions.csv --batch-size 100
+wai read <title>
+wai read "Summer 2023" --raw
+wai read "Summer 2023" --section 2
+wai read "Summer 2023" --offset 10 --limit 50
 ```
 
 **Flags**:
-- `--batch-size <n>` — process files in batches of n (useful for large datasets)
+- `-s, --section <n>` — read only section number n
+- `--offset <n>` — start output from line n
+- `-n, --limit <n>` — limit output to n lines
+- `--raw` — output raw wikitext without formatting
+
+### `wai write`
+
+Write (overwrite) an entire page.
+
+```bash
+wai write "Summer 2023" notes.txt
+wai write "Summer 2023" -c "Page content here"
+wai write "Summer 2023" -f notes.txt -m "Import notes"
+echo "content" | wai write "Summer 2023"
+```
+
+**Flags**:
+- `-c, --content <text>` — provide content inline
+- `-f, --file <path>` — read content from a file
+- `-m, --summary <text>` — edit summary
+
+Content can be provided via `-c`, `-f`, a positional file argument, or stdin.
+
+### `wai edit`
+
+Edit a page using find-and-replace.
+
+```bash
+wai edit "Summer 2023" --old "old text" --new "new text"
+wai edit "Summer 2023" --old "typo" --new "fixed" --replace-all
+wai edit "Summer 2023" --old "old" --new "new" --dry-run
+```
+
+**Flags**:
+- `--old <text>` — text to find (required)
+- `--new <text>` — replacement text (required)
+- `--replace-all` — replace all occurrences (default: first only)
+- `--dry-run` — preview changes without applying
+- `-m, --summary <text>` — edit summary
+
+### `wai create`
+
+Create a new page.
+
+```bash
+wai create "New Page" -c "Page content"
+wai create "New Page" -f draft.txt -m "Initial draft"
+echo "content" | wai create "New Page"
+```
+
+**Flags**:
+- `-c, --content <text>` — provide content inline
+- `-f, --file <path>` — read content from a file
+- `-m, --summary <text>` — edit summary
 
 ### `wai search`
 
-Search across your data.
+Full-text search across all pages.
 
 ```bash
 wai search "tokyo 2023"
-wai search --type photos "birthday"
+wai search "birthday" --limit 20
 ```
 
 **Flags**:
-- `--type <type>` — filter by data type (photos, messages, voice, location, financial)
+- `-n, --limit <n>` — maximum number of results (default: 10)
 
-## Wiki
+### `wai upload`
 
-### `wai wiki restart`
-
-Restart the local MediaWiki instance.
+Upload a file to the wiki.
 
 ```bash
-wai wiki restart
+wai upload photo.jpg
+wai upload photo.jpg --name "Vacation_Photo.jpg"
+wai upload photo.jpg -d "Photo from vacation" -m "Upload vacation photo"
 ```
 
-### `wai wiki backup`
+**Flags**:
+- `--name <wiki-name>` — override the filename on the wiki
+- `-d, --description <text>` — file description
+- `-m, --comment <text>` — upload comment
 
-Create a backup of your entire encyclopedia.
+## Sections
+
+### `wai section list`
+
+List all sections of a page.
 
 ```bash
-wai wiki backup --output ~/whoami-backup.tar.gz
+wai section list "Summer 2023"
 ```
 
-### `wai wiki restore`
+### `wai section read`
 
-Restore from a backup.
+Read a specific section of a page.
 
 ```bash
-wai wiki restore --input ~/whoami-backup.tar.gz
+wai section read "Summer 2023" 2
+wai section read "Summer 2023" 2 --raw
 ```
+
+**Flags**:
+- `--offset <n>` — start output from line n
+- `-n, --limit <n>` — limit output to n lines
+- `--raw` — output raw wikitext without formatting
+
+### `wai section update`
+
+Update a specific section of a page.
+
+```bash
+wai section update "Summer 2023" 2 -c "New section content"
+wai section update "Summer 2023" 2 -f section.txt -m "Update section"
+```
+
+**Flags**:
+- `-c, --content <text>` — provide content inline
+- `-f, --file <path>` — read content from a file
+- `-m, --summary <text>` — edit summary
+
+## Talk pages
+
+### `wai talk read`
+
+Read a page's talk page.
+
+```bash
+wai talk read "Summer 2023"
+wai talk read "Summer 2023" --thread "Location details"
+wai talk read "Summer 2023" --raw
+```
+
+**Flags**:
+- `--thread <name>` — read a specific thread
+- `--raw` — output raw wikitext without formatting
+
+### `wai talk create`
+
+Create a new talk page thread.
+
+```bash
+wai talk create "Summer 2023" -s "Missing details" -c "What hotel did we stay at?"
+```
+
+**Flags**:
+- `-s, --subject <text>` — thread subject (required)
+- `-c, --content <text>` — provide content inline
+- `-f, --file <path>` — read content from a file
+- `-m, --summary <text>` — edit summary
+
+## Discovery
+
+### `wai link`
+
+Show incoming and outgoing links for a page.
+
+```bash
+wai link "Summer 2023"
+wai link "Summer 2023" --direction out
+wai link "Summer 2023" --direction in
+```
+
+**Flags**:
+- `--direction <in|out|both>` — filter link direction (default: both)
+
+### `wai category`
+
+List all categories, or list pages within a specific category.
+
+```bash
+wai category
+wai category "Trips"
+```
+
+### `wai changes`
+
+Show recent changes across the wiki.
+
+```bash
+wai changes
+wai changes --limit 20
+```
+
+**Flags**:
+- `-n, --limit <n>` — maximum number of results (default: 10)
+
+### `wai source list`
+
+List all pages in the Source namespace.
+
+```bash
+wai source list
+```
+
+### `wai place`
+
+Look up a place using the Google Places API.
+
+```bash
+wai place "Eiffel Tower"
+wai place "coffee shops near me" --limit 10
+```
+
+**Flags**:
+- `-n, --limit <n>` — maximum number of results (default: 5)
+
+Requires a Google Places API key via the `GOOGLE_PLACES_API_KEY` environment variable or `googlePlacesApiKey` in `~/.whoami/config.json`.
 
 ## Task queue
 
-Agents use the task queue to coordinate work. These commands are primarily used by agent harness plugins, but you can also use them directly.
+Agents use the task queue to coordinate work. These commands can also be used directly.
 
 ### `wai task list`
 
@@ -99,15 +247,21 @@ List tasks in the queue.
 ```bash
 wai task list
 wai task list --status pending
-wai task list --status claimed
+wai task list --status in-progress
+wai task list --status done
+wai task list --status failed
 ```
+
+**Flags**:
+- `-s, --status <status>` — filter by status: `pending`, `in-progress`, `done`, `failed` (default: pending)
+- `-n, --limit <n>` — maximum number of results
 
 ### `wai task read`
 
 Read the details of a specific task.
 
 ```bash
-wai task read <task-id>
+wai task read <id>
 ```
 
 ### `wai task create`
@@ -115,58 +269,138 @@ wai task read <task-id>
 Create a new task.
 
 ```bash
-wai task create --title "Write page about summer trip" --type write
+wai task create -m "Write page about summer trip"
+wai task create -m "Categorize recent uploads" --source snapshot-abc123
 ```
+
+**Flags**:
+- `-m, --message <text>` — task description (required)
+- `--source <name>` — associate the task with a source
 
 ### `wai task claim`
 
 Claim a pending task for processing.
 
 ```bash
-wai task claim <task-id>
+wai task claim <id>
 ```
 
 ### `wai task complete`
 
-Mark a task as completed.
+Mark an in-progress task as completed.
 
 ```bash
-wai task complete <task-id>
+wai task complete <id>
+wai task complete <id> -m "Created 3 new pages"
 ```
+
+**Flags**:
+- `-m, --message <text>` — output message to record
 
 ### `wai task fail`
 
-Mark a task as failed with a reason.
+Mark an in-progress task as failed.
 
 ```bash
-wai task fail <task-id> --reason "Missing location data"
+wai task fail <id>
+wai task fail <id> -m "Missing location data"
 ```
+
+**Flags**:
+- `-m, --message <text>` — failure reason to record
 
 ### `wai task requeue`
 
-Return a claimed or failed task to the pending queue.
+Return a failed or in-progress task to the pending queue.
 
 ```bash
-wai task requeue <task-id>
+wai task requeue <id>
 ```
 
-## Plugin
+## Data
 
-### `wai plugin install`
+### `wai snapshot`
 
-Install an agent harness plugin.
+Snapshot a directory into the content-addressable vault and create a Source page.
 
 ```bash
-wai plugin install claude-code
-wai plugin install codex
-wai plugin install opencode
-wai plugin install claude-code --force  # reinstall
+wai snapshot ~/Photos/summer-2023
+wai snapshot ~/exports/chat-logs --name "WhatsApp 2023"
+wai snapshot ~/data --dry-run
 ```
 
-### `wai plugin list`
+**Flags**:
+- `--name <name>` — override the source page name (default: directory basename)
+- `--dry-run` — preview what would be stored without writing
 
-List installed plugins.
+## Backup
+
+### `wai export`
+
+Export a full wiki backup as a tar archive.
 
 ```bash
-wai plugin list
+wai export ~/backups
+wai export ~/backups --dry-run
 ```
+
+**Flags**:
+- `--dry-run` — preview what would be exported without writing
+
+### `wai import`
+
+Import from a backup archive.
+
+```bash
+wai import ~/backups/whoami-2023-12-01.tar
+wai import backup.tar --force
+wai import backup.tar --dry-run
+```
+
+**Flags**:
+- `--force` — overwrite existing data
+- `--dry-run` — preview backup contents without restoring
+
+## Auth
+
+### `wai auth login`
+
+Store wiki credentials. Prompts interactively for any missing values.
+
+```bash
+wai auth login
+wai auth login --server http://localhost:8080 --username admin --password secret
+```
+
+**Flags**:
+- `--server <url>` — wiki server URL
+- `--username <name>` — wiki username
+- `--password <pass>` — wiki password
+
+### `wai auth logout`
+
+Remove stored credentials.
+
+```bash
+wai auth logout
+```
+
+### `wai auth status`
+
+Show connection status and stored credential info.
+
+```bash
+wai auth status
+```
+
+## Update
+
+### `wai update`
+
+Update the CLI to the latest version.
+
+```bash
+wai update
+```
+
+The CLI also checks for updates automatically in the background once every 24 hours and prints a notice to stderr if a newer version is available.
