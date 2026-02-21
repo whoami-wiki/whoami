@@ -6,10 +6,10 @@ An audit of every noun and term used as a concept in the whoami.wiki project, id
 
 The archive → vault rename is fully resolved. The remaining issues are:
 
-1. **page-types.mdx and the glossary disagree** on what the page types are and how many exist
-2. **"Source" still means four different things** depending on context, though the dual-section citation structure is now clarified
-3. **cli.mdx documentation** is substantially out of sync with the actual CLI — and the same phantom commands appear in installation.mdx and troubleshooting.mdx
-4. **evals.mdx uses `== Sources ==`** where it means `== References ==`
+1. **"Source" still means four different things** depending on context, though the dual-section citation structure is now clarified
+2. **cli.mdx documentation** is substantially out of sync with the actual CLI — and the same phantom commands appear in installation.mdx and troubleshooting.mdx
+3. **evals.mdx uses `== Sources ==`** where it means `== References ==`
+4. **evals.mdx references a stale page type list**
 
 ---
 
@@ -28,52 +28,15 @@ Otherwise the current state is correct:
 
 ---
 
-## Problem 1: page-types.mdx and glossary disagree
+## Resolved: page types aligned
 
-The glossary defines **five** page types:
+page-types.mdx and the glossary now agree on four page types: **Person**, **Episode**, **Talk**, **Task**. The Conversation and Reflection types have been removed.
 
-| Page type | Glossary | page-types.mdx |
-|---|---|---|
-| Person | Yes | Yes |
-| Episode | Yes | Yes |
-| Conversation | Yes | No — absent entirely |
-| Reflection | Yes | No — absent entirely |
-| Task | Yes (operational page) | Yes (but documented as a namespace, not a page type) |
-
-Meanwhile page-types.mdx says "four page types" and documents:
-
-1. **Person** — a page type (main namespace)
-2. **Episode** — a page type (main namespace)
-3. **Talk** — the `Talk:` namespace (editorial discussion pages, not a page type)
-4. **Task** — the `Task:` namespace (work logs, not a page type)
-
-This creates three problems:
-
-- **Conversation** and **Reflection** exist in the glossary but are never documented. An agent reading page-types.mdx doesn't know these types exist.
-- **Talk** in page-types.mdx describes the `Talk:` namespace, which the glossary correctly separates from page types. The glossary's "Talk page" entry says "Not to be confused with the Conversation page type."
-- **Task** in page-types.mdx describes the `Task:` namespace. The glossary lists Task as both a page type and a namespace, which is fine, but page-types.mdx frames it as namespace documentation rather than page type documentation.
-
-### Additionally: evals.mdx references a stale set
-
-evals.mdx line 28 says test cases span "all four page types (Person, Episode, Talk, Task)." This uses the old "Talk" page type name and doesn't include Conversation or Reflection.
-
-### Recommendation
-
-Align page-types.mdx with the glossary. The page should document all five page types:
-
-1. **Person** — biographical article (main namespace)
-2. **Episode** — narrative page for a specific story (main namespace)
-3. **Conversation** — page built from chat messages or voice notes (main namespace)
-4. **Reflection** — introspective page synthesized from patterns across multiple sources (main namespace)
-5. **Task** — operational page tracking editorial work (`Task:` namespace)
-
-Move the Talk namespace documentation to its own section or a separate page. Talk pages are part of the wiki's infrastructure, not a page type.
-
-Update evals.mdx to reference the correct five page types.
+One stale reference remains: **evals.mdx line 28** says test cases span "all four page types (Person, Episode, Talk, Task)" — the list happens to be correct now, but should be verified against the actual test suite if Conversation/Reflection test cases existed.
 
 ---
 
-## Problem 2: "Source" is overloaded
+## Problem 1: "Source" is overloaded
 
 "Source" still means at least four different things:
 
@@ -115,7 +78,7 @@ evals.mdx line 58 says the completeness grader checks for `== Sources ==` with `
 
 ---
 
-## Problem 3: cli.mdx is out of sync
+## Problem 2: cli.mdx is out of sync
 
 The reference documentation in `web/content/docs/cli.mdx` documents commands that don't exist in the actual CLI, and has wrong flags for commands that do exist. **This is unchanged from the previous audit.**
 
@@ -179,7 +142,6 @@ Consider moving `source list` from **Discovery** to **Data** in the CLI help, si
 
 | Change | Files affected | Risk |
 |---|---|---|
-| Align page-types.mdx with glossary | `page-types.mdx`, `evals.mdx` | Low — documentation only |
 | Fix evals.mdx completeness grader | `evals.mdx` | Low — documentation only |
 | Fix citation-system.mdx "archive" straggler | `citation-system.mdx` | Low — one word |
 | Rewrite cli.mdx | `cli.mdx` | Low — documentation only |
