@@ -29,10 +29,10 @@ After installation, the app will:
 3. Verify everything is connected
 
 ```bash
-wai status
+wai auth status
 ```
 
-You should see confirmation that both the wiki and CLI are ready.
+You should see confirmation that the CLI is connected to the wiki.
 
 ## Install the agent harness plugin
 
@@ -40,33 +40,31 @@ The agent harness connects your AI coding tool to your wiki. Install the plugin 
 
 ### Claude Code
 
-```bash
-wai plugin install claude-code
-```
-
-This registers the whoami.wiki MCP server with Claude Code, giving it access to wiki tools.
-
-### Codex
+Install the whoami plugin from the Claude Code plugin marketplace:
 
 ```bash
-wai plugin install codex
+claude plugin add whoami
 ```
 
-### OpenCode
+This gives Claude Code access to wiki tools through the `wai` CLI.
 
-```bash
-wai plugin install opencode
-```
+### Codex / OpenCode
+
+These tools can use the `wai` CLI directly. Ensure the `wai` binary is in your PATH and run `wai auth login` to authenticate before starting a session.
 
 ## Verify the setup
 
 Run a quick check to confirm everything is connected:
 
 ```bash
-wai doctor
+wai auth status
 ```
 
-This verifies the wiki is running, the CLI is installed, and the agent harness can communicate with both.
+This verifies the CLI can connect to the wiki. You can also try a quick search to confirm everything is working end-to-end:
+
+```bash
+wai search "test"
+```
 
 ## Next steps
 

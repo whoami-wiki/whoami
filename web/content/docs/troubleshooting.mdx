@@ -7,19 +7,21 @@ Common issues and how to fix them.
 
 ## Wiki not starting
 
-**Symptom**: `wai status` shows the wiki as offline, or `http://localhost:8080` is unreachable.
+**Symptom**: `wai auth status` shows the wiki as offline, or `http://localhost:8080` is unreachable.
 
-**Fix**: Make sure Docker is running, then restart the wiki:
-
-```bash
-wai wiki restart
-```
-
-If the port is already in use, you can change it:
+**Fix**: Make sure Docker is running, then restart the wiki from the desktop app or by restarting the Docker container directly:
 
 ```bash
-wai config set wiki.port 8081
+docker restart whoami-wiki
 ```
+
+If the port is already in use, you can change it in `~/.whoami/config.json`:
+
+```json
+{ "wiki": { "port": 8081 } }
+```
+
+Then restart the wiki for the change to take effect.
 
 ## CLI not found in PATH
 
@@ -38,19 +40,20 @@ Add this line to your shell profile (`~/.zshrc`, `~/.bashrc`) to make it permane
 
 **Symptom**: The agent can't find whoami.wiki tools or returns connection errors when trying to use them.
 
-**Fix**: Verify the plugin is installed and the wiki is reachable:
+**Fix**: Verify the CLI can reach the wiki:
 
 ```bash
-wai doctor
+wai auth status
 ```
 
-If the plugin is installed but not detected, try reinstalling:
+If the plugin is installed but not detected, try removing and re-adding it:
 
 ```bash
-wai plugin install claude-code --force
+claude plugin remove whoami
+claude plugin add whoami
 ```
 
-Make sure you restart your agent harness after installing the plugin.
+Make sure you restart your agent session after reinstalling the plugin.
 
 ## Permission errors on snapshot
 
@@ -68,18 +71,19 @@ On macOS, you may need to grant terminal access to the Photos directory in Syste
 
 **Symptom**: `wai snapshot` takes a very long time or your machine runs out of memory with large data sets.
 
-**Fix**: Process in smaller batches:
+**Fix**: Process smaller directories at a time instead of one large snapshot:
 
 ```bash
-wai snapshot ~/Photos/grandma/2020 --batch-size 100
+wai snapshot ~/Photos/grandma/2020
+wai snapshot ~/Photos/grandma/2021
 ```
 
 ## Still stuck?
 
-Run diagnostics and include the output when reporting an issue:
+Check your connection status and include the output when reporting an issue:
 
 ```bash
-wai doctor --verbose
+wai auth status --json
 ```
 
 File issues at [github.com/whoami-wiki/whoami/issues](https://github.com/whoami-wiki/whoami/issues).
