@@ -7,9 +7,7 @@ An audit of every noun and term used as a concept in the whoami.wiki project, id
 Most naming issues from earlier audits are now resolved. The remaining issues are:
 
 1. **"Source" still means four different things** depending on context, though the dual-section citation structure is now clarified
-2. **Glossary says "four page types"** but page-types.mdx now says "two reader-facing page types" — the definition of "page type" needs settling
-3. **evals.mdx has two stale references**: `== Sources ==` where it means `== References ==`, and "all four page types" which doesn't match the new two-type framing
-4. **Phantom commands in installation.mdx and troubleshooting.mdx** — cli.mdx is fixed, but these pages still reference non-existent commands
+2. **evals.mdx has two stale references**: `== Sources ==` where it means `== References ==`, and "all four page types (Person, Episode, Talk, Task)" which doesn't match the current two-type framing
 
 ---
 
@@ -80,28 +78,15 @@ evals.mdx line 58 says the completeness grader checks for `== Sources ==` with `
 
 ---
 
-## Problem 2: glossary "page type" definition doesn't match page-types.mdx
+## Resolved: glossary "page type" definition aligned
 
-The glossary defines "page type" as one of four structural templates: **Person**, **Episode**, **Talk**, **Task**.
+The glossary now defines "page type" as a grouping of pages that share a common structure, with Person and Episode as the current types. New types may emerge as different kinds of data are added. Talk and Task are namespaces, not page types.
 
-But page-types.mdx now says "two reader-facing page types" and only documents Person and Episode. Talk and Task are documented as namespaces in namespaces.mdx, not as page types.
-
-This creates an ambiguity: are Talk and Task "page types" or just "namespaces with conventions"?
-
-Additionally, evals.mdx line 27 says test cases span "all four page types (Person, Episode, Talk, Task)" — this uses the old four-type framing.
-
-### Recommendation
-
-Decide whether "page type" means:
-
-- **(a) Reader-facing content types** — Person and Episode only. Talk and Task are namespaces with their own conventions but not "page types." Update the glossary to match page-types.mdx.
-- **(b) Any page with a defined structure** — Person, Episode, Talk, and Task. Update page-types.mdx to list all four again (possibly in two groups: reader-facing and operational).
-
-Either way, the glossary and page-types.mdx should agree.
+evals.mdx line 27 still says "all four page types (Person, Episode, Talk, Task)" — this should be updated.
 
 ---
 
-## Problem 3: phantom commands in installation.mdx and troubleshooting.mdx
+## Problem 2: phantom commands in installation.mdx and troubleshooting.mdx
 
 cli.mdx is now fixed, but the same non-existent commands still appear in two other pages:
 
@@ -134,9 +119,8 @@ Consider moving `source list` from **Discovery** to **Data** in the CLI help, si
 
 | Change | Files affected | Risk |
 |---|---|---|
-| Fix evals.mdx completeness grader | `evals.mdx` | Low — documentation only |
+| Fix evals.mdx completeness grader and page type list | `evals.mdx` | Low — documentation only |
 | Fix citation-system.mdx "archive" straggler | `citation-system.mdx` | Low — one word |
-| Settle "page type" definition | `glossary.mdx` or `page-types.mdx`, `evals.mdx` | Low — documentation only |
 | Fix phantom commands in installation/troubleshooting | `installation.mdx`, `troubleshooting.mdx` | Low — documentation only |
 | Use "data source" consistently | Multiple docs | Low — wording only |
 | Move `source list` to Data group | `index.ts` | Low — cosmetic |
