@@ -6,22 +6,29 @@ An audit of every noun and term used as a concept in the whoami.wiki project, id
 
 Most naming issues from earlier audits are now resolved. The remaining issues are:
 
-1. **"Source" still means four different things** depending on context, though the dual-section citation structure is now clarified
-2. **evals.mdx has two stale references**: `== Sources ==` where it means `== References ==`, and "all four page types (Person, Episode, Talk, Task)" which doesn't match the current two-type framing
+1. **wiki-writer.md still uses `{{Cite source}}` and `== Sources ==`** — should be `{{Cite vault}}` and `== Bibliography ==`
+2. **evals.mdx has two stale references**: the completeness grader conflates `== Bibliography ==` with `{{reflist}}`, and "all four page types" doesn't match the current two-type framing
 
 ---
 
 ## Resolved: "Archive" → "Vault"
 
-Clean. One straggler remains:
-
-- **citation-system.mdx line 70** says "the content-addressed archive snapshot hash" — should be "vault" or just "snapshot hash"
+Clean. The citation-system.mdx "archive" straggler is gone — the template is now `{{Cite vault}}`.
 
 ---
 
 ## Resolved: cli.mdx rewritten
 
-cli.mdx has been completely rewritten to match the actual CLI. All phantom commands (`wai status`, `wai doctor`, `wai config`, `wai wiki restart/backup/restore`, `wai plugin install/list`) and wrong flags (`--batch-size`, `--type`, `--status claimed`, `--title`, `--reason`) are gone. The new cli.mdx documents every real command with correct flags.
+cli.mdx has been completely rewritten to match the actual CLI. All phantom commands and wrong flags are gone.
+
+---
+
+## Resolved: phantom commands in installation.mdx and troubleshooting.mdx
+
+Both pages have been updated:
+
+- installation.mdx: `wai status` → `wai auth status`, `wai plugin install` → `claude plugin add whoami`, `wai doctor` removed
+- troubleshooting.mdx: `wai wiki restart` → `docker restart`, `wai config set` → manual config edit, `wai doctor` → `wai auth status`, `wai snapshot --batch-size` removed
 
 ---
 
@@ -32,72 +39,55 @@ Content has been cleanly split:
 - **page-types.mdx** — documents the two reader-facing page types (Person, Episode)
 - **namespaces.mdx** — documents all four namespaces (Main, Talk, Source, Task) with their structure and conventions
 
-Talk and Task documentation moved from page-types.mdx to namespaces.mdx. This is a clean separation.
-
----
-
-## Problem 1: "Source" is overloaded
-
-"Source" still means at least four different things:
-
-| Usage | Where | What it means |
-|---|---|---|
-| Wiki namespace `Source:` | `wai source list`, `Source:WhatsApp` pages | A wiki page documenting an ingested dataset |
-| Raw data type | data-sources.mdx, editorial-standards.mdx | The type of raw input (photos, messages, etc.) |
-| Citation bibliography | `{{Cite source}}`, `== Sources ==` section | A bibliography entry listing archives consulted |
-| Task field | `TaskInfo.source`, `--source` flag | Which Source page a task relates to |
-
-### Clarification from updated docs
-
-citation-system.mdx explicitly defines a **dual-section structure** at the bottom of pages:
-
-```wikitext
-== References ==
-<references />
-
-== Sources ==
-{{Cite source|type=messages|snapshot=...|timestamp=...|note=...}}
-```
-
-- **References** = numbered footnotes from `<ref>` tags (inline citations)
-- **Sources** = bibliography-style `{{Cite source}}` entries (archives consulted)
-
-This means `== Sources ==` is intentional and correct in wiki-writer.md — it's the bibliography section, not the footnotes section.
-
-### What's still wrong
-
-evals.mdx line 58 says the completeness grader checks for `== Sources ==` with `{{reflist}}`. This conflates the two sections — `{{reflist}}` renders footnotes and belongs in `== References ==`. The grader should check for both sections or at least use the correct name for the footnotes section.
-
-### Recommendation
-
-1. **Fix evals.mdx**: The completeness grader should check for `== References ==` with `{{reflist}}` (footnotes) and optionally `== Sources ==` with `{{Cite source}}` entries (bibliography).
-
-2. **Use "data source" (two words) consistently** when referring to raw input types. Never use bare "source" to mean raw data. The data-sources.mdx page is already correctly titled.
-
-3. **Consider renaming `{{Cite source}}`** to `{{Cite ref}}` or `{{Bibliography}}` to avoid confusion with the Source namespace. Lower priority since it's a wiki template.
-
 ---
 
 ## Resolved: glossary "page type" definition aligned
 
 The glossary now defines "page type" as a grouping of pages that share a common structure, with Person and Episode as the current types. New types may emerge as different kinds of data are added. Talk and Task are namespaces, not page types.
 
-evals.mdx line 27 still says "all four page types (Person, Episode, Talk, Task)" — this should be updated.
+---
+
+## Resolved: "Source" overloading reduced
+
+The `== Sources ==` / `{{Cite source}}` rename to `== Bibliography ==` / `{{Cite vault}}` eliminates the biggest collision. "Source" now means:
+
+| Usage | Where | What it means |
+|---|---|---|
+| Wiki namespace `Source:` | `wai source list`, `Source:WhatsApp` pages | A wiki page documenting an ingested dataset |
+| Raw data type | data-sources.mdx, editorial-standards.mdx | The type of raw input (photos, messages, etc.) |
+| Task field | `TaskInfo.source`, `--source` flag | Which Source page a task relates to |
+
+The bibliography meaning is gone. The remaining "Source namespace" vs "data source" collision is manageable with the two-word convention ("data source" for raw input types).
 
 ---
 
-## Problem 2: phantom commands in installation.mdx and troubleshooting.mdx
+## Problem 1: wiki-writer.md still uses old citation names
 
-cli.mdx is now fixed, but the same non-existent commands still appear in two other pages:
+wiki-writer.md still references the pre-rename citation system:
 
-| File | Phantom commands used |
+| wiki-writer.md | Should be |
 |---|---|
-| installation.mdx | `wai status`, `wai doctor`, `wai plugin install` |
-| troubleshooting.mdx | `wai wiki restart`, `wai config set`, `wai doctor`, `wai plugin install --force`, `wai snapshot --batch-size` |
+| `{{Cite source\|type=...\|snapshot=...\|timestamp=...\|note=...}}` | `{{Cite vault\|type=...\|snapshot=...\|timestamp=...\|note=...}}` |
+| `== Sources ==` section | `== Bibliography ==` section |
+| "look at their `{{Cite source}}` entries" (Phase 2) | "look at their `{{Cite vault}}` entries" |
 
 ### Recommendation
 
-Audit both pages against the actual CLI. Either remove references to unimplemented commands or replace them with real equivalents (e.g., `wai auth status` instead of `wai status`).
+Find-and-replace `Cite source` → `Cite vault` and `== Sources ==` → `== Bibliography ==` in wiki-writer.md.
+
+---
+
+## Problem 2: evals.mdx has two stale references
+
+### Completeness grader conflates sections
+
+evals.mdx line 58 says the completeness grader checks for `== Bibliography ==` with `{{reflist}}`. But `{{reflist}}` renders inline citation footnotes and belongs in `== References ==`. The Bibliography section uses `{{Cite vault}}` entries.
+
+The grader should check for `== References ==` with `<references />` (footnotes) and `== Bibliography ==` with `{{Cite vault}}` entries.
+
+### Page type list is stale
+
+evals.mdx line 27 says test cases span "all four page types (Person, Episode, Talk, Task)." Page types are now Person and Episode only. Talk and Task are namespaces, not page types.
 
 ---
 
@@ -119,8 +109,8 @@ Consider moving `source list` from **Discovery** to **Data** in the CLI help, si
 
 | Change | Files affected | Risk |
 |---|---|---|
-| Fix evals.mdx completeness grader and page type list | `evals.mdx` | Low — documentation only |
-| Fix citation-system.mdx "archive" straggler | `citation-system.mdx` | Low — one word |
-| Fix phantom commands in installation/troubleshooting | `installation.mdx`, `troubleshooting.mdx` | Low — documentation only |
+| Update wiki-writer.md citation names | `wiki-writer.md` | Low — agent instructions only |
+| Fix evals.mdx completeness grader | `evals.mdx` | Low — documentation only |
+| Fix evals.mdx page type list | `evals.mdx` | Low — documentation only |
 | Use "data source" consistently | Multiple docs | Low — wording only |
 | Move `source list` to Data group | `index.ts` | Low — cosmetic |
