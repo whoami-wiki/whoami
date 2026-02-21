@@ -29,7 +29,7 @@ If you're working from the task queue rather than a direct user request:
 1. **List available sources**: `wai source list`
 2. **Read relevant source pages** — these contain querying instructions for programmatic access to the vault. For example, the WhatsApp source page explains how to query ChatStorage.sqlite, and the Facebook source page explains the JSON message format.
 3. **Follow the querying recipes** in source pages to extract data. This means running SQL queries against databases, reading JSON files via snapshot hashes, etc.
-4. **Check existing person pages** for source identifiers: `wai read "Person Name"` — look at their `{{Cite source}}` entries for JIDs, session PKs, thread paths, and other cross-references that help locate data.
+4. **Check existing person pages** for source identifiers: `wai read "Person Name"` — look at their `{{Cite vault}}` entries for JIDs, session PKs, thread paths, and other cross-references that help locate data.
 
 ## Phase 3: Drafting
 
@@ -38,10 +38,10 @@ If you're working from the task queue rather than a direct user request:
 **Structure**:
 - Lead paragraph with key identifying information
 - Thematic or chronological sections with `== Section ==` headers
-- `== Sources ==` section at the end with `{{Cite source}}` entries
+- `== Bibliography ==` section at the end with `{{Cite vault}}` entries
 
 **Templates and conventions**:
-- `{{Cite source|type=messages|snapshot=...|timestamp=...|note=...}}` — cite primary sources with identifiers (JIDs, Z_PKs, thread paths, date ranges) in the `note` field so future research can retrace your steps
+- `{{Cite vault|type=messages|snapshot=...|timestamp=...|note=...}}` — cite primary sources with identifiers (JIDs, Z_PKs, thread paths, date ranges) in the `note` field so future research can retrace your steps
 - Do NOT use `{{Gap}}` inline. Instead, post each unknown as a separate talk page thread (see Phase 4)
 - `{{Blockquote|Quote text|Attribution, date}}` — preserve authentic voice from source material
 - Use wikitables for statistics and structured data

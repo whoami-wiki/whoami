@@ -24,7 +24,7 @@ Evals run end-to-end: an agent is given a task, source data, and access to the w
 
 The simplest benchmark. The agent receives a single data source — a photo directory, a chat export, or a set of transactions — and writes a page from it. This tests whether the agent can extract facts, choose the right page type, and produce well-formed wikitext.
 
-**Test cases**: 10 tasks spanning all four page types (Person, Episode, Talk, Task). Each task includes a known-good reference page written by a human editor.
+**Test cases**: 10 tasks spanning both page types (Person, Episode) and covering all four namespaces (Main, Talk, Source, Task). Each task includes a known-good reference page written by a human editor.
 
 **What it measures**: Baseline competence. Can the agent use `wai snapshot` to ingest data, read the resulting Source page, write a page with correct structure, and cite its sources?
 
@@ -55,10 +55,11 @@ Checks whether the page includes all expected structural elements:
 - Lead paragraph before any section heading
 - Infobox with required fields for the page type
 - At least one body section with substantive prose
-- A `== Bibliography ==` section with `{{reflist}}`
+- A `== References ==` section with `<references />`
+- A `== Bibliography ==` section with `{{Cite vault}}` entries
 - At least one category tag
 
-**Scoring**: Binary per element. A page with all five elements scores 1.0. Missing elements are penalized equally (0.2 each).
+**Scoring**: Binary per element. A page with all six elements scores 1.0. Missing elements are penalized equally (0.167 each).
 
 ### Accuracy
 

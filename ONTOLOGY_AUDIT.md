@@ -4,16 +4,13 @@ An audit of every noun and term used as a concept in the whoami.wiki project, id
 
 ## Summary of findings
 
-Most naming issues from earlier audits are now resolved. The remaining issues are:
-
-1. **wiki-writer.md still uses `{{Cite source}}` and `== Sources ==`** — should be `{{Cite vault}}` and `== Bibliography ==`
-2. **evals.mdx has two stale references**: the completeness grader conflates `== Bibliography ==` with `{{reflist}}`, and "all four page types" doesn't match the current two-type framing
+All major naming issues are resolved. The remaining items are minor wording suggestions.
 
 ---
 
 ## Resolved: "Archive" → "Vault"
 
-Clean. The citation-system.mdx "archive" straggler is gone — the template is now `{{Cite vault}}`.
+Clean. No stragglers remain.
 
 ---
 
@@ -61,33 +58,16 @@ The bibliography meaning is gone. The remaining "Source namespace" vs "data sour
 
 ---
 
-## Problem 1: wiki-writer.md still uses old citation names
+## Resolved: wiki-writer.md citation names
 
-wiki-writer.md still references the pre-rename citation system:
-
-| wiki-writer.md | Should be |
-|---|---|
-| `{{Cite source\|type=...\|snapshot=...\|timestamp=...\|note=...}}` | `{{Cite vault\|type=...\|snapshot=...\|timestamp=...\|note=...}}` |
-| `== Sources ==` section | `== Bibliography ==` section |
-| "look at their `{{Cite source}}` entries" (Phase 2) | "look at their `{{Cite vault}}` entries" |
-
-### Recommendation
-
-Find-and-replace `Cite source` → `Cite vault` and `== Sources ==` → `== Bibliography ==` in wiki-writer.md.
+All three occurrences updated: `{{Cite source}}` → `{{Cite vault}}`, `== Sources ==` → `== Bibliography ==`.
 
 ---
 
-## Problem 2: evals.mdx has two stale references
+## Resolved: evals.mdx stale references
 
-### Completeness grader conflates sections
-
-evals.mdx line 58 says the completeness grader checks for `== Bibliography ==` with `{{reflist}}`. But `{{reflist}}` renders inline citation footnotes and belongs in `== References ==`. The Bibliography section uses `{{Cite vault}}` entries.
-
-The grader should check for `== References ==` with `<references />` (footnotes) and `== Bibliography ==` with `{{Cite vault}}` entries.
-
-### Page type list is stale
-
-evals.mdx line 27 says test cases span "all four page types (Person, Episode, Talk, Task)." Page types are now Person and Episode only. Talk and Task are namespaces, not page types.
+- Completeness grader now checks for both `== References ==` (with `<references />`) and `== Bibliography ==` (with `{{Cite vault}}` entries) as separate elements
+- Test case description now says "both page types (Person, Episode) and covering all four namespaces"
 
 ---
 
@@ -102,15 +82,3 @@ writing-your-first-page.mdx line 16 says `wai snapshot` "indexes the photos, ext
 ### Command group placement
 
 Consider moving `source list` from **Discovery** to **Data** in the CLI help, since it's about data management not discovery.
-
----
-
-## Change impact matrix
-
-| Change | Files affected | Risk |
-|---|---|---|
-| Update wiki-writer.md citation names | `wiki-writer.md` | Low — agent instructions only |
-| Fix evals.mdx completeness grader | `evals.mdx` | Low — documentation only |
-| Fix evals.mdx page type list | `evals.mdx` | Low — documentation only |
-| Use "data source" consistently | Multiple docs | Low — wording only |
-| Move `source list` to Data group | `index.ts` | Low — cosmetic |
