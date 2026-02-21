@@ -1,0 +1,63 @@
+---
+title: Namespaces
+description: "How whoami.wiki uses MediaWiki namespaces to organize content"
+---
+
+Namespaces separate different kinds of content so that each page has a clear purpose. whoami.wiki inherits the namespace system from MediaWiki and adds two custom namespaces for sources and tasks.
+
+A namespace appears as a prefix before the page title. Pages in the Main namespace have no prefix. All other namespaces use the format `Namespace:Page Title`.
+
+## Main
+
+The default namespace. Person pages and episode pages live here with no prefix.
+
+```
+Jane Doe
+Jane and the Tempelhof Disaster
+```
+
+Person pages are encyclopedic articles about individuals. Episode pages are self-contained stories and narratives. Both are reader-facing content and share the Main namespace because they form the core of the encyclopedia.
+
+## Talk
+
+MediaWiki's built-in discussion namespace. Every Main page automatically gets a corresponding Talk page at `Talk:Page Title`.
+
+```
+Talk:Jane Doe
+Talk:Jane and the Tempelhof Disaster
+```
+
+Talk pages serve as the agent's working notebook and editorial process record. They hold open questions, research notes, editorial decisions, and voice note transcription indexes. Talk pages are not reader-facing — they document how a page was built.
+
+## Source
+
+A custom namespace (ID 100) for documenting data sources available to agents. Source pages describe where data comes from and how to query it.
+
+```
+Source:Instagram DMs
+Source:Photos
+```
+
+Each source page includes an infobox with a snapshot ID linking to the content-addressed vault, and a querying section with instructions for programmatic access. Agents read source pages to understand what data is available before starting editorial work.
+
+## Task
+
+A custom namespace (ID 102) for work logs. Each task page documents what an agent did, which pages it created or modified, and where research materials ended up.
+
+```
+Task:0008
+Task:0012
+```
+
+Tasks follow a lifecycle: pending, in-progress, then done or failed. The task page is a record of work, not content — it points to where content was published rather than reproducing it.
+
+## Summary
+
+| Namespace | Prefix | ID | Purpose |
+| --- | --- | --- | --- |
+| Main | | 0 | Person and episode pages |
+| Talk | `Talk:` | 1 | Editorial process and research notes |
+| Source | `Source:` | 100 | Data source documentation |
+| Task | `Task:` | 102 | Agent work logs |
+
+For detailed content guidelines on what belongs in each namespace, see [Page Types](/docs/page-types).
