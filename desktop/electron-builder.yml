@@ -25,6 +25,8 @@ extraResources:
     to: resources/mediawiki
     filter:
       - "**/*"
+      - "!extensions/Scribunto/includes/Engines/LuaStandalone/binaries"
+      - "!tests"
   - from: resources/ffmpeg
     to: resources/ffmpeg
     filter:
@@ -38,6 +40,8 @@ extraResources:
     filter:
       - wai.cjs
 
+afterSign: scripts/notarize.cjs
+
 mac:
   category: public.app-category.productivity
   target:
@@ -45,7 +49,9 @@ mac:
     - zip
   icon: build/icon.icns
   darkModeSupport: true
-  identity: null
+  hardenedRuntime: true
+  strictVerify: false
+  notarize: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
 
