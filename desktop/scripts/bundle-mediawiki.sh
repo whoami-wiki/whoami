@@ -126,7 +126,40 @@ else
   echo "Vector skin already exists — skipping"
 fi
 
-# 4. Create router.php for PHP's built-in server
+# 4. Prune unused files to reduce bundle size
+echo "==> Pruning unused extensions, skins, languages, and dev artifacts..."
+
+# Keep only the extensions we use
+KEEP_EXTENSIONS="Cite CiteThisPage ParserFunctions Scribunto TemplateData TemplateStyles TimedMediaHandler"
+for dir in "$OUT"/extensions/*/; do
+  ext="$(basename "$dir")"
+  if ! echo "$KEEP_EXTENSIONS" | grep -qw "$ext"; then
+    rm -rf "$dir"
+  fi
+done
+
+# Keep only the Vector skin
+for dir in "$OUT"/skins/*/; do
+  skin="$(basename "$dir")"
+  if [ "$skin" != "Vector" ]; then
+    rm -rf "$dir"
+  fi
+done
+
+# Prune languages — keep only en.json and qqq.json
+find "$OUT/languages/i18n" -name '*.json' ! -name 'en.json' ! -name 'qqq.json' -delete
+find "$OUT/languages/messages" -name '*.php' ! -name 'MessagesEn.php' -delete
+for dir in "$OUT"/extensions/*/i18n "$OUT"/skins/*/i18n; do
+  [ -d "$dir" ] && find "$dir" -name '*.json' ! -name 'en.json' ! -name 'qqq.json' -delete
+done
+
+# Delete docs, tests, and dev artifacts
+rm -rf "$OUT/tests" "$OUT/docs"
+for dir in "$OUT"/extensions/*/tests "$OUT"/skins/*/tests; do
+  [ -d "$dir" ] && rm -rf "$dir"
+done
+
+# 5. Create router.php for PHP's built-in server
 cat > "$OUT/router.php" << 'ROUTER'
 <?php
 /**
