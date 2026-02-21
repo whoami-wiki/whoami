@@ -63,10 +63,10 @@ Discovery:
   link <title>                Show page links (in/out)
   category [name]             List categories or pages in one
   changes                     Recent changes
-  source list                 List pages in the Source namespace
   place <query>               Look up a place (Google Places)
 
 Data:
+  source list                 List pages in the Source namespace
   snapshot <dir>              Snapshot a directory into the vault
 
 Backup:

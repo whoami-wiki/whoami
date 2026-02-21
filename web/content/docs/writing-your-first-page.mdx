@@ -7,13 +7,13 @@ This tutorial walks you through creating your first encyclopedia page end-to-end
 
 ## Snapshot your data
 
-First, ingest a data source using the `wai snapshot` command. We'll use a folder of photos as an example — say, photos of a family member.
+First, snapshot a data source using the `wai snapshot` command. We'll use a folder of photos as an example — say, photos of a family member.
 
 ```bash
 wai snapshot ~/Photos/grandma
 ```
 
-This indexes the photos, extracts metadata (dates, locations, camera info), and makes them available to agents. You should see a summary of what was ingested.
+This hashes the files, copies them into the vault, and creates a Source page so agents can find the data. You should see a summary of what was snapshotted.
 
 ## Prompt the agent to write a page
 
