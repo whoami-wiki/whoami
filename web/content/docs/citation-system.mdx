@@ -3,7 +3,7 @@ title: Citation System
 description: "How citations link wiki content back to source material"
 ---
 
-On Wikipedia, citations exist for public verifiability. Here, the sources are private archives. Citations serve a different purpose: traceability. When a future agent (or the wiki owner) reads a claim and wants to find the original context, the citation should point them to a specific, locatable place in the archive.
+On Wikipedia, citations exist for public verifiability. Here, the sources are private archives. Citations serve a different purpose: traceability. When a future agent (or the wiki owner) reads a claim and wants to find the original context, the citation should point them to a specific, locatable place in the vault.
 
 ## MediaWiki's native ref system
 
@@ -17,7 +17,7 @@ Jane was born in Munich and moved to Berlin at eighteen.<ref name="ig-2021-04-15
 
 ## Citation templates
 
-Four templates, matching common source types in personal archives.
+Four templates for inline citations, matching common source types in personal archives. A fifth template, `{{Cite vault}}`, is used in the Bibliography section to describe full archives consulted.
 
 ### Cite message
 
@@ -63,13 +63,29 @@ For video content.
 
 Renders as: Video: berlin\_gallery\_opening.mp4, 12 November 2021
 
+### Cite vault
+
+For the Bibliography section. Describes a full vault snapshot consulted during research.
+
+```wikitext
+{{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
+|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
+```
+
+Renders as: Vault: Instagram DM thread with Jane Doe, Mar 2021–May 2022 (snapshot a1b2c3d4)
+
 ### Common fields
 
 All templates include:
 
-- **snapshot** — the content-addressed archive snapshot hash (first 8 chars is fine for display)
+- **snapshot** — the content-addressed vault snapshot hash (first 8 chars is fine for display)
 - **date** — the date of the source material
 - **note** — brief human-readable description of what this citation supports
+
+`{{Cite vault}}` additionally includes:
+
+- **type** — the kind of archive (messages, photos, video, etc.)
+- **timestamp** — the date range of the material
 
 ## Granularity
 
@@ -101,7 +117,7 @@ Her father works in Zurich.<ref name="ig-2021-05-02">
 She has a younger brother named Max.<ref name="ig-2021-04-15" />
 ```
 
-## Page structure for references
+## Page structure
 
 Every person page and episode page ends with two sections:
 
@@ -109,12 +125,22 @@ Every person page and episode page ends with two sections:
 == References ==
 <references />
 
-== Sources ==
-{{Cite source|type=messages|snapshot=a1b2c3d4e5f6
-|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread...}}
+== Bibliography ==
+{{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
+|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
+{{Cite vault|type=voice_notes|snapshot=b2c3d4e5f6a1
+|timestamp=2021-04-12/2021-06-03|note=47 voice notes, Jane and wiki owner}}
 ```
 
-The **References** section contains the auto-generated numbered footnotes from `<ref>` tags. The **Sources** section contains bibliography-style `{{Cite source}}` entries describing the full archives consulted. References are inline citations; Sources are the bibliography. Both are needed.
+**References** are inline citations. Each one traces a specific claim back to a specific moment in the vault. They are auto-generated from `<ref>` tags.
+
+**Bibliography** lists the full vault snapshots consulted for the page. This tells a reader (or agent) what data the page drew from overall, without tying it to individual claims.
+
+These serve different purposes from **[Source:](/docs/namespaces#source) pages**, which are system-level documentation of data sources available to agents (how to query them, what they contain, snapshot IDs). The relationship:
+
+- A `Source:Instagram DMs` page documents the data source and how agents access it
+- A `{{Cite vault}}` entry in the Bibliography says "this page used that data source, specifically this snapshot and date range"
+- A `{{Cite message}}` ref in the References says "this specific claim comes from this specific message"
 
 ## Migration
 
