@@ -15,7 +15,7 @@
     {
       "name": "whoami",
       "description": "Your personal encyclopedia, written by agents.",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "author": {
         "name": "Jeremy Philemon",
         "email": "jrmy@whoami.wiki"
@@ -23,10 +23,9 @@
       "source": "./plugins/whoami",
       "category": "productivity",
       "keywords": [
-        "personal-wiki",
-        "mediawiki",
-        "life-documentation",
-        "digital-archive"
+        "whoami",
+        "wiki",
+        "wai"
       ],
       "homepage": "https://whoami.wiki"
     }
