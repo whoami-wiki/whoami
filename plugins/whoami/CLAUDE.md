@@ -97,13 +97,135 @@ wai task requeue 0001             # requeue a failed task
 4. User answers questions
 5. Agent refines and publishes
 
+## Page Types
+
+Two reader-facing page types live in the Main namespace:
+
+**Person pages** — Encyclopedic article about a person. Documentary voice: third person, past tense, factual. The person page is a hub that links out to episode pages. Contains biographical details, chronological arc (summarized, not exhaustive), key statistics, media, and citations. Does NOT contain full voice note transcriptions, raw research notes, or detailed retellings of specific episodes.
+
+**Episode pages** — Self-contained page for a specific story or event. Named `{Person} and the {Episode Title}` (e.g. `Jane and the Tempelhof Disaster`). More narrative latitude than person pages but still third-person and factual. Contains full contextual setup, the story itself, voice note transcriptions inline with context, audio/video embeds, and links back to the person page.
+
+**When to create an episode page**: Any narrative sequence involving 3+ voice notes telling a connected story, or a sustained back-and-forth about a specific event that takes more than two paragraphs to tell properly. The person page gets a one-sentence summary with a link; the episode page gets the full treatment. Create episode pages as follow-up tasks when you encounter rich narrative sequences during processing.
+
+### Lead paragraph convention
+
+Keep it tight and neutral. Biographical identity first, relationship to the wiki owner in one sentence, the arc in one more sentence. Save statistics for the statistics section. No emotional framing.
+
+### Episode references
+
+When the chronological arc mentions a story that has its own episode page, summarize it in one sentence and link out:
+
+```wikitext
+On 14 August, Jane described a disastrous shoot at Tempelhof
+in a series of five voice notes (see [[Jane and the Tempelhof Disaster]]).
+```
+
+## Editorial Standards
+
+### One canonical home
+Every piece of content lives in exactly one place. Other pages link to it, they don't duplicate it.
+
+### Pages are cheap, links are structure
+When in doubt, make a new page. A story that takes more than two paragraphs to tell properly deserves its own page. The person page becomes a hub of links, not a monolith of content.
+
+### Documentary voice
+- Third person, past tense, factual on person pages
+- Episode pages can be more narrative but still third-person and factual
+- No rhetorical questions, no direct address, no "what began as X evolved into Y" framing
+- State what happened, in what order, with what evidence
+
+### Em dash discipline
+- Maximum roughly 1 per paragraph, many paragraphs should have zero
+- Never use double em dashes (X — Y — Z) for parentheticals — use actual parentheses or restructure
+- Never use em dashes to connect a quote to its attribution — use a colon or integrate grammatically
+- If tempted, first try: a period and new sentence, a colon, parentheses, or restructuring
+
+### No editorializing
+State facts, not feelings. **Words to avoid**: staggering, extraordinary, remarkable, harrowing, spectacular, pivotal, ecstatic, surgical, devastating, profound, masterful, breathtaking, unmistakable, undeniable. If you reach for one of these, state the fact instead.
+
+### Sentence length
+Keep sentences under roughly 40 words. If longer, split.
+
+### Avoid "genuine," "genuinely"
+These are common LLM verbal tics. Cut them everywhere.
+
+### Quoting conventions
+- Use direct quotes when exact words matter: confessions, turning points, self-descriptions, distinctive phrasing
+- Don't quote routine factual statements, padding (three quotes saying similar things), or to show off the archive
+- Integrate quotes grammatically into sentences where possible
+- Save `{{Blockquote}}` for extended passages (2+ sentences) that need to stand alone
+
+## Citation System
+
+### Inline citations
+All inline citations use `<ref>` tags, rendered via `<references />` at the bottom of the page in a `== References ==` section.
+
+```wikitext
+Jane was born in Munich.<ref name="ig-2021-04-15">
+{{Cite message|snapshot=a1b2c3d4e5f6|date=2021-04-15
+|thread=janedoe_12345|note=Family background exchange}}</ref>
+```
+
+### Citation templates
+
+Four inline citation templates, one per source type:
+
+- `{{Cite message|snapshot=...|date=...|thread=...|note=...}}` — text messages, DMs, chats
+- `{{Cite voice note|number=...|date=...|speaker=...|snapshot=...|note=...}}` — voice notes
+- `{{Cite photo|file=...|hash=...|date=...|snapshot=...|note=...}}` — photos/screenshots
+- `{{Cite video|file=...|date=...|snapshot=...|note=...}}` — video content
+
+All templates include: **snapshot** (vault hash, first 8 chars is fine), **date**, **note** (brief human-readable description).
+
+### Named refs for reuse
+Reuse refs when multiple facts come from the same source:
+
+```wikitext
+Jane's mother is from Munich.<ref name="ig-2021-04-15" />
+She has a younger brother named Max.<ref name="ig-2021-04-15" />
+```
+
+### Page ending structure
+Every person page and episode page ends with:
+
+```wikitext
+== References ==
+<references />
+
+== Bibliography ==
+{{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
+|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
+```
+
+**References** = inline citations tracing specific claims. **Bibliography** = full vault snapshots consulted for the page.
+
+### Citation granularity
+
+**Always cite**: biographical facts, direct quotes, specific dates, statistics, corrected/disputed claims.
+
+**Don't need individual citations**: broadly sourced observations, information already attributed inline with a date, episode page content where the source set is defined at the top.
+
+## Talk Page Structure
+
+Talk pages use the following sections as needed, in this order. Omit any that have no content, but when present they should appear in this position:
+
+1. **Active gaps** — open editorial questions marked `{{Open}}`
+2. **Resolved** — closed questions marked `{{Closed}}`, corrections marked `{{Superseded}}`
+3. **Editorial decisions** — choices about page structure, scope, voice
+4. **Infrastructure** — technical issues (file uploads, config, permissions)
+5. **Agent log** — one entry per task that touched the page, chronological
+6. **Research notes** — index of raw research materials (what exists, where, which pages consumed it)
+7. **Voice note transcriptions** — canonical chronological index of all transcriptions with inline audio embeds
+
+Do NOT put reader-facing content or duplicate research indexes on talk pages.
+
 ## Conventions
 - Use third person ("Jeremy visited..." not "I visited...")
 - Link to people, places, events with [[wikilinks]]
 - Pages use a lead paragraph followed by thematic/chronological sections
 - Do NOT use {{Gap}} inline — post unknowns as individual talk page threads with {{Open}}/{{Closed}} status
 - Use {{Blockquote}} for preserving authentic voice from sources
-- **Source identifiers**: Person identifiers (WhatsApp JIDs, chat session Z_PKs, Facebook thread paths) go in `{{Cite source}}` entries in the `== Sources ==` section. Include snapshot ID, date range, and identifiers in the `note` field so future research can retrace queries. See the Vishhvak Srinivasan page for the canonical example.
+- **Source identifiers**: Person identifiers (WhatsApp JIDs, chat session Z_PKs, Facebook thread paths) go in citation entries. Include snapshot ID, date range, and identifiers in the `note` field so future research can retrace queries.
 
 ## When working on a page
 - Check Talk:PageName for any existing context or locks
