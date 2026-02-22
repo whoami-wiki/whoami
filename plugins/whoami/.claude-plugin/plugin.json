@@ -10,5 +10,5 @@
   "homepage": "https://whoami.wiki",
   "repository": "https://github.com/whoami-wiki/whoami",
   "license": "MIT",
-  "keywords": ["personal-wiki", "mediawiki", "life-documentation", "digital-archive"]
+  "keywords": ["whoami", "wiki", "wai"]
 }
