@@ -102,7 +102,7 @@ if [ ! -d "$TMH_DIR" ]; then
   fi
 
   echo "==> Installing TimedMediaHandler composer dependencies..."
-  "$PHP" "$COMPOSER_PHAR" install --no-dev --no-interaction --working-dir="$TMH_DIR"
+  "$PHP" "$COMPOSER_PHAR" install --no-dev --no-interaction --ignore-platform-reqs --working-dir="$TMH_DIR"
 else
   echo "TimedMediaHandler already exists — skipping"
 fi

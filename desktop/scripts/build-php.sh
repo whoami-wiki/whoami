@@ -37,7 +37,9 @@ mkdir -p "$OUT/bin"
 # ── Static binary for distribution (macOS) ─────────────────────────────
 
 if [ "$STATIC" = true ]; then
-  EXTENSIONS="sqlite3,pdo_sqlite,mbstring,xml,gd,intl,curl,fileinfo"
+  # MediaWiki extensions + extensions that are default-on in normal PHP but
+  # must be explicitly listed for static builds (filter, openssl, ctype, etc.)
+  EXTENSIONS="sqlite3,pdo_sqlite,mbstring,xml,dom,simplexml,xmlwriter,xmlreader,gd,intl,curl,fileinfo,phar,filter,openssl,ctype,iconv,tokenizer,session,zlib"
   ARCH="$(uname -m)"
 
   # Map uname arch to static-php-cli naming
@@ -62,6 +64,10 @@ if [ "$STATIC" = true ]; then
     chmod +x "$SPC"
     rm "$TARBALL"
   fi
+
+  # Ensure build dependencies are available (spc doctor checks and fixes them)
+  echo "==> Checking build dependencies..."
+  "$SPC" doctor --auto-fix
 
   # Download PHP sources and extension dependencies
   echo "==> Downloading PHP 8.3 sources..."

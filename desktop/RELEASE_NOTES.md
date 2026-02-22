@@ -1,4 +1,5 @@
-Non-blocking notarization so builds no longer stall waiting for Apple.
+Fix crash on launch caused by macOS rejecting Homebrew PHP's code signature.
 
-Improvements:
-- Replace `notarytool --wait` with Apple's Notary REST API for non-blocking notarization
+Fixes:
+- Bundle a static PHP binary in release builds instead of a symlink to Homebrew PHP
+- Bundle a static ffmpeg binary in release builds instead of a symlink

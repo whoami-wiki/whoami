@@ -28,6 +28,8 @@ jobs:
       - name: Build PHP
         run: bash scripts/build-php.sh --static
         working-directory: desktop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bundle MediaWiki
         run: bash scripts/bundle-mediawiki.sh
