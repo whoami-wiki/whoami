@@ -1,5 +1,14 @@
 #!/usr/bin/env node
 
+// Suppress DEP0169 url.parse() deprecation emitted by proxy-from-env (axios dependency).
+// proxy-from-env v2 fixes this, but axios still pins ^1.1.0.
+const _emit = process.emit;
+// @ts-expect-error — narrowing the overloaded signature is not worth the noise
+process.emit = function (event: string, ...args: unknown[]) {
+  if (event === 'warning' && (args[0] as any)?.code === 'DEP0169') return false;
+  return _emit.apply(process, [event, ...args] as unknown as Parameters<typeof _emit>);
+};
+
 import { resolveCredentials } from './auth.js';
 import { WikiClient } from './wiki-client.js';
 import { WaiError, UsageError, AuthError } from './errors.js';
