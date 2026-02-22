@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "axios": "^1.7.0",
-    "axios-cookiejar-support": "^4.0.0",
+    "axios-cookiejar-support": "^6.0.0",
     "fast-xml-parser": "^5.3.5",
     "form-data": "^4.0.0",
     "tough-cookie": "^5.1.0"
