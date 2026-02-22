@@ -26,6 +26,10 @@ let isQuitting = false;
 // ── App lifecycle ───────────────────────────────────────────────────────
 
 app.whenReady().then(async () => {
+  if (process.platform === "darwin" && !app.isPackaged) {
+    app.dock.setIcon(join(app.getAppPath(), "build", "icon.png"));
+  }
+
   if (isFirstRun()) {
     showSetupWizard();
   } else {
@@ -93,6 +97,7 @@ function showSetupWizard(): void {
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 16, y: 16 },
     vibrancy: "window",
+    icon: join(app.getAppPath(), "build", "icon.png"),
     webPreferences: {
       preload: join(app.getAppPath(), "dist", "src", "preload.js"),
       contextIsolation: true,
@@ -126,6 +131,7 @@ async function launchWiki(): Promise<void> {
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 16, y: 15 },
     title: "whoami",
+    icon: join(app.getAppPath(), "build", "icon.png"),
     webPreferences: {
       preload: join(app.getAppPath(), "dist", "src", "preload-navbar.js"),
       contextIsolation: true,
