@@ -1,5 +1,6 @@
-Fix crash on launch caused by macOS rejecting Homebrew PHP's code signature.
+New app icon and tray icon with "w.w" branding.
 
-Fixes:
-- Bundle a static PHP binary in release builds instead of a symlink to Homebrew PHP
-- Bundle a static ffmpeg binary in release builds instead of a symlink
+Features:
+- New app icon for dock, DMG, and app bundle
+- Updated tray menu bar icons
+- Show correct icon in dock during development instead of default Electron icon
