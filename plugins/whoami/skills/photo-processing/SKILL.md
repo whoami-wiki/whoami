@@ -1,7 +1,7 @@
 ---
 name: photo-processing
-description: Processing photos for wiki pages
-triggers: ["photo", "image", "picture", "album", "trip"]
+description: Process photos for wiki pages. Use when working with photos, images, pictures, albums, or trip documentation — extracting EXIF metadata, creating contact sheets, selecting key photos, or uploading images.
+allowed-tools: Bash, Read
 ---
 
 # Photo Processing for Wiki Pages

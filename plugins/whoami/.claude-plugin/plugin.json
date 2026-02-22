@@ -9,5 +9,6 @@
   },
   "homepage": "https://whoami.wiki",
   "repository": "https://github.com/whoami-wiki/whoami",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": ["personal-wiki", "mediawiki", "life-documentation", "digital-archive"]
 }
