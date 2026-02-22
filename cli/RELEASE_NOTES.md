@@ -1,11 +1,13 @@
-Replace XML export/import with full wiki backup and improve write reliability.
+Snapshot reliability improvements and vault-based storage for backups.
 
 Features:
-- `wai export <dir>` creates a portable `.tar` archive of the full wiki data directory (SQLite databases, secrets, uploaded images) with a dated filename (`whoami-YYYY-MM-DD.tar`)
-- `wai import <file>` restores from an archive, with `--force` to overwrite existing data
-- Both commands work without auth or a running server — useful for disaster recovery
-- `--dry-run` support for both commands
+- Include snapshot vault in export/import backups
+- Reorganise help text into Data and Backup sections
 
 Fixes:
-- Reject empty or whitespace-only content in `wai write` before hitting the API
-- Improve error messages for file read failures and API errors
+- Verify object and snapshot writes land on disk, with clear error on failure
+- Warn on unreadable files during snapshot instead of silently skipping
+
+Improvements:
+- Move snapshot storage from ~/Archive to /Application Support/whoami/vault
+- Upgrade tough-cookie to v5.1.0
