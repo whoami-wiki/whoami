@@ -1,6 +1,6 @@
 ---
-name: wiki-writer
-description: Writes wiki pages from source materials. Use when creating or expanding pages about trips, people, events.
+name: editor
+description: Researches sources, writes encyclopedia pages, and maintains talk pages. Use for person pages, episode pages, and editorial tasks.
 tools: Read, Bash
 skills:
   - editorial-guide
