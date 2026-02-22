@@ -26,7 +26,7 @@ jobs:
         working-directory: desktop
 
       - name: Build PHP
-        run: bash scripts/build-php.sh
+        run: bash scripts/build-php.sh --static
         working-directory: desktop
 
       - name: Bundle MediaWiki
@@ -38,7 +38,7 @@ jobs:
         working-directory: desktop
 
       - name: Bundle ffmpeg
-        run: bash scripts/bundle-ffmpeg.sh
+        run: bash scripts/bundle-ffmpeg.sh --static
         working-directory: desktop
 
       - name: Import signing certificate
