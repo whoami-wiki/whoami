@@ -20,15 +20,20 @@ interface Release {
 }
 
 async function getLatestDesktopRelease(): Promise<Release | null> {
-  const res = await fetch(`https://api.github.com/repos/${REPO}/releases`, {
-    headers: {
-      Accept: "application/vnd.github.v3+json",
-      ...(process.env.GITHUB_TOKEN && {
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      }),
-    },
-    next: { revalidate: 300, tags: ["github-releases"] },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`https://api.github.com/repos/${REPO}/releases`, {
+      headers: {
+        Accept: "application/vnd.github.v3+json",
+        ...(process.env.GITHUB_TOKEN && {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        }),
+      },
+      next: { revalidate: 300, tags: ["github-releases"] },
+    });
+  } catch {
+    return null;
+  }
   if (!res.ok) return null;
   const releases: Release[] = await res.json();
   return releases.find((r) => r.tag_name.startsWith("desktop-v")) ?? null;

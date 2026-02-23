@@ -16,18 +16,23 @@ interface Release {
 }
 
 async function getReleases(): Promise<Release[]> {
-  const res = await fetch(
-    `https://api.github.com/repos/${REPO}/releases?per_page=50`,
-    {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        ...(process.env.GITHUB_TOKEN && {
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        }),
+  let res: Response;
+  try {
+    res = await fetch(
+      `https://api.github.com/repos/${REPO}/releases?per_page=50`,
+      {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+          ...(process.env.GITHUB_TOKEN && {
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          }),
+        },
+        next: { revalidate: 300, tags: ["github-releases"] },
       },
-      next: { revalidate: 300, tags: ["github-releases"] },
-    },
-  );
+    );
+  } catch {
+    return [];
+  }
   if (!res.ok) return [];
   const all: Release[] = await res.json();
   return all
