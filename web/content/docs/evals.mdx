@@ -1,190 +1,70 @@
 ---
 title: Evals
-description: "Benchmarks, graders, and compatibility scores for agent harnesses"
+description: "Benchmarks, graders, and scores for agent harnesses"
 ---
 
-whoami.wiki works with several AI coding tools as agent harnesses. Each has different strengths depending on the task. This page documents how we evaluate them, what graders are used, and how to interpret the results.
+Evals run end-to-end: an agent receives a task, source data, and a wiki instance, then produces pages. Output is graded automatically against a rubric.
 
-## Compatibility matrix
+## Protocol
 
-| Capability | Claude Code | Codex | OpenCode |
-|---|---|---|---|
-| Page writing | Yes | Yes | Yes |
-| Photo analysis | Yes | Yes | Partial |
-| Multi-source cross-referencing | Strong | Moderate | Moderate |
-| Task queue operations | Yes | Yes | Yes |
-| Interactive refinement | Strong | Moderate | Moderate |
-| Long context handling | Strong | Strong | Moderate |
+1. A fresh MediaWiki instance is provisioned with templates and no content pages.
+2. **Phase 1 (source)** — the agent snapshots source directories and documents them as `Source:` pages. Graded at checkpoint 1.
+3. **Checkpoint gate** — if checkpoint 1 composite < 0.7, Phase 2 is skipped.
+4. **Phase 2 (content)** — the agent reads source pages, queries the vault, and writes content pages. Graded at checkpoint 2.
+5. **Composite** = 20% checkpoint 1 + 80% checkpoint 2.
 
-## Benchmarks
-
-Evals run end-to-end: an agent is given a task, source data, and access to the wiki, then produces a page. The output is graded against a rubric. There are three benchmark suites, each testing a different capability.
-
-### Single-source page writing
-
-The simplest benchmark. The agent receives a single data source — a photo directory, a chat export, or a set of transactions — and writes a page from it. This tests whether the agent can extract facts, choose the right page type, and produce well-formed wikitext.
-
-**Test cases**: 10 tasks spanning both page types (Person, Episode) and covering all four namespaces (Main, Talk, Source, Task). Each task includes a known-good reference page written by a human editor.
-
-**What it measures**: Baseline competence. Can the agent use `wai snapshot` to ingest data, read the resulting Source page, write a page with correct structure, and cite its sources?
-
-### Multi-source cross-referencing
-
-The harder benchmark. The agent receives 2–4 overlapping data sources for the same topic — for example, photos, location history, and bank transactions from the same trip. The test measures whether the agent finds connections across sources that no single source contains on its own.
-
-**Test cases**: 5 tasks, each with multiple source types that overlap in time. Reference pages include facts that can only be established by combining sources (e.g., identifying a restaurant from a transaction cross-referenced with a GPS coordinate and a photo timestamp).
-
-**What it measures**: The ability to reason across data sources. An agent that processes each source in isolation will miss cross-referenced facts and score lower.
-
-### Interactive refinement
-
-Tests whether an agent can incorporate feedback. The agent writes a first draft, then receives 2–3 rounds of editorial feedback (restructure a section, add missing context, fix a citation). The final page is graded.
-
-**Test cases**: 3 multi-turn sessions. Feedback is scripted to be consistent across harnesses.
-
-**What it measures**: Whether the agent can revise without losing existing good content, whether it follows editorial direction, and whether it can work within an interactive session rather than a single-shot generation.
+The `--from-result` flag reuses checkpoint 1 source pages from a previous run, skipping Phase 1.
 
 ## Graders
 
-Each benchmark output is scored by five graders. Graders are automated — they run against the page wikitext and the source data, not against a reference page — so they measure absolute quality rather than similarity to a specific answer.
+**Completeness** — checks structural elements: lead paragraph, infobox, body sections, References/Bibliography sections, categories, word count (≥ 800), subsections (≥ 3), inline citations (≥ 10), blockquotes, media embeds. Binary per element with weighted penalties.
 
-### Completeness
+**Citations** — validates citation templates (`{{Cite message}}`, `{{Cite vault}}`, etc.) have required fields: `snapshot`, `date`, and type-specific fields. Score = valid / total.
 
-Checks whether the page includes all expected structural elements:
+**Accuracy** — resolves citations against vault manifests and checks whether claimed facts are supported by source data. Score = supported / total claims.
 
-- Lead paragraph before any section heading
-- Infobox with required fields for the page type
-- At least one body section with substantive prose
-- A `== References ==` section with `<references />`
-- A `== Bibliography ==` section with `{{Cite vault}}` entries
-- At least one category tag
+**Structure** — evaluates Wikipedia conventions: third-person neutral tone, past tense, section organization, wikitext syntax, wikilinks. Deductions for tone violations (−0.1 each, capped −0.4), structural issues (−0.15), syntax errors (−0.1).
 
-**Scoring**: Binary per element. A page with all six elements scores 1.0. Missing elements are penalized equally (0.167 each).
+**Cross-referencing** — measures whether the page combines information from multiple source types. Count of cross-referenced facts / possible cross-references. Only scored on multi-source tasks.
 
-### Accuracy
+**Reference coverage** — compares against a human-written reference page: section heading overlap, infobox field coverage, citation hash coverage, category coverage. Weighted average.
 
-Verifies that factual claims in the page are supported by the source data. The grader extracts all date, location, and name claims from the page wikitext, then checks each against the source data.
+**Tool usage** — checks harness logs for expected CLI usage: `wai snapshot`, `wai read`, `wai write`/`create`/`edit`. Binary per tool.
 
-- Dates are checked against EXIF timestamps, message timestamps, and transaction dates
-- Locations are checked against GPS coordinates, check-in data, and venue names in transactions
-- Names are checked against message participants, photo metadata, and any structured data fields
+## Results
 
-**Scoring**: Precision-based. `correct_claims / total_claims`. A page that states fewer facts but gets them all right scores higher than a page that states many facts with some errors. Fabricated details — facts not supported by any source — are weighted as double penalties.
+Test case: Person page from Instagram DMs (10,434 messages) + WhatsApp backup (171 messages). Best run per harness+model shown.
 
-### Structure
-
-Evaluates whether the page follows Wikipedia conventions as described in the editorial standards:
-
-- Third-person, neutral tone (no first-person pronouns, no editorializing)
-- Past tense for events, present tense for ongoing states
-- Chronological or thematic section organization
-- Correct wikitext syntax (headings, links, templates)
-- Appropriate use of wikilinks to other pages
-
-**Scoring**: Rubric-based, 0–1. Deductions for tone violations (−0.1 each, capped at −0.4), structural issues (−0.15 each), and syntax errors (−0.1 each).
-
-### Cross-referencing
-
-Measures whether the page draws connections across multiple data sources. Only scored on the multi-source benchmark — single-source tests receive a pass on this grader.
-
-- Does the page combine information from different source types?
-- Are cross-referenced facts cited with multiple sources?
-- Does the narrative reflect the richer picture that multiple sources provide?
-
-**Scoring**: Count of cross-referenced facts divided by the number of possible cross-references in the reference set. A cross-referenced fact is one where the page makes a claim supported by two or more distinct source types.
-
-### Citation quality
-
-Checks that every citation is correctly formatted and resolvable:
-
-- Uses the correct `{{cite ...}}` template for the source type
-- Includes all required fields (`hash`, `date`, and type-specific fields)
-- The `hash` field resolves to an actual object in the vault
-- No orphaned citations (cited but never referenced) or uncited major claims
-
-**Scoring**: `valid_citations / total_citations`, with a penalty for uncited claims. A page with 8 correct citations out of 10 and no uncited claims scores 0.8. A page with 10 correct citations but 3 uncited major claims scores lower.
-
-## Results by model
-
-Harness scores depend heavily on the underlying model. The same harness can produce very different results depending on which model is driving it. The tables below break down composite scores per benchmark suite.
-
-### Single-source page writing
+### Checkpoint 1 — Source pages
 
 <ScoreTable
-  headers='["Harness", "Model", "Completeness", "Accuracy", "Structure", "Citations", "Composite"]'
-  rows='[["Claude Code", "Opus 4.6", "1.0", "0.94", "0.92", "0.95", "0.95"], ["Claude Code", "Opus 4.5", "1.0", "0.91", "0.90", "0.93", "0.94"], ["Codex", "GPT-5.3", "1.0", "0.89", "0.85", "0.88", "0.90"], ["Codex", "GPT-5.2", "1.0", "0.86", "0.83", "0.85", "0.88"], ["Codex", "GPT-oss-120B", "0.9", "0.82", "0.78", "0.80", "0.82"], ["OpenCode", "Kimi K2.5", "0.9", "0.83", "0.79", "0.76", "0.82"], ["Codex", "GPT-oss-8B", "0.8", "0.71", "0.68", "0.65", "0.71"]]'
+  headers='["Harness", "Model", "Completeness", "Reference", "Composite"]'
+  rows='[["Claude Code", "Sonnet 4", "1.000", "0.657", "0.829"], ["Codex", "o4-mini", "1.000", "0.580", "0.818"], ["OpenCode", "Kimi K2.5", "1.000", "1.000", "1.000"], ["OpenCode", "MiniMax M2.5", "1.000", "1.000", "1.000"]]'
 />
 
-### Multi-source cross-referencing
+### Checkpoint 2 — Person page
 
 <ScoreTable
-  headers='["Harness", "Model", "Accuracy", "Cross-ref", "Citations", "Composite"]'
-  rows='[["Claude Code", "Opus 4.6", "0.92", "0.88", "0.93", "0.91"], ["Claude Code", "Opus 4.5", "0.89", "0.84", "0.90", "0.88"], ["Codex", "GPT-5.3", "0.84", "0.68", "0.85", "0.79"], ["Codex", "GPT-5.2", "0.81", "0.62", "0.82", "0.75"], ["OpenCode", "Kimi K2.5", "0.78", "0.58", "0.70", "0.69"], ["Codex", "GPT-oss-120B", "0.75", "0.52", "0.74", "0.67"], ["Codex", "GPT-oss-8B", "0.64", "0.35", "0.58", "0.52"]]'
+  headers='["Harness", "Model", "Compl.", "Citations", "Accuracy", "Structure", "X-ref", "Reference", "Composite"]'
+  rows='[["Claude Code", "Sonnet 4", "0.857", "0.750", "0.245", "0.900", "1.000", "0.508", "0.686"], ["Codex", "o4-mini", "0.714", "1.000", "0.091", "0.900", "1.000", "0.357", "0.620"], ["OpenCode", "Kimi K2.5", "0.711", "0.623", "0.312", "0.450", "1.000", "0.557", "0.579"], ["OpenCode", "MiniMax M2.5", "0.421", "0.850", "0.038", "0.100", "1.000", "0.307", "0.399"]]'
 />
 
-### Interactive refinement
+### Overall composite
 
 <ScoreTable
-  headers='["Harness", "Model", "Accuracy", "Structure", "Citations", "Composite"]'
-  rows='[["Claude Code", "Opus 4.6", "0.93", "0.94", "0.94", "0.94"], ["Claude Code", "Opus 4.5", "0.90", "0.91", "0.91", "0.91"], ["Codex", "GPT-5.3", "0.83", "0.80", "0.84", "0.82"], ["Codex", "GPT-5.2", "0.80", "0.76", "0.81", "0.79"], ["OpenCode", "Kimi K2.5", "0.76", "0.72", "0.68", "0.72"], ["Codex", "GPT-oss-120B", "0.72", "0.70", "0.71", "0.71"], ["Codex", "GPT-oss-8B", "0.58", "0.55", "0.50", "0.54"]]'
+  headers='["Harness", "Model", "Runs", "Source", "Content", "Composite"]'
+  rows='[["Claude Code", "Sonnet 4", "6", "0.829", "0.686", "0.715"], ["OpenCode", "Kimi K2.5", "2", "1.000", "0.579", "0.663"], ["Codex", "o4-mini", "9", "0.818", "0.620", "0.660"], ["OpenCode", "MiniMax M2.5", "3", "1.000", "0.399", "0.519"]]'
 />
 
-### Key findings
+### Observations
 
-**Opus 4.6 vs 4.5**: The jump is most visible on cross-referencing (+4 points) and citation quality (+3 points). Opus 4.6 is better at connecting facts across source types and produces fewer malformed citation templates.
+- **Accuracy is the weakest grader across all harnesses.** Claude Code leads at 0.245; Kimi K2.5 is close at 0.312. The eval wiki's vault is populated but citation resolution is still lossy.
+- **OpenCode achieves perfect source scores.** Both Kimi K2.5 and MiniMax M2.5 score 1.000 on checkpoint 1, exceeding Claude Code (0.829) and Codex (0.818) on source documentation.
+- **Structure separates Claude Code from the rest.** Claude Code scores 0.900 on structure vs 0.450 for Kimi K2.5 and 0.100 for MiniMax M2.5. This reflects prose quality, section organization, and editorial tone.
+- **Codex has the strongest citation formatting.** Codex scores 1.000 on citations across its best runs. It produces more citations and uses templates more consistently.
+- **Research depth matters more than extraction.** Adding research guidance to the content prompt (search for biographical keywords, sample across timelines, extract quotes) improved Codex's content score from 0.417 to 0.620.
 
-**GPT-5.3 vs 5.2**: Modest improvement across the board. The biggest gain is in structure (+2 points), where 5.3 is more consistent at producing neutral, encyclopedic tone without first-person slips.
+## Known issues
 
-**GPT-oss-120B vs GPT-oss-8B**: The gap is large — 10+ points on every grader. The 8B model struggles with citation formatting and rarely produces cross-referenced facts. It can write passable single-source pages for simple tasks but falls apart on anything requiring multi-step reasoning across sources.
-
-**Kimi K2.5**: Competitive with GPT-oss-120B on single-source tasks and slightly ahead on cross-referencing. Weaker on citation formatting — tends to omit required fields or use incorrect template names. Vision capabilities are strong, making it a reasonable choice for photo-heavy workflows through OpenCode.
-
-## Harness profiles
-
-### Claude Code
-
-Best overall scores across all benchmarks. Strongest on cross-referencing and interactive refinement, where it consistently finds connections between data sources that other harnesses miss.
-
-**Strengths**: Produces well-structured encyclopedia prose on the first attempt. Handles the full citation system reliably — rarely produces malformed citations. Excels at incorporating editorial feedback without regressing existing content.
-
-**Tradeoffs**: Slower per task. Higher cost per page due to longer context usage.
-
-**Best for**: Initial page creation from complex, multi-source data. Interactive sessions where you're refining pages with the agent.
-
-### Codex
-
-Strong on single-source page writing and task queue throughput. Competitive with Claude Code on straightforward tasks but drops off on cross-referencing. Model choice matters — GPT-5.3 is significantly better than the open-source variants.
-
-**Strengths**: Fast execution for batch operations. Good at processing large volumes of data efficiently. Reliable task queue integration — claims, completes, and fails tasks cleanly.
-
-**Tradeoffs**: Less nuanced editorial judgment — may need more human review on tone and structure. Cross-referencing scores are notably lower on the multi-source benchmark. Photo analysis is capable but less detailed.
-
-**Best for**: Batch processing — snapshotting large archives, creating initial drafts for many pages at once, queue-based workflows where speed matters more than polish. Use GPT-5.3 for quality-sensitive tasks and GPT-oss models for high-volume, low-stakes work.
-
-### OpenCode
-
-Scores vary significantly depending on the underlying model. With Kimi K2.5, competitive on single-source tasks and photo analysis. Cross-referencing and interactive refinement depend heavily on model choice.
-
-**Strengths**: Flexible model selection — can use any OpenAI-compatible provider. Good for users who want to use specific models or run against local models for privacy.
-
-**Tradeoffs**: Photo analysis depends entirely on the underlying model's vision capabilities. Cross-referencing quality varies by model. May require more explicit prompting for Wikipedia-style output. Inconsistent citation formatting across models.
-
-**Best for**: Users who need model flexibility or specific providers. Works well when paired with strong vision models for photo-heavy workflows.
-
-## How evals are run
-
-Each eval run follows the same protocol:
-
-1. **Setup** — A fresh MediaWiki instance is provisioned with no existing pages. Source data for each test case is placed in a staging directory.
-2. **Task creation** — Test tasks are created via `wai task create`, matching the format an agent would see in production.
-3. **Agent execution** — The agent harness claims and completes each task using its standard workflow. No special prompting or hints beyond what the task description contains.
-4. **Grading** — After all tasks are complete, graders run against the resulting wiki pages and source data. Scores are recorded per-grader, per-task.
-5. **Aggregation** — Scores are averaged across tasks within each benchmark suite, then across graders for a composite score.
-
-Evals are re-run when agent harnesses release new versions or when the underlying models are updated. Historical scores are tracked to catch regressions.
-
-## Interpreting scores
-
-A composite score above 0.85 indicates a harness that produces publication-ready pages with minimal human review. Scores between 0.65 and 0.85 indicate pages that are structurally sound but may need editorial polish. Below 0.65, pages typically require significant revision.
-
-The most diagnostic individual grader is **accuracy** — a harness that scores well on accuracy but poorly on structure is producing correct content that just needs reformatting. A harness that scores well on structure but poorly on accuracy is producing plausible-looking pages with factual errors, which is harder to catch in review.
+- **Accuracy grader underreports**: citation resolution against vault manifests loses some valid claims as "unsupported."
+- **Single-source and interactive benchmarks not yet run**: test cases are defined but only multi-source has results.
