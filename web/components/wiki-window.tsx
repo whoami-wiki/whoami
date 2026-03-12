@@ -8,7 +8,6 @@ import { imageMap } from "@/utils/image-map";
 
 interface Props {
   activePage: WikiPage | null;
-  revealProgress: number;
   zIndex?: number;
 }
 
@@ -55,22 +54,7 @@ function renderWikiText(text: string): ReactNode[] {
   return parts;
 }
 
-function RevealBlock({ children }: { children: ReactNode }) {
-  return <>{children}</>;
-}
-
-export function WikiWindow({ activePage, revealProgress, zIndex }: Props) {
-  // Reveal steps: 0=title+subtitle+divider, 1=intro, 2=infobox, 3..N+2=sections
-  const totalSteps = (activePage?.sections.length ?? 0) + 3;
-  const visibleSteps = Math.floor(revealProgress * totalSteps);
-
-  const showIntro = visibleSteps >= 1;
-  const showInfobox = visibleSteps >= 2;
-  const sectionsVisible = Math.max(0, visibleSteps - 2);
-
-  // Count top-level TOC entries that correspond to revealed sections
-  // Each top-level TOC entry maps to one section heading
-  const revealedTocCount = sectionsVisible;
+export function WikiWindow({ activePage, zIndex }: Props) {
 
   return (
     <AnimatePresence>
@@ -93,19 +77,12 @@ export function WikiWindow({ activePage, revealProgress, zIndex }: Props) {
 
           <div className="relative flex-1 overflow-hidden">
             {/* Table of contents — outside scroll offset so it stays fixed */}
-            {revealedTocCount > 0 && (
-              <div className="absolute top-[6.5rem] left-6 w-48 bg-neutral-100 dark:bg-neutral-900 p-3 hidden md:block z-10">
-                <RevealBlock>
-                  <div className="font-sans text-xs font-medium text-muted uppercase tracking-wider mb-2">
-                    Contents
-                  </div>
-                </RevealBlock>
-                <RevealedTocList
-                  entries={activePage.toc}
-                  visibleCount={revealedTocCount}
-                />
+            <div className="absolute top-[6.5rem] left-6 w-48 bg-neutral-100 dark:bg-neutral-900 p-3 hidden md:block z-10">
+              <div className="font-sans text-xs font-medium text-muted uppercase tracking-wider mb-2">
+                Contents
               </div>
-            )}
+              <TocList entries={activePage.toc} />
+            </div>
 
             <div
               className="p-6"
@@ -113,7 +90,7 @@ export function WikiWindow({ activePage, revealProgress, zIndex }: Props) {
             >
               {/* Article content — offset right to clear the TOC */}
               <div className="md:ml-52">
-                {/* Step 0: Title + subtitle + divider (always visible) */}
+                {/* Title + subtitle + divider */}
                 <h1 className="font-serif text-2xl font-normal mb-1">
                   {activePage.title}
                 </h1>
@@ -122,10 +99,9 @@ export function WikiWindow({ activePage, revealProgress, zIndex }: Props) {
                 </div>
                 <div className="h-px bg-neutral-200 dark:bg-neutral-700 mb-4" />
 
-                {/* Step 2: Infobox — always in layout to prevent reflow, visibility toggled */}
+                {/* Infobox */}
                     <div
                       className="float-right ml-4 mb-3 w-48 border border-muted text-sm font-sans overflow-hidden relative z-10 bg-neutral-100 dark:bg-neutral-900"
-                      style={{ visibility: showInfobox ? "visible" : "hidden" }}
                     >
                       <div className="bg-neutral-200 dark:bg-neutral-700 px-3 py-1.5 font-medium text-center text-xs">
                         {activePage.title}
@@ -151,19 +127,14 @@ export function WikiWindow({ activePage, revealProgress, zIndex }: Props) {
                       ))}
                     </div>
 
-                {/* Step 1: Intro */}
-                {showIntro && (
-                  <RevealBlock>
-                    <p className="font-sans text-sm leading-[1.7] text-neutral-700 dark:text-neutral-300 mb-4">
-                      {renderWikiText(activePage.intro)}
-                    </p>
-                  </RevealBlock>
-                )}
+                {/* Intro */}
+                <p className="font-sans text-sm leading-[1.7] text-neutral-700 dark:text-neutral-300 mb-4">
+                  {renderWikiText(activePage.intro)}
+                </p>
 
-                {/* Steps 3..N+2: Sections, one by one */}
-                {activePage.sections.slice(0, sectionsVisible).map((section) => (
-                  <RevealBlock key={section.heading}>
-                    <div className="mb-4">
+                {/* Sections */}
+                {activePage.sections.map((section) => (
+                    <div key={section.heading} className="mb-4">
                       <h2 className="font-serif text-lg font-normal mb-1 text-primary">
                         {section.heading}
                       </h2>
@@ -190,7 +161,6 @@ export function WikiWindow({ activePage, revealProgress, zIndex }: Props) {
                         <Gallery images={section.images} />
                       )}
                     </div>
-                  </RevealBlock>
                 ))}
               </div>
             </div>
@@ -201,26 +171,10 @@ export function WikiWindow({ activePage, revealProgress, zIndex }: Props) {
   );
 }
 
-function RevealedTocList({
-  entries,
-  visibleCount,
-}: {
-  entries: TocEntry[];
-  visibleCount: number;
-}) {
-  // Each top-level entry corresponds to one section. Show entries up to visibleCount.
-  let remaining = visibleCount;
-  const visibleEntries: TocEntry[] = [];
-  for (const entry of entries) {
-    if (remaining <= 0) break;
-    visibleEntries.push(entry);
-    // Each top-level entry (with or without children) consumes one section slot
-    remaining--;
-  }
-
+function TocList({ entries }: { entries: TocEntry[] }) {
   return (
     <ol className="font-sans text-sm space-y-1 text-blue-600 dark:text-blue-400 list-decimal list-inside">
-      {visibleEntries.map((entry) => (
+      {entries.map((entry) => (
         <li key={entry.label}>
           {entry.label}
           {entry.children && (

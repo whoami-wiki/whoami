@@ -976,19 +976,11 @@ export function DesktopScene() {
   }, [offsets]);
 
   // Active page = last consumed item across all windows + standalone
-  // revealProgress = 0→1 sub-progress within the active page's range
   let activePage: WikiPage | null = null;
-  let revealProgress = 1;
 
   for (let i = 0; i < allItemsByHideAt.length; i++) {
     if (progress >= allItemsByHideAt[i].hideAt) {
       activePage = allItemsByHideAt[i].page;
-      const start = allItemsByHideAt[i].hideAt;
-      const end = allItemsByHideAt[i + 1]?.hideAt ?? 1.0;
-      revealProgress = Math.min(
-        (progress - start) / ((end - start) * 0.9),
-        1,
-      );
     }
   }
 
@@ -1033,7 +1025,7 @@ export function DesktopScene() {
           })}
         </div>
 
-        <WikiWindow activePage={activePage} revealProgress={revealProgress} zIndex={topZ + 1} />
+        <WikiWindow activePage={activePage} zIndex={topZ + 1} />
       </div>
     </div>
   );
