@@ -5,13 +5,13 @@ date: "2025-02-18"
 
 Last year, I visited my grandmother's house for the first time after the pandemic and came across a cupboard full of old photos. There were about 1,351 of them spanning all the way from my grandmother's wedding, my mom as a baby, to me in middle school, just right around the time when we got a smartphone and all photos since then are backed up online.
 
-<Placeholder content="Photos all over the place" />
+<ThemedImage light="/blog/01-light.png" dark="/blog/01-dark.png"/>
 
 Everything was all over the place so I spent some time going through all of them individually and organizing them into groups. Some of the initial groups were based on photos with similar aspect ratios or film stock so there was a group of black/white 32mm square pictures that were taken around the time when my grandfather was in his mid 20s.
 
 As I got done with grouping all of them, I was able to see flashes of stories in my head, but they were ephemeral and fragile. For example, there was a group of photos that looked like it was taken during my grandparents' wedding but I didn't know the chronological order they were taken because [EXIF](https://en.wikipedia.org/wiki/Exif) metadata didn't exist around that time.
 
-<Placeholder content="Grouped photos" />
+<ThemedImage light="/blog/02-light.png" dark="/blog/02-dark.png"/>
 
 So I sat down with my grandmother and asked her to reorder the photos and tell me everything she could remember about her wedding. Her face lit up as she narrated the backstory behind the occasion, going from photo to photo, resurfacing details that had been dormant for decades. I wrote everything down, recorded the names of people in some of the photos, some of whom I recognized as younger versions of my uncles and aunts.
 
@@ -19,7 +19,7 @@ After the interview, I had multiple pages of notes connecting the photos to even
 
 So I cloned [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki), spun up a local instance, and began my editorial work. I used the [2011 Royal Wedding](https://en.wikipedia.org/wiki/Wedding_of_Prince_William_and_Catherine_Middleton) as reference and drafted a page starting with the classic infobox and the lead paragraph.
 
-<Placeholder content="Image of the wiki infobox" />
+<ThemedImage light="/blog/03-light.png" dark="/blog/03-light.png"/>
 
 I split up the rest of the content into sections and filled them with everything I could verify like dates, names, places, who sat where. I scanned all the photos and spent some time figuring out what to place where. For every photo placement, there was a follow up to include a descriptive caption.
 
@@ -27,7 +27,8 @@ Whenever I mentioned a person, I linked them to an empty [stub](https://en.wikip
 
 In two evenings, I was able to document a full backstory for the photos into a neat article. These two evenings also made me realize just how useful encyclopedia software is to record and preserve media and knowledge that would've otherwise been lost over time.
 
-<Placeholder content="Image of the wiki homepage" />
+<ThemedImage light="/blog/04a-light.png" dark="/blog/04a-light.png"/>
+<ThemedImage light="/blog/04b-light.png" dark="/blog/04b-light.png"/>
 
 This was so much fun that I spent the following months writing pages to account for all the photos that needed to be stitched together.
 
@@ -41,13 +42,13 @@ After finding all the stories behind the physical photos, I started to work on d
 
 This time, without any interviews, I wanted to see if I could use a language model to create a page based on just browsing through the photos. As my first experiment, I created a folder with 624 photos of a family trip to [Coorg](https://en.wikipedia.org/wiki/Kodagu_district) back in 2012.
 
-<Placeholder content="Image of folder" />
+<ThemedImage light="/blog/05-light.png" dark="/blog/05-light.png"/>
 
 I pointed [Claude Code](https://www.claude.com/product/claude-code) at the directory and asked it to draft a wiki page by browsing through the images. I hinted at using [ImageMagick](https://imagemagick.org) and creating contact sheets so it would help with browsing through multiple photos at once.
 
 After a few minutes and a couple of tokens later, it had created a compelling draft with a detailed account of everything we did during the trip by time of day. The model had no location data to work with, just timestamps and visual content, but it was able to identify the places from the photos alone, including ones that I had forgotten by now. It picked up details on the modes of transportation we used to get between places just from what it could see.
 
-<Placeholder content="Image of coorg page" />
+<ThemedImage light="/blog/06-light.png" dark="/blog/06-light.png"/>
 
 After I had clarified who some of the people in the pictures were, it went on to identify them automatically in the captions. All I had to do was fill in a few gaps that were locked in my memory and not available from the photos, and the page was complete.
 
