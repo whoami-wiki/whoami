@@ -84,6 +84,23 @@ const mdxComponents = {
       <img src={dark} alt={alt} className="hidden dark:block w-full" />
     </>
   ),
+  SideBySide: ({ children }: { children?: ReactNode }) => (
+    <div className="w-screen relative left-1/2 -translate-x-1/2 md:w-[min(960px,90vw)] px-4 md:px-0 grid grid-cols-1 md:grid-cols-2 gap-4">{children}</div>
+  ),
+  WideImage: ({
+    light,
+    dark,
+    alt = "",
+  }: {
+    light: string;
+    dark: string;
+    alt?: string;
+  }) => (
+    <div className="w-screen relative left-1/2 -translate-x-1/2 md:w-[min(960px,90vw)] px-4 md:px-0">
+      <img src={light} alt={alt} className="w-full rounded-xl dark:hidden" />
+      <img src={dark} alt={alt} className="hidden dark:block w-full rounded-xl" />
+    </div>
+  ),
 };
 
 export function MDXContent({
