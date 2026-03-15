@@ -20,7 +20,7 @@ export default function Home() {
               <Button text="Download Now" accent="primary" isCircular />
             </Link>
             <Link href="/blog/personal-encyclopedias" tabIndex={-1}>
-              <Button text="Learn More" accent="secondary" isCircular />
+              <Button text="Read Essay" accent="secondary" isCircular />
             </Link>
           </div>
         </div>
