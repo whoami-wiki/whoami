@@ -39,9 +39,27 @@ async function getLatestDesktopRelease(): Promise<Release | null> {
   return releases.find((r) => r.tag_name.startsWith("desktop-v")) ?? null;
 }
 
-export default async function DownloadPage() {
+function findDmg(assets: Asset[], arch: "arm64" | "x64"): Asset | undefined {
+  const dmgs = assets.filter((a) => a.name.endsWith(".dmg"));
+  if (arch === "arm64") {
+    return dmgs.find((a) => a.name.includes("arm64"));
+  }
+  // Intel: prefer explicit x64, fall back to the one without arm64
+  return (
+    dmgs.find((a) => a.name.includes("x64")) ??
+    dmgs.find((a) => !a.name.includes("arm64"))
+  );
+}
+
+type Platform = "macos-arm" | "macos-intel";
+
+export default async function DownloadPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ platform?: string }>;
+}) {
+  const { platform } = await searchParams;
   const release = await getLatestDesktopRelease();
-  const dmg = release?.assets.find((a) => a.name.endsWith(".dmg"));
   const version = release?.tag_name.replace(/^desktop-v/, "v");
   const date = release
     ? new Date(release.published_at).toLocaleDateString("en-US", {
@@ -50,6 +68,30 @@ export default async function DownloadPage() {
         day: "numeric",
       })
     : null;
+
+  const armDmg = release ? findDmg(release.assets, "arm64") : undefined;
+  const intelDmg = release ? findDmg(release.assets, "x64") : undefined;
+
+  const validPlatforms: Platform[] = ["macos-arm", "macos-intel"];
+  const selectedPlatform = validPlatforms.includes(platform as Platform)
+    ? (platform as Platform)
+    : null;
+
+  const downloads =
+    selectedPlatform === "macos-arm" && armDmg
+      ? [{ label: "Download for macOS (Apple Silicon)", asset: armDmg }]
+      : selectedPlatform === "macos-intel" && intelDmg
+        ? [{ label: "Download for macOS (Intel)", asset: intelDmg }]
+        : [
+            armDmg && {
+              label: "Download for macOS (Apple Silicon)",
+              asset: armDmg,
+            },
+            intelDmg && {
+              label: "Download for macOS (Intel)",
+              asset: intelDmg,
+            },
+          ].filter(Boolean);
 
   return (
     <div className="flex flex-col w-dvw items-center">
@@ -63,14 +105,21 @@ export default async function DownloadPage() {
 
         <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
 
-        {dmg ? (
-          <div className="flex flex-row items-center justify-between">
-            <Link href={dmg.browser_download_url} tabIndex={-1}>
-              <Button accent="tertiary" text="Download for macOS" />
-            </Link>
-            <div className="font-sans text-sm text-neutral-500 dark:text-neutral-400">
-              {version} &middot; {date}
-            </div>
+        {downloads.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            {downloads.map((d) => (
+              <div
+                key={d.asset.name}
+                className="flex flex-row items-center justify-between"
+              >
+                <Link href={d.asset.browser_download_url} tabIndex={-1}>
+                  <Button accent="tertiary" text={d.label} />
+                </Link>
+                <div className="font-sans text-sm text-neutral-500 dark:text-neutral-400">
+                  {version} &middot; {date}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="font-sans text-neutral-500">
