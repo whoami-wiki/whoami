@@ -44,7 +44,7 @@ export function DocsSidebar({ sections }: { sections: SidebarSection[] }) {
   const activeHeadingId = useActiveHeading(headingIds);
 
   return (
-    <nav className="w-56 shrink-0 font-sans text-sm">
+    <nav className="w-56 shrink-0 font-sans text-sm max-h-[calc(100dvh-5rem)] overflow-y-auto">
       <div className="flex flex-col gap-6">
         {sections.map((section) => (
           <div key={section.title} className="flex flex-col gap-1">

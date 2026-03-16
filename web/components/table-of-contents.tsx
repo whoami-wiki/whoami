@@ -31,7 +31,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   if (headings.length === 0) return null;
 
   return (
-    <nav className="sticky top-24 w-56">
+    <nav className="sticky top-24 w-56 max-h-[calc(100dvh-7rem)] overflow-y-auto">
       <div className="font-sans text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-3">
         On this page
       </div>
