@@ -155,8 +155,8 @@ export const CheckIcon = ({ className }: { className?: string }) => (
 
 export const InfoIcon = ({ className }: { className?: string }) => (
   <svg
-    width="1em"
-    height="1em"
+    width="1.2em"
+    height="1.2em"
     viewBox="0 0 24 24"
     fill="currentColor"
     className={className}
