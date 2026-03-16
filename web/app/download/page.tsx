@@ -77,21 +77,15 @@ export default async function DownloadPage({
     ? (platform as Platform)
     : null;
 
-  const downloads =
-    selectedPlatform === "macos-arm" && armDmg
-      ? [{ label: "Download for macOS (Apple Silicon)", asset: armDmg }]
-      : selectedPlatform === "macos-intel" && intelDmg
-        ? [{ label: "Download for macOS (Intel)", asset: intelDmg }]
-        : [
-            armDmg && {
-              label: "Download for macOS (Apple Silicon)",
-              asset: armDmg,
-            },
-            intelDmg && {
-              label: "Download for macOS (Intel)",
-              asset: intelDmg,
-            },
-          ].filter(Boolean);
+  const downloads: { label: string; asset: Asset }[] = [];
+  if (selectedPlatform === "macos-arm" || !selectedPlatform) {
+    if (armDmg)
+      downloads.push({ label: "Download for macOS (Apple Silicon)", asset: armDmg });
+  }
+  if (selectedPlatform === "macos-intel" || !selectedPlatform) {
+    if (intelDmg)
+      downloads.push({ label: "Download for macOS (Intel)", asset: intelDmg });
+  }
 
   return (
     <div className="flex flex-col w-dvw items-center">
