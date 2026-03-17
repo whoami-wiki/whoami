@@ -1,0 +1,8 @@
+<includeonly><div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:4px; padding:4px 10px; margin:4px 0; font-size:0.85em; display:inline-block;">&#x2705; <b>Closed</b></div></includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Closed}}</nowiki></code>
+
+Status marker for resolved questions on talk pages.
+
+[[Category:Templates]]
+</noinclude>

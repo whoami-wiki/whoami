@@ -1,0 +1,8 @@
+<includeonly><div style="background:#fff8e1; border:1px solid #ffe082; border-radius:4px; padding:4px 10px; margin:4px 0; font-size:0.85em; display:inline-block;">&#x1F7E1; <b>Open</b></div></includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Open}}</nowiki></code>
+
+Status marker for active gaps on talk pages. Indicates an unresolved editorial question.
+
+[[Category:Templates]]
+</noinclude>
