@@ -24,21 +24,52 @@ Windows and Linux coming soon!
 
 ## Install the extension for your agent harness
 
-The agent harness connects your AI coding tool to your wiki. Install the plugin for your tool of choice:
+The agent harness connects your AI coding tool to your wiki. Install the extension for your tool of choice:
 
 ### Claude Code
 
-Install the whoami plugin from the Claude Code plugin marketplace:
+Install the whoami plugin from the Claude Code plugin registry:
 
 ```bash
 claude plugin add whoami
 ```
 
-This gives Claude Code access to wiki tools through the `wai` CLI.
+This installs the editor agent, editorial guide, and gives Claude Code access to wiki tools through the `wai` CLI.
 
-### Codex / OpenCode
+### Codex
 
-These tools can use the `wai` CLI directly. Ensure the `wai` binary is in your PATH and run `wai auth login` to authenticate before starting a session.
+Clone the [extensions repo](https://github.com/whoami-wiki/extensions) and copy the Codex configuration into your working directory:
+
+```bash
+git clone https://github.com/whoami-wiki/extensions.git
+cp -r extensions/codex/.agents .agents
+```
+
+This sets up the `.agents/` directory with the editor agent and editorial guide skill. Codex reads this directory automatically when you start a session.
+
+Ensure the `wai` binary is in your PATH, then authenticate:
+
+```bash
+wai auth login
+```
+
+### OpenCode
+
+Clone the [extensions repo](https://github.com/whoami-wiki/extensions) and copy the OpenCode configuration into your working directory:
+
+```bash
+git clone https://github.com/whoami-wiki/extensions.git
+cp -r extensions/opencode/.opencode .opencode
+cp extensions/opencode/opencode.json opencode.json
+```
+
+This sets up the `.opencode/` directory with instructions and the whoami plugin. The plugin injects environment variables for the `wai` CLI and preserves editorial context across long sessions.
+
+Ensure the `wai` binary is in your PATH, then authenticate:
+
+```bash
+wai auth login
+```
 
 ## Verify the setup
 
