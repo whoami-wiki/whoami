@@ -28,11 +28,11 @@ The agent harness connects your AI coding tool to your wiki. Install the extensi
 
 ### Claude Code
 
-Add the whoami marketplace and install the plugin:
+Add the whoami marketplace and install the plugin. Run these slash commands inside Claude Code:
 
-```bash
-claude marketplace add whoami-wiki/extensions
-claude plugin add whoami
+```
+/plugin marketplace add whoami-wiki/extensions
+/plugin install whoami@whoami-marketplace
 ```
 
 This installs the editor agent, editorial guide, and gives Claude Code access to wiki tools through the `wai` CLI.
