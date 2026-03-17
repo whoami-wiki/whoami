@@ -46,14 +46,13 @@ Add this line to your shell profile (`~/.zshrc`, `~/.bashrc`) to make it permane
 wai auth status
 ```
 
-If the plugin is installed but not detected, try removing and re-adding it:
+If the extension is installed but not detected, try reinstalling it:
 
 ```bash
-claude plugin remove whoami
-claude plugin add whoami
+wai plugin install claude-code
 ```
 
-Make sure you restart your agent session after reinstalling the plugin.
+For Codex or OpenCode, replace `claude-code` with `codex` or `opencode`. Make sure you restart your agent session after reinstalling.
 
 ## Permission errors on snapshot
 

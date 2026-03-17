@@ -1,12 +1,12 @@
 ---
 title: Installation
-description: "Install the whoami.wiki desktop app, CLI, and agent harness plugin"
+description: "Install the whoami.wiki desktop app, CLI, and agent harness extension"
 ---
 
 whoami.wiki has two components that work together:
 
-- **Desktop App and CLI** — the encyclopedia you use to browse through pages and `wai` command-line tool for agents interact with it 
-- **Agent Harness and Extension** — a coding agent like [Claude Code](https://code.claude.com), [Codex](https://openai.com/codex), or [OpenCode](https://opencode.ai) and supporting files to guide editorial work
+- **Desktop App and CLI** — the encyclopedia you use to browse through pages and `wai` command-line tool for agents to interact with it
+- **Agent Harness Extension** — a coding agent like [Claude Code](https://code.claude.com), [Codex](https://openai.com/codex), or [OpenCode](https://opencode.ai) and supporting files to guide editorial work
 
 <Note>We recommend using Claude Code with Opus 4.6. You can [view evals across different agent harnesses and models](/docs/evals) to help you choose.</Note>
 
@@ -24,21 +24,92 @@ Windows and Linux coming soon!
 
 ## Install the extension for your agent harness
 
-The agent harness connects your AI coding tool to your wiki. Install the plugin for your tool of choice:
+The extension connects your AI coding agent to your wiki via an [MCP](https://modelcontextprotocol.io) server. Each harness has its own extension — install the one that matches your tool of choice.
+
+Extension source code is available at [github.com/whoami-wiki/extensions](https://github.com/whoami-wiki/extensions).
 
 ### Claude Code
 
-Install the whoami plugin from the Claude Code plugin marketplace:
+[Claude Code](https://code.claude.com) is Anthropic's agentic coding tool that runs in your terminal.
+
+**1. Install Claude Code** (if you haven't already):
 
 ```bash
-claude plugin add whoami
+# macOS / Linux
+curl -fsSL https://claude.ai/install.sh | bash
+
+# or via Homebrew
+brew install --cask claude-code
 ```
 
-This gives Claude Code access to wiki tools through the `wai` CLI.
+**2. Install the whoami extension:**
 
-### Codex / OpenCode
+```bash
+wai plugin install claude-code
+```
 
-These tools can use the `wai` CLI directly. Ensure the `wai` binary is in your PATH and run `wai auth login` to authenticate before starting a session.
+This registers the whoami MCP server with Claude Code so it can read and write wiki pages, snapshot data, and manage tasks.
+
+**3. Start a session:**
+
+```bash
+claude
+```
+
+Claude Code will automatically have access to `wai` tools through the MCP server.
+
+### Codex
+
+[Codex](https://github.com/openai/codex) is OpenAI's agentic coding tool that runs in your terminal.
+
+**1. Install Codex** (if you haven't already):
+
+```bash
+# via npm
+npm install -g @openai/codex
+
+# or via Homebrew
+brew install --cask codex
+```
+
+**2. Install the whoami extension:**
+
+```bash
+wai plugin install codex
+```
+
+This adds the whoami MCP server to your Codex config (`~/.codex/config.toml`) so Codex can access wiki tools.
+
+**3. Start a session:**
+
+```bash
+codex
+```
+
+### OpenCode
+
+[OpenCode](https://opencode.ai) is an open-source agentic coding tool that runs in your terminal, desktop, or IDE.
+
+**1. Install OpenCode** (if you haven't already):
+
+```bash
+# macOS / Linux
+curl -fsSL https://opencode.ai/install | bash
+```
+
+**2. Install the whoami extension:**
+
+```bash
+wai plugin install opencode
+```
+
+This adds the whoami MCP server to your OpenCode config (`opencode.json`) so OpenCode can access wiki tools.
+
+**3. Start a session:**
+
+```bash
+opencode
+```
 
 ## Verify the setup
 
