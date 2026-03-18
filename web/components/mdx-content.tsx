@@ -7,7 +7,6 @@ import { Features } from "@/components/features";
 import { ScoreTable } from "@/components/score-table";
 import { ArchOverview } from "@/components/arch-overview";
 import { Note } from "@/components/note";
-import { Contributors } from "@/components/contributors";
 
 function textContent(children: ReactNode): string {
   if (typeof children === "string") return children;
@@ -75,7 +74,6 @@ const mdxComponents = {
   ScoreTable,
   ArchOverview,
   Note,
-  Contributors,
   ThemedImage: ({
     light,
     dark,
