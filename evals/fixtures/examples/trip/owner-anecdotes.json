@@ -1,0 +1,26 @@
+{
+  "speaker": "owner",
+  "context": "Wiki owner providing personal memories about the Portland trip",
+  "entries": [
+    {
+      "type": "anecdote",
+      "content": "At the airport I had my water bottle confiscated because I forgot to empty it before security. I was annoyed the whole flight.",
+      "topic": "Departure"
+    },
+    {
+      "type": "anecdote",
+      "content": "On the first night at the rental, there was a strange humming noise from the fridge that kept us up. We unplugged it and just ate out for every meal after that.",
+      "topic": "First night at rental"
+    },
+    {
+      "type": "anecdote",
+      "content": "I bought a hand-carved wooden bird at the Saturday market. The vendor told us the story behind the design and we ended up talking for twenty minutes.",
+      "topic": "Souvenir at Saturday Market"
+    },
+    {
+      "type": "anecdote",
+      "content": "My favourite discovery was the lavender lemonade at the food cart pod. I went back for it three times.",
+      "topic": "Lavender lemonade"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+== Active gaps ==
+
+{{Open}} '''Mobile client''' — The API module was built for a planned mobile client that never materialised. No Slack discussion explains why it was abandoned. Nate may have context.
+
+{{Open}} '''User count''' — The page says "roughly thirty people" but no source confirms this. The number comes from a Slack message where the wiki owner said "we have like 30 users" which may have been approximate.
+
+{{Open}} '''Hosting cost''' — Only the base droplet cost ($5/month) is documented. Database hosting, domain registration, and any other costs are unknown.
+
+== Resolved ==
+
+{{Closed}} '''License''' — Initial commits had no license file. Commit `b8c9d0e1` on 2021-02-03 added MIT license. Confirmed via git log.
+
+{{Closed}} '''Priya's join date''' — Slack message from 2021-01-18 confirms Priya asked to join after seeing the demo. First commit from Priya is dated 2021-01-22.
+
+{{Closed}} '''Final commit''' — Git log confirms the last commit was on 2022-08-14 (Django security patch), not July as initially noted in an earlier draft.
+
+== Editorial decisions ==
+
+{{Closed}} '''Contributor percentages''' — Calculated from `git shortlog -sn` output. Rounded to nearest whole percent. Noted absolute commit counts alongside percentages for transparency.
+
+{{Closed}} '''Decline framing''' — Described the project's end as "stalled" and "stopped receiving attention" rather than "failed." The project achieved its goals for its scale; it simply lost momentum when contributors moved on.
+
+{{Closed}} '''Slack quoting''' — Used direct quotes from Slack sparingly and only when they add voice or context that paraphrasing would lose. Most Slack content is summarised rather than quoted.
+
+== Episode candidates ==
+
+{{Open}} '''Hackathon weekend''' — The 15–16 January 2021 hackathon has enough commit density and Slack activity to sustain its own episode page. Twenty hours of intensive coding with real-time Slack commentary.
+
+{{Open}} '''Recommendation engine sprint''' — Nate's two-weekend deep dive into collaborative filtering (late March – early April 2021) produced the project's most distinctive feature and generated substantial Slack discussion.

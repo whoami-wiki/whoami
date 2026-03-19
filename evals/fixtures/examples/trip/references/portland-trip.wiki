@@ -1,0 +1,79 @@
+{{Infobox Episode
+| name = Portland trip
+| date = 14–18 July 2023
+| location = Portland, Oregon
+| participants = Wiki owner, Sam, Jordan
+| transport = Flight (outbound), rental car (return)
+| photo_count = 187
+| video_count = 12
+}}
+
+The '''Portland trip''' was a five-day visit to Portland, Oregon in July 2023 undertaken by the wiki owner, Sam, and Jordan. Originally planned as a weekend getaway, it extended to five days after the group discovered a food cart pod festival running through the following Wednesday. The trip produced 187 photos, 12 short videos, and roughly 400 messages across two group chats.
+
+[[File:Portland_bridge_sunset.jpg|thumb|right|250px|Hawthorne Bridge at sunset, 15 July 2023.]]
+
+== Planning ==
+
+The trip was proposed on 20 June 2023 in a group chat message from Sam suggesting a long weekend somewhere within driving distance.<ref name="msg-2023-06-20">{{Cite message|snapshot=f1a2b3c4|date=2023-06-20|thread=trip_group|note=Trip proposal}}</ref> Portland was chosen after Jordan vetoed Seattle on account of a prior bad experience with airport security there. Flights were booked on 25 June through a budget carrier for $138 round trip.<ref name="tx-flight">{{Cite transaction|snapshot=d5e6f7a8|date=2023-06-25|amount=138.00|vendor=Budget Air|note=Round trip flight}}</ref>
+
+== Day by day ==
+
+=== July 14 (Friday) — Arrival ===
+
+The group departed on a morning flight arriving at Portland International Airport at 11:42 AM local time.<ref name="loc-arrival">{{Cite location|snapshot=b9c0d1e2|date=2023-07-14T11:42|lat=45.5898|lon=-122.5951|note=Airport arrival}}</ref> After collecting bags they took a rideshare to the rental on Division Street. The first stop was a late lunch at a taqueria two blocks from the rental where the wiki owner ordered carnitas and Sam got a michelada.<ref name="tx-lunch">{{Cite transaction|snapshot=d5e6f7a8|date=2023-07-14|amount=47.20|vendor=Taqueria Sol|note=First lunch}}</ref>
+
+The evening was spent exploring the Hawthorne neighbourhood on foot. Jordan discovered a used bookshop and spent forty minutes inside while the others waited on a bench eating ice cream from a cart across the street.<ref name="photo-hawthorne">{{Cite photo|snapshot=f1a2b3c4|date=2023-07-14|hash=aa11bb22|note=Jordan in bookshop}}</ref>
+
+=== July 15 (Saturday) — Saturday Market ===
+
+The group walked to the Saturday Market along the waterfront, arriving shortly after opening at 10 AM.<ref name="loc-market">{{Cite location|snapshot=b9c0d1e2|date=2023-07-15T10:08|lat=45.5225|lon=-122.6700|note=Saturday Market}}</ref> The wiki owner bought a hand-carved wooden bird from a vendor who explained the design was inspired by Pacific Northwest folklore. Sam bought matching enamel pins for the group.
+
+{{Blockquote|The vendor told us each bird takes about three days to carve. He had this whole wall of them, all slightly different. I picked the one with the longest tail.|Wiki owner, 15 July 2023}}
+
+The afternoon was spent at a craft brewery where they sampled a flight of eight beers and played cards for three hours.<ref name="tx-brewery">{{Cite transaction|snapshot=d5e6f7a8|date=2023-07-15|amount=62.00|vendor=Cascade Brewing|note=Beer flight and snacks}}</ref>
+
+=== July 16 (Sunday) — Forest Park ===
+
+A morning hike through Forest Park began at the Wildwood trailhead. The group hiked roughly five miles over three hours, pausing at a creek crossing for photos.<ref name="photo-creek">{{Cite photo|snapshot=f1a2b3c4|date=2023-07-16|hash=cc33dd44|note=Creek crossing group photo}}</ref> Jordan twisted an ankle on the descent and the pace slowed considerably for the final mile.
+
+Lunch was at a food cart pod near Alberta Street. The wiki owner tried lavender lemonade for the first time and returned twice more over the next two days.<ref name="tx-lemonade">{{Cite transaction|snapshot=d5e6f7a8|date=2023-07-16|amount=6.50|vendor=Bloom Cart|note=Lavender lemonade}}</ref>
+
+=== July 17 (Monday) — Powell's and the food cart festival ===
+
+The morning was spent at a large bookshop downtown. Each person set a thirty-minute timer and a twenty-dollar budget; all three exceeded both limits.<ref name="tx-books">{{Cite transaction|snapshot=d5e6f7a8|date=2023-07-17|amount=34.80|vendor=City Books|note=Book haul}}</ref>
+
+In the afternoon the group stumbled upon a food cart festival that was running all week. This discovery prompted the decision to extend the trip through Wednesday. Jordan called their employer from the festival to request two extra days off.<ref name="msg-extend">{{Cite message|snapshot=f1a2b3c4|date=2023-07-17|thread=trip_group|note=Decision to extend trip}}</ref>
+
+=== July 18 (Tuesday) — Japanese Garden and departure ===
+
+The final full day began with a visit to the Japanese Garden in Washington Park. The group spent two hours walking the grounds in near-silence, taking photos of the stone arrangements and koi pond.<ref name="photo-garden">{{Cite photo|snapshot=f1a2b3c4|date=2023-07-18|hash=ee55ff66|note=Japanese Garden stone path}}</ref>
+
+The return journey was by rental car — Sam had found a one-way deal that was cheaper than three flight changes. The drive took six hours with one stop for gas and coffee. Jordan slept through most of it.<ref name="tx-rental">{{Cite transaction|snapshot=d5e6f7a8|date=2023-07-18|amount=89.00|vendor=Budget Rental|note=One-way car rental}}</ref>
+
+== Food ==
+
+Portland's food scene was a recurring highlight. The group ate at twelve distinct venues across five days, spending a combined $310 on meals. Standout experiences included the taqueria on arrival day, a ramen shop near the rental that they visited twice, and the lavender lemonade cart that became a daily ritual. The food cart festival on day four introduced them to a Georgian khachapuri stand that Sam declared the best thing eaten on the entire trip.
+
+== People ==
+
+Three people participated in the trip:
+
+* '''Wiki owner''' — organised logistics and drove the rental car home
+* '''[[Sam]]''' — proposed the trip, served as unofficial photographer (104 of 187 photos)
+* '''[[Jordan]]''' — navigated on foot, twisted ankle on day three, bookshop enthusiast
+
+== Impact ==
+
+The Portland trip became a frequently referenced touchpoint in subsequent group conversations. The lavender lemonade became an inside joke — any time someone suggested a drink, the others would respond with "but is it lavender lemonade." The wooden bird sat on the wiki owner's desk for months afterward. Sam's photos were compiled into a shared album that accumulated 23 comments over the following week.
+
+== References ==
+<references />
+
+== Bibliography ==
+
+{{Cite vault|type=photos|snapshot=f1a2b3c4|timestamp=2023-07-14/2023-07-18|note=Trip photos (187 images, 12 videos).}}
+{{Cite vault|type=location|snapshot=b9c0d1e2|timestamp=2023-07-14/2023-07-18|note=Location history for trip duration.}}
+{{Cite vault|type=messages|snapshot=f1a2b3c4|timestamp=2023-06-20/2023-07-25|note=Group chat messages.}}
+{{Cite vault|type=transactions|snapshot=d5e6f7a8|timestamp=2023-07-14/2023-07-18|note=Transaction records.}}
+
+[[Category:Episodes]]

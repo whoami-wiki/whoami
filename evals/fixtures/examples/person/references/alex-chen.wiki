@@ -1,0 +1,76 @@
+{{Infobox Person
+| name = Alex Chen
+| birth_date = 15 June (year unknown, likely 1998–2000)
+| birth_place = Portland, Oregon
+| home_town = Eastside, Portland
+| education = BA Graphic Design, State University; exchange semester in Tokyo
+| occupation = Freelance illustrator, part-time barista
+| relatives = Mother (architect), younger brother "Ethan"
+| zodiac = Gemini
+| sources = Instagram, WhatsApp
+}}
+
+'''Alex Chen''' is a freelance illustrator and graphic design graduate documented in the personal archive through Instagram DMs and WhatsApp messages spanning November 2023 to April 2024. Born and raised in Portland, Oregon, Alex studied graphic design at State University before pursuing freelance illustration. The wiki owner connected with Alex through a mutual interest in indie music and Japanese art, building a friendship that evolved through an intensive six-month messaging period.
+
+[[File:Alex_Chen_profile.jpg|thumb|right|250px|Alex Chen, January 2024.]]
+
+== Background ==
+
+Alex grew up in the Eastside neighbourhood of Portland in a household that valued creative expression. Their mother is an architect who encouraged drawing from an early age, and their younger brother Ethan is studying computer science. The family keeps two cats, Miso and Tofu, who feature frequently in Alex's Instagram stories.
+
+=== Education ===
+
+Alex attended Lincoln High School before enrolling at State University, completing a BA in Graphic Design in 2022. During junior year, Alex spent an exchange semester in Tokyo at Musashino Art University, an experience that profoundly shaped their illustration style.
+
+{{Blockquote|Tokyo broke my brain in the best way. I went in drawing like every other American design student and came back obsessed with negative space and mono no aware.|Alex Chen, 18 November 2023}}
+
+=== Career ===
+
+After graduating, Alex began freelancing as an illustrator while working part-time at a specialty coffee shop. Clients include indie bands needing album art and small publishers commissioning book covers. Alex also runs a modest print shop selling risograph prints of original illustrations.
+
+== Connection with wiki owner ==
+
+The wiki owner connected with Alex through Instagram in November 2023 after discovering their illustration work through a mutual friend's story share.
+
+=== Phase 1: Art exchange ===
+
+Contact was initiated on 3 November 2023 with a message complimenting a recent illustration post.<ref name="ig-2023-11-03">{{Cite message|snapshot=a1b2c3d4|date=2023-11-03|thread=alex_thread|note=Opening message}}</ref> Alex responded with enthusiasm and the conversation quickly moved to sharing references and influences.
+
+=== Phase 2: Music bonding ===
+
+The friendship deepened around 15 November when they discovered a shared love of Japanese Breakfast and Mitski.<ref name="ig-2023-11-15">{{Cite message|snapshot=a1b2c3d4|date=2023-11-15|thread=alex_thread|note=Music discovery}}</ref> A collaborative playlist was created and became a recurring touchpoint in the conversation.
+
+=== Phase 3: Meeting in person ===
+
+Three in-person meetings occurred in January 2024: a dinner at a ramen shop on the 12th, a gallery opening on the 18th, and a concert on the 25th.<ref name="ig-2024-01-12">{{Cite message|snapshot=a1b2c3d4|date=2024-01-12|thread=alex_thread|note=First meeting}}</ref><ref name="ig-2024-01-25">{{Cite message|snapshot=a1b2c3d4|date=2024-01-25|thread=alex_thread|note=Concert}}</ref>
+
+== Interests ==
+
+=== Illustration ===
+
+Alex's illustration style blends flat colour fields with intricate line work, drawing influence from both ukiyo-e woodblock prints and contemporary graphic novels. Recurring motifs include urban landscapes, cats, and food.
+
+=== Music ===
+
+Alex is an avid listener with eclectic taste spanning indie rock, shoegaze, and city pop. Frequently mentioned artists include Japanese Breakfast, Mitski, Tatsuro Yamashita, and Slowdive.
+
+== Conversation statistics ==
+
+{| class="wikitable"
+|-
+! Metric !! Value
+|-
+| Total messages || 4,892
+|-
+| Date range || Nov 2023 – Apr 2024
+|}
+
+== References ==
+<references />
+
+== Bibliography ==
+
+{{Cite vault|type=messages|snapshot=a1b2c3d4|timestamp=2023-11-03/2024-04-15|note=Instagram DM thread.}}
+{{Cite vault|type=messages|snapshot=e5f6a7b8|timestamp=2024-01-10/2024-03-20|note=WhatsApp messages.}}
+
+[[Category:People]]

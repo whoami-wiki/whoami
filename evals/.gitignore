@@ -1,0 +1,9 @@
+results/
+node_modules/
+dist/
+.env
+
+# Real fixtures contain personal data — keep them local
+fixtures/incremental/
+# Example fixtures are safe to commit
+!fixtures/examples/

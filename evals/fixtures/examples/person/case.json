@@ -1,0 +1,86 @@
+{
+  "id": "001-person",
+  "suite": "incremental",
+  "description": "Write a Person page for Alex Chen using incremental editorial workflow",
+  "pageType": "Person",
+  "subject": "Alex Chen",
+  "sources": [
+    {
+      "path": "/path/to/your/archive/instagram",
+      "type": "instagram",
+      "snapshotId": ""
+    },
+    {
+      "path": "/path/to/your/archive/whatsapp",
+      "type": "whatsapp",
+      "snapshotId": ""
+    }
+  ],
+  "references": {
+    "Alex Chen": "references/alex-chen.wiki",
+    "Talk:Alex Chen": "references/talk-alex-chen.wiki"
+  },
+  "checkpoints": [
+    {
+      "id": "survey",
+      "description": "Snapshot the Instagram source directory and create an enriched source page. Catalog media files (photos, voice notes), transcribe voice notes, assess data quality (gaps, encrypted content, missing exports). Plan your editorial approach for the person page.\n\nThe source page should go beyond raw statistics — include platform limitations, querying instructions (SQL recipes, key tables), top conversations, and a critical assessment of what this source can and cannot tell us.",
+      "sources": [
+        {
+          "path": "/path/to/your/archive/instagram",
+          "type": "instagram",
+          "snapshotId": ""
+        }
+      ],
+      "grade": [{ "pattern": "Source:Instagram/*", "role": "source" }],
+      "threshold": 0.3
+    },
+    {
+      "id": "draft",
+      "description": "Write the person page for Alex Chen using only the Instagram data available so far. Include an infobox, lead paragraph, and organized sections with prose, citations, and embedded media.\n\nOn the Talk page, note episode candidates you've identified (events rich enough for their own pages) and gaps where additional sources would help.",
+      "skipReference": true,
+      "grade": [
+        { "pattern": "Alex Chen", "role": "person" },
+        { "pattern": "Talk:Alex Chen", "role": "talk" }
+      ]
+    },
+    {
+      "id": "new-source",
+      "description": "Snapshot the WhatsApp source directory and create an enriched source page for it.\n\nThen revise the person page — weave the new WhatsApp data into the existing article. Do not simply append a 'WhatsApp data' section; integrate new facts into appropriate existing sections, update the infobox with newly available fields, and remove hedging where WhatsApp data confirms what Instagram only hinted at.\n\nCross-reference facts that appear in both sources. Update the Talk page with new findings and resolved gaps.",
+      "sources": [
+        {
+          "path": "/path/to/your/archive/whatsapp",
+          "type": "whatsapp",
+          "snapshotId": ""
+        }
+      ],
+      "grade": [
+        { "pattern": "Source:Whatsapp/*", "role": "source" },
+        { "pattern": "Alex Chen", "role": "person" },
+        { "pattern": "Talk:Alex Chen", "role": "talk" }
+      ]
+    },
+    {
+      "id": "episodes",
+      "description": "Create episode pages for rich narratives discovered during research — events like first meetings, trips, conflicts, or milestones that have enough detail for their own page.\n\nLink each episode from the person page with a one-sentence summary. Each episode page should have its own infobox, citations, and embedded media where available.",
+      "grade": [{ "pattern": "Alex Chen", "role": "person" }]
+    },
+    {
+      "id": "owner-input",
+      "description": "The wiki owner has provided personal memories and corrections about Alex Chen. Integrate this testimony into the person page.\n\nCite owner statements using {{Cite testimony|speaker=...|date=...}}. Where the owner's account conflicts with digital source data, note the discrepancy on the Talk page — do not silently overwrite either version.\n\nUpdate the infobox and prose with any new biographical details from the testimony.",
+      "ownerInput": "owner-anecdotes.json",
+      "grade": [
+        { "pattern": "Alex Chen", "role": "person" },
+        { "pattern": "Talk:Alex Chen", "role": "talk" }
+      ]
+    },
+    {
+      "id": "verify",
+      "description": "Final editorial review. Audit the person page for tone, balance, and gaps. Ensure all factual claims have citations, the narrative flows coherently, and no section feels underdeveloped.\n\nProduce a citation manifest pairing every factual claim with its source evidence. Write the manifest to `./citation-manifest.json`.\n\nThe JSON format:\n```json\n{\n  \"page\": \"Alex Chen\",\n  \"claims\": [\n    {\n      \"claim\": \"Alex attended State University\",\n      \"type\": \"fact\",\n      \"citation\": \"{{Cite testimony|speaker=owner|date=2026-02-27}}\",\n      \"evidence\": \"Owner testimony: Alex went to State University\"\n    }\n  ]\n}\n```\n\nFor each claim:\n1. Read the cited source (use `sqlite3` for WhatsApp, `jq` for Instagram JSON, or note testimony)\n2. Extract the specific text that supports the claim\n3. If a claim has no supporting evidence, mark evidence as null\n\nInclude ALL factual claims from the person page, talk page, and any episode pages.",
+      "produceManifest": true,
+      "grade": [
+        { "pattern": "Alex Chen", "role": "person" },
+        { "pattern": "Talk:Alex Chen", "role": "talk" }
+      ]
+    }
+  ]
+}

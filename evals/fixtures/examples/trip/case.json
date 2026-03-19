@@ -1,0 +1,112 @@
+{
+  "id": "001-trip",
+  "suite": "incremental",
+  "description": "Write an Episode page for the Portland trip",
+  "pageType": "Episode",
+  "subject": "Portland trip",
+  "sources": [
+    {
+      "path": "/path/to/your/archive/camera/portland",
+      "type": "photos",
+      "snapshotId": ""
+    },
+    {
+      "path": "/path/to/your/archive/location-history.json",
+      "type": "location",
+      "snapshotId": ""
+    },
+    {
+      "path": "/path/to/your/archive/messages",
+      "type": "messages",
+      "snapshotId": ""
+    },
+    {
+      "path": "/path/to/your/archive/transactions.csv",
+      "type": "transactions",
+      "snapshotId": ""
+    }
+  ],
+  "weights": {
+    "primary": 0.85,
+    "episodes": 0,
+    "talk": 0.15,
+    "source": 0.2
+  },
+  "references": {
+    "Portland trip": "references/portland-trip.wiki",
+    "Talk:Portland trip": "references/talk-portland-trip.wiki"
+  },
+  "checkpoints": [
+    {
+      "id": "survey",
+      "description": "Snapshot the photo directory and location history. Create enriched source pages — catalog photos (count, date range, EXIF quality), assess geolocation coverage and accuracy. Note platform limitations and data quality issues.\n\nPlan your editorial approach for the episode page.",
+      "sources": [
+        {
+          "path": "/path/to/your/archive/camera/portland",
+          "type": "photos",
+          "snapshotId": ""
+        },
+        {
+          "path": "/path/to/your/archive/location-history.json",
+          "type": "location",
+          "snapshotId": ""
+        }
+      ],
+      "grade": [{ "pattern": "Source:*", "role": "source" }],
+      "threshold": 0.3
+    },
+    {
+      "id": "draft",
+      "description": "Write the episode page for the Portland trip using photos and location history. Build a day-by-day itinerary from timestamps and GPS data. Embed key photos in the sections they relate to.\n\nOn the Talk page, note gaps where additional sources (messages, transactions) would fill in context.",
+      "skipReference": true,
+      "grade": [
+        { "pattern": "Portland trip", "role": "episode" },
+        { "pattern": "Talk:Portland trip", "role": "talk" }
+      ]
+    },
+    {
+      "id": "new-source",
+      "description": "Snapshot messages and transactions. Create enriched source pages for each.\n\nIntegrate the new data into the existing episode page — weave social context from messages and spending patterns from transactions into the existing itinerary. Do not append separate sections for each source; place facts where they belong in the narrative.\n\nCross-reference across sources (e.g., a restaurant transaction + a photo at the same location + a message about dinner plans). Update the Talk page with resolved gaps and new findings.",
+      "sources": [
+        {
+          "path": "/path/to/your/archive/messages",
+          "type": "messages",
+          "snapshotId": ""
+        },
+        {
+          "path": "/path/to/your/archive/transactions.csv",
+          "type": "transactions",
+          "snapshotId": ""
+        }
+      ],
+      "grade": [
+        { "pattern": "Source:*", "role": "source" },
+        { "pattern": "Portland trip", "role": "episode" },
+        { "pattern": "Talk:Portland trip", "role": "talk" }
+      ]
+    },
+    {
+      "id": "persons",
+      "description": "Create person stub pages for key trip participants identified in messages and photos. Each stub should have an infobox with known details and a brief description of their role in the trip.\n\nLink person stubs from the episode page. Update the episode page's People section.",
+      "grade": [{ "pattern": "Portland trip", "role": "episode" }]
+    },
+    {
+      "id": "owner-input",
+      "description": "The wiki owner has provided personal memories about the Portland trip. Integrate this testimony into the episode page.\n\nCite owner statements using {{Cite testimony|speaker=...|date=...}}. Where the owner's account conflicts with digital evidence (e.g., a different restaurant name than what the transaction shows), note the discrepancy on the Talk page.\n\nUpdate the narrative with personal context that digital sources alone couldn't capture.",
+      "ownerInput": "owner-anecdotes.json",
+      "grade": [
+        { "pattern": "Portland trip", "role": "episode" },
+        { "pattern": "Talk:Portland trip", "role": "talk" }
+      ]
+    },
+    {
+      "id": "verify",
+      "description": "Final editorial review. Audit the episode page for timeline consistency, tone, and completeness. Ensure all factual claims have citations.\n\nProduce a citation manifest pairing every factual claim with its source evidence. Write the manifest to `./citation-manifest.json`.",
+      "produceManifest": true,
+      "grade": [
+        { "pattern": "Portland trip", "role": "episode" },
+        { "pattern": "Talk:Portland trip", "role": "talk" }
+      ]
+    }
+  ]
+}
