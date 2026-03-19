@@ -9,7 +9,7 @@ interface Entry {
 
 const sequence: Entry[] = [
   {
-    delay: 1200,
+    delay: 600,
     content: (
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5">
@@ -25,7 +25,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 2000,
+    delay: 1000,
     content: (
       <div className="flex items-start gap-1.5">
         <div className="w-2 h-2 rounded-full bg-green-400 shrink-0 mt-0.5" />
@@ -37,7 +37,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 1500,
+    delay: 750,
     content: (
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5">
@@ -53,7 +53,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 1800,
+    delay: 900,
     content: (
       <div className="flex items-start gap-1.5">
         <div className="w-2 h-2 rounded-full bg-green-400 shrink-0 mt-0.5" />
@@ -62,7 +62,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 1000,
+    delay: 500,
     content: (
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5">
@@ -79,7 +79,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 2200,
+    delay: 1100,
     content: (
       <div className="flex items-start gap-1.5">
         <div className="w-2 h-2 rounded-full bg-green-400 shrink-0 mt-0.5" />
@@ -91,7 +91,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 1500,
+    delay: 750,
     content: (
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5">
@@ -107,7 +107,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 2500,
+    delay: 1250,
     content: (
       <div className="flex items-start gap-1.5">
         <div className="w-2 h-2 rounded-full bg-green-400 shrink-0 mt-0.5" />
@@ -119,7 +119,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 1500,
+    delay: 750,
     content: (
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5">
@@ -135,7 +135,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 2000,
+    delay: 1000,
     content: (
       <div className="flex items-start gap-1.5">
         <div className="w-2 h-2 rounded-full bg-green-400 shrink-0 mt-0.5" />
@@ -147,7 +147,7 @@ const sequence: Entry[] = [
     ),
   },
   {
-    delay: 1200,
+    delay: 600,
     content: (
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5">
