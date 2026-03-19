@@ -3,68 +3,23 @@ title: Evals
 description: "Benchmarks, graders, and scores for agent harnesses"
 ---
 
-Evals run end-to-end: an agent receives a task, source data, and a fresh wiki instance, then produces pages across multiple checkpoints. Output is graded automatically against rubrics and a human-written reference.
+Evals measure how well an agent can research raw data and produce encyclopedic wiki pages. Each run is fully automated: the agent receives a task, source directories, and a fresh MediaWiki instance, then builds pages across six checkpoints. Output is graded against rubrics and a human-written reference.
 
-## Protocol
+Test fixtures in the repository use example data with stub references. Production runs use real archives.
 
-The incremental eval uses a **6-checkpoint editorial workflow** that mirrors how a human editor would build a wiki page from raw data:
-
-1. **Survey** — snapshot a source directory and create an enriched `Source:` page. Catalog media, transcribe voice notes, assess data quality and coverage gaps. Plan editorial approach.
-2. **Draft** — write the person or episode page using only the first source. Include infobox, lead paragraph, sections with prose and citations. Note episode candidates and gaps on the Talk page.
-3. **New source** — snapshot a second source directory, create its source page, then **revise** the existing article by weaving new data into appropriate sections (not appending). Cross-reference facts across sources. Update the Talk page.
-4. **Episodes** — create episode pages for rich narratives (first meetings, trips, conflicts, milestones). Link from the main page with one-sentence summaries.
-5. **Owner input** — integrate first-person testimony from the wiki owner. Cite using `{{Cite testimony}}`. Note conflicts between testimony and digital evidence on the Talk page.
-6. **Verify** — final editorial review. Audit tone, balance, and gaps. Produce a citation manifest pairing every factual claim with its source evidence.
-
-A fresh MediaWiki instance is provisioned per run with templates and no content pages. The agent's conversation is resumed between checkpoints so it can build on prior work.
-
-## Graders
-
-Graders are organized into three tiers that combine into a weighted composite.
-
-### Quality tier (50%)
-
-**Reference coverage** — compares output against a human-written reference page. Measures section heading overlap, infobox field coverage, citation hash coverage, and category overlap. Each dimension is weighted and combined into a single score.
-
-**Accuracy** — resolves the citation manifest produced at the verify checkpoint. For each factual claim, checks whether the cited source evidence actually supports it. Claims are classified as supported, unsupported, or fabricated (contradicted by evidence). Fabrications carry a 2x penalty. Owner testimony claims cited with `{{Cite testimony}}` are classified as "attributed" rather than unsupported.
-
-### Content tier (30%)
-
-**Completeness** — checks structural elements: lead paragraph, infobox, body sections, `References`/`Bibliography` sections, categories, prose word count, subsection count, inline citations, blockquotes, and media embeds. Depth thresholds scale with checkpoint — earlier checkpoints have lower requirements.
-
-**Editorial** — LLM-graded evaluation of Wikipedia editorial conventions: neutral third-person tone, past tense for biographical events, section organization, prose quality, wikitext syntax, and appropriate use of wikilinks. Uses multi-pass grading with median scoring.
-
-**Integration** — measures revision quality when a page is updated across checkpoints. Checks whether new facts are placed in appropriate existing sections (not dumped in an "Additional information" block), whether the page reads as one unified article after revision, and whether conflicting data is noted on the Talk page. Only scored when the page has been revised from a previous checkpoint.
-
-**Source criticism** — evaluates whether source pages include critical assessment beyond raw statistics. Checks for platform limitation notes, gap identification (missing date ranges, encrypted content), data quality assessment, querying instructions, and content breakdowns.
-
-### Mechanics tier (20%)
-
-**Citations** — validates citation templates (`{{Cite message}}`, `{{Cite vault}}`, `{{Cite testimony}}`, etc.) have required fields. Each template type has specific requirements: `snapshot` and `date` for digital sources, `speaker` and `date` for testimony. Score = valid / total.
-
-**Cross-referencing** — measures whether the page combines information from multiple source types. Counts facts that synthesize data across sources vs. possible cross-references. Enabled when two or more source types are present.
-
-**Tool usage** — checks harness logs for expected CLI tool usage: `wai snapshot`, `wai read`, `wai write`/`create`/`edit`. Binary per tool.
-
-### Composite formula
-
-```
-page_composite = 0.5 × quality + 0.3 × content + 0.2 × mechanics
-```
-
-The overall composite splits 20% source pages (averaged) and 80% content pages. Content pages are weighted: person 85% + talk 15% (or person 50% + episodes 40% + talk 10% when episode pages exist).
+<FixtureOverview />
 
 ## Results
 
-Test case: person page from messaging archives (two source types, ~10k messages total). Best run per harness+model shown. All runs use the 6-checkpoint incremental protocol.
+Person page from messaging archives. Two source types, roughly 10k messages. Best run per harness and model. All runs use the six-checkpoint incremental protocol described below.
 
-Accuracy scores are **calibrated**: false penalties are removed where the grader penalized correct facts due to misnumbered citation targets, Talk page editorial notes classified as unsupported claims, or partial evidence matches where the core fact is confirmed. Composites are recomputed from calibrated accuracy.
+Accuracy scores are **calibrated**: false penalties are removed where the grader penalized correct facts due to misnumbered citation targets, Talk page editorial notes misclassified as unsupported claims, or partial evidence matches where the core fact is confirmed. Composites are recomputed from calibrated accuracy.
 
 ### Overall composite
 
 <ScoreTable
   headers='["Harness", "Model", "Duration", "Composite"]'
-  rows='[["Claude Code", "Opus 4.6", "2h 21m", "0.828"], ["OpenCode", "Opus 4.6", "2h 29m", "0.803"], ["Codex", "GPT-5.2", "1h 41m", "0.770"], ["Codex", "GPT-5.3", "2h 23m", "0.761"], ["Claude Code", "Opus 4.5", "59m", "0.743"], ["Codex", "GPT-5.4", "2h 1m", "0.709"], ["OpenCode", "Kimi K2.5", "39m", "0.624"]]'
+  rows='[["Claude Code", "Opus 4.6", "2h 21m", "0.828"], ["OpenCode", "Opus 4.6", "2h 29m", "0.803"], ["Codex", "GPT-5.2", "1h 41m", "0.770"], ["Codex", "GPT-5.4", "3h 28m", "0.766"], ["Codex", "GPT-5.3", "2h 23m", "0.761"], ["Claude Code", "Opus 4.5", "59m", "0.743"], ["OpenCode", "Kimi K2.5", "39m", "0.624"]]'
   scoreStart={3}
 />
 
@@ -72,35 +27,71 @@ Accuracy scores are **calibrated**: false penalties are removed where the grader
 
 <ScoreTable
   headers='["Harness", "Model", "Compl.", "Cite", "Ref.", "Acc.", "Edit.", "X-ref", "Integ.", "Composite"]'
-  rows='[["CC", "Opus 4.6", "1.000", "0.950", "0.733", "0.890", "0.650", "1.000", "1.000", "0.867"], ["OC", "Opus 4.6", "1.000", "0.900", "0.717", "0.920", "0.350", "1.000", "1.000", "0.838"], ["CX", "GPT-5.2", "0.737", "0.950", "0.533", "0.990", "0.900", "1.000", "0.850", "0.826"], ["CX", "GPT-5.3", "0.632", "0.900", "0.500", "0.960", "0.450", "1.000", "1.000", "0.767"], ["CC", "Opus 4.5", "0.763", "0.700", "0.617", "0.933", "0.100", "1.000", "1.000", "0.754"], ["CX", "GPT-5.4", "0.579", "0.950", "0.633", "0.789", "0.500", "1.000", "0.650", "0.725"], ["OC", "Kimi K2.5", "0.658", "0.539", "0.550", "0.846", "0.000", "1.000", "—", "0.617"]]'
+  rows='[["CC", "Opus 4.6", "1.000", "0.950", "0.733", "0.890", "0.650", "1.000", "1.000", "0.867"], ["OC", "Opus 4.6", "1.000", "0.900", "0.717", "0.920", "0.350", "1.000", "1.000", "0.838"], ["CX", "GPT-5.2", "0.737", "0.950", "0.533", "0.990", "0.900", "1.000", "0.850", "0.826"], ["CX", "GPT-5.3", "0.632", "0.900", "0.500", "0.960", "0.450", "1.000", "1.000", "0.767"], ["CX", "GPT-5.4", "0.579", "0.900", "0.522", "0.974", "0.400", "1.000", "1.000", "0.765"], ["CC", "Opus 4.5", "0.763", "0.700", "0.617", "0.933", "0.100", "1.000", "1.000", "0.754"], ["OC", "Kimi K2.5", "0.658", "0.539", "0.550", "0.846", "0.000", "1.000", "—", "0.617"]]'
 />
 
 ### Talk page
 
 <ScoreTable
   headers='["Harness", "Model", "Compl.", "Ref.", "Edit.", "Composite"]'
-  rows='[["CX", "GPT-5.3", "0.786", "0.829", "1.000", "0.853"], ["CC", "Opus 4.5", "1.000", "0.714", "0.800", "0.784"], ["CC", "Opus 4.6", "1.000", "0.629", "0.800", "0.731"], ["OC", "Opus 4.6", "0.786", "0.600", "0.800", "0.672"], ["CX", "GPT-5.4", "0.786", "0.600", "0.700", "0.654"], ["CX", "GPT-5.2", "0.786", "0.657", "0.400", "0.633"], ["OC", "Kimi K2.5", "0.500", "0.600", "0.000", "0.469"]]'
-/>
-
-### Source pages
-
-<ScoreTable
-  headers='["Harness", "Model", "Instagram", "WhatsApp", "Voice notes"]'
-  rows='[["CC", "Opus 4.6", "0.761", "0.747", "—"], ["OC", "Opus 4.6", "0.761", "—", "—"], ["CX", "GPT-5.4", "0.724", "0.780", "0.569"], ["CC", "Opus 4.5", "0.710", "0.647", "—"], ["CX", "GPT-5.3", "0.712", "0.795", "0.556"], ["CX", "GPT-5.2", "0.691", "0.754", "0.543"], ["OC", "Kimi K2.5", "0.741", "—", "—"]]'
+  rows='[["CX", "GPT-5.3", "0.786", "0.829", "1.000", "0.853"], ["CC", "Opus 4.5", "1.000", "0.714", "0.800", "0.784"], ["CX", "GPT-5.4", "0.786", "0.700", "1.000", "0.772"], ["CC", "Opus 4.6", "1.000", "0.629", "0.800", "0.731"], ["OC", "Opus 4.6", "0.786", "0.600", "0.800", "0.672"], ["CX", "GPT-5.2", "0.786", "0.657", "0.400", "0.633"], ["OC", "Kimi K2.5", "0.500", "0.600", "0.000", "0.469"]]'
 />
 
 ## Observations
 
-- **Calibration significantly changes rankings.** Raw accuracy scores ranged from 0.462 to 0.933. After removing false penalties (misnumbered citation targets, Talk page notes treated as unsupported claims), calibrated accuracy ranges from 0.846 to 0.990. Claude Code Opus 4.6 moved from 2nd to 1st overall; Codex GPT-5.2 moved from 5th to 3rd.
-- **Accuracy measures manifest quality, not factual accuracy.** The accuracy grader checks whether the citation manifest correctly maps claims to source evidence. An agent can write a factually accurate article but score low if its manifest has incorrect evidence lookups. Calibration corrects the most egregious cases, but the grader still conflates source-linking precision with truthfulness.
-- **Editorial scoring has high variance.** The editorial grader uses LLM evaluation and scores range from 0.000 (Kimi K2.5) to 0.900 (GPT-5.2). Multi-pass median scoring helps but editorial quality remains the most subjective dimension.
-- **Cross-referencing and integration are near-ceiling.** Most agents score 1.000 on cross-ref and integration once they process both source types. These graders primarily catch failure modes (ignoring a source entirely, appending instead of weaving) rather than distinguishing quality.
-- **Source pages cluster tightly.** All agents score 0.65–0.80 on source documentation. The main differentiator is source criticism depth — whether the agent notes platform limitations and data quality issues.
-- **Speed varies 4x across models.** Kimi K2.5 finishes in 39 minutes vs. 2h 29m for Opus 4.6 on OpenCode. Faster runs correlate with lower scores but the gap narrows at the top — Opus 4.5 on Claude Code matches Opus 4.6's composite in under an hour.
+- **Calibration moves rankings.** Raw accuracy ranged from 0.462 to 0.933. After removing false penalties, calibrated accuracy ranges from 0.846 to 0.990. Claude Code Opus 4.6 moved from 2nd to 1st overall; Codex GPT-5.2 moved from 5th to 3rd.
+- **Accuracy grades the manifest, not the article.** The accuracy grader checks whether the citation manifest correctly maps claims to source evidence. An agent can write a factually accurate article and score low if its manifest has bad evidence lookups. This is a known limitation.
+- **Editorial scoring has high variance.** Scores range from 0.000 (Kimi K2.5) to 0.900 (GPT-5.2). Multi-pass median scoring reduces noise but editorial quality remains the most subjective dimension.
+- **Cross-referencing and integration are near ceiling.** Most agents score 1.000 once they process both source types. These graders catch failure modes (ignoring a source, appending instead of weaving) rather than distinguishing quality.
+- **Speed varies widely.** Kimi K2.5 finishes in 39 minutes; GPT-5.4 on Codex takes over three hours. Faster runs tend to score lower, but the gap narrows at the top: Opus 4.5 on Claude Code nearly matches Opus 4.6 in under an hour.
 
-## Known issues
+## Protocol
 
-- **Accuracy conflates manifest quality with factual accuracy**: agents that write correct articles but produce imprecise citation manifests are penalized. Splitting into separate factual-accuracy and citation-integrity graders would improve signal.
-- **Editorial grader subjectivity**: LLM-based editorial evaluation shows high variance across passes and may penalize valid stylistic choices.
-- **Draft checkpoint produces zero pages for some harnesses**: OpenCode agents sometimes skip page creation at the draft checkpoint, resulting in 0.000 scores that don't reflect the final output quality.
-- **Episode page grading limited**: episode pages are graded as part of the person page composite but lack dedicated episode-specific rubrics.
+Each eval uses a six-checkpoint editorial workflow that mirrors how a human editor would build a wiki page from raw data.
+
+1. **Survey**: Snapshot a source directory and create a `Source:` page. Catalog media, transcribe voice notes, assess data quality and gaps. Plan the editorial approach.
+2. **Draft**: Write the person or episode page using only the first source. Include an infobox, lead paragraph, sections with prose and citations. Note episode candidates and gaps on the Talk page.
+3. **New source**: Snapshot a second source directory and create its source page. Revise the existing article by weaving new data into the right sections rather than appending. Cross-reference facts across sources. Update the Talk page.
+4. **Episodes**: Create episode pages for rich narratives: first meetings, trips, conflicts, milestones. Link each from the main page with a one-sentence summary.
+5. **Owner input**: Integrate first-person testimony from the wiki owner. Cite using `{{Cite testimony}}`. Where testimony conflicts with digital evidence, note the discrepancy on the Talk page.
+6. **Verify**: Final editorial review. Audit tone, balance, and gaps. Produce a citation manifest pairing every factual claim with its source evidence.
+
+A fresh MediaWiki instance is provisioned per run with templates and no content pages. The agent's conversation is resumed between checkpoints so it can build on prior work.
+
+## Graders
+
+Nine graders organized into three weighted tiers.
+
+### Quality (50%)
+
+**Reference** compares output against a human-written reference page. Measures section heading overlap, infobox field coverage, citation hash density, and category overlap. Each dimension is weighted and combined into a single score.
+
+**Accuracy** resolves the citation manifest produced at the verify checkpoint. For each claim, it checks whether the cited source evidence actually supports it. Claims are classified as supported, unsupported, or fabricated. Fabrications carry a 2x penalty. Owner testimony cited with `{{Cite testimony}}` is classified as "attributed" rather than unsupported.
+
+### Content (30%)
+
+**Completeness** checks structural elements: lead paragraph, infobox, body sections, `References` and `Bibliography` sections, categories, prose word count, subsection count, inline citations, blockquotes, and media embeds. Thresholds scale with checkpoint so earlier checkpoints have lower requirements.
+
+**Editorial** is an LLM-graded evaluation of Wikipedia editorial conventions: neutral third-person tone, past tense for biographical events, section organization, prose quality, wikitext syntax, and wikilink usage. Uses multi-pass grading with median scoring.
+
+**Integration** measures revision quality when a page is updated across checkpoints. Checks whether new facts land in the right existing sections, whether the page reads as a unified article after revision, and whether conflicting data is noted on the Talk page. Only scored when the page content has changed since the previous checkpoint.
+
+**Source criticism** evaluates whether source pages include critical assessment beyond raw statistics: platform limitation notes, gap identification, data quality assessment, querying instructions, and content breakdowns. LLM-graded.
+
+### Mechanics (20%)
+
+**Citations** validates citation templates (`{{Cite message}}`, `{{Cite vault}}`, `{{Cite testimony}}`, etc.) for required fields. Each template type has specific requirements: `snapshot` and `date` for digital sources, `speaker` and `date` for testimony. Score is valid citations over total.
+
+**Cross-referencing** measures whether the page combines information from multiple source types. Counts facts that synthesize data across sources versus possible cross-references. Only scored when two or more source types are present.
+
+**Tool usage** checks harness logs for expected CLI calls: `wai snapshot`, `wai read`, `wai write`/`create`/`edit`. Binary per tool.
+
+### Composite
+
+```
+page_composite = 0.5 * quality + 0.3 * content + 0.2 * mechanics
+```
+
+Within each tier, weight is split equally among the graders that produced a score. If an entire tier is absent, its weight redistributes proportionally to the tiers that are present.
+
+The overall run composite splits 20% source pages (averaged) and 80% content pages. Content pages are weighted: person 85% + talk 15% when no episodes exist, or person 50% + episodes 40% + talk 10% when they do.
