@@ -16,8 +16,8 @@ export default function Home() {
           </div>
 
           <div className="flex flex-row gap-2">
-            <Link href="/download" tabIndex={-1}>
-              <Button text="Download Now" accent="primary" isCircular />
+            <Link href="/docs" tabIndex={-1}>
+              <Button text="Get Started" accent="primary" isCircular />
             </Link>
             <Link href="/blog/personal-encyclopedias" tabIndex={-1}>
               <Button text="Read Essay" accent="secondary" isCircular />
