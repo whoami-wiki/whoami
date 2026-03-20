@@ -21,6 +21,10 @@ export function ScoreTable({
     maxPerCol[col] = max;
   }
 
+  const lastCol = parsedHeaders.length - 1;
+  const stickyClass =
+    "sticky right-0 bg-white dark:bg-neutral-900";
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
@@ -29,7 +33,7 @@ export function ScoreTable({
             {parsedHeaders.map((h, i) => (
               <th
                 key={i}
-                className={`py-2.5 px-3 font-normal text-neutral-500 dark:text-neutral-400${i >= scoreStart ? " text-right" : " text-left"}`}
+                className={`py-2.5 px-3 font-normal text-neutral-500 dark:text-neutral-400${i >= scoreStart ? " text-right" : " text-left"}${i === lastCol ? ` ${stickyClass}` : ""}`}
               >
                 {h}
               </th>
@@ -47,14 +51,16 @@ export function ScoreTable({
                 const isBest =
                   ci >= scoreStart && !isNaN(val) && val === maxPerCol[ci];
 
+                const frozen = ci === lastCol;
+
                 return (
                   <td
                     key={ci}
                     className={`${
                       isBest
-                        ? "py-2.5 px-3 font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/30"
+                        ? `py-2.5 px-3 font-medium text-green-700 dark:text-green-400${frozen ? "" : " bg-green-50 dark:bg-green-950/30"}`
                         : "py-2.5 px-3 text-neutral-600 dark:text-neutral-400"
-                    }${ci < scoreStart ? " whitespace-nowrap" : " text-right tabular-nums"}`}
+                    }${ci < scoreStart ? " whitespace-nowrap" : " text-right tabular-nums"}${frozen ? ` ${stickyClass}${isBest ? " !bg-green-50 dark:!bg-green-950/30" : ""}` : ""}`}
                   >
                     {cell}
                   </td>
