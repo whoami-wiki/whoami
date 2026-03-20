@@ -22,8 +22,10 @@ export function ScoreTable({
   }
 
   const lastCol = parsedHeaders.length - 1;
-  const stickyClass =
-    "sticky right-0 shadow-[-1px_0_0_0_theme(colors.neutral.200)] dark:shadow-[-1px_0_0_0_theme(colors.neutral.700)] bg-neutral-50 dark:bg-neutral-800";
+  const stickyClass = "sticky right-0 bg-neutral-50 dark:bg-neutral-800";
+  const stickyStyle = {
+    boxShadow: "-1px 0 0 0 var(--border-primary)",
+  } as const;
 
   return (
     <div className="overflow-x-auto">
@@ -34,6 +36,7 @@ export function ScoreTable({
               <th
                 key={i}
                 className={`py-2.5 px-3 font-normal text-neutral-500 dark:text-neutral-400${i >= scoreStart ? " text-right" : " text-left"}${i === lastCol ? ` ${stickyClass}` : ""}`}
+                style={i === lastCol ? stickyStyle : undefined}
               >
                 {h}
               </th>
@@ -56,6 +59,7 @@ export function ScoreTable({
                 return (
                   <td
                     key={ci}
+                    style={frozen ? stickyStyle : undefined}
                     className={`${
                       isBest
                         ? `py-2.5 px-3 font-medium text-green-700 dark:text-green-400${frozen ? "" : " bg-green-50 dark:bg-green-950/30"}`
