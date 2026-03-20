@@ -1,0 +1,21 @@
+{
+  "name": "@whoami-wiki/evals",
+  "version": "0.1.0",
+  "description": "Eval suite for whoami.wiki agent harnesses",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "grade": "tsx src/index.ts grade",
+    "run": "tsx src/index.ts run",
+    "report": "tsx src/index.ts report"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1"
+  }
+}

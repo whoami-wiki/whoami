@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/next";
 import { Agentation } from "agentation";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -82,6 +83,7 @@ export default function RootLayout({
           <Footer />
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
         {process.env.NODE_ENV === "development" && <Agentation />}
       </body>
     </html>

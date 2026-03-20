@@ -1,0 +1,38 @@
+== Active gaps ==
+
+{{Open}} '''Birth year''' — Alex's exact birth year is not stated in any source. Messages mention being "a couple years younger" than the wiki owner, and a birthday falls on 15 June. Cross-referencing graduation year (BA 2022) suggests 1998–2000.
+
+{{Open}} '''Father''' — No mention of Alex's father in any source. The mother and brother appear frequently but the father is never referenced. This could be a sensitive topic; do not speculate.
+
+{{Open}} '''Post-April 2024''' — The message thread ends abruptly in April 2024. No source documents what happened after — whether the friendship continued on another platform or faded.
+
+== Resolved ==
+
+{{Closed}} '''Tokyo semester''' — Initially unclear whether this was a full year or one semester. WhatsApp message from 2024-01-18 confirms: "I was only there for one semester but it felt like a lifetime."
+
+{{Closed}} '''Coffee shop name''' — Instagram bio says "barista" but never names the shop. WhatsApp message from 2024-02-03 mentions "my shift at Opal" — confirmed as Opal Coffee Roasters via context.
+
+== Editorial decisions ==
+
+{{Closed}} '''Section structure''' — Organized by topic (Background, Connection, Interests) rather than chronologically. The friendship arc within "Connection with wiki owner" follows the natural phases of the conversation.
+
+{{Closed}} '''Brother's details''' — Ethan is mentioned by name in multiple messages. Included first name only; no further biographical detail since he is not a primary subject.
+
+== Episode candidates ==
+
+{{Open}} '''Tokyo semester''' — Rich enough for its own page if photo/journal sources become available. Currently only referenced through messages.
+
+{{Open}} '''Gallery opening (January 2024)''' — Alex exhibited two prints. Multiple photos exist. Could sustain an episode page with additional context from messages around that date.
+
+== Voice note index ==
+
+{| class="wikitable"
+|-
+! Date !! Duration !! Topic !! Transcribed
+|-
+| 2023-12-01 || 1:42 || Describing a new illustration project || Yes
+|-
+| 2024-01-13 || 3:15 || Recap of first dinner meeting || Yes
+|-
+| 2024-02-14 || 0:58 || Complaining about a difficult client || Yes
+|}

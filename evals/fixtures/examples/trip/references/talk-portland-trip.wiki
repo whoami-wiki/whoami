@@ -1,0 +1,23 @@
+== Active gaps ==
+
+{{Open}} '''Day 4 evening''' — No photos or transactions between 6 PM and 10 PM on July 17. The group was at the food cart festival but no specific vendors are documented. Owner testimony may help fill this.
+
+{{Open}} '''Jordan's employer''' — Jordan called to request extra days off but the employer is never named in any source. Not critical but would add context.
+
+{{Open}} '''Return drive playlist''' — Messages reference a "road trip playlist" for the drive home but no Shazam or Spotify data covers this window.
+
+== Resolved ==
+
+{{Closed}} '''Flight cost''' — Initially unclear whether $138 was per person or total. Transaction CSV confirms it was per person ($138.00 × 3 travellers).
+
+{{Closed}} '''Saturday Market timing''' — Location history shows arrival at 10:08 AM, confirming the market had just opened (opens at 10 AM on Saturdays).
+
+{{Closed}} '''Ankle injury severity''' — Messages from the evening of July 16 confirm Jordan walked on it the next day with no issues. Minor twist, not a sprain.
+
+== Editorial decisions ==
+
+{{Closed}} '''Chronological structure''' — Organized day-by-day rather than thematically. The trip's narrative arc follows the calendar naturally and thematic sections (Food, People) supplement the timeline.
+
+{{Closed}} '''Transaction detail level''' — Included specific dollar amounts for representative purchases but did not list every transaction. The goal is colour, not an expense report.
+
+{{Closed}} '''Participant privacy''' — Used first names only for Sam and Jordan. No last names, employers, or social media handles included.

@@ -1,0 +1,87 @@
+{{Infobox Project
+| name = Bookshelf
+| language = Python
+| framework = Django
+| license = MIT
+| dates_active = January 2021 – August 2022
+| repository = github.com/example/bookshelf
+| contributors = Wiki owner, Nate, Priya
+}}
+
+'''Bookshelf''' was a web application for tracking personal reading habits, built with Django and Python between January 2021 and August 2022. The project was a collaboration between the wiki owner, Nate, and Priya, originating as a weekend hackathon idea that grew into a functional product used by roughly thirty people before development stalled.
+
+== Purpose ==
+
+Bookshelf allowed users to log books they had read, assign ratings and tags, write short reviews, and view reading statistics over time. The distinguishing feature was a recommendation engine that suggested books based on overlapping taste profiles between users rather than genre metadata. The wiki owner described the motivation as wanting "Letterboxd but for books, without the social media nonsense."<ref name="slack-pitch">{{Cite message|snapshot=a1a1a1a1|date=2021-01-15|thread=general|note=Original pitch in Slack}}</ref>
+
+== Technical architecture ==
+
+The application was built on Django 3.2 with a PostgreSQL database and a minimal frontend using Django templates and HTMX for interactivity. The recommendation engine used collaborative filtering via a cosine similarity matrix recomputed nightly by a management command.
+
+=== Key modules ===
+
+* '''catalog''' — Book model, ISBN lookup via Open Library API, cover image caching
+* '''reviews''' — User reviews, ratings (1–5 scale), tag system
+* '''recommend''' — Collaborative filtering engine, similarity matrix, nightly recompute job
+* '''api''' — REST endpoints for a planned mobile client that was never built
+
+=== Infrastructure ===
+
+The application ran on a single DigitalOcean droplet ($5/month) with nginx as a reverse proxy and gunicorn as the WSGI server. Deployments were manual via SSH until Priya set up a GitHub Actions workflow in March 2021.<ref name="commit-ci">{{Cite commit|snapshot=b2b2b2b2|hash=3f7a9e1c|date=2021-03-22|note=Add GitHub Actions CI/CD}}</ref>
+
+== Development history ==
+
+=== Hackathon origin (January 2021) ===
+
+The project began at a weekend hackathon on 15–16 January 2021. The wiki owner and Nate built the initial Django scaffold with user auth, book CRUD, and a basic search page in roughly twenty hours.<ref name="commit-init">{{Cite commit|snapshot=b2b2b2b2|hash=a1b2c3d4|date=2021-01-15|note=Initial commit}}</ref> Priya joined the following week after seeing the demo in Slack.<ref name="slack-priya">{{Cite message|snapshot=a1a1a1a1|date=2021-01-18|thread=general|note=Priya asks to join}}</ref>
+
+=== Active development (February – June 2021) ===
+
+The most productive period saw 247 commits across three contributors. Key milestones included the Open Library API integration in February, the recommendation engine in April, and the tagging system in May.<ref name="commit-recommend">{{Cite commit|snapshot=b2b2b2b2|hash=e5f6a7b8|date=2021-04-12|note=Add collaborative filtering recommendation engine}}</ref>
+
+{{Blockquote|The recommendation engine was Nate's baby. He spent two weekends reading papers about collaborative filtering and came back with this elegant cosine similarity approach that worked surprisingly well with our tiny dataset.|Wiki owner, recalling development}}
+
+=== Feature plateau (July – December 2021) ===
+
+Commit frequency dropped from forty per month to roughly ten. The team added polish features — dark mode, CSV export, email digests — but no major new functionality. Slack discussions shifted from feature planning to bug reports and minor UI complaints.<ref name="slack-plateau">{{Cite message|snapshot=a1a1a1a1|date=2021-09-03|thread=general|note=Discussion about project direction}}</ref>
+
+=== Decline and abandonment (2022) ===
+
+Nate started a new job in January 2022 and his contributions dropped to zero. Priya made sporadic commits through April. The wiki owner pushed the final commit on 14 August 2022 — a dependency update that fixed a security vulnerability in Django.<ref name="commit-last">{{Cite commit|snapshot=b2b2b2b2|hash=f9e8d7c6|date=2022-08-14|note=Bump Django to 3.2.15 (security patch)}}</ref>
+
+The project was never formally shut down; it simply stopped receiving attention. The droplet continued running until December 2022 when the wiki owner cancelled the hosting subscription.
+
+== Contributors ==
+
+* '''Wiki owner''' — Backend architecture, book catalog, deployment. 312 commits (52%).
+* '''[[Nate]]''' — Recommendation engine, API endpoints, database optimisation. 198 commits (33%).
+* '''[[Priya]]''' — CI/CD pipeline, frontend improvements, tagging system. 89 commits (15%).
+
+== Commit statistics ==
+
+{| class="wikitable"
+|-
+! Period !! Commits !! Active contributors
+|-
+| Jan–Jun 2021 || 389 || 3
+|-
+| Jul–Dec 2021 || 142 || 3
+|-
+| Jan–Aug 2022 || 68 || 2
+|-
+| '''Total''' || '''599''' || '''3'''
+|}
+
+== Legacy ==
+
+Despite its abandonment, Bookshelf influenced subsequent projects by the wiki owner. The cosine similarity approach from the recommendation engine was reused in a later playlist generator. The deployment workflow Priya built became the template for all of the wiki owner's subsequent GitHub Actions configurations. Nate occasionally referenced the project in job interviews as an example of collaborative open-source work.
+
+== References ==
+<references />
+
+== Bibliography ==
+
+{{Cite vault|type=github|snapshot=b2b2b2b2|timestamp=2021-01-15/2022-08-14|note=Git repository (599 commits, 3 contributors).}}
+{{Cite vault|type=slack|snapshot=a1a1a1a1|timestamp=2021-01-15/2022-06-30|note=Slack workspace export (3 channels, ~2400 messages).}}
+
+[[Category:Projects]]

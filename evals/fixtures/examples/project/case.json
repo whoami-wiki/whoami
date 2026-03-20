@@ -1,0 +1,77 @@
+{
+  "id": "001-project",
+  "suite": "incremental",
+  "description": "Write a Project page for Bookshelf using incremental editorial workflow",
+  "pageType": "Project",
+  "subject": "Bookshelf",
+  "sources": [
+    {
+      "path": "/path/to/your/archive/bookshelf-repo",
+      "type": "github",
+      "snapshotId": ""
+    },
+    {
+      "path": "/path/to/your/archive/slack",
+      "type": "slack",
+      "snapshotId": ""
+    }
+  ],
+  "references": {
+    "Bookshelf": "references/bookshelf.wiki",
+    "Talk:Bookshelf": "references/talk-bookshelf.wiki"
+  },
+  "checkpoints": [
+    {
+      "id": "survey",
+      "description": "Snapshot the GitHub repository and create an enriched source page. Explore the codebase structure, commit history, branches, contributors, and CI configuration. Assess data quality — note what the repo reveals (development timeline, technical decisions, division of labor) and what it cannot tell us (motivation, context, decisions behind the code).\n\nThe source page should go beyond a file inventory — include commit volume over time, contributor breakdown, key modules and their purposes, and querying instructions.",
+      "sources": [
+        {
+          "path": "/path/to/your/archive/bookshelf-repo",
+          "type": "github",
+          "snapshotId": ""
+        }
+      ],
+      "grade": [{ "pattern": "Source:*", "role": "source" }],
+      "threshold": 0.3
+    },
+    {
+      "id": "draft",
+      "description": "Write the project page for Bookshelf using only the GitHub repository data available so far. Include an infobox (project name, language, framework, license, dates active, repository, key contributors), lead paragraph, and organized sections covering the project's purpose, technical architecture, development history, and contributors.\n\nOn the Talk page, note episode candidates you've identified (intensive development sprints, architectural changes, feature launches) and gaps where the Slack source would help fill in collaboration context.",
+      "skipReference": true,
+      "grade": [
+        { "pattern": "Bookshelf", "role": "project" },
+        { "pattern": "Talk:Bookshelf", "role": "talk" }
+      ]
+    },
+    {
+      "id": "new-source",
+      "description": "Snapshot the Slack workspace export and create an enriched source page for it. Document channels, member roster, message volume, date range, and key discussion threads.\n\nThen revise the project page — weave Slack context into the existing article. Do not append a 'Slack discussions' section; integrate collaboration dynamics, design decisions, and team interactions into appropriate existing sections.\n\nUpdate the Talk page with new findings and resolved gaps.",
+      "sources": [
+        {
+          "path": "/path/to/your/archive/slack",
+          "type": "slack",
+          "snapshotId": ""
+        }
+      ],
+      "grade": [
+        { "pattern": "Source:*", "role": "source" },
+        { "pattern": "Bookshelf", "role": "project" },
+        { "pattern": "Talk:Bookshelf", "role": "talk" }
+      ]
+    },
+    {
+      "id": "episodes",
+      "description": "Create episode pages for key moments in the project's lifecycle — development sprints, feature launches, architectural pivots, team milestones, or notable debugging sessions.\n\nLink each episode from the project page with a one-sentence summary.",
+      "grade": [{ "pattern": "Bookshelf", "role": "project" }]
+    },
+    {
+      "id": "verify",
+      "description": "Final editorial review. Audit the project page for tone, balance, and gaps. Ensure all factual claims have citations.\n\nProduce a citation manifest pairing every factual claim with its source evidence. Write the manifest to `./citation-manifest.json`.",
+      "produceManifest": true,
+      "grade": [
+        { "pattern": "Bookshelf", "role": "project" },
+        { "pattern": "Talk:Bookshelf", "role": "talk" }
+      ]
+    }
+  ]
+}
