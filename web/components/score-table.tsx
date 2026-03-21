@@ -27,7 +27,15 @@ export function ScoreTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="text-sm border-separate border-spacing-0">
+      <table className="w-full text-sm border-separate border-spacing-0">
+        <colgroup>
+          {parsedHeaders.map((_, i) => (
+            <col
+              key={i}
+              style={i === lastCol ? { width: 112 } : undefined}
+            />
+          ))}
+        </colgroup>
         <thead>
           <tr>
             {parsedHeaders.map((h, i) => (
