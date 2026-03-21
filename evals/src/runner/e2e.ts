@@ -10,6 +10,7 @@ import type { CitationManifest } from '../graders/accuracy.js';
 import { createClaudeCodeHarness } from '../harnesses/claude-code.js';
 import { createCodexHarness } from '../harnesses/codex.js';
 import { createOpenCodeHarness } from '../harnesses/opencode.js';
+import { createCursorHarness } from '../harnesses/cursor.js';
 import { startWiki, writePageDirect, type WikiInstance } from '../wiki.js';
 
 export interface E2EOptions {
@@ -55,6 +56,8 @@ function getHarness(name: string, model?: string): Harness {
       return createCodexHarness(model);
     case 'opencode':
       return createOpenCodeHarness(model);
+    case 'cursor':
+      return createCursorHarness(model);
     default:
       throw new Error(`Unknown harness: ${name}`);
   }
