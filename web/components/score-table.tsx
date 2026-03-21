@@ -34,7 +34,6 @@ export function ScoreTable({
             {parsedHeaders.map((h, i) => (
               <th
                 key={i}
-                style={i === lastCol ? frozenStyle : undefined}
                 style={{
                   borderBottomColor: "var(--border-primary)",
                   ...(i === lastCol ? frozenStyle : {}),
