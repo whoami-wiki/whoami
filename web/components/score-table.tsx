@@ -22,21 +22,18 @@ export function ScoreTable({
   }
 
   const lastCol = parsedHeaders.length - 1;
-  const stickyClass = "sticky right-0 bg-neutral-50 dark:bg-neutral-800";
-  const stickyStyle = {
-    boxShadow: "-1px 0 0 0 var(--border-primary)",
-  } as const;
+  const stickyClass =
+    "sticky right-0 border-l border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800";
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
+      <table className="w-full text-sm border-separate border-spacing-0">
         <thead>
-          <tr className="border-b border-neutral-200 dark:border-neutral-700">
+          <tr>
             {parsedHeaders.map((h, i) => (
               <th
                 key={i}
-                className={`py-2.5 px-3 font-normal text-neutral-500 dark:text-neutral-400${i >= scoreStart ? " text-right" : " text-left"}${i === lastCol ? ` ${stickyClass}` : ""}`}
-                style={i === lastCol ? stickyStyle : undefined}
+                className={`py-2.5 px-3 font-normal text-neutral-500 dark:text-neutral-400 border-b border-neutral-200 dark:border-neutral-700${i >= scoreStart ? " text-right" : " text-left"}${i === lastCol ? ` ${stickyClass}` : ""}`}
               >
                 {h}
               </th>
@@ -45,10 +42,7 @@ export function ScoreTable({
         </thead>
         <tbody>
           {parsedRows.map((row, ri) => (
-            <tr
-              key={ri}
-              className="border-b border-neutral-100 dark:border-neutral-800"
-            >
+            <tr key={ri}>
               {row.map((cell, ci) => {
                 const val = parseFloat(cell);
                 const isBest =
@@ -59,12 +53,11 @@ export function ScoreTable({
                 return (
                   <td
                     key={ci}
-                    style={frozen ? stickyStyle : undefined}
                     className={`${
                       isBest
                         ? `py-2.5 px-3 font-medium text-green-700 dark:text-green-400${frozen ? "" : " bg-green-50 dark:bg-green-950/30"}`
                         : "py-2.5 px-3 text-neutral-600 dark:text-neutral-400"
-                    }${ci < scoreStart ? " whitespace-nowrap" : " text-right tabular-nums"}${frozen ? ` ${stickyClass}${isBest ? " !bg-green-50 dark:!bg-green-900/40" : ""}` : ""}`}
+                    } border-b border-neutral-100 dark:border-neutral-800${ci < scoreStart ? " whitespace-nowrap" : " text-right tabular-nums"}${frozen ? ` ${stickyClass}${isBest ? " !bg-green-50 dark:!bg-green-900/40" : ""}` : ""}`}
                   >
                     {cell}
                   </td>
