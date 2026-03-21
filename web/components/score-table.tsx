@@ -24,23 +24,17 @@ export function ScoreTable({
   const lastCol = parsedHeaders.length - 1;
   const stickyClass =
     "sticky right-0 border-l border-l-neutral-200 dark:border-l-neutral-500 bg-neutral-50 dark:bg-[#2e2e2e]";
+  const frozenStyle = { width: 112, minWidth: 112, maxWidth: 112 } as const;
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-separate border-spacing-0">
-        <colgroup>
-          {parsedHeaders.map((_, i) => (
-            <col
-              key={i}
-              style={i === lastCol ? { width: 112 } : undefined}
-            />
-          ))}
-        </colgroup>
         <thead>
           <tr>
             {parsedHeaders.map((h, i) => (
               <th
                 key={i}
+                style={i === lastCol ? frozenStyle : undefined}
                 className={`py-2.5 px-3 font-normal text-neutral-500 dark:text-neutral-400 border-b border-b-neutral-200 dark:border-b-neutral-700${i >= scoreStart ? " text-right" : " text-left"}${i === lastCol ? ` ${stickyClass}` : ""}`}
               >
                 {h}
@@ -61,6 +55,7 @@ export function ScoreTable({
                 return (
                   <td
                     key={ci}
+                    style={frozen ? frozenStyle : undefined}
                     className={`${
                       isBest
                         ? `py-2.5 px-3 font-medium text-green-700 dark:text-green-400${frozen ? "" : " bg-green-50 dark:bg-green-950/30"}`
