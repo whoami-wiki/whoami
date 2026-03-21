@@ -23,11 +23,11 @@ export function ScoreTable({
 
   const lastCol = parsedHeaders.length - 1;
   const stickyClass =
-    "sticky right-0 w-28 border-l border-l-neutral-200 dark:border-l-neutral-500 bg-neutral-50 dark:bg-[#2e2e2e]";
+    "sticky right-0 border-l border-l-neutral-200 dark:border-l-neutral-500 bg-neutral-50 dark:bg-[#2e2e2e]";
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm border-separate border-spacing-0">
+      <table className="text-sm border-separate border-spacing-0">
         <thead>
           <tr>
             {parsedHeaders.map((h, i) => (
