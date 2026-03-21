@@ -35,7 +35,11 @@ export function ScoreTable({
               <th
                 key={i}
                 style={i === lastCol ? frozenStyle : undefined}
-                className={`py-2.5 px-3 font-normal text-neutral-500 dark:text-neutral-400 border-b border-b-neutral-200 !dark:border-b-neutral-700${i >= scoreStart ? " text-right" : " text-left"}${i === lastCol ? ` ${stickyClass}` : ""}`}
+                style={{
+                  borderBottomColor: "var(--border-primary)",
+                  ...(i === lastCol ? frozenStyle : {}),
+                }}
+                className={`py-2.5 px-3 font-normal text-neutral-500 dark:text-neutral-400 border-b${i >= scoreStart ? " text-right" : " text-left"}${i === lastCol ? ` ${stickyClass}` : ""}`}
               >
                 {h}
               </th>
@@ -55,12 +59,15 @@ export function ScoreTable({
                 return (
                   <td
                     key={ci}
-                    style={frozen ? frozenStyle : undefined}
+                    style={{
+                      borderBottomColor: "var(--border-muted)",
+                      ...(frozen ? frozenStyle : {}),
+                    }}
                     className={`${
                       isBest
                         ? `py-2.5 px-3 font-medium text-green-700 dark:text-green-400${frozen ? "" : " bg-green-50 dark:bg-green-950/30"}`
                         : "py-2.5 px-3 text-neutral-600 dark:text-neutral-400"
-                    } border-b border-b-neutral-100 !dark:border-b-neutral-700${ci < scoreStart ? " whitespace-nowrap" : " text-right tabular-nums"}${frozen ? ` ${stickyClass}${isBest ? " !bg-green-50 dark:!bg-green-900/40" : ""}` : ""}`}
+                    } border-b${ci < scoreStart ? " whitespace-nowrap" : " text-right tabular-nums"}${frozen ? ` ${stickyClass}${isBest ? " !bg-green-50 dark:!bg-green-900/40" : ""}` : ""}`}
                   >
                     {cell}
                   </td>
