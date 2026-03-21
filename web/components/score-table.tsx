@@ -23,7 +23,7 @@ export function ScoreTable({
 
   const lastCol = parsedHeaders.length - 1;
   const stickyClass =
-    "sticky right-0 border-l border-l-neutral-200 dark:border-l-neutral-600 bg-neutral-50 dark:bg-neutral-900";
+    "sticky right-0 border-l border-l-neutral-200 dark:border-l-neutral-600 bg-neutral-50 dark:bg-[#2e2e2e]";
 
   return (
     <div className="overflow-x-auto">
