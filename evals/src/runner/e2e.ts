@@ -11,7 +11,7 @@ import { createClaudeCodeHarness } from '../harnesses/claude-code.js';
 import { createCodexHarness } from '../harnesses/codex.js';
 import { createOpenCodeHarness } from '../harnesses/opencode.js';
 import { createCursorHarness } from '../harnesses/cursor.js';
-import { startWiki, writePageDirect, type WikiInstance } from '../wiki.js';
+import { startWiki, findFreePort, writePageDirect, type WikiInstance } from '../wiki.js';
 
 export interface E2EOptions {
   suite: string;
@@ -29,6 +29,10 @@ export interface E2EOptions {
   checkpointThreshold?: number;
   /** Path to a previous result JSON — reuses checkpoint 1 source pages, skips Phase 1 */
   fromResult?: string;
+  /** Explicit port for the isolated wiki (overrides WIKI_PORT env). Use 0 for auto-assign. */
+  port?: number;
+  /** Prefix for log lines (used by batch to distinguish parallel runs) */
+  logPrefix?: string;
 }
 
 interface DiscoveredPage {
@@ -88,11 +92,13 @@ interface Logger {
   path: string;
 }
 
-function createLogger(resultsDir: string): Logger {
+function createLogger(resultsDir: string, prefix?: string): Logger {
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
-  const logPath = join(resultsDir, `run-${ts}.log`);
+  const slug = prefix ? `-${prefix.replace(/[^a-zA-Z0-9._-]/g, '_')}` : '';
+  const logPath = join(resultsDir, `run${slug}-${ts}.log`);
+  const tag = prefix ? ` [${prefix}]` : '';
   const write = (level: string, msg: string) => {
-    const line = `[${new Date().toISOString()}] [${level}] ${msg}\n`;
+    const line = `[${new Date().toISOString()}] [${level}]${tag} ${msg}\n`;
     process.stderr.write(line);
     appendFileSync(logPath, line);
   };
@@ -232,8 +238,8 @@ function discoverContentPages(env: Record<string, string | undefined>, subject: 
     if (seen.has(change.title)) continue;
     seen.add(change.title);
 
-    // Skip Source:, Task:, and default Main Page
-    if (/^(Source|Task):/i.test(change.title)) continue;
+    // Skip Source:, Task:, MediaWiki:, Template:, and default Main Page
+    if (/^(Source|Task|MediaWiki|Template):/i.test(change.title)) continue;
     if (change.title === 'Main Page') continue;
 
     // Talk namespace
@@ -299,7 +305,7 @@ function discoverPagesForTargets(
     for (const change of changes) {
       if (seen.has(change.title)) continue;
       if (change.title === 'Main Page') continue;
-      if (/^(Source|Task):/i.test(change.title)) continue;
+      if (/^(Source|Task|MediaWiki|Template):/i.test(change.title)) continue;
 
       const pageIsTalk = /^Talk:/i.test(change.title);
       if (isTalk !== pageIsTalk) continue;
@@ -1051,7 +1057,7 @@ export async function runE2E(options: E2EOptions): Promise<EvalResult[]> {
   const resultsDir = options.resultsDir ?? join(resolve('.'), 'results');
   mkdirSync(resultsDir, { recursive: true });
 
-  const log = createLogger(resultsDir);
+  const log = createLogger(resultsDir, options.logPrefix);
   log.log(`Log file: ${log.path}`);
   log.log(`Suite: ${options.suite}, Harness: ${options.harness}, Model: ${options.model ?? 'default'}`);
 
@@ -1073,14 +1079,24 @@ export async function runE2E(options: E2EOptions): Promise<EvalResult[]> {
   }
 
   // Isolated wiki: spin up a fresh instance
-  const port = parseInt(process.env['WIKI_PORT'] ?? '8081', 10);
+  let port: number;
+  if (options.port !== undefined) {
+    port = options.port === 0 ? await findFreePort() : options.port;
+  } else {
+    port = parseInt(process.env['WIKI_PORT'] ?? '8081', 10);
+  }
   log.log(`Starting isolated wiki on port ${port}`);
   const wiki = await startWiki(port);
   log.log(`Wiki ready at ${wiki.url} (data: ${wiki.dataPath})`);
 
   try {
-    configureWaiCredentials(wiki);
     const env: Record<string, string | undefined> = { ...process.env, ...wiki.env };
+    // Only write the shared credentials file when auth env vars are absent
+    // (wiki.env now includes WIKI_USERNAME/WIKI_PASSWORD, making the file unnecessary
+    // and avoiding race conditions during parallel runs)
+    if (!env['WIKI_USERNAME'] || !env['WIKI_PASSWORD']) {
+      configureWaiCredentials(wiki);
+    }
     return await runCases(cases, harness, env, options, resultsDir, log);
   } finally {
     if (options.inspect) {
@@ -1090,4 +1106,76 @@ export async function runE2E(options: E2EOptions): Promise<EvalResult[]> {
     log.log('Tearing down wiki');
     wiki.destroy();
   }
+}
+
+export interface BatchRunSpec {
+  harness: string;
+  model?: string;
+}
+
+export interface BatchOptions {
+  suite: string;
+  runs: BatchRunSpec[];
+  caseFilter?: string;
+  checkpointThreshold?: number;
+  fromResult?: string;
+  fixturesDir?: string;
+  resultsDir?: string;
+  /** Max parallel runs (default: all at once) */
+  jobs?: number;
+}
+
+export interface BatchOutcome {
+  spec: BatchRunSpec;
+  results: EvalResult[];
+  error?: string;
+  durationMs: number;
+}
+
+/**
+ * Run multiple harness/model combinations in parallel.
+ * Each run gets its own isolated wiki on an auto-assigned port.
+ * Uses a pool pattern: as soon as one slot frees up, the next run starts.
+ */
+export async function runBatch(options: BatchOptions): Promise<BatchOutcome[]> {
+  const { runs, jobs } = options;
+  const concurrency = jobs ?? runs.length;
+  const outcomes: BatchOutcome[] = [];
+  let nextIndex = 0;
+
+  function launchNext(): Promise<void> | undefined {
+    const idx = nextIndex++;
+    if (idx >= runs.length) return undefined;
+    const spec = runs[idx];
+    const label = spec.model ? `${spec.harness}:${spec.model}` : spec.harness;
+    const start = Date.now();
+
+    return runE2E({
+      suite: options.suite,
+      harness: spec.harness,
+      model: spec.model,
+      caseFilter: options.caseFilter,
+      externalWiki: false,
+      inspect: false,
+      checkpointThreshold: options.checkpointThreshold,
+      fromResult: options.fromResult,
+      fixturesDir: options.fixturesDir,
+      resultsDir: options.resultsDir,
+      port: 0,
+      logPrefix: label,
+    }).then(
+      (results) => { outcomes.push({ spec, results, durationMs: Date.now() - start }); },
+      (err) => { outcomes.push({ spec, results: [], error: String(err), durationMs: Date.now() - start }); },
+    ).then(() => launchNext());
+  }
+
+  // Start up to `concurrency` workers; each one chains to the next run when done
+  const workers: Promise<void>[] = [];
+  for (let i = 0; i < concurrency; i++) {
+    const p = launchNext();
+    if (p) workers.push(p);
+  }
+  await Promise.all(workers);
+
+  return outcomes;
 }

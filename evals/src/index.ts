@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import { resolve } from 'node:path';
 import { gradeFixture } from './runner/grade.js';
-import { runE2E } from './runner/e2e.js';
+import { runE2E, runBatch } from './runner/e2e.js';
+import type { BatchOutcome } from './runner/e2e.js';
 import { report, formatPageBreakdown, formatCheckpointBreakdown } from './reporter.js';
 
 const USAGE = `Usage:
@@ -9,6 +10,7 @@ const USAGE = `Usage:
   tsx src/index.ts grade <fixture-dir> --pages <dir> [--rule-based-only] [--vault-path <path>]
   tsx src/index.ts grade <fixture-dir> --result <result.json> [--graders <name,...>] [--rule-based-only] [--vault-path <path>]
   tsx src/index.ts run --suite <name> --harness <name> [--model <name>] [--case <id>] [--external-wiki] [--inspect] [--checkpoint-threshold <n>] [--from-result <result.json>]
+  tsx src/index.ts batch --suite <name> --runs <harness:model,...> [--case <id>] [--jobs <n>] [--checkpoint-threshold <n>] [--from-result <result.json>]
   tsx src/index.ts report [results-dir]`;
 
 function parseArgs(args: string[]): { command: string; positional: string[]; flags: Record<string, string> } {
@@ -64,6 +66,47 @@ function printScores(result: { scores: { grader: string; score: number; skipped?
   }
 
   console.log(`Composite: ${result.composite.toFixed(3)}`);
+}
+
+function formatBatchDuration(ms: number): string {
+  const secs = Math.floor(ms / 1000);
+  if (secs < 60) return `${secs}s`;
+  const mins = Math.floor(secs / 60);
+  const remainSecs = secs % 60;
+  if (mins < 60) return `${mins}m${remainSecs > 0 ? ` ${remainSecs}s` : ''}`;
+  const hours = Math.floor(mins / 60);
+  const remainMins = mins % 60;
+  return `${hours}h${remainMins > 0 ? ` ${remainMins}m` : ''}`;
+}
+
+function printBatchSummary(outcomes: BatchOutcome[]): void {
+  console.log('\n=== Batch Summary ===\n');
+
+  const harnessWidth = Math.max(7, ...outcomes.map((o) => o.spec.harness.length));
+  const modelWidth = Math.max(5, ...outcomes.map((o) => (o.spec.model ?? 'default').length));
+
+  const header = `${'Harness'.padEnd(harnessWidth)}  ${'Model'.padEnd(modelWidth)}  ${'Composite'.padEnd(9)}  ${'Duration'.padEnd(8)}  Status`;
+  console.log(header);
+  console.log('-'.repeat(header.length));
+
+  for (const o of outcomes) {
+    const harness = o.spec.harness.padEnd(harnessWidth);
+    const model = (o.spec.model ?? 'default').padEnd(modelWidth);
+    const duration = formatBatchDuration(o.durationMs).padEnd(8);
+
+    if (o.error) {
+      console.log(`${harness}  ${model}  ${'—'.padEnd(9)}  ${duration}  FAILED: ${o.error.slice(0, 60)}`);
+    } else if (o.results.length === 0) {
+      console.log(`${harness}  ${model}  ${'—'.padEnd(9)}  ${duration}  NO RESULTS`);
+    } else {
+      for (const r of o.results) {
+        const comp = r.composite.toFixed(3).padEnd(9);
+        console.log(`${harness}  ${model}  ${comp}  ${duration}  OK`);
+      }
+    }
+  }
+
+  console.log();
 }
 
 async function main(): Promise<void> {
@@ -130,6 +173,48 @@ async function main(): Promise<void> {
       for (const r of results) {
         printScores(r);
       }
+      break;
+    }
+
+    case 'batch': {
+      const suite = flags['suite'];
+      const runsRaw = flags['runs'];
+      if (!suite || !runsRaw) {
+        console.error('Error: --suite and --runs are required');
+        console.error('  --runs format: harness:model,harness:model,...  (model is optional)');
+        console.log(USAGE);
+        process.exit(1);
+      }
+
+      const runs = runsRaw.split(',').map((s) => {
+        const trimmed = s.trim();
+        const colon = trimmed.indexOf(':');
+        if (colon === -1) return { harness: trimmed };
+        return { harness: trimmed.slice(0, colon), model: trimmed.slice(colon + 1) };
+      });
+
+      const jobsStr = flags['jobs'];
+      const jobs = jobsStr ? parseInt(jobsStr, 10) : undefined;
+
+      const batchThresholdStr = flags['checkpoint-threshold'];
+      const batchThreshold = batchThresholdStr ? parseFloat(batchThresholdStr) : undefined;
+
+      console.log(`\nStarting batch: ${runs.length} run(s)${jobs ? `, ${jobs} parallel` : ', all parallel'}`);
+      for (const r of runs) {
+        console.log(`  ${r.harness}${r.model ? `:${r.model}` : ''}`);
+      }
+      console.log();
+
+      const outcomes = await runBatch({
+        suite,
+        runs,
+        caseFilter: flags['case'],
+        checkpointThreshold: batchThreshold,
+        fromResult: flags['from-result'],
+        jobs,
+      });
+
+      printBatchSummary(outcomes);
       break;
     }
 

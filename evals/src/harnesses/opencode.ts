@@ -46,6 +46,16 @@ function parseProvider(model: string): ProviderConfig | undefined {
   return { provider: prefix, modelName: rest.join(':'), baseURL: defaults.baseURL, apiKeyEnv: defaults.apiKeyEnv };
 }
 
+/**
+ * Map bare model names to opencode's built-in provider/model format.
+ * OpenCode routes all models through its built-in `opencode/` provider.
+ * Models already in provider/model format are returned as-is.
+ */
+function resolveBuiltinModel(model: string): string {
+  if (model.includes('/')) return model;
+  return `opencode/${model}`;
+}
+
 function writeOpenCodeConfig(
   cwd: string,
   provider: ProviderConfig | undefined,
@@ -78,11 +88,22 @@ function writeOpenCodeConfig(
     };
   }
 
-  // Allow access to source directories, vault, and common tool paths
+  // Allow access to source directories/files, vault, and common tool paths
   const rules: Record<string, string> = {};
   if (allowPaths) {
+    const parentDirs = new Set<string>();
     for (const p of allowPaths) {
+      // Allow the path itself (could be a file) and its children (if a directory)
+      rules[p] = 'allow';
       rules[`${p}/**`] = 'allow';
+      // Track parent directories
+      const parent = p.replace(/\/[^/]+$/, '');
+      if (parent && parent !== p) parentDirs.add(parent);
+    }
+    // Allow parent directories so the agent can list/access siblings
+    for (const dir of parentDirs) {
+      rules[`${dir}/*`] = 'allow';
+      rules[`${dir}/**`] = 'allow';
     }
   }
   // Allow vault path (where wai stores snapshots/objects)
@@ -139,7 +160,7 @@ export function createOpenCodeHarness(model?: string): Harness {
       if (customProvider) {
         args.push('--model', `${customProvider.provider}/${customProvider.modelName}`);
       } else if (model) {
-        args.push('--model', model);
+        args.push('--model', resolveBuiltinModel(model));
       }
 
       args.push('--format', 'json');
