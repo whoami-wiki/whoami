@@ -8,6 +8,7 @@
     "test": "tsx --test test/*.test.ts",
     "grade": "tsx src/index.ts grade",
     "run": "tsx src/index.ts run",
+    "batch": "tsx src/index.ts batch",
     "report": "tsx src/index.ts report"
   },
   "devDependencies": {

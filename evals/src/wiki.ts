@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomBytes } from 'node:crypto';
+import net from 'node:net';
 import http from 'node:http';
 
 const HEALTH_POLL_MS = 200;
@@ -134,11 +135,12 @@ function generateLocalSettings(opts: {
 function runPhp(args: string[], cwd?: string): string {
   return execFileSync(PHP_PATH, [
     '-d', 'display_errors=Off',
-    '-d', 'error_reporting=22527',
+    '-d', 'error_reporting=0',
     ...args,
   ], {
     cwd: cwd ?? MW_PATH,
     encoding: 'utf-8',
+    stdio: ['pipe', 'pipe', 'ignore'],
     timeout: 120_000,
     maxBuffer: 10 * 1024 * 1024,
   });
@@ -183,7 +185,7 @@ function importPage(confPath: string, title: string, filePath: string): void {
 export function writePageDirect(confPath: string, title: string, content: string): void {
   execFileSync(PHP_PATH, [
     '-d', 'display_errors=Off',
-    '-d', 'error_reporting=22527',
+    '-d', 'error_reporting=0',
     'maintenance/run.php', 'edit',
     '--conf', confPath,
     title,
@@ -191,6 +193,7 @@ export function writePageDirect(confPath: string, title: string, content: string
     cwd: MW_PATH,
     input: content,
     encoding: 'utf-8',
+    stdio: ['pipe', 'pipe', 'ignore'],
     timeout: 30_000,
     maxBuffer: 10 * 1024 * 1024,
   });
@@ -227,7 +230,7 @@ export async function startWiki(port: number): Promise<WikiInstance> {
   mkdirSync(join(dataPath, 'cache'), { recursive: true });
   mkdirSync(vaultPath, { recursive: true });
 
-  console.log(`==> Provisioning wiki at ${serverUrl} (root: ${basePath})`);
+  // Provisioning output goes through the caller's logger, not console
 
   // Install MediaWiki
   runPhp([
@@ -267,7 +270,7 @@ export async function startWiki(port: number): Promise<WikiInstance> {
   // Start PHP built-in server
   const proc: ChildProcess = spawn(PHP_PATH, [
     '-d', 'display_errors=Off',
-    '-d', 'error_reporting=22527',
+    '-d', 'error_reporting=0',
     '-S', `127.0.0.1:${port}`,
     '-t', MW_PATH,
     join(MW_PATH, 'router.php'),
@@ -280,10 +283,11 @@ export async function startWiki(port: number): Promise<WikiInstance> {
   proc.stderr?.on('data', () => {});
 
   await waitForServer(serverUrl);
-  console.log(`==> Wiki ready at ${serverUrl}`);
 
   const env: Record<string, string> = {
     WIKI_SERVER: serverUrl,
+    WIKI_USERNAME: username,
+    WIKI_PASSWORD: password,
     WAI_VAULT_PATH: vaultPath,
     WIKI_DATA_PATH: dataPath,
   };
@@ -302,7 +306,20 @@ export async function startWiki(port: number): Promise<WikiInstance> {
     destroy() {
       proc.kill('SIGTERM');
       rmSync(basePath, { recursive: true, force: true });
-      console.log(`==> Wiki torn down (${basePath} removed)`);
     },
   };
+}
+
+/**
+ * Find a free TCP port on 127.0.0.1 by briefly binding to port 0.
+ */
+export function findFreePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.listen(0, '127.0.0.1', () => {
+      const addr = server.address() as net.AddressInfo;
+      server.close(() => resolve(addr.port));
+    });
+    server.on('error', reject);
+  });
 }

@@ -131,6 +131,36 @@ pnpm run report results/
 
 The report aggregates scores by harness/model/suite into a markdown table.
 
+### Parallel batch runs
+
+Run multiple harness/model combinations at once:
+
+```bash
+# All combos in parallel — each gets its own wiki on an auto-assigned port
+pnpm run batch --suite incremental \
+  --runs "claude-code:claude-opus-4-6,codex:gpt-5.3,opencode:claude-opus-4-6"
+
+# Limit concurrency to 3 parallel runs
+pnpm run batch --suite incremental --case 001-person --jobs 3 \
+  --runs "claude-code:claude-opus-4-6,codex:gpt-5.2,codex:gpt-5.3,cursor"
+
+# Model is optional (uses harness default)
+pnpm run batch --suite incremental --runs "claude-code,codex,opencode"
+```
+
+Each run provisions its own isolated wiki and writes results independently to `results/`. A summary table is printed when all runs complete.
+
+#### Batch flags
+
+| Flag | Description |
+|------|-------------|
+| `--suite <name>` | **Required.** Suite to run. |
+| `--runs <list>` | **Required.** Comma-separated `harness:model` pairs (model optional). |
+| `--case <id>` | Run only this case. |
+| `--jobs <n>` | Max parallel runs (default: all at once). |
+| `--checkpoint-threshold <n>` | Override per-checkpoint gate score. |
+| `--from-result <path>` | Resume all runs from a previous result JSON. |
+
 ### Output
 
 Results are written to `results/` as JSON files named `<case-id>-<harness>-<timestamp>.json`. Each result contains:
