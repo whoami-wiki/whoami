@@ -34,10 +34,6 @@ extraResources:
     to: resources/templates
     filter:
       - "**/*"
-  - from: ../cli/dist
-    to: resources
-    filter:
-      - wai.cjs
 
 afterSign: scripts/notarize.cjs
 

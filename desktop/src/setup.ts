@@ -24,7 +24,7 @@ interface SetupParams {
   password: string;
 }
 
-type StepId = "database" | "mediawiki" | "templates" | "userpage" | "cli";
+type StepId = "database" | "mediawiki" | "templates" | "userpage";
 
 // ── Public ──────────────────────────────────────────────────────────────
 
@@ -192,12 +192,6 @@ export async function runSetup(
     "Redirect to user page",
   );
   send("userpage", "done");
-
-  // 5. Create bot password for CLI + configure wai
-  send("cli", "running");
-  await installCli();
-  await configureCli(params.username, params.password);
-  send("cli", "done");
 }
 
 export function refreshLocalSettings(): void {
@@ -537,26 +531,3 @@ async function createPage(
   }
 }
 
-async function installCli(): Promise<void> {
-  // CLI installer is handled separately — just a placeholder for the setup flow
-  const { installWaiCli } = await import("./cli-installer.js");
-  await installWaiCli();
-}
-
-async function configureCli(username: string, password: string): Promise<void> {
-  // Write wai CLI credentials
-  const { homedir } = await import("node:os");
-  const configDir = join(homedir(), ".whoami");
-  mkdirSync(configDir, { recursive: true });
-
-  const credentials = {
-    server: getServerUrl(),
-    username,
-    password,
-  };
-  writeFileSync(
-    join(configDir, "credentials.json"),
-    JSON.stringify(credentials, null, 2) + "\n",
-    { mode: 0o600 },
-  );
-}
