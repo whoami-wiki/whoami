@@ -157,7 +157,10 @@ const lines: Line[] = [
     text: '$ jq \'[.[] | select(.date | startswith("2019-12"))] | sort_by(.date) | .[] | "\\(.date) \\(.track) — \\(.artist)"\' ~/exports/shazam-history/*.json',
   },
   { type: "output", text: "" },
-  { type: "output", text: "  2019-12-22 21:14  Tujhe Dekha Toh — Kumar Sanu" },
+  {
+    type: "output",
+    text: '  2019-12-22 21:14  "Tujhe Dekha Toh" — Kumar Sanu',
+  },
   {
     type: "output",
     text: '  2019-12-23 23:30  "Blinding Lights" — The Weeknd',

@@ -38,11 +38,29 @@ export default function Home() {
 
       <div className="max-w-2xl w-full flex flex-col gap-8 py-18 px-6 border-b border-neutral-200 dark:border-neutral-700">
         <div className="font-sans">
-          Combine your favorite agent harness with the{" "}
-          <span className="font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-600 rounded-md">
-            wai
-          </span>{" "}
-          extension to build your personal encyclopedia.
+          Works with your friendly neighborhood agent harness. Currently tested
+          with{" "}
+          <a
+            href="https://docs.anthropic.com/en/docs/claude-code"
+            className="underline underline-offset-4"
+          >
+            Claude Code
+          </a>
+          ,{" "}
+          <a
+            href="https://openai.com/index/introducing-codex/"
+            className="underline underline-offset-4"
+          >
+            Codex
+          </a>
+          , and{" "}
+          <a
+            href="https://opencode.ai"
+            className="underline underline-offset-4"
+          >
+            OpenCode
+          </a>
+          . More coming soon!
         </div>
         <AgentLoop />
       </div>
@@ -50,55 +68,20 @@ export default function Home() {
       <div className="max-w-2xl w-full flex flex-col gap-24 py-18 px-6">
         <div className="flex flex-1/2 flex-col gap-8 h-fit">
           <dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-6 font-sans">
-            <dt className="">Local-first</dt>
+            <dt className="">Private by default</dt>
             <dd className="text-muted">
-              Everything runs on your machine—MediaWiki in Docker, archive on
-              your filesystem. Your data never touches a server unless you put
-              it there.
-            </dd>
-            <dt className="">Works with your tools</dt>
-            <dd className="text-muted">
-              Built for{" "}
-              <a
-                href="https://docs.anthropic.com/en/docs/claude-code"
-                className="underline underline-offset-4"
-              >
-                Claude Code
-              </a>{" "}
-              and{" "}
-              <a
-                href="https://openai.com/index/introducing-codex/"
-                className="underline underline-offset-4"
-              >
-                Codex
-              </a>
-              . Agents use the CLI directly, no plugins required. Add{" "}
-              <span className="font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-600 rounded-md">
-                wai
-              </span>{" "}
-              to any AI workflow that can run bash.
-            </dd>
-            <dt className="">Citations you can click</dt>
-            <dd className="text-muted">
-              Every fact links back to its source. Click a citation in the wiki
-              and see the original photo, chat message, or document it came
-              from.
-            </dd>
-            <dt className="">Content-addressed</dt>
-            <dd className="text-muted">
-              Files are stored by hash and deduplicated automatically. The same
-              photo across five exports is stored once.
+              Your wiki and archive live on your machine. Nothing is stored
+              remotely.
             </dd>
             <dt className="">Export anytime</dt>
             <dd className="text-muted">
               Full export to Markdown and original files. Share a single page
-              with family or back up everything. No proprietary formats, no
-              lock-in.
+              with family or back up everything.
             </dd>
             <dt className="">Open source</dt>
             <dd className="text-muted">
-              MIT licensed. The core stays open forever. Run it, fork it, extend
-              it however you want.
+              MIT licensed. Fork it, clone it, hack it, build it, cite it, tag
+              it, ship, extend it.
             </dd>
           </dl>
         </div>
