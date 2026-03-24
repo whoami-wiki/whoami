@@ -59,41 +59,51 @@ export function WikiWindow({ activePage, zIndex }: Props) {
   return (
     <AnimatePresence>
       {activePage && (
-        <motion.div
-          key="wiki-window"
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.85 }}
-          transition={{ duration: 0.1 }}
-          className="absolute inset-0 pointer-events-none"
-          style={{ zIndex }}
-        >
-          {/* Desktop: browser window */}
-          <div
-            className="hidden md:flex absolute w-3/4 max-w-4xl h-6/7 rounded-xl bg-neutral-100 dark:bg-neutral-900 overflow-hidden flex-col shadow-2xl border border-primary left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        <>
+          {/* Mobile: backdrop tint (separate layer so it fades without scaling) */}
+          <motion.div
+            key="wiki-tint"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+            className="md:hidden absolute inset-0 bg-black/25 dark:bg-black/50 pointer-events-none"
+            style={{ zIndex }}
+          />
+
+          <motion.div
+            key="wiki-window"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ duration: 0.1 }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ zIndex }}
           >
-            <div className="flex items-center gap-2 p-3 bg-neutral-200 dark:bg-neutral-800 shrink-0 border-b border-primary">
-              <div className="w-3 h-3 rounded-full bg-red-400" />
-              <div className="w-3 h-3 rounded-full bg-yellow-400" />
-              <div className="w-3 h-3 rounded-full bg-green-400" />
-              <div className="ml-4 text-xs font-sans text-muted" />
-            </div>
-            <WikiArticle activePage={activePage} />
-          </div>
-
-          {/* Mobile: backdrop tint to push desktop back */}
-          <div className="md:hidden absolute inset-0 bg-black/25 dark:bg-black/50" />
-
-          {/* Mobile: phone frame */}
-          <div className="md:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[80dvh] aspect-[445/901]">
-            {/* Screen content area — slightly larger than cutout, bezel masks the excess */}
-            <div className="absolute inset-[2%] overflow-hidden bg-neutral-100 dark:bg-neutral-900 flex flex-col pt-8" style={{ borderRadius: '16% / 8%' }}>
+            {/* Desktop: browser window */}
+            <div
+              className="hidden md:flex absolute w-3/4 max-w-4xl h-6/7 rounded-xl bg-neutral-100 dark:bg-neutral-900 overflow-hidden flex-col shadow-2xl border border-primary left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            >
+              <div className="flex items-center gap-2 p-3 bg-neutral-200 dark:bg-neutral-800 shrink-0 border-b border-primary">
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                <div className="w-3 h-3 rounded-full bg-green-400" />
+                <div className="ml-4 text-xs font-sans text-muted" />
+              </div>
               <WikiArticle activePage={activePage} />
             </div>
-            {/* Phone bezel overlay */}
-            <PhoneBezel />
-          </div>
-        </motion.div>
+
+            {/* Mobile: phone frame */}
+            <div className="md:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[80dvh] aspect-[445/901]">
+              {/* Screen content area — slightly larger than cutout, bezel masks the excess */}
+              <div className="absolute inset-[2%] overflow-hidden bg-neutral-100 dark:bg-neutral-900 flex flex-col pt-8" style={{ borderRadius: '16% / 8%' }}>
+                <WikiArticle activePage={activePage} />
+              </div>
+              {/* Phone bezel overlay */}
+              <PhoneBezel />
+            </div>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );
@@ -320,7 +330,7 @@ function VoiceNote({
   audio: { title: string; duration: string; transcription: string };
 }) {
   // Generate a natural-looking waveform: quiet start, build up, plateau with variation, taper
-  const count = 48;
+  const count = 100;
   const bars = Array.from({ length: count }, (_, i) => {
     const t = i / (count - 1); // 0→1
     // Envelope: ramp up, sustain, taper down
@@ -346,7 +356,7 @@ function VoiceNote({
           {bars.map((h, i) => (
             <div
               key={i}
-              className="flex-1 min-w-0 mx-px rounded-sm bg-neutral-400/60 dark:bg-neutral-500/60"
+              className="flex-1 min-w-0 mx-[0.5px] rounded-sm bg-neutral-400/60 dark:bg-neutral-500/60"
               style={{ height: `${h}%` }}
             />
           ))}
