@@ -27,6 +27,10 @@ const sidebarLayout: SidebarSectionConfig[] = [
     items: [
       { title: "Installation", slug: "installation" },
       { title: "Writing Your First Page", slug: "writing-your-first-page" },
+      {
+        title: "Choosing a Harness and Model",
+        slug: "choosing-harness-and-model",
+      },
       { title: "Troubleshooting", slug: "troubleshooting" },
     ],
   },
@@ -46,7 +50,6 @@ const sidebarLayout: SidebarSectionConfig[] = [
     items: [
       { title: "CLI", slug: "cli" },
       { title: "Glossary", slug: "glossary" },
-      { title: "Evals", slug: "evals" },
     ],
   },
 ];
