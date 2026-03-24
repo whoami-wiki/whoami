@@ -25,7 +25,7 @@ export function CopyCodeBlock({ children }: { children?: ReactNode }) {
 
       <button
         onClick={handleCopy}
-        className="size-fit mt-4 rounded-md text-neutral-400 hover:text-neutral-100 cursor-pointer"
+        className="size-fit mt-4 rounded-md text-neutral-400 hover:text-neutral-100 cursor-pointer transition-all duration-150 active:scale-90 active:blur-[2px]"
         aria-label="Copy to clipboard"
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
