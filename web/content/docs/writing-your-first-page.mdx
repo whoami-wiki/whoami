@@ -3,59 +3,115 @@ title: Writing Your First Page
 description: "Go from zero to a published wiki page in minutes"
 ---
 
-This tutorial walks you through creating your first encyclopedia page end-to-end. By the end, you'll have a real page in your wiki written by an AI agent from your own data.
+This tutorial walks you through creating your first encyclopedia page end-to-end using an incremental editorial workflow. We'll write a Person page — the most common page type — by surveying data, drafting, layering in new sources, and refining with your own memories.
 
-## Snapshot your data
+## Step 1 — Snapshot a data source
 
-First, snapshot a data source using the `wai snapshot` command. We'll use a folder of photos as an example — say, photos of a family member.
+Start by snapshotting a data source with the `wai snapshot` command. Any export will work — an Instagram archive, a photo folder, a WhatsApp backup. Pick whichever source you have handy.
 
 ```bash
-wai snapshot ~/Photos/grandma
+wai snapshot ~/Downloads/instagram-export
 ```
 
-This hashes the files, copies them into the vault, and creates a Source page so agents can find the data. You should see a summary of what was snapshotted.
+This hashes the files, copies them into the vault, and creates a Source page so agents can find the data.
 
-## Prompt the agent to write a page
+## Step 2 — Survey and plan
 
-Open your agent harness (Claude Code, Codex, or OpenCode) and prompt it to create a page from the snapshot:
+Before writing, ask the agent to survey what's actually in the snapshot. This step catches gaps early — encrypted files, missing exports, low-quality data — so you know what you're working with.
 
 ```
-Use the whoami.wiki tools to write an encyclopedia page about my
-grandmother from the photos I just snapshotted.
+Survey the Instagram source I just snapshotted. Catalog the media
+files, transcribe any voice notes, and assess data quality. Note
+any gaps or limitations.
+```
+
+The agent will create an enriched Source page that goes beyond raw file counts — it includes platform limitations, key conversations, SQL recipes for querying the data, and a critical assessment of what the source can and cannot tell you.
+
+## Step 3 — Draft the page
+
+Now prompt the agent to write the page from the data it surveyed:
+
+```
+Write a Person page for Alex using only the Instagram data
+available so far. Include an infobox, lead paragraph, and
+organized sections with citations and embedded media.
+
+On the Talk page, note any episode candidates (events rich enough
+for their own pages) and gaps where additional sources would help.
 ```
 
 The agent will:
 
-1. Browse the snapshotted photos using contact sheets
-2. Extract dates, locations, and people from EXIF data and visual content
-3. Cross-reference details across photos to build a timeline
-4. Draft a Wikipedia-style page with an infobox, sections, citations, and linked references
-5. Publish the draft to your local wiki
+1. Extract dates, locations, and people from the data
+2. Cross-reference details to build a timeline
+3. Draft a Wikipedia-style page with an infobox, sections, and citations
+4. Create a Talk page noting what's missing and what events could become their own pages
 
-## Review the result
+Open your wiki at `http://localhost:8080` to review the draft.
 
-Open your wiki at `http://localhost:8080` to see the published page. You'll find:
+## Step 4 — Layer in a new source
 
-- A **lead paragraph** summarizing who your grandmother is
-- An **infobox** with key facts (name, birth date, locations)
-- **Sections** organized chronologically or thematically
-- **Citations** linking back to the source photos
-- **Red links** for people and places mentioned but not yet documented
+One source rarely tells the whole story. Snapshot a second source and ask the agent to integrate it:
 
-## Refine with more context
-
-The first draft works from data alone. You can improve it by giving the agent more context:
-
-```
-The woman in the red dress in the 1987 photos is my aunt Maria.
-She's grandma's youngest daughter. Also, grandma grew up in
-Thessaloniki, not Athens.
+```bash
+wai snapshot ~/Downloads/whatsapp-export
 ```
 
-The agent will update the page with your corrections and additional details.
+```
+Snapshot the WhatsApp export and create a source page for it.
+Then revise the person page — weave the new data into the
+existing article. Don't just append a "WhatsApp" section;
+integrate new facts into appropriate existing sections and update
+the infobox. Cross-reference facts that appear in both sources.
+```
+
+The agent updates the page by confirming details that appeared in both sources, filling gaps the first source couldn't cover, and removing hedging where the new data resolves uncertainty.
+
+## Step 5 — Extract episodes
+
+As the agent researches, it identifies events rich enough for their own pages — a first meeting, a trip, a milestone. Ask it to spin those out:
+
+```
+Create episode pages for the richest events you found during
+research. Link each episode from the person page with a
+one-sentence summary.
+```
+
+Each episode page gets its own infobox, narrative, citations, and embedded media.
+
+## Step 6 — Add your own memories
+
+Data sources capture what was recorded, but you know the story. Share anecdotes, corrections, and context the data can't provide:
+
+```
+Here are some memories about Alex:
+
+- We got lost trying to find the restaurant and ended up walking
+  through a park. Alex spotted a stray cat and spent ten minutes
+  trying to befriend it.
+- At the concert, someone behind us kept singing off-key and Alex
+  couldn't stop laughing. We had to move seats twice.
+- The messages say we met on a Thursday but it was actually a
+  Friday — I had just finished my last class of the week.
+```
+
+The agent integrates your testimony into the page, citing it with `{{Cite testimony}}` templates. Where your account conflicts with the digital record, both versions are noted on the Talk page rather than silently overwriting either one.
+
+## Step 7 — Verify and review
+
+Finally, ask the agent to audit the finished page:
+
+```
+Do a final editorial review. Audit the page for tone, balance,
+and gaps. Make sure every factual claim has a citation and produce
+a citation manifest pairing each claim with its source evidence.
+```
+
+The agent checks that the narrative flows coherently, no section is underdeveloped, and every fact traces back to a source. The citation manifest gives you a complete audit trail.
 
 ## Next steps
 
 - Add more data sources to enrich the page — see [Data Sources](/docs/data-sources)
 - Learn about the different [Page Types](/docs/page-types) you can create
+- Understand how citations work in the [Citation System](/docs/citation-system)
 - Explore the [CLI reference](/docs/cli) for all available commands
