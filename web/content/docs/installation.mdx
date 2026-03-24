@@ -60,12 +60,6 @@ cp -r extensions/codex/.agents .agents
 
 This sets up the `.agents/` directory with the editor agent and editorial guide skill. Codex reads this directory automatically when you start a session.
 
-Ensure the `wai` binary is in your PATH, then authenticate:
-
-```bash
-wai auth login
-```
-
 ### OpenCode
 
 Clone the [extensions repo](https://github.com/whoami-wiki/extensions) and copy the OpenCode configuration into your working directory:
@@ -77,12 +71,6 @@ cp extensions/opencode/opencode.json opencode.json
 ```
 
 This sets up the `.opencode/` directory with instructions and the whoami plugin. The plugin injects environment variables for the `wai` CLI and preserves editorial context across long sessions.
-
-Ensure the `wai` binary is in your PATH, then authenticate:
-
-```bash
-wai auth login
-```
 
 ## Step 4: Verify the setup
 
