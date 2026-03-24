@@ -5,16 +5,14 @@ description: "Install the whoami.wiki desktop app, CLI, and agent harness plugin
 
 whoami.wiki has two components that work together:
 
-- **Desktop App and CLI** — the encyclopedia you use to browse through pages and `wai` command-line tool for agents interact with it 
+- **Desktop App and CLI** — the encyclopedia you use to browse through pages and the `wai` command-line tool that agents use to interact with it
 - **Agent Harness and Extension** — a coding agent like [Claude Code](https://code.claude.com), [Codex](https://openai.com/codex), or [OpenCode](https://opencode.ai) and supporting files to guide editorial work
 
 <Note>We recommend using Claude Code with Opus 4.6. You can [view evals across different agent harnesses and models](/docs/choosing-harness-and-model) to help you choose.</Note>
 
 <ArchOverview />
 
-## Install the desktop app
-
-The desktop app sets up both the wiki and the CLI in one step.
+## Step 1: Install the desktop app
 
 Download the installer for your platform:
 - [macOS (Apple Silicon)](/download?platform=macos-arm)
@@ -22,7 +20,21 @@ Download the installer for your platform:
 
 Windows and Linux coming soon!
 
-## Install the extension for your agent harness
+## Step 2: Install the CLI
+
+Install the `wai` command-line tool, which agents use to read and write wiki pages:
+
+```bash
+curl -fsSL https://whoami.wiki/cli/install.sh | bash
+```
+
+Then log in with the credentials you created during desktop setup:
+
+```bash
+wai auth login
+```
+
+## Step 3: Install the extension for your agent harness
 
 The agent harness connects your AI coding tool to your wiki. Install the extension for your tool of choice:
 
@@ -72,7 +84,7 @@ Ensure the `wai` binary is in your PATH, then authenticate:
 wai auth login
 ```
 
-## Verify the setup
+## Step 4: Verify the setup
 
 Run a quick check to confirm everything is connected:
 
