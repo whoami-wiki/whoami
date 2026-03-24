@@ -297,6 +297,8 @@ async function launchWiki(): Promise<void> {
       wikiView.webContents.goBack();
     } else if (input.meta && input.key === "]") {
       wikiView.webContents.goForward();
+    } else if (input.meta && input.key === "r") {
+      wikiView.webContents.reload();
     }
   };
   mainWindow.webContents.on("before-input-event", handleKeyboardNav);
