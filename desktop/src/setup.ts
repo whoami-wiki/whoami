@@ -7,6 +7,7 @@ import {
   unlinkSync,
 } from "node:fs";
 import { join } from "node:path";
+import { homedir } from "node:os";
 import { app, type BrowserWindow } from "electron";
 import { net } from "electron";
 import {
@@ -192,6 +193,14 @@ export async function runSetup(
     "Redirect to user page",
   );
   send("userpage", "done");
+
+  // Write shared credentials file so the CLI can pick them up
+  saveCredentials({
+    server: getServerUrl(),
+    username: params.username,
+    password: params.password,
+    role: "owner",
+  });
 }
 
 export function refreshLocalSettings(): void {
@@ -225,6 +234,73 @@ export async function runSchemaUpdate(): Promise<void> {
     "--conf",
     confPath,
   ]);
+}
+
+// ── Shared Credentials ──────────────────────────────────────────────────
+
+const CREDENTIALS_DIR = join(homedir(), ".whoami");
+const CREDENTIALS_FILE = join(CREDENTIALS_DIR, "credentials.json");
+
+interface SharedCredentials {
+  server: string;
+  username: string;
+  password: string;
+  role: string;
+}
+
+function saveCredentials(creds: SharedCredentials): void {
+  mkdirSync(CREDENTIALS_DIR, { recursive: true });
+  writeFileSync(CREDENTIALS_FILE, JSON.stringify(creds, null, 2) + "\n", {
+    mode: 0o600,
+  });
+}
+
+function loadCredentials(): SharedCredentials | null {
+  if (!existsSync(CREDENTIALS_FILE)) return null;
+  try {
+    const data = JSON.parse(readFileSync(CREDENTIALS_FILE, "utf-8"));
+    if (data.server && data.username && data.password) return data;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+/**
+ * Log in to the wiki using stored credentials via net.fetch so session
+ * cookies land in the default Electron session (shared with the wiki view).
+ */
+export async function autoLogin(): Promise<boolean> {
+  const creds = loadCredentials();
+  if (!creds) return false;
+
+  const apiUrl = `${getServerUrl()}/api.php`;
+  try {
+    // Get login token
+    const tokenResp = await net.fetch(
+      `${apiUrl}?action=query&meta=tokens&type=login&format=json`,
+    );
+    const tokenData = await tokenResp.json();
+    const loginToken = tokenData.query.tokens.logintoken;
+
+    // Login
+    const loginResp = await net.fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        action: "login",
+        lgname: creds.username,
+        lgpassword: creds.password,
+        lgtoken: loginToken,
+        format: "json",
+      }),
+    });
+    const loginData = await loginResp.json();
+    return loginData.login?.result === "Success";
+  } catch (err) {
+    console.error("[auto-login] failed:", err);
+    return false;
+  }
 }
 
 // ── Local Settings Generation ───────────────────────────────────────────
