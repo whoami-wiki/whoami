@@ -11,15 +11,18 @@ Test fixtures in the repository use example data with stub references. Productio
 
 ## Results
 
-Person page from messaging archives. Two source types, roughly 10k messages. Best run per harness and model. All runs use the six-checkpoint incremental protocol described below.
+Best run per harness and model. All runs use the six-checkpoint incremental protocol described below. Accuracy scores are **calibrated**: false penalties are removed where the grader penalized correct facts due to misnumbered citation targets, Talk page editorial notes misclassified as unsupported claims, or partial evidence matches where the core fact is confirmed. Composites are recomputed from calibrated accuracy.
 
-Accuracy scores are **calibrated**: false penalties are removed where the grader penalized correct facts due to misnumbered citation targets, Talk page editorial notes misclassified as unsupported claims, or partial evidence matches where the core fact is confirmed. Composites are recomputed from calibrated accuracy.
+<Tabs labels='["Person", "Trip"]'>
+<Tab>
+
+Person page from messaging archives. Two source types, roughly 10k messages.
 
 ### Overall composite
 
 <ScoreTable
   headers='["Harness", "Model", "Duration", "Composite"]'
-  rows='[["Claude Code", "Opus 4.6", "2h 21m", "0.828"], ["OpenCode", "Opus 4.6", "2h 29m", "0.803"], ["Codex", "GPT-5.2", "1h 41m", "0.770"], ["Codex", "GPT-5.4", "3h 28m", "0.766"], ["Codex", "GPT-5.3", "2h 23m", "0.761"], ["Claude Code", "Opus 4.5", "59m", "0.743"], ["OpenCode", "Kimi K2.5", "39m", "0.624"]]'
+  rows='[["Claude Code", "Opus 4.6", "2h 21m", "0.828"], ["OpenCode", "Opus 4.6", "2h 29m", "0.803"], ["Codex", "GPT-5.2", "1h 41m", "0.770"], ["Codex", "GPT-5.4", "3h 28m", "0.766"], ["Codex", "GPT-5.3", "2h 23m", "0.761"], ["Claude Code", "Opus 4.5", "59m", "0.743"], ["Cursor", "Composer 2", "1h 27m", "0.722"], ["OpenCode", "Kimi K2.5", "39m", "0.624"]]'
   scoreStart={3}
 />
 
@@ -27,23 +30,60 @@ Accuracy scores are **calibrated**: false penalties are removed where the grader
 
 <ScoreTable
   headers='["Harness", "Model", "Compl.", "Cite", "Ref.", "Acc.", "Edit.", "X-ref", "Integ.", "Composite"]'
-  rows='[["CC", "Opus 4.6", "1.000", "0.950", "0.733", "0.890", "0.650", "1.000", "1.000", "0.867"], ["OC", "Opus 4.6", "1.000", "0.900", "0.717", "0.920", "0.350", "1.000", "1.000", "0.838"], ["CX", "GPT-5.2", "0.737", "0.950", "0.533", "0.990", "0.900", "1.000", "0.850", "0.826"], ["CX", "GPT-5.3", "0.632", "0.900", "0.500", "0.960", "0.450", "1.000", "1.000", "0.767"], ["CX", "GPT-5.4", "0.579", "0.900", "0.522", "0.974", "0.400", "1.000", "1.000", "0.765"], ["CC", "Opus 4.5", "0.763", "0.700", "0.617", "0.933", "0.100", "1.000", "1.000", "0.754"], ["OC", "Kimi K2.5", "0.658", "0.539", "0.550", "0.846", "0.000", "1.000", "—", "0.617"]]'
+  rows='[["CC", "Opus 4.6", "1.000", "0.950", "0.733", "0.890", "0.650", "1.000", "1.000", "0.867"], ["OC", "Opus 4.6", "1.000", "0.900", "0.717", "0.920", "0.350", "1.000", "1.000", "0.838"], ["CX", "GPT-5.2", "0.737", "0.950", "0.533", "0.990", "0.900", "1.000", "0.850", "0.826"], ["CX", "GPT-5.3", "0.632", "0.900", "0.500", "0.960", "0.450", "1.000", "1.000", "0.767"], ["CX", "GPT-5.4", "0.579", "0.900", "0.522", "0.974", "0.400", "1.000", "1.000", "0.765"], ["CC", "Opus 4.5", "0.763", "0.700", "0.617", "0.933", "0.100", "1.000", "1.000", "0.754"], ["CU", "Composer 2", "0.842", "1.000", "0.300", "0.984", "0.550", "1.000", "1.000", "0.760"], ["OC", "Kimi K2.5", "0.658", "0.539", "0.550", "0.846", "0.000", "1.000", "—", "0.617"]]'
 />
 
 ### Talk page
 
 <ScoreTable
   headers='["Harness", "Model", "Compl.", "Ref.", "Edit.", "Composite"]'
-  rows='[["CX", "GPT-5.3", "0.786", "0.829", "1.000", "0.853"], ["CC", "Opus 4.5", "1.000", "0.714", "0.800", "0.784"], ["CX", "GPT-5.4", "0.786", "0.700", "1.000", "0.772"], ["CC", "Opus 4.6", "1.000", "0.629", "0.800", "0.731"], ["OC", "Opus 4.6", "0.786", "0.600", "0.800", "0.672"], ["CX", "GPT-5.2", "0.786", "0.657", "0.400", "0.633"], ["OC", "Kimi K2.5", "0.500", "0.600", "0.000", "0.469"]]'
+  rows='[["CX", "GPT-5.3", "0.786", "0.829", "1.000", "0.853"], ["CC", "Opus 4.5", "1.000", "0.714", "0.800", "0.784"], ["CX", "GPT-5.4", "0.786", "0.700", "1.000", "0.772"], ["CC", "Opus 4.6", "1.000", "0.629", "0.800", "0.731"], ["OC", "Opus 4.6", "0.786", "0.600", "0.800", "0.672"], ["CX", "GPT-5.2", "0.786", "0.657", "0.400", "0.633"], ["CU", "Composer 2", "0.286", "0.400", "0.700", "0.435"], ["OC", "Kimi K2.5", "0.500", "0.600", "0.000", "0.469"]]'
 />
 
-## Observations
+### Observations
 
 - **Calibration moves rankings.** Raw accuracy ranged from 0.462 to 0.933. After removing false penalties, calibrated accuracy ranges from 0.846 to 0.990. Claude Code Opus 4.6 moved from 2nd to 1st overall; Codex GPT-5.2 moved from 5th to 3rd.
 - **Accuracy grades the manifest, not the article.** The accuracy grader checks whether the citation manifest correctly maps claims to source evidence. An agent can write a factually accurate article and score low if its manifest has bad evidence lookups. This is a known limitation.
 - **Editorial scoring has high variance.** Scores range from 0.000 (Kimi K2.5) to 0.900 (GPT-5.2). Multi-pass median scoring reduces noise but editorial quality remains the most subjective dimension.
 - **Cross-referencing and integration are near ceiling.** Most agents score 1.000 once they process both source types. These graders catch failure modes (ignoring a source, appending instead of weaving) rather than distinguishing quality.
 - **Speed varies widely.** Kimi K2.5 finishes in 39 minutes; GPT-5.4 on Codex takes over three hours. Faster runs tend to score lower, but the gap narrows at the top: Opus 4.5 on Claude Code nearly matches Opus 4.6 in under an hour.
+
+</Tab>
+<Tab>
+
+Episode page from a trip combining location history, photos, messages, transactions, Shazam history, and flight records. Six source types.
+
+### Overall composite
+
+<ScoreTable
+  headers='["Harness", "Model", "Duration", "Composite"]'
+  rows='[["Claude Code", "Opus 4.5", "1h 7m", "0.774"], ["Codex", "GPT-5.3", "1h 45m", "0.761"], ["Claude Code", "Opus 4.6", "1h 37m", "0.745"], ["Codex", "GPT-5.4", "2h 28m", "0.737"], ["OpenCode", "Opus 4.6", "1h 11m", "0.652"], ["Cursor", "Composer 2", "1h 9m", "0.640"], ["Codex", "GPT-5.2", "2h 57m", "0.632"], ["OpenCode", "Kimi K2.5", "1h 48m", "0.460"]]'
+  scoreStart={3}
+/>
+
+### Episode page
+
+<ScoreTable
+  headers='["Harness", "Model", "Compl.", "Cite", "Ref.", "Acc.", "Edit.", "X-ref", "Integ.", "Composite"]'
+  rows='[["CC", "Opus 4.5", "0.711", "0.750", "—", "0.955", "0.400", "1.000", "—", "0.827"], ["OC", "Opus 4.6", "0.789", "0.700", "0.400", "0.937", "0.900", "1.000", "1.000", "0.783"], ["CC", "Opus 4.6", "0.868", "1.000", "0.467", "0.817", "0.650", "1.000", "1.000", "0.773"], ["CX", "GPT-5.3", "0.763", "1.000", "0.364", "0.926", "0.700", "1.000", "0.850", "0.754"], ["CX", "GPT-5.4", "0.763", "1.000", "0.290", "0.972", "0.550", "1.000", "1.000", "0.747"], ["CU", "Composer 2", "0.553", "1.000", "0.297", "0.887", "0.050", "1.000", "1.000", "0.656"], ["CX", "GPT-5.2", "0.500", "0.900", "0.133", "0.758", "0.550", "1.000", "0.550", "0.576"], ["OC", "Kimi K2.5", "0.605", "0.531", "0.456", "—", "0.050", "1.000", "—", "0.495"]]'
+/>
+
+### Talk page
+
+<ScoreTable
+  headers='["Harness", "Model", "Compl.", "Ref.", "Edit.", "Composite"]'
+  rows='[["CC", "Opus 4.5", "0.786", "—", "0.500", "0.643"], ["CX", "GPT-5.4", "0.786", "0.400", "0.850", "0.557"], ["CX", "GPT-5.3", "0.786", "0.400", "0.800", "0.547"], ["CC", "Opus 4.6", "0.786", "0.400", "0.600", "0.510"], ["OC", "Kimi K2.5", "0.786", "0.400", "0.550", "0.500"], ["CU", "Composer 2", "0.714", "0.200", "1.000", "0.446"], ["OC", "Opus 4.6", "0.786", "0.200", "0.800", "0.422"], ["CX", "GPT-5.2", "0.786", "0.200", "0.800", "0.422"]]'
+/>
+
+### Observations
+
+- **Opus 4.5 edges out Opus 4.6.** Claude Code with Opus 4.5 scored 0.774 in just over an hour, beating Opus 4.6 (0.745 in 1h 37m). The older model produced a more polished article with fewer but higher-quality citations.
+- **Six source types stress integration.** With location history, photos, messages, transactions, Shazam, and flights, agents must synthesize across more data types than the person fixture. Cross-referencing still hits 1.000 across the board, but reference scores are notably lower (0.133–0.467 vs 0.300–0.733 for person).
+- **OpenCode benefits from permission fix.** After correcting filesystem permission rules, OpenCode Opus 4.6 jumped from 0.000 to 0.652 and scored the highest editorial mark (0.900) of any agent on either fixture.
+- **Talk pages are weaker across the board.** The best trip talk page (CC Opus 4.5 at 0.643) trails the best person talk page (CX GPT-5.3 at 0.853). Reference scores are particularly low, suggesting agents don't structure editorial discussion as thoroughly for episode pages.
+
+</Tab>
+</Tabs>
 
 ## Protocol
 

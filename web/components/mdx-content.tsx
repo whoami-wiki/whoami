@@ -8,6 +8,7 @@ import { ScoreTable } from "@/components/score-table";
 import { ArchOverview } from "@/components/arch-overview";
 import { FixtureOverview } from "@/components/fixture-overview";
 import { Note } from "@/components/note";
+import { Tabs, Tab } from "@/components/tabs";
 
 function textContent(children: ReactNode): string {
   if (typeof children === "string") return children;
@@ -76,6 +77,8 @@ const mdxComponents = {
   ArchOverview,
   FixtureOverview,
   Note,
+  Tabs,
+  Tab,
   ThemedImage: ({
     light,
     dark,
