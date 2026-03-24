@@ -39,20 +39,19 @@ async function login(args: string[], globals: GlobalFlags): Promise<void> {
 
   // Interactive mode if any value is missing
   if (!server || !username || !password) {
-    const rl = createInterface({ input: process.stdin, output: process.stdout });
-    try {
-      if (!server) {
-        const ans = await rl.question('Wiki server [http://localhost:8080]: ');
-        server = ans.trim() || 'http://localhost:8080';
-      }
-      if (!username) {
+    if (!server) {
+      server = 'http://localhost:8080';
+    }
+    if (!username) {
+      const rl = createInterface({ input: process.stdin, output: process.stdout });
+      try {
         username = await rl.question('Username: ');
+      } finally {
+        rl.close();
       }
-      if (!password) {
-        password = await readPassword('Password: ');
-      }
-    } finally {
-      rl.close();
+    }
+    if (!password) {
+      password = await readPassword('Password: ');
     }
   }
 
