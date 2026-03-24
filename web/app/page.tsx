@@ -36,7 +36,7 @@ export default function Home() {
 
       <DesktopScene />
 
-      <div className="max-w-2xl w-full flex flex-col gap-8 py-18 px-6 border-b border-neutral-200">
+      <div className="max-w-2xl w-full flex flex-col gap-8 py-18 px-6 border-b border-neutral-200 dark:border-neutral-700">
         <div className="font-sans">
           Combine your favorite agent harness with the{" "}
           <span className="font-mono p-0.5 px-1 border border-neutral-300 dark:border-neutral-600 rounded-md">
