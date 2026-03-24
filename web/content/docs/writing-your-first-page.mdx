@@ -7,13 +7,13 @@ This tutorial walks you through creating your first encyclopedia page end-to-end
 
 ## Step 1 — Snapshot a data source
 
-Start by snapshotting a data source with the `wai snapshot` command. Any export will work — an Instagram archive, a photo folder, a WhatsApp backup. Pick whichever source you have handy.
+Start by pointing the agent at a data source. Any export will work — an Instagram archive, a photo folder, a WhatsApp backup. Pick whichever source you have handy.
 
-```bash
-wai snapshot ~/Downloads/instagram-export
+```
+Snapshot my Instagram export at ~/Downloads/instagram-export
 ```
 
-This hashes the files, copies them into the vault, and creates a Source page so agents can find the data.
+The agent snapshots the files into the vault and creates a Source page so it can reference the data later.
 
 ## Step 2 — Survey and plan
 
@@ -47,22 +47,19 @@ The agent will:
 3. Draft a Wikipedia-style page with an infobox, sections, and citations
 4. Create a Talk page noting what's missing and what events could become their own pages
 
-Open your wiki at `http://localhost:8080` to review the draft.
+Open the whoami wiki app to review the draft.
 
 ## Step 4 — Layer in a new source
 
-One source rarely tells the whole story. Snapshot a second source and ask the agent to integrate it:
-
-```bash
-wai snapshot ~/Downloads/whatsapp-export
-```
+One source rarely tells the whole story. Point the agent at a second source and ask it to integrate:
 
 ```
-Snapshot the WhatsApp export and create a source page for it.
-Then revise the person page — weave the new data into the
-existing article. Don't just append a "WhatsApp" section;
-integrate new facts into appropriate existing sections and update
-the infobox. Cross-reference facts that appear in both sources.
+Snapshot my WhatsApp export at ~/Downloads/whatsapp-export and
+create a source page for it. Then revise the person page — weave
+the new data into the existing article. Don't just append a
+"WhatsApp" section; integrate new facts into appropriate existing
+sections and update the infobox. Cross-reference facts that
+appear in both sources.
 ```
 
 The agent updates the page by confirming details that appeared in both sources, filling gaps the first source couldn't cover, and removing hedging where the new data resolves uncertainty.
