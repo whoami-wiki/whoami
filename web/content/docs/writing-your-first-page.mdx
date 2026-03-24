@@ -3,112 +3,88 @@ title: Writing Your First Page
 description: "Go from zero to a published wiki page in minutes"
 ---
 
-This tutorial walks you through creating your first encyclopedia page end-to-end using an incremental editorial workflow. We'll write a Person page — the most common page type — by surveying data, drafting, layering in new sources, and refining with your own memories.
+This tutorial walks you through creating your first encyclopedia page end-to-end. We'll write a Person page (the most common page type) by snapshotting data, drafting, layering in new sources, and refining with your own memories.
 
-## Step 1 — Snapshot a data source
+You don't need to spell out formatting rules, citation templates, or talk page conventions in your prompts. The [extension](/docs/installation#install-the-extension-for-your-agent-harness) handles all of that automatically.
 
-Start by pointing the agent at a data source. Any export will work — an Instagram archive, a photo folder, a WhatsApp backup. Pick whichever source you have handy.
+## Step 1: Snapshot a data source
+
+Start by pointing the agent at a data source. Any export will work: an Instagram archive, a photo folder, a WhatsApp backup.
 
 ```
 Snapshot my Instagram export at ~/Downloads/instagram-export
 ```
 
-The agent snapshots the files into the vault and creates a Source page so it can reference the data later.
+The agent snapshots the files into the vault and creates a Source page with querying instructions so it can reference the data later.
 
-## Step 2 — Survey and plan
+## Step 2: Survey and plan
 
-Before writing, ask the agent to survey what's actually in the snapshot. This step catches gaps early — encrypted files, missing exports, low-quality data — so you know what you're working with.
-
-```
-Survey the Instagram source I just snapshotted. Catalog the media
-files, transcribe any voice notes, and assess data quality. Note
-any gaps or limitations.
-```
-
-The agent will create an enriched Source page that goes beyond raw file counts — it includes platform limitations, key conversations, SQL recipes for querying the data, and a critical assessment of what the source can and cannot tell you.
-
-## Step 3 — Draft the page
-
-Now prompt the agent to write the page from the data it surveyed:
+Before writing, ask the agent to survey what's in the snapshot. This catches gaps early: encrypted files, missing exports, low-quality data.
 
 ```
-Write a Person page for Alex using only the Instagram data
-available so far. Include an infobox, lead paragraph, and
-organized sections with citations and embedded media.
-
-On the Talk page, note any episode candidates (events rich enough
-for their own pages) and gaps where additional sources would help.
+Survey the Instagram source I just snapshotted.
 ```
 
-The agent will:
+The agent enriches the Source page with key conversations, data quality notes, SQL recipes, and an assessment of what the source can and cannot tell you.
 
-1. Extract dates, locations, and people from the data
-2. Cross-reference details to build a timeline
-3. Draft a Wikipedia-style page with an infobox, sections, and citations
-4. Create a Talk page noting what's missing and what events could become their own pages
+## Step 3: Draft the page
 
-Open the whoami wiki app to review the draft.
+```
+Write a Person page for Alex from the Instagram data.
+```
 
-## Step 4 — Layer in a new source
+The agent extracts dates, locations, and people from the data, cross-references details to build a timeline, and drafts the page with an infobox, sections, citations, and embedded media. It also creates a Talk page noting gaps and episode candidates.
+
+Open the whoami app to view the page.
+
+## Step 4: Layer in a new source
 
 One source rarely tells the whole story. Point the agent at a second source and ask it to integrate:
 
 ```
-Snapshot my WhatsApp export at ~/Downloads/whatsapp-export and
-create a source page for it. Then revise the person page — weave
-the new data into the existing article. Don't just append a
-"WhatsApp" section; integrate new facts into appropriate existing
-sections and update the infobox. Cross-reference facts that
-appear in both sources.
+Snapshot ~/Downloads/whatsapp-export and revise the Alex page
+with the new data.
 ```
 
-The agent updates the page by confirming details that appeared in both sources, filling gaps the first source couldn't cover, and removing hedging where the new data resolves uncertainty.
+The agent confirms details that appear in both sources, fills gaps, and removes hedging where the new data resolves uncertainty. New facts get woven into existing sections rather than appended as a separate block.
 
-## Step 5 — Extract episodes
+## Step 5: Extract episodes
 
-As the agent researches, it identifies events rich enough for their own pages — a first meeting, a trip, a milestone. Ask it to spin those out:
+As the agent researches, it identifies events rich enough for their own pages: a first meeting, a trip, a milestone.
 
 ```
-Create episode pages for the richest events you found during
-research. Link each episode from the person page with a
-one-sentence summary.
+Create episode pages for the richest events on the Alex page.
 ```
 
-Each episode page gets its own infobox, narrative, citations, and embedded media.
+Each episode page gets its own narrative, citations, and embedded media, linked from the person page with a one-sentence summary.
 
-## Step 6 — Add your own memories
+## Step 6: Add your own memories
 
 Data sources capture what was recorded, but you know the story. Share anecdotes, corrections, and context the data can't provide:
 
 ```
-Here are some memories about Alex:
-
-- We got lost trying to find the restaurant and ended up walking
-  through a park. Alex spotted a stray cat and spent ten minutes
-  trying to befriend it.
-- At the concert, someone behind us kept singing off-key and Alex
-  couldn't stop laughing. We had to move seats twice.
-- The messages say we met on a Thursday but it was actually a
-  Friday — I had just finished my last class of the week.
+Some memories about Alex:
+- We got lost finding the restaurant and walked through a park
+  where Alex spent ten minutes befriending a stray cat.
+- At the concert someone behind us sang off-key and Alex couldn't
+  stop laughing. We moved seats twice.
+- We actually met on a Friday, not Thursday. I'd just finished
+  my last class of the week.
 ```
 
-The agent integrates your testimony into the page, citing it with `{{Cite testimony}}` templates. Where your account conflicts with the digital record, both versions are noted on the Talk page rather than silently overwriting either one.
+The agent integrates your testimony into the page. Where your account conflicts with the digital record, both versions are noted on the Talk page.
 
-## Step 7 — Verify and review
-
-Finally, ask the agent to audit the finished page:
+## Step 7: Verify and review
 
 ```
-Do a final editorial review. Audit the page for tone, balance,
-and gaps. Make sure every factual claim has a citation and produce
-a citation manifest pairing each claim with its source evidence.
+Do a final editorial review of the Alex page.
 ```
 
-The agent checks that the narrative flows coherently, no section is underdeveloped, and every fact traces back to a source. The citation manifest gives you a complete audit trail.
+The agent audits tone, balance, and gaps, ensures every factual claim has a citation, and produces a citation manifest pairing each claim with its source evidence.
 
 ## Next steps
 
-- Add more data sources to enrich the page — see [Data Sources](/docs/data-sources)
+- Add more data sources to enrich the page. See [Data Sources](/docs/data-sources)
 - Learn about the different [Page Types](/docs/page-types) you can create
 - Understand how citations work in the [Citation System](/docs/citation-system)
 - Explore the [CLI reference](/docs/cli) for all available commands
