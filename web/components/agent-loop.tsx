@@ -70,7 +70,7 @@ const lines: Line[] = [
 
   {
     type: "command",
-    text: '$ exiftool -Model -json ~/Photos/Goa/*.HEIC | jq \'group_by(.Model) | map({model: .[0].Model, count: length}) | sort_by(-.count)\'',
+    text: "$ exiftool -Model -json ~/Photos/Goa/*.HEIC | jq 'group_by(.Model) | map({model: .[0].Model, count: length}) | sort_by(-.count)'",
   },
   { type: "output", text: "" },
   { type: "output", text: '  {"model": "iPhone 11", "count": 612}' },
@@ -113,7 +113,7 @@ const lines: Line[] = [
   // ── Phase 4: Transaction forensics ────────────────────────────
   {
     type: "command",
-    text: "$ wai snapshot ~/exports/splitwise-dec-2019.csv --title \"Goa Expenses\"",
+    text: '$ wai snapshot ~/exports/splitwise-dec-2019.csv --title "Goa Expenses"',
   },
   { type: "output", text: "" },
   { type: "output", text: "  Files: 1" },
@@ -124,14 +124,14 @@ const lines: Line[] = [
 
   {
     type: "command",
-    text: '$ cat ~/exports/splitwise-dec-2019.csv | csvq "SELECT description, amount, paid_by FROM expenses WHERE date BETWEEN \'2019-12-21\' AND \'2019-12-27\' ORDER BY date"',
+    text: "$ cat ~/exports/splitwise-dec-2019.csv | csvq \"SELECT description, amount, paid_by FROM expenses WHERE date BETWEEN '2019-12-21' AND '2019-12-27' ORDER BY date\"",
   },
   { type: "output", text: "" },
-  { type: "output", text: "  Villa booking (Assagao)     ₹42,000  Vik" },
-  { type: "output", text: "  Gunpowder restaurant         ₹4,200  Priya" },
-  { type: "output", text: "  Mapusa market dosa cart         ₹180  Jay" },
-  { type: "output", text: "  Anjuna beach parking            ₹200  Sid" },
-  { type: "output", text: "  Basilica of Bom Jesus taxi      ₹650  Rohit" },
+  { type: "output", text: "  Villa booking (Assagao)      ₹42,000     Vik" },
+  { type: "output", text: "  Gunpowder restaurant          ₹4,200     Priya" },
+  { type: "output", text: "  Mapusa market dosa cart         ₹180     Jay" },
+  { type: "output", text: "  Anjuna beach parking            ₹200     Sid" },
+  { type: "output", text: "  Basilica of Bom Jesus taxi      ₹650     Rohit" },
   { type: "output", text: "  ..." },
   { type: "output", text: "  (23 transactions total)" },
   { type: "output", text: "" },
@@ -145,7 +145,7 @@ const lines: Line[] = [
   // ── Phase 5: Shazam / music data ──────────────────────────────
   {
     type: "command",
-    text: "$ wai snapshot ~/exports/shazam-history/ --title \"Shazam Dec 2019\"",
+    text: '$ wai snapshot ~/exports/shazam-history/ --title "Shazam Dec 2019"',
   },
   { type: "output", text: "" },
   { type: "output", text: "  Files: 12" },
@@ -181,7 +181,7 @@ const lines: Line[] = [
   // ── Phase 6: Location history ─────────────────────────────────
   {
     type: "command",
-    text: '$ jq \'[.[] | select(.startTime | startswith("2019-12-2")) | {date: .startTime[:10], place: .name, lat: .lat, lon: .lon}] | group_by(.date) | map({date: .[0].date, places: map(.place)})\' ~/exports/location-history.json',
+    text: "$ jq '[.[] | select(.startTime | startswith(\"2019-12-2\")) | {date: .startTime[:10], place: .name, lat: .lat, lon: .lon}] | group_by(.date) | map({date: .[0].date, places: map(.place)})' ~/exports/location-history.json",
   },
   { type: "output", text: "" },
   {
@@ -257,7 +257,7 @@ const lines: Line[] = [
   { type: "output", text: "" },
   {
     type: "output",
-    text: '  ...borrowed by Jay for the Mumbai Dance Competition trip, and last fired in anger at The Goa Trip...',
+    text: "  ...borrowed by Jay for the Mumbai Dance Competition trip, and last fired in anger at The Goa Trip...",
   },
   { type: "output", text: "" },
 
@@ -353,7 +353,9 @@ const lines: Line[] = [
 
   {
     type: "command",
-    text: '$ wai read "The Goa Trip" | grep "\\{\\{Cite" | sed \'s/.*type=//;s/|.*//' + "' | sort | uniq -c | sort -rn",
+    text:
+      '$ wai read "The Goa Trip" | grep "\\{\\{Cite" | sed \'s/.*type=//;s/|.*//' +
+      "' | sort | uniq -c | sort -rn",
   },
   { type: "output", text: "" },
   { type: "output", text: "  8 photo" },
@@ -418,7 +420,7 @@ const lines: Line[] = [
   },
   {
     type: "output",
-    text: "  person who drove the entire Goa trip, who texts \"hills",
+    text: '  person who drove the entire Goa trip, who texts "hills',
   },
   {
     type: "output",
@@ -531,7 +533,7 @@ const lines: Line[] = [
 
   {
     type: "thinking",
-    text: "₹350 at the flea market on Dec 24 — same day as the Dosa Incident. The Hot Wheels spreadsheet entry says \"technically a Goa Trip souvenir.\" I can cite the Splitwise record as provenance.",
+    text: '₹350 at the flea market on Dec 24 — same day as the Dosa Incident. The Hot Wheels spreadsheet entry says "technically a Goa Trip souvenir." I can cite the Splitwise record as provenance.',
   },
   { type: "output", text: "" },
 ];
