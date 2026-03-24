@@ -1,0 +1,25 @@
+<div style="max-width: 42em;">
+
+== Hello, welcome to your wiki ==
+
+Nobody's life fits in a single page. That's why you have a whole wiki.
+
+Your job is simple: point the agent at your data (old chats, photos, notes, whatever you've got) and it'll turn it into wiki pages. You don't need to write or format anything yourself. The agent handles the editorial work. You just decide what's worth remembering.
+
+'''[https://whoami.wiki/docs/writing-your-first-page Writing your first page]''' walks you through it.
+
+== A few things worth knowing ==
+
+* '''You don't have to write anything.''' Give the agent a chat export, a photo album, a pile of notes. It'll create pages, link them together, and fill in the details. You can always edit later, but you don't have to.
+* '''Everything connects.''' The agent links pages together automatically. Over time, your wiki becomes a web: people, places, inside jokes, trips, all cross-referenced.
+* '''Red links are invitations, not errors.''' If a page mentions <code><nowiki>[[The Incident at Lake Tahoe]]</nowiki></code> and it turns red, that just means the page doesn't exist yet. Click it when you're ready, or feed the agent more context and let it fill in the gaps.
+* '''Talk pages are for the margins.''' Every page has a "Talk" tab. Good for open questions, half-remembered details, or notes to your future self.
+* '''Upload photos, audio, video.''' Click "Upload file" in the sidebar. Your wiki should sound and look like your life, not just read like it.
+* '''Hit / to search.''' It's fast. Use it often.
+* '''Check "Recent changes" in the sidebar''' to see what's been added or edited. It's surprisingly satisfying to watch your wiki grow.
+
+== Need help? ==
+
+If something breaks or feels wrong, open an issue at [https://github.com/anthropics/whoami-wiki/issues github.com/anthropics/whoami-wiki/issues]. We read every one.
+
+</div>

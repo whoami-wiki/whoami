@@ -173,6 +173,15 @@ export async function runSetup(
     "Initial styles import",
   );
 
+  // Create Main Page
+  await createPage(
+    apiUrl,
+    csrfToken,
+    "Main Page",
+    readFileSync(join(templatesDir, "Main_Page.wiki"), "utf-8"),
+    "Initial main page",
+  );
+
   send("templates", "done");
 
   // 4. Create user's name page + [[Me]] redirect
