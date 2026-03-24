@@ -57,13 +57,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "whoami.wiki",
     description: "your personal encyclopedia, written by agents",
-    images: [{ url: "/og.webp", width: 1208, height: 683 }],
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "whoami.wiki",
     description: "your personal encyclopedia, written by agents",
-    images: ["/og.webp"],
+    images: ["/og.png"],
   },
 };
 
