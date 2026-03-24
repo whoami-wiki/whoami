@@ -444,6 +444,7 @@ function configureWaiCredentials(wiki: WikiInstance): void {
     server: wiki.url,
     username: wiki.username,
     password: wiki.password,
+    role: 'owner',
   }, null, 2);
   writeFileSync(credPath, credentials + '\n', { mode: 0o600 });
 }
