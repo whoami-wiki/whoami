@@ -9,7 +9,14 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - runner: macos-latest
+            arch: arm64
+          - runner: macos-13
+            arch: x64
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
 
@@ -65,18 +72,37 @@ jobs:
         run: |
           sudo launchctl limit maxfiles 65536 200000
           ulimit -n 65536
-          pnpm dist -- --arm64 --x64
+          pnpm dist -- --${{ matrix.arch }}
         working-directory: desktop
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
 
-      - name: Publish release
-        run: gh release create "$GITHUB_REF_NAME" desktop/dist-electron/*.{dmg,zip} --title "$GITHUB_REF_NAME" --notes-file desktop/RELEASE_NOTES.md
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.arch }}
+          path: |
+            desktop/dist-electron/*.dmg
+            desktop/dist-electron/*.zip
 
       - name: Clean up keychain
         if: always()
         run: security delete-keychain $RUNNER_TEMP/signing.keychain-db
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publish release
+        run: gh release create "$GITHUB_REF_NAME" artifacts/desktop/dist-electron/*.{dmg,zip} --title "$GITHUB_REF_NAME" --notes-file desktop/RELEASE_NOTES.md --latest=false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

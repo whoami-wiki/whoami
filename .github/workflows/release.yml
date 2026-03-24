@@ -48,3 +48,4 @@ jobs:
             wai-v*.tar.gz
             wai-v*.tar.gz.sha256
           body_path: cli/RELEASE_NOTES.md
+          make_latest: "false"
