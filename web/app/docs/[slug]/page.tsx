@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDoc, getAllDocs } from "@/lib/docs";
+import { getSidebarConfig } from "@/lib/docs-sidebar-config";
+import { DocsSidebarServer } from "@/components/docs-sidebar-server";
 import { MDXContent } from "@/components/mdx-content";
 import { MarkdownBlocks } from "@/components/markdown-blocks";
 import { CopyCodeBlock } from "@/components/copy-code-block";
@@ -82,13 +84,22 @@ export default async function DocPage({ params }: Props) {
   const doc = getDoc(slug);
   if (!doc) notFound();
 
+  const sections = getSidebarConfig();
+
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="font-sans text-2xl font-medium">{doc.title}</h1>
-      <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
-      <article className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert prose-strong:font-normal prose-p:leading-6.5 prose-img:rounded-xl prose-li:m-0 prose-p:m-0 prose-ul:mt-0 prose-code:before:content-none prose-code:after:content-none flex flex-col gap-4 prose-headings:mb-0 prose-ol:mt-0 prose-pre:m-0 prose-th:font-normal prose-blockquote:not-italic prose-blockquote:font-normal prose-blockquote:before:content-none">
-        <MDXContent source={doc.content} components={docsComponents} />
-      </article>
-    </div>
+    <>
+      <div className="hidden md:block self-start sticky top-18">
+        <DocsSidebarServer sections={sections} activeSlug={slug} />
+      </div>
+      <main className="min-w-0 flex-1">
+        <div className="flex flex-col gap-6">
+          <h1 className="font-sans text-2xl font-medium">{doc.title}</h1>
+          <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
+          <article className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert prose-strong:font-normal prose-p:leading-6.5 prose-img:rounded-xl prose-li:m-0 prose-p:m-0 prose-ul:mt-0 prose-code:before:content-none prose-code:after:content-none flex flex-col gap-4 prose-headings:mb-0 prose-ol:mt-0 prose-pre:m-0 prose-th:font-normal prose-blockquote:not-italic prose-blockquote:font-normal prose-blockquote:before:content-none">
+            <MDXContent source={doc.content} components={docsComponents} />
+          </article>
+        </div>
+      </main>
+    </>
   );
 }
