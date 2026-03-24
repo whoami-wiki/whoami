@@ -239,14 +239,6 @@ async function launchWiki(): Promise<void> {
   wikiView.webContents.on("did-navigate", sendNavigationState);
   wikiView.webContents.on("did-navigate-in-page", sendNavigationState);
 
-  // Forward find-in-page results to the navbar
-  wikiView.webContents.on("found-in-page", (_event, result) => {
-    mainWindow?.webContents.send("find:result", {
-      activeMatchOrdinal: result.activeMatchOrdinal,
-      matches: result.matches,
-    });
-  });
-
   // Sync navbar dark mode with the wiki's theme preference.
   // Vector 2022 sets skin-theme-clientpref-{night,os} classes on <html>.
   // We map these to nativeTheme.themeSource so prefers-color-scheme
@@ -292,19 +284,10 @@ async function launchWiki(): Promise<void> {
     }
   };
   const handleGetVersion = () => app.getVersion();
-  const onFindQuery = (_event: Electron.IpcMainEvent, text: string, options?: { forward?: boolean; findNext?: boolean }) => {
-    if (!wikiView || !text) return;
-    wikiView.webContents.findInPage(text, options);
-  };
-  const onFindClose = () => {
-    wikiView?.webContents.stopFindInPage("clearSelection");
-  };
   ipcMain.on("navbar:go-back", onGoBack);
   ipcMain.on("navbar:go-forward", onGoForward);
   ipcMain.on("settings:open", onOpenSettings);
   ipcMain.on("settings:close", onCloseSettings);
-  ipcMain.on("find:query", onFindQuery);
-  ipcMain.on("find:close", onFindClose);
   ipcMain.handle("app:get-version", handleGetVersion);
 
   // Keyboard shortcuts for navigation (on both navbar and wiki webContents)
@@ -316,8 +299,6 @@ async function launchWiki(): Promise<void> {
       wikiView.webContents.goForward();
     } else if (input.meta && input.key === "r") {
       wikiView.webContents.reload();
-    } else if (input.meta && input.key === "f") {
-      mainWindow?.webContents.send("find:show");
     }
   };
   mainWindow.webContents.on("before-input-event", handleKeyboardNav);
@@ -336,8 +317,6 @@ async function launchWiki(): Promise<void> {
     ipcMain.removeListener("navbar:go-forward", onGoForward);
     ipcMain.removeListener("settings:open", onOpenSettings);
     ipcMain.removeListener("settings:close", onCloseSettings);
-    ipcMain.removeListener("find:query", onFindQuery);
-    ipcMain.removeListener("find:close", onFindClose);
     ipcMain.removeHandler("app:get-version");
     mainWindow = null;
     wikiView = null;
