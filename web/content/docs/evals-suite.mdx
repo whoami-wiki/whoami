@@ -1,0 +1,59 @@
+---
+title: Evals Suite
+description: "Protocol, graders, and scoring methodology for agent evals"
+---
+
+Each eval is fully automated: the agent receives a task, source directories, and a fresh MediaWiki instance, then builds pages across six checkpoints. Output is graded against rubrics and a human-written reference. Accuracy scores are **calibrated**: false penalties are removed where the grader penalized correct facts due to misnumbered citation targets, Talk page editorial notes misclassified as unsupported claims, or partial evidence matches where the core fact is confirmed. Composites are recomputed from calibrated accuracy.
+
+For results across harness and model combinations, see [Choosing a Harness and Model](/docs/choosing-harness-and-model).
+
+## Protocol
+
+Each eval uses a six-checkpoint editorial workflow that mirrors how a human editor would build a wiki page from raw data.
+
+1. **Survey**: Snapshot a source directory and create a `Source:` page. Catalog media, transcribe voice notes, assess data quality and gaps. Plan the editorial approach.
+2. **Draft**: Write the person or episode page using only the first source. Include an infobox, lead paragraph, sections with prose and citations. Note episode candidates and gaps on the Talk page.
+3. **New source**: Snapshot a second source directory and create its source page. Revise the existing article by weaving new data into the right sections rather than appending. Cross-reference facts across sources. Update the Talk page.
+4. **Episodes**: Create episode pages for rich narratives: first meetings, trips, conflicts, milestones. Link each from the main page with a one-sentence summary.
+5. **Owner input**: Integrate first-person testimony from the wiki owner. Cite using `{{Cite testimony}}`. Where testimony conflicts with digital evidence, note the discrepancy on the Talk page.
+6. **Verify**: Final editorial review. Audit tone, balance, and gaps. Produce a citation manifest pairing every factual claim with its source evidence.
+
+A fresh MediaWiki instance is provisioned per run with templates and no content pages. The agent's conversation is resumed between checkpoints so it can build on prior work.
+
+## Graders
+
+Nine graders organized into three weighted tiers.
+
+### Quality (50%)
+
+**Reference** compares output against a human-written reference page. Measures section heading overlap, infobox field coverage, citation hash density, and category overlap. Each dimension is weighted and combined into a single score.
+
+**Accuracy** resolves the citation manifest produced at the verify checkpoint. For each claim, it checks whether the cited source evidence actually supports it. Claims are classified as supported, unsupported, or fabricated. Fabrications carry a 2x penalty. Owner testimony cited with `{{Cite testimony}}` is classified as "attributed" rather than unsupported.
+
+### Content (30%)
+
+**Completeness** checks structural elements: lead paragraph, infobox, body sections, `References` and `Bibliography` sections, categories, prose word count, subsection count, inline citations, blockquotes, and media embeds. Thresholds scale with checkpoint so earlier checkpoints have lower requirements.
+
+**Editorial** is an LLM-graded evaluation of Wikipedia editorial conventions: neutral third-person tone, past tense for biographical events, section organization, prose quality, wikitext syntax, and wikilink usage. Uses multi-pass grading with median scoring.
+
+**Integration** measures revision quality when a page is updated across checkpoints. Checks whether new facts land in the right existing sections, whether the page reads as a unified article after revision, and whether conflicting data is noted on the Talk page. Only scored when the page content has changed since the previous checkpoint.
+
+**Source criticism** evaluates whether source pages include critical assessment beyond raw statistics: platform limitation notes, gap identification, data quality assessment, querying instructions, and content breakdowns. LLM-graded.
+
+### Mechanics (20%)
+
+**Citations** validates citation templates (`{{Cite message}}`, `{{Cite vault}}`, `{{Cite testimony}}`, etc.) for required fields. Each template type has specific requirements: `snapshot` and `date` for digital sources, `speaker` and `date` for testimony. Score is valid citations over total.
+
+**Cross-referencing** measures whether the page combines information from multiple source types. Counts facts that synthesize data across sources versus possible cross-references. Only scored when two or more source types are present.
+
+**Tool usage** checks harness logs for expected CLI calls: `wai snapshot`, `wai read`, `wai write`/`create`/`edit`. Binary per tool.
+
+### Composite
+
+```
+page_composite = 0.5 * quality + 0.3 * content + 0.2 * mechanics
+```
+
+Within each tier, weight is split equally among the graders that produced a score. If an entire tier is absent, its weight redistributes proportionally to the tiers that are present.
+
+The overall run composite splits 20% source pages (averaged) and 80% content pages. Content pages are weighted: person 85% + talk 15% when no episodes exist, or person 50% + episodes 40% + talk 10% when they do.

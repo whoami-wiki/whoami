@@ -393,9 +393,61 @@ function GitHubContent() {
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 
-const labels = ["Person", "Trip", "Project"];
+const scenes = {
+  person: (
+    <>
+      <AppWindow className="left-[4%] top-[16%] w-[36%] h-[52%] z-10">
+        <InstagramContent />
+      </AppWindow>
+      <AppWindow className="left-[24%] top-[12%] w-[42%] h-[56%] z-20">
+        <PhotosContent />
+      </AppWindow>
+      <AppWindow className="left-[52%] top-[10%] w-[26%] h-[62%] z-30">
+        <WhatsAppContent />
+      </AppWindow>
+      <AppWindow className="left-[68%] top-[16%] w-[24%] h-[56%] z-40">
+        <MessagesContent />
+      </AppWindow>
+      <div className="absolute left-[6%] top-[52%] w-[30%] z-50">
+        <ClaudeCodeMini />
+      </div>
+    </>
+  ),
+  trip: (
+    <>
+      <AppWindow className="left-[4%] top-[12%] w-[46%] h-[60%] z-10">
+        <PhotosContent />
+      </AppWindow>
+      <AppWindow className="left-[34%] top-[16%] w-[38%] h-[56%] z-20">
+        <MapsContent />
+      </AppWindow>
+      <AppWindow className="left-[62%] top-[10%] w-[30%] h-[58%] z-30">
+        <TransactionsContent />
+      </AppWindow>
+      <div className="absolute left-[6%] top-[52%] w-[30%] z-40">
+        <ClaudeCodeMini />
+      </div>
+    </>
+  ),
+  project: (
+    <>
+      <AppWindow className="left-[6%] top-[12%] w-[44%] h-[62%] z-10">
+        <SlackContent />
+      </AppWindow>
+      <AppWindow className="left-[42%] top-[10%] w-[42%] h-[58%] z-20">
+        <GitHubContent />
+      </AppWindow>
+      <div className="absolute left-[10%] top-[50%] w-[32%] z-30">
+        <ClaudeCodeMini />
+      </div>
+    </>
+  ),
+} as const;
 
-export function FixtureOverview() {
+const labels = ["Person", "Trip", "Project"] as const;
+type Fixture = "person" | "trip" | "project";
+
+export function FixtureOverview({ fixture }: { fixture?: Fixture }) {
   const [active, setActive] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
@@ -404,9 +456,10 @@ export function FixtureOverview() {
   }, []);
 
   useEffect(() => {
+    if (fixture) return;
     timerRef.current = setInterval(advance, 5000);
     return () => clearInterval(timerRef.current);
-  }, [advance]);
+  }, [advance, fixture]);
 
   const goTo = useCallback(
     (i: number) => {
@@ -417,6 +470,23 @@ export function FixtureOverview() {
     [advance],
   );
 
+  if (fixture) {
+    return (
+      <div className="not-prose">
+        <div
+          className="relative w-full rounded-xl aspect-[16/10] bg-cover bg-center overflow-hidden"
+          style={{ backgroundImage: "url('/evals-wallpaper.jpg')" }}
+        >
+          <MenuBar />
+          <div className="absolute inset-0">{scenes[fixture]}</div>
+          <Dock />
+        </div>
+      </div>
+    );
+  }
+
+  const order: Fixture[] = ["person", "trip", "project"];
+
   return (
     <div className="not-prose flex flex-col items-center gap-3">
       <div
@@ -425,59 +495,14 @@ export function FixtureOverview() {
       >
         <MenuBar />
 
-        {/* Person */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-700 ${active === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        >
-          <AppWindow className="left-[4%] top-[16%] w-[36%] h-[52%] z-10">
-            <InstagramContent />
-          </AppWindow>
-          <AppWindow className="left-[24%] top-[12%] w-[42%] h-[56%] z-20">
-            <PhotosContent />
-          </AppWindow>
-          <AppWindow className="left-[52%] top-[10%] w-[26%] h-[62%] z-30">
-            <WhatsAppContent />
-          </AppWindow>
-          <AppWindow className="left-[68%] top-[16%] w-[24%] h-[56%] z-40">
-            <MessagesContent />
-          </AppWindow>
-          <div className="absolute left-[6%] top-[52%] w-[30%] z-50">
-            <ClaudeCodeMini />
+        {order.map((key, i) => (
+          <div
+            key={key}
+            className={`absolute inset-0 transition-opacity duration-700 ${active === i ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+          >
+            {scenes[key]}
           </div>
-        </div>
-
-        {/* Trip */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-700 ${active === 1 ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        >
-          <AppWindow className="left-[4%] top-[12%] w-[46%] h-[60%] z-10">
-            <PhotosContent />
-          </AppWindow>
-          <AppWindow className="left-[34%] top-[16%] w-[38%] h-[56%] z-20">
-            <MapsContent />
-          </AppWindow>
-          <AppWindow className="left-[62%] top-[10%] w-[30%] h-[58%] z-30">
-            <TransactionsContent />
-          </AppWindow>
-          <div className="absolute left-[6%] top-[52%] w-[30%] z-40">
-            <ClaudeCodeMini />
-          </div>
-        </div>
-
-        {/* Project */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-700 ${active === 2 ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        >
-          <AppWindow className="left-[6%] top-[12%] w-[44%] h-[62%] z-10">
-            <SlackContent />
-          </AppWindow>
-          <AppWindow className="left-[42%] top-[10%] w-[42%] h-[58%] z-20">
-            <GitHubContent />
-          </AppWindow>
-          <div className="absolute left-[10%] top-[50%] w-[32%] z-30">
-            <ClaudeCodeMini />
-          </div>
-        </div>
+        ))}
 
         <Dock />
       </div>
