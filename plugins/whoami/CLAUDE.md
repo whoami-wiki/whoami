@@ -26,7 +26,7 @@ Structure of snapshot.json:
 {
   "files": [
     {
-      "path": "18455129814@s.whatsapp.net/0/0/00b35087-9f6e-4b37-8fd3-74caeece3ee7.jpg",
+      "path": "15551234567@s.whatsapp.net/0/0/00b35087-9f6e-4b37-8fd3-74caeece3ee7.jpg",
       "hash": "9b980e25709b348676c2f32b261135b141568d1c45e7dc5a9fd78e17679ea0da"
     },
     ...
