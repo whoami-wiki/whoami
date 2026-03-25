@@ -43,13 +43,15 @@ if [[ "$(uname)" == "Linux" ]]; then
   PLATFORM="linux"
 fi
 
-# Cross-compilation: override CFLAGS/LDFLAGS directly since the macosx
-# make target overrides MYCFLAGS, losing the -target flag.
+# Cross-compilation: build in src/ directly with -target in CC to ensure
+# both compilation and linking use the correct architecture. The macosx
+# make target uses nested makes that don't propagate LDFLAGS reliably.
 case "$TARGET_ARCH" in
   x64|x86_64)
-    make "$PLATFORM" \
-      CFLAGS="-O2 -Wall -DLUA_USE_MACOSX -target x86_64-apple-darwin -mmacosx-version-min=12.0" \
-      LDFLAGS="-target x86_64-apple-darwin -mmacosx-version-min=12.0"
+    make -C src all \
+      CC="cc -target x86_64-apple-darwin" \
+      MYCFLAGS="-DLUA_USE_MACOSX -mmacosx-version-min=12.0" \
+      MYLDFLAGS="-mmacosx-version-min=12.0"
     ;;
   *)
     make "$PLATFORM" MYCFLAGS="-mmacosx-version-min=12.0"
