@@ -173,8 +173,8 @@ export async function runSetup(
     "Initial styles import",
   );
 
-  // Create Main Page
-  await createPage(
+  // Overwrite the stock Main Page created by the install script
+  await editPage(
     apiUrl,
     csrfToken,
     "Main Page",
@@ -593,6 +593,26 @@ function apiPost(apiUrl: string, params: Record<string, string>): Promise<any> {
     request.write(body);
     request.end();
   });
+}
+
+async function editPage(
+  apiUrl: string,
+  token: string,
+  title: string,
+  content: string,
+  summary: string,
+): Promise<void> {
+  const result = await apiPost(apiUrl, {
+    action: "edit",
+    title,
+    text: content,
+    summary,
+    token,
+    format: "json",
+  });
+  if (result?.error) {
+    console.error(`[setup] Failed to edit ${title}:`, result.error);
+  }
 }
 
 async function createPage(
