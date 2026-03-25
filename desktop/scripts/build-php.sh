@@ -14,9 +14,11 @@ ROOT="$SCRIPT_DIR/.."
 OUT="$ROOT/resources/php"
 
 STATIC=false
+TARGET_ARCH=""
 for arg in "$@"; do
   case "$arg" in
     --static) STATIC=true ;;
+    --arch=*) TARGET_ARCH="${arg#--arch=}" ;;
   esac
 done
 
@@ -40,26 +42,41 @@ if [ "$STATIC" = true ]; then
   # MediaWiki extensions + extensions that are default-on in normal PHP but
   # must be explicitly listed for static builds (filter, openssl, ctype, etc.)
   EXTENSIONS="sqlite3,pdo_sqlite,mbstring,xml,dom,simplexml,xmlwriter,xmlreader,gd,intl,curl,fileinfo,phar,filter,openssl,ctype,iconv,tokenizer,session,zlib"
-  ARCH="$(uname -m)"
+  HOST_ARCH="$(uname -m)"
 
-  # Map uname arch to static-php-cli naming
-  case "$ARCH" in
-    arm64) SPC_ARCH="aarch64" ;;
-    *)     SPC_ARCH="$ARCH" ;;
+  # Map host arch to static-php-cli naming (for downloading spc binary)
+  case "$HOST_ARCH" in
+    arm64) SPC_HOST_ARCH="aarch64" ;;
+    *)     SPC_HOST_ARCH="$HOST_ARCH" ;;
   esac
 
-  echo "==> Building static PHP for macOS ($ARCH) with extensions: $EXTENSIONS"
+  # Resolve target architecture
+  if [ -z "$TARGET_ARCH" ]; then
+    TARGET_ARCH="$HOST_ARCH"
+  fi
+  case "$TARGET_ARCH" in
+    x64|x86_64) SPC_TARGET_ARCH="x86_64" ;;
+    arm64)      SPC_TARGET_ARCH="aarch64" ;;
+    *)          SPC_TARGET_ARCH="$TARGET_ARCH" ;;
+  esac
+
+  CROSS_ARGS=""
+  if [ "$SPC_HOST_ARCH" != "$SPC_TARGET_ARCH" ]; then
+    CROSS_ARGS="--arch=$SPC_TARGET_ARCH"
+  fi
+
+  echo "==> Building static PHP for macOS ($SPC_TARGET_ARCH) with extensions: $EXTENSIONS"
 
   BUILD_DIR="$ROOT/.build/php-static"
   mkdir -p "$BUILD_DIR"
 
-  # Download spc (static-php-cli) binary
+  # Download spc (static-php-cli) binary for host architecture
   SPC="$BUILD_DIR/spc"
   if [ ! -f "$SPC" ]; then
-    TARBALL="$BUILD_DIR/spc-macos-$SPC_ARCH.tar.gz"
+    TARBALL="$BUILD_DIR/spc-macos-$SPC_HOST_ARCH.tar.gz"
     echo "==> Downloading static-php-cli..."
     curl -fSL -o "$TARBALL" \
-      "https://github.com/crazywhalecc/static-php-cli/releases/latest/download/spc-macos-$SPC_ARCH.tar.gz"
+      "https://github.com/crazywhalecc/static-php-cli/releases/latest/download/spc-macos-$SPC_HOST_ARCH.tar.gz"
     tar -xzf "$TARBALL" -C "$BUILD_DIR"
     chmod +x "$SPC"
     rm "$TARBALL"
@@ -71,18 +88,18 @@ if [ "$STATIC" = true ]; then
 
   # Download PHP sources and extension dependencies
   echo "==> Downloading PHP 8.3 sources..."
-  "$SPC" download --with-php=8.3 --for-extensions="$EXTENSIONS" --prefer-pre-built
+  "$SPC" download --with-php=8.3 --for-extensions="$EXTENSIONS" --prefer-pre-built $CROSS_ARGS
 
   # Build static PHP CLI
   echo "==> Compiling static PHP CLI..."
-  "$SPC" build "$EXTENSIONS" --build-cli
+  "$SPC" build "$EXTENSIONS" --build-cli $CROSS_ARGS
 
   # Copy the resulting binary
   cp buildroot/bin/php "$OUT/bin/php"
   chmod +x "$OUT/bin/php"
 
   echo "==> Static PHP ready at $OUT/bin/php"
-  "$OUT/bin/php" -v
+  file "$OUT/bin/php"
   exit 0
 fi
 

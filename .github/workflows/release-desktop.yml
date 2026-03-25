@@ -13,9 +13,7 @@ jobs:
       matrix:
         include:
           - arch: arm64
-            arch_prefix: ""
           - arch: x64
-            arch_prefix: "arch -x86_64"
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +31,7 @@ jobs:
         working-directory: desktop
 
       - name: Build PHP
-        run: ${{ matrix.arch_prefix }} bash scripts/build-php.sh --static
+        run: bash scripts/build-php.sh --static --arch=${{ matrix.arch }}
         working-directory: desktop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,11 +41,11 @@ jobs:
         working-directory: desktop
 
       - name: Bundle Lua
-        run: ${{ matrix.arch_prefix }} bash scripts/bundle-lua.sh
+        run: bash scripts/bundle-lua.sh --arch=${{ matrix.arch }}
         working-directory: desktop
 
       - name: Bundle ffmpeg
-        run: ${{ matrix.arch_prefix }} bash scripts/bundle-ffmpeg.sh --static
+        run: bash scripts/bundle-ffmpeg.sh --static
         working-directory: desktop
 
       - name: Import signing certificate
