@@ -88,7 +88,7 @@ if [ "$STATIC" = true ]; then
 
   # Download PHP sources and extension dependencies
   echo "==> Downloading PHP 8.3 sources..."
-  "$SPC" download --with-php=8.3 --for-extensions="$EXTENSIONS" --prefer-pre-built $CROSS_ARGS
+  "$SPC" download --with-php=8.3 --for-extensions="$EXTENSIONS" --prefer-pre-built
 
   # Build static PHP CLI
   echo "==> Compiling static PHP CLI..."
