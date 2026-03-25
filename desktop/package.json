@@ -1,6 +1,6 @@
 {
   "name": "whoami",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "whoami.wiki app",
   "main": "dist/src/main.js",
   "scripts": {

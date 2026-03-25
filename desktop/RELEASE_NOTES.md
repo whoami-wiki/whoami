@@ -1,4 +1,4 @@
-Fix Main Page setup during fresh install.
+Fix incorrect GitHub issues link on the default main page.
 
 Fixes:
-- Overwrite the stock Main Page during fresh install instead of skipping it when it already exists
+- Correct the GitHub issues link in the desktop main page to point to the right repository
