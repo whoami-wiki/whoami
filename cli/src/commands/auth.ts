@@ -102,6 +102,8 @@ async function status(globals: GlobalFlags): Promise<void> {
     } else {
       console.log(`Status:    not configured`);
       console.log(`           ${e.message}`);
+      console.log('');
+      console.log('Tip: Make sure the whoami desktop app is running to authenticate.');
     }
   }
 }
