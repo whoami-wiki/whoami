@@ -83,11 +83,6 @@ if [ "$STATIC" = true ]; then
     rm "$TARBALL"
   fi
 
-  # Ensure build dependencies are available (always run natively to avoid
-  # Homebrew/Rosetta conflicts when cross-compiling)
-  echo "==> Checking build dependencies..."
-  "$SPC_NATIVE" doctor --auto-fix
-
   # For cross-compilation, download the target-arch spc binary.
   # Running the x86_64 spc under Rosetta makes it download x86_64 prebuilt
   # libs and compile PHP for x86_64.
@@ -103,8 +98,16 @@ if [ "$STATIC" = true ]; then
       chmod +x "$SPC"
       rm "$TARBALL"
     fi
+    # Install brew dependencies natively first, then run doctor with the
+    # target-arch binary to download target-arch pkg-config
+    echo "==> Installing build dependencies (native)..."
+    "$SPC_NATIVE" doctor --auto-fix
+    echo "==> Setting up target-arch build tools ($SPC_TARGET_ARCH)..."
+    "$SPC" doctor --auto-fix
   else
     SPC="$SPC_NATIVE"
+    echo "==> Checking build dependencies..."
+    "$SPC" doctor --auto-fix
   fi
 
   # Download PHP sources and extension dependencies
