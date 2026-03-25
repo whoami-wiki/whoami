@@ -5,7 +5,7 @@ description: "Benchmarks and scores to help pick the best agent harness and mode
 
 Which harness and model combination produces the best wiki pages? To find out, we run the same eval across every pairing: the agent gets a task, source directories, and a fresh MediaWiki instance, then builds pages through a six-checkpoint editorial workflow. Output is graded against rubrics and a human-written reference. For full details on the protocol, graders, and scoring, see [Evals Suite](/docs/evals-suite).
 
-The tables below show the best run per harness and model. Scores are **calibrated** — false penalties from misnumbered citation targets, Talk page editorial notes misclassified as unsupported claims, and partial evidence matches are removed before computing composites.
+The tables below show the best run per harness and model.
 
 ## Person
 
@@ -73,19 +73,92 @@ Combined composite averaging Person and Trip fixture scores for each harness and
   scoreStart={3}
 />
 
-## Observations
+## Writer profiles
 
-### Person fixture
+Reading the raw output reveals distinct editorial personalities behind the numbers. Here are profiles of the top performers based on what their actual wiki pages look like.
 
-- **Calibration moves rankings.** Raw accuracy ranged from 0.462 to 0.933. After removing false penalties, calibrated accuracy ranges from 0.846 to 0.990. Claude Code Opus 4.6 moved from 2nd to 1st overall; Codex GPT-5.2 moved from 5th to 3rd.
-- **Accuracy grades the manifest, not the article.** The accuracy grader checks whether the citation manifest correctly maps claims to source evidence. An agent can write a factually accurate article and score low if its manifest has bad evidence lookups. This is a known limitation.
-- **Editorial scoring has high variance.** Scores range from 0.000 (Kimi K2.5) to 0.900 (GPT-5.2). Multi-pass median scoring reduces noise but editorial quality remains the most subjective dimension.
-- **Cross-referencing and integration are near ceiling.** Most agents score 1.000 once they process both source types. These graders catch failure modes (ignoring a source, appending instead of weaving) rather than distinguishing quality.
-- **Speed varies widely.** Kimi K2.5 finishes in 39 minutes; GPT-5.4 on Codex takes over three hours. Faster runs tend to score lower, but the gap narrows at the top: Opus 4.5 on Claude Code nearly matches Opus 4.6 in under an hour.
+### Claude Code + Opus 4.6
 
-### Trip fixture
+The thoroughbred. Produces the longest, most detailed pages, with its trip article running to 24,500 characters, nearly double some competitors. It writes a full "Planning" section reconstructing how the trip was organized over group chat, includes a travel companion lobbying for a Friday departure and earning a "Dislike" reaction, and captures a design school class conflict that kept the group to a Saturday flight. Citations are dense and precise. The tradeoff is a tendency to over-narrate: every Uber fare gets a sentence, and the page can read more like a travel diary than an encyclopedia entry. Its talk pages are workmanlike. They get the structure right but can start with research notes from early checkpoints rather than the clean gap/resolved/editorial format the reference uses.
 
-- **Opus 4.5 edges out Opus 4.6.** Claude Code with Opus 4.5 scored 0.774 in just over an hour, beating Opus 4.6 (0.745 in 1h 37m). The older model produced a more polished article with fewer but higher-quality citations.
-- **Six source types stress integration.** With location history, photos, messages, transactions, Shazam, and flights, agents must synthesize across more data types than the person fixture. Cross-referencing still hits 1.000 across the board, but reference scores are notably lower (0.133–0.467 vs 0.300–0.733 for person).
-- **OpenCode benefits from permission fix.** After correcting filesystem permission rules, OpenCode Opus 4.6 jumped from 0.000 to 0.652 and scored the highest editorial mark (0.900) of any agent on either fixture.
-- **Talk pages are weaker across the board.** The best trip talk page (CC Opus 4.5 at 0.643) trails the best person talk page (CX GPT-5.3 at 0.853). Reference scores are particularly low, suggesting agents don't structure editorial discussion as thoroughly for episode pages.
+### OpenCode + Opus 4.6
+
+The surprise editorial stylist. Despite a middling overall composite (0.728), this combination produced the highest editorial score of any agent on either fixture (0.900 on the trip page). It writes clean, neutral prose and avoids the data-dump tendencies that plague other agents. Its lead paragraphs are tight. It also showed editorial initiative, spontaneously creating a person page for a side character only mentioned in a few messages, complete with infobox, citations, and a bibliography. The weakness is structural: it scored low on Reference because it organized pages differently from the human-written target, and some source pages were stubs rather than full documentation.
+
+### Codex + GPT-5.3
+
+The careful methodologist. Opens its trip page with an explicit timezone methodology note explaining how EXIF offsets, location history timestamps, and message timestamps are normalized, the kind of sourcing transparency that a real editor would appreciate. Its talk pages make good use of `{{Superseded}}` tags to show how gaps were resolved across checkpoints. It produces solid middle-of-the-road prose: not as vivid as Opus 4.6, not as data-heavy as GPT-5.2, but reliably accurate. The main gap is completeness: it tends to write shorter pages and miss some structural elements the reference includes.
+
+### Claude Code + Opus 4.5
+
+The efficient generalist. Finishes in roughly half the time of its Opus 4.6 sibling and actually beats it on the trip fixture (0.774 vs 0.745). The person page is thinner on biographical detail (it does not find the subject's full name, school, or college) but its narrative sections flow well. The trip page is a concise 9,800 characters that hits the major beats without belaboring every meal. It captures anecdotes cleanly: a shampoo confiscation at the airport, Shazam captures at a Cuban bar, the street vendor noise from the first night. Where it falls short is editorial polish: talk pages sometimes include duplicate section headers or leftover planning notes from early checkpoints.
+
+## Surprises and failures
+
+### Cursor misidentified the subject
+
+Cursor's Composer 2 agent got the subject's identity wrong on the person fixture. The reference subject attended one school and studied journalism at a particular college. Cursor's output listed two entirely different institutions, schools that actually belong to a different person in the WhatsApp archive. It also never found the subject's full name, referring to them throughout as "the Instagram display name for [the wiki owner's] correspondent in folder `[id]`." Despite this, it scored 0.984 on accuracy because the accuracy grader checks the citation manifest, not the article's biographical correctness. The manifest faithfully mapped the claims it did make to real source messages. They were just claims about the wrong person's school.
+
+### Kimi K2.5 wrote a spreadsheet instead of an article
+
+OpenCode with Kimi K2.5 produced the lowest editorial score on both fixtures (0.000 on person, 0.050 on trip). On the trip fixture, the reason is visible in the first few lines: instead of prose, it opens with a sortable wikitable listing dates, photo counts, location record counts, and "key activities" per row. GPS coordinates appear in citations. The lead paragraph is a single sentence. Dollar amounts are truncated throughout ("$690.70" becomes ".70"), suggesting a parsing bug that no editorial pass caught. There are no blockquotes, no embedded images, no narrative arc. The talk page lists many gaps as "Open" that were already answerable from the source data, like "FIFA match details unknown. Which teams played?" when the transaction records explicitly say "Fifa Qualifiers." It reads like an agent that can query data but does not understand what encyclopedic writing is.
+
+### OpenCode created an unsolicited person page
+
+OpenCode with Opus 4.6 on the trip fixture spontaneously created a person page for a friend mentioned in a handful of messages who was not part of the trip. The page has a proper infobox, two citations, a bibliography, and scores 1.000 on both editorial and cross-referencing. It correctly identifies her as a graduate program student and notes shared dining transactions after the trip. No other agent attempted this. The page is short (1,400 characters) and the reference does not include a page for that person, so the graders do not reward the initiative. But it demonstrates the kind of editorial instinct that the numbers cannot capture.
+
+## What talk pages reveal
+
+Talk pages are the editorial backbone of a wiki. They document gaps, record decisions, and flag contradictions. The reference talk page for the trip fixture runs about 3,000 words and includes five active gaps (with evidence and possible explanations), seven resolved items (each with a `{{Closed}}` tag and a brief summary of how it was settled), and three editorial decisions explaining structural choices.
+
+The best agent talk pages approximate this structure. Codex GPT-5.4's person talk page is a clean example: three active gaps (full name, birth year, education institution), one resolved item with a `{{Closed}}` tag, and an editorial decisions section listing episode candidates. It is concise (1,900 characters), uses the correct templates, and does not waste space on obvious observations. It scored 1.000 on editorial.
+
+OpenCode Opus 4.6's trip talk page demonstrates deeper analytical thinking. It includes a "Shazam timestamp timezone" discussion working through whether Shazam times are in device home timezone or local timezone, cross-referencing against location history to determine that the local timezone interpretation is more consistent. This is the kind of reasoning a human editor would do, and neither the reference page nor any other agent's output addresses it.
+
+At the other end, Cursor Composer 2's person talk page scored 0.286 on completeness and 0.400 on reference. It leads with "Owner testimony (step 5)," checkpoint-specific bookkeeping that will not make sense to a future reader, and its gap entries mix open questions with speculative episode candidates in a flat list. There is no "Resolved" section and no editorial decisions section.
+
+The pattern across talk pages is consistent: agents that treat the talk page as a living editorial document score well; agents that treat it as a scratch pad or agent log score poorly. The biggest differentiator is whether resolved gaps include evidence for *how* they were resolved, not just that they were.
+
+## How agents open an article
+
+The lead paragraph sets the tone for the entire page. Comparing leads across all agents on the trip fixture reveals a clean split between agents that write for readers and agents that write for machines.
+
+The best leads answer the question a reader actually has: who went where, when, and what did they do? OpenCode Opus 4.6 opens with 73 words that pack in the travelers, their shared graduate program, the dates, the accommodation neighborhood, and a summary of activities (museums, archaeological sites, restaurants, a lucha libre match). Claude Code Opus 4.5 adds a narrative detail: the trip was planned in four days via group chat. Codex GPT-5.4 is the most compact at 69 words, naming companions, the accommodation address, and the week's highlights in a single sentence.
+
+The worst leads answer a different question: what data sources exist and how were timestamps normalized? Cursor Composer 2 produces the longest lead at 153 words yet names zero travel companions and describes zero activities. It is a catalog of source types (location history, camera roll, iMessage exports, transaction CSVs, Shazam screenshots, flight records) followed by a timezone disclaimer. Codex GPT-5.3 similarly opens with a methodology note about EXIF offsets and timezone normalization before saying anything about the trip. Kimi K2.5 starts with one good encyclopedic sentence, then pivots to source enumeration.
+
+The pattern maps directly to editorial scores. Every agent with an encyclopedia-style lead scored above 0.600 on editorial; every agent with a methods-preamble lead scored below 0.100.
+
+## Citation fingerprints
+
+Citation style varies as much as prose style, and each model family has a recognizable fingerprint in the `note=` field of its `{{Cite message}}` templates.
+
+The reference pages write terse, fact-rich notes averaging 56 to 93 characters, like `"Uber trip: [address] → [address] → Terminal B, $80.70"`. They use semicolons to pack multiple topics into one note and include specific details like addresses, dollar amounts, and timestamps.
+
+The Claude-family agents (Claude Code and OpenCode with Opus models) lean terse, averaging 23 to 39 characters per note. Claude Code Opus 4.5 often writes just one or two words: "Pongal trip," "French finals." The tone is right but the notes are too sparse to be useful to a future editor trying to locate the evidence.
+
+The GPT-family agents (Codex with GPT-5.x) lean verbose, averaging 110 to 116 characters. Codex GPT-5.4 writes near-prose: "Messages sent on 14 November 2019 about being born in [city], moved to [city] as an infant, sister [name], family background in medicine, and the turn from medicine to journalism." These read more like source annotations than citation notes.
+
+Neither family hits the reference's sweet spot. Claude agents capture the right tone but under-specify; GPT agents capture more content but over-explain. Claude Code Opus 4.6 comes closest overall, with notes that are factual and concise but would benefit from slightly more detail.
+
+## Handling contested evidence
+
+The eval workflow introduces owner testimony at checkpoint five. Some testimony is straightforward (a shampoo was confiscated at the airport). Some contradicts the digital record (the owner recalls a companion leaving "halfway" through the trip, but transaction memos still list him on day six of eight). Some is unverifiable (the owner claims to have seen cartel members patrolling outside the accommodation).
+
+How agents handle these conflicts reveals their editorial judgment more clearly than any numerical score.
+
+**Contradictions between testimony and data.** The companion departure conflict is a litmus test. Claude Code Opus 4.6 creates a dedicated talk page section explaining that "halfway" is "closer to three-quarters" by the calendar, and hypothesizes the owner's memory reflects the subjective feel of the trip rather than the literal midpoint. OpenCode Opus 4.6 juxtaposes both accounts in a single sentence of the episode page: the subject "recalled [the companion] leaving 'halfway' through the trip, though by the calendar he departed on the sixth of eight days." Kimi K2.5 uses a rigid format with bold **Digital evidence** and **Owner testimony** subsections followed by a bold **Status: UNRESOLVED**, but its hypotheses are weaker and sometimes confused.
+
+**Unverifiable subjective claims.** The cartel sighting shows how agents hedge. OpenCode Opus 4.6 writes "what appeared to be cartel members" in the prose and adds a dedicated talk page note: "The characterization of the individuals as 'cartel members' is the owner's interpretation." Claude Code Opus 4.6 hedges with "what they believed to be." Codex GPT-5.4 uses epistemic distance: "men he believed were cartel members." Kimi K2.5 writes "individuals identified as cartel members" and then drops the hedge entirely when repeating the claim later in the page.
+
+## What goes wrong
+
+Beyond the identity confusion and spreadsheet-as-article failures described above, the raw output contains subtler errors that illustrate how agents hallucinate when they have partial information.
+
+**Fabricated details from real-world knowledge.** Claude Code Opus 4.6 looked up the football match at the stadium and added a match score and goalscorer names to the trip page. The match score was correct, but it got one of the goalscorers wrong, substituting a different player from the same national team. The reference deliberately omits match details because they were not in the source data. This is a case where an agent's world knowledge made the page worse: a confident-sounding but partially wrong sports fact is harder to catch than a missing detail.
+
+**Misidentified venues from GPS coordinates.** Cursor interpreted stadium-area GPS coordinates as belonging to a canal district in another part of the city. Photos at the football ground were captioned as "canal-side scenes." Codex GPT-5.2 used a sponsorship name from Google Location History for the stadium instead of the universally known name, making the text harder to follow. Both errors stem from trusting geocoded place names over contextual evidence from messages and transactions.
+
+**Clothing store becomes a restaurant.** Claude Code Opus 4.6 described a well-known outdoor clothing brand's retail location as "an Argentinian restaurant." The store is on a street full of restaurants in a dining-heavy neighborhood, and the agent apparently inferred the category from context rather than checking what the business actually is.
+
+**Events shuffled between days.** Several agents moved events to the wrong date. The crowd chant at a wrestling match was attributed to a football game by Kimi K2.5. A juice discovery from day seven was placed on day one by Claude Code Opus 4.6. A museum gift shop transaction dated two days after the museum visit confused multiple agents into inventing a return trip. These are the kinds of errors that only a human reviewer (or a more careful future eval) would catch, because the prose reads naturally even when the chronology is wrong.
