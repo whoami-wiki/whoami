@@ -38,6 +38,19 @@ export interface TocHeading {
   level: number;
 }
 
+/** Format a blog post date string, preserving the local date from the ISO string to avoid UTC shift. */
+export function formatBlogDate(dateStr: string): string {
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return dateStr;
+  const [, year, month, day] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()
