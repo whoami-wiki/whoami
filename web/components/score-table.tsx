@@ -66,7 +66,7 @@ export function ScoreTable({
                       isBest
                         ? `py-2.5 px-3 font-medium text-green-700 dark:text-green-400${frozen ? "" : " bg-green-50 dark:bg-green-950/30"}`
                         : "py-2.5 px-3 text-neutral-600 dark:text-neutral-400"
-                    } border-b${ci < scoreStart ? " whitespace-nowrap" : " text-right tabular-nums"}${frozen ? ` ${stickyClass}${isBest ? " !bg-green-50 dark:!bg-green-900/40" : ""}` : ""}`}
+                    } border-b${ci < scoreStart ? " whitespace-nowrap" : " text-right tabular-nums"}${frozen ? ` ${stickyClass}${isBest ? " !bg-green-50 dark:!bg-[#243d2e]" : ""}` : ""}`}
                   >
                     {cell}
                   </td>
