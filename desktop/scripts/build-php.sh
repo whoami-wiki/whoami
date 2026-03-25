@@ -60,9 +60,9 @@ if [ "$STATIC" = true ]; then
     *)          SPC_TARGET_ARCH="$TARGET_ARCH" ;;
   esac
 
-  CROSS_ARGS=""
+  CROSS_COMPILE=false
   if [ "$SPC_HOST_ARCH" != "$SPC_TARGET_ARCH" ]; then
-    CROSS_ARGS="--arch=$SPC_TARGET_ARCH"
+    CROSS_COMPILE=true
   fi
 
   echo "==> Building static PHP for macOS ($SPC_TARGET_ARCH) with extensions: $EXTENSIONS"
@@ -71,20 +71,41 @@ if [ "$STATIC" = true ]; then
   mkdir -p "$BUILD_DIR"
 
   # Download spc (static-php-cli) binary for host architecture
-  SPC="$BUILD_DIR/spc"
-  if [ ! -f "$SPC" ]; then
+  SPC_NATIVE="$BUILD_DIR/spc-$SPC_HOST_ARCH"
+  if [ ! -f "$SPC_NATIVE" ]; then
     TARBALL="$BUILD_DIR/spc-macos-$SPC_HOST_ARCH.tar.gz"
-    echo "==> Downloading static-php-cli..."
+    echo "==> Downloading static-php-cli ($SPC_HOST_ARCH)..."
     curl -fSL -o "$TARBALL" \
       "https://github.com/crazywhalecc/static-php-cli/releases/latest/download/spc-macos-$SPC_HOST_ARCH.tar.gz"
     tar -xzf "$TARBALL" -C "$BUILD_DIR"
-    chmod +x "$SPC"
+    mv "$BUILD_DIR/spc" "$SPC_NATIVE"
+    chmod +x "$SPC_NATIVE"
     rm "$TARBALL"
   fi
 
-  # Ensure build dependencies are available (spc doctor checks and fixes them)
+  # Ensure build dependencies are available (always run natively to avoid
+  # Homebrew/Rosetta conflicts when cross-compiling)
   echo "==> Checking build dependencies..."
-  "$SPC" doctor --auto-fix
+  "$SPC_NATIVE" doctor --auto-fix
+
+  # For cross-compilation, download the target-arch spc binary.
+  # Running the x86_64 spc under Rosetta makes it download x86_64 prebuilt
+  # libs and compile PHP for x86_64.
+  if [ "$CROSS_COMPILE" = true ]; then
+    SPC="$BUILD_DIR/spc-$SPC_TARGET_ARCH"
+    if [ ! -f "$SPC" ]; then
+      TARBALL="$BUILD_DIR/spc-macos-$SPC_TARGET_ARCH.tar.gz"
+      echo "==> Downloading static-php-cli ($SPC_TARGET_ARCH) for cross-compilation..."
+      curl -fSL -o "$TARBALL" \
+        "https://github.com/crazywhalecc/static-php-cli/releases/latest/download/spc-macos-$SPC_TARGET_ARCH.tar.gz"
+      tar -xzf "$TARBALL" -C "$BUILD_DIR"
+      mv "$BUILD_DIR/spc" "$SPC"
+      chmod +x "$SPC"
+      rm "$TARBALL"
+    fi
+  else
+    SPC="$SPC_NATIVE"
+  fi
 
   # Download PHP sources and extension dependencies
   echo "==> Downloading PHP 8.3 sources..."
@@ -92,7 +113,7 @@ if [ "$STATIC" = true ]; then
 
   # Build static PHP CLI
   echo "==> Compiling static PHP CLI..."
-  "$SPC" build "$EXTENSIONS" --build-cli $CROSS_ARGS
+  "$SPC" build "$EXTENSIONS" --build-cli
 
   # Copy the resulting binary
   cp buildroot/bin/php "$OUT/bin/php"
