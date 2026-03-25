@@ -93,7 +93,7 @@ case ":\$PATH:" in
     ;;
 esac
 
-info "Run 'wai auth login' to get started."
+info "Installation complete."
 `;
 
 export function GET() {
