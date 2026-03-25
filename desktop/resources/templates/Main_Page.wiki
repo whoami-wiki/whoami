@@ -19,6 +19,6 @@ Your job is simple: point the agent at your data (old chats, photos, notes, what
 
 == Need help? ==
 
-If something breaks or feels wrong, open an issue at [https://github.com/anthropics/whoami-wiki/issues github.com/anthropics/whoami-wiki/issues]. We read every one.
+If something breaks or feels wrong, open an issue at [https://github.com/whoami-wiki/whoami/issues github.com/whoami-wiki/whoami/issues]. We read every one.
 
 </div>
