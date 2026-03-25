@@ -43,14 +43,18 @@ if [[ "$(uname)" == "Linux" ]]; then
   PLATFORM="linux"
 fi
 
-# Resolve target for cross-compilation
-CFLAGS_EXTRA="-mmacosx-version-min=12.0"
+# Cross-compilation: override CFLAGS/LDFLAGS directly since the macosx
+# make target overrides MYCFLAGS, losing the -target flag.
 case "$TARGET_ARCH" in
-  x64|x86_64) CFLAGS_EXTRA="$CFLAGS_EXTRA -target x86_64-apple-darwin" ;;
-  arm64)      CFLAGS_EXTRA="$CFLAGS_EXTRA -target arm64-apple-darwin" ;;
+  x64|x86_64)
+    make "$PLATFORM" \
+      CFLAGS="-O2 -Wall -DLUA_USE_MACOSX -target x86_64-apple-darwin -mmacosx-version-min=12.0" \
+      LDFLAGS="-target x86_64-apple-darwin -mmacosx-version-min=12.0"
+    ;;
+  *)
+    make "$PLATFORM" MYCFLAGS="-mmacosx-version-min=12.0"
+    ;;
 esac
-
-make "$PLATFORM" MYCFLAGS="$CFLAGS_EXTRA" MYLDFLAGS="$CFLAGS_EXTRA"
 
 mkdir -p "$OUT/bin"
 cp src/lua "$OUT/bin/lua"
