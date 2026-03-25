@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAllPosts, getPost } from "@/lib/blog";
+import { getAllPosts, getPost, formatBlogDate } from "@/lib/blog";
 import { MDXContent } from "@/components/mdx-content";
 import Image from "next/image";
 
@@ -60,11 +60,7 @@ export default async function BlogPostPage({ params }: Props) {
             className="font-sans text-base text-neutral-500 dark:text-neutral-400"
             dateTime={post.date}
           >
-            {new Date(post.date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+            {formatBlogDate(post.date)}
           </time>
         </div>
 

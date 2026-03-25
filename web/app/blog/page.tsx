@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { getAllPosts } from "@/lib/blog";
+import { getAllPosts, formatBlogDate } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: "Blog — whoami.wiki",
@@ -44,11 +44,7 @@ export default function BlogPage() {
                   className="font-sans text-base text-neutral-500 dark:text-neutral-400"
                   dateTime={post.date}
                 >
-                  {new Date(post.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {formatBlogDate(post.date)}
                 </time>
               </div>
               <Image
