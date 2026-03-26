@@ -20,6 +20,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${post.title} — whoami.wiki`,
     description: post.description,
+    openGraph: {
+      images: [{ url: `/blog/${slug}/opengraph-image.png?v=2` }],
+    },
+    twitter: {
+      images: [{ url: `/blog/${slug}/twitter-image.png?v=2` }],
+    },
   };
 }
 
