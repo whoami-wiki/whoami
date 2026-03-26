@@ -52,16 +52,19 @@ const signifier = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://whoami.wiki"),
   title: "whoami.wiki",
   description: "your personal encyclopedia, written by agents",
   openGraph: {
     title: "whoami.wiki",
     description: "your personal encyclopedia, written by agents",
+    images: [{ url: "/opengraph-image.png?v=2" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "whoami.wiki",
     description: "your personal encyclopedia, written by agents",
+    images: [{ url: "/twitter-image.png?v=2" }],
   },
 };
 
