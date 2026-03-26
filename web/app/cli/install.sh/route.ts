@@ -79,17 +79,25 @@ info "Installed wai to \$INSTALL_DIR/wai"
 case ":\$PATH:" in
   *":\$INSTALL_DIR:"*) ;;
   *)
-    info ""
-    info "Add \$INSTALL_DIR to your PATH:"
-    info ""
     SHELL_NAME=\$(basename "\$SHELL")
     case "\$SHELL_NAME" in
-      zsh)  info "  echo 'export PATH=\\"\$INSTALL_DIR:\\\$PATH\\"' >> ~/.zshrc && source ~/.zshrc" ;;
-      bash) info "  echo 'export PATH=\\"\$INSTALL_DIR:\\\$PATH\\"' >> ~/.bashrc && source ~/.bashrc" ;;
-      fish) info "  fish_add_path \$INSTALL_DIR" ;;
-      *)    info "  export PATH=\\"\$INSTALL_DIR:\\\$PATH\\"" ;;
+      zsh)  RC="\$HOME/.zshrc" ;;
+      bash) RC="\$HOME/.bashrc" ;;
+      fish) RC="" ;;
+      *)    RC="" ;;
     esac
-    info ""
+
+    if [ -n "\$RC" ]; then
+      echo "export PATH=\\"\$INSTALL_DIR:\\\$PATH\\"" >> "\$RC"
+      info "Added \$INSTALL_DIR to your PATH in \$RC."
+      info "Restart your terminal to apply."
+    elif [ "\$SHELL_NAME" = "fish" ]; then
+      fish_add_path \$INSTALL_DIR
+      info "Added \$INSTALL_DIR to your PATH."
+    else
+      info "Add \$INSTALL_DIR to your PATH manually:"
+      info "  export PATH=\\"\$INSTALL_DIR:\\\$PATH\\""
+    fi
     ;;
 esac
 
