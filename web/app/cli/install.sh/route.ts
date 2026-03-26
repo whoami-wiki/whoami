@@ -84,8 +84,8 @@ case ":\$PATH:" in
     info ""
     SHELL_NAME=\$(basename "\$SHELL")
     case "\$SHELL_NAME" in
-      zsh)  info "  echo 'export PATH=\\"\$INSTALL_DIR:\\\\\\$PATH\\"' >> ~/.zshrc && source ~/.zshrc" ;;
-      bash) info "  echo 'export PATH=\\"\$INSTALL_DIR:\\\\\\$PATH\\"' >> ~/.bashrc && source ~/.bashrc" ;;
+      zsh)  info "  echo 'export PATH=\\"\$INSTALL_DIR:\\\$PATH\\"' >> ~/.zshrc && source ~/.zshrc" ;;
+      bash) info "  echo 'export PATH=\\"\$INSTALL_DIR:\\\$PATH\\"' >> ~/.bashrc && source ~/.bashrc" ;;
       fish) info "  fish_add_path \$INSTALL_DIR" ;;
       *)    info "  export PATH=\\"\$INSTALL_DIR:\\\$PATH\\"" ;;
     esac
