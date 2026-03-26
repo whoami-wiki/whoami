@@ -35,7 +35,7 @@ import { exportCommand } from './commands/export.js';
 import { importCommand } from './commands/import.js';
 import { checkForUpdate, updateCommand } from './update.js';
 
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 
 const HELP = `wai — personal wiki CLI
 

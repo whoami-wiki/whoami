@@ -1,8 +1,5 @@
-Shared credentials and improved auth login.
-
-Features:
-- Share credentials with the desktop app via `~/.whoami/credentials.json`
+Small quality-of-life improvements for the CLI install and auth experience.
 
 Fixes:
-- Obfuscate password input during `wai auth login`
-- Skip interactive server prompt, default to `localhost:8080`
+- Auto-configure PATH during installation instead of requiring manual setup
+- Show a helpful tip about running the desktop app when authenticating
