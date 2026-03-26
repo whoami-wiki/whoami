@@ -71,7 +71,7 @@ export default function Home() {
             <dt className="">Private by default</dt>
             <dd className="text-muted">
               Your wiki and archive live on your machine. Nothing is stored
-              remotely.
+              remotely.*
             </dd>
             <dt className="">Export anytime</dt>
             <dd className="text-muted">
@@ -84,6 +84,17 @@ export default function Home() {
               it, ship, extend it.
             </dd>
           </dl>
+          <p className="text-muted text-sm font-sans pl-[0.6em] -indent-[0.6em]">
+            *When using agent harnesses with models hosted online, your data is
+            sent to those providers. Use{" "}
+            <a
+              href="https://opencode.ai"
+              className="underline underline-offset-4"
+            >
+              OpenCode
+            </a>{" "}
+            + local models for a fully offline experience.
+          </p>
         </div>
       </div>
     </div>
