@@ -45,6 +45,8 @@ export function startServer(): Promise<void> {
     phpProcess = spawn(phpPath, [
       '-d', 'display_errors=Off',
       '-d', 'error_reporting=22527',
+      '-d', 'upload_max_filesize=10M',
+      '-d', 'post_max_size=10M',
       '-S', `${HOST}:${PORT}`,
       '-t', docRoot,
       router,

@@ -378,6 +378,8 @@ function generateLocalSettings(opts: LocalSettingsOpts): string {
     "## Uploads",
     "$wgEnableUploads = true;",
     "$wgUseImageMagick = false;  // Use GD instead",
+    "$wgMaxUploadSize = 10 * 1024 * 1024;  // 10 MB",
+    "$wgUploadSizeWarning = 10 * 1024 * 1024;",
     "$wgFileExtensions = array_merge( $wgFileExtensions, [ 'mp3', 'mp4', 'ogg', 'ogv', 'opus', 'wav', 'webm', 'flac' ] );",
     "",
     "## Skin",
