@@ -42,6 +42,8 @@ if [ "$STATIC" = true ]; then
   # MediaWiki extensions + extensions that are default-on in normal PHP but
   # must be explicitly listed for static builds (filter, openssl, ctype, etc.)
   EXTENSIONS="sqlite3,pdo_sqlite,mbstring,xml,dom,simplexml,xmlwriter,xmlreader,gd,intl,curl,fileinfo,phar,filter,openssl,ctype,iconv,tokenizer,session,zlib"
+  # libjpeg is needed for GD to support JPEG thumbnailing in MediaWiki
+  LIBS="libjpeg"
   HOST_ARCH="$(uname -m)"
 
   # Map host arch to static-php-cli naming (for downloading spc binary)
@@ -112,11 +114,11 @@ if [ "$STATIC" = true ]; then
 
   # Download PHP sources and extension dependencies
   echo "==> Downloading PHP 8.3 sources..."
-  "$SPC" download --with-php=8.3 --for-extensions="$EXTENSIONS" --prefer-pre-built
+  "$SPC" download --with-php=8.3 --for-extensions="$EXTENSIONS" --for-libs="$LIBS" --prefer-pre-built
 
   # Build static PHP CLI
   echo "==> Compiling static PHP CLI..."
-  "$SPC" build "$EXTENSIONS" --build-cli
+  "$SPC" build "$EXTENSIONS" --with-libs="$LIBS" --build-cli
 
   # Copy the resulting binary
   cp buildroot/bin/php "$OUT/bin/php"
