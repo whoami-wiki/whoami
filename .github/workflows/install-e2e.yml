@@ -1,0 +1,105 @@
+name: Install E2E
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cli/**"
+      - "web/app/cli/install.sh/**"
+      - ".github/workflows/install-e2e.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "cli/**"
+      - "web/app/cli/install.sh/**"
+      - ".github/workflows/install-e2e.yml"
+
+jobs:
+  install-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: cli
+
+      - name: Build CLI
+        run: pnpm build
+        working-directory: cli
+
+      - name: Create release tarball
+        run: |
+          VERSION=$(node -p "require('./cli/package.json').version")
+          mkdir -p "wai-v${VERSION}/bin"
+          cp cli/dist/wai.cjs "wai-v${VERSION}/bin/wai"
+          tar -czf "wai-v${VERSION}.tar.gz" "wai-v${VERSION}"
+          sha256sum "wai-v${VERSION}.tar.gz" > "wai-v${VERSION}.tar.gz.sha256"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Start local release server
+        run: |
+          mkdir -p fake-releases
+          cp wai-v${VERSION}.tar.gz fake-releases/
+          cp wai-v${VERSION}.tar.gz.sha256 fake-releases/
+
+          # Serve a fake GitHub releases API response
+          echo '[{"tag_name": "cli-v'"${VERSION}"'"}]' > fake-releases/releases.json
+
+          cd fake-releases
+          python3 -m http.server 9123 &
+          echo $! > /tmp/server.pid
+          sleep 1
+
+      - name: Extract and patch install script
+        run: |
+          # Extract the install script from the Next.js route handler,
+          # evaluate the template literal to produce real bash, and
+          # patch URLs to point at our local release server.
+          node <<'NODESCRIPT'
+          const fs = require('fs');
+          const src = fs.readFileSync('web/app/cli/install.sh/route.ts', 'utf-8');
+          const REPO = 'whoami-wiki/whoami';
+          const script = eval(src.match(/const script = (`[\s\S]*?`);/)[1]);
+          const patched = script
+            .replace(
+              'https://api.github.com/repos/$REPO/releases',
+              'http://localhost:9123/releases.json'
+            )
+            .replace(
+              /https:\/\/github\.com\/\$REPO\/releases\/download\/cli-v\$\{VERSION\}\/\$\{TARBALL}/,
+              'http://localhost:9123/${TARBALL}'
+            )
+            .replace(
+              /CHECKSUM_URL=.*$/m,
+              'CHECKSUM_URL="http://localhost:9123/${TARBALL}.sha256"'
+            );
+          fs.writeFileSync('/tmp/install.sh', patched);
+          NODESCRIPT
+
+      - name: Run install script
+        run: |
+          export WAI_INSTALL_DIR="$HOME/.local/bin"
+          bash /tmp/install.sh
+
+      - name: Verify installation (wai --version)
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          wai --version
+
+      - name: Verify PATH was configured
+        run: |
+          grep -q '.local/bin' "$HOME/.bashrc" || echo "PATH entry found in existing PATH"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          [ -f /tmp/server.pid ] && kill "$(cat /tmp/server.pid)" || true
