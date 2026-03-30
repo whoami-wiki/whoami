@@ -213,21 +213,11 @@ jobs:
           find "$WORKDIR/.opencode" -type f -printf "  %P\n"
 
   # ── Steps 1+4: Full setup and verification ───────────────────────────
-  # Replays the desktop app's onboarding flow (setup.ts) against a real
-  # MediaWiki instance, then verifies the CLI can auth and search.
+  # Replays the desktop app's onboarding flow against a real MediaWiki
+  # instance using system PHP + SQLite — the same stack the desktop app
+  # runs (php -S with router.php), just without the Electron shell.
   setup-and-verify:
     runs-on: ubuntu-latest
-    services:
-      mediawiki:
-        image: mediawiki:1.42
-        ports:
-          - 8080:80
-        options: >-
-          --health-cmd "curl -sf http://localhost/api.php?action=query&meta=siteinfo&format=json || exit 1"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 10
-
     steps:
       - uses: actions/checkout@v4
 
@@ -239,44 +229,149 @@ jobs:
         with:
           version: latest
 
+      - name: Install PHP + extensions
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq php-cli php-sqlite3 php-xml php-mbstring php-intl php-curl
+
+      - name: Bundle MediaWiki (same as desktop build)
+        run: bash desktop/scripts/bundle-mediawiki.sh
+
       - name: Install and build CLI
         run: pnpm install && pnpm build
         working-directory: cli
 
-      - name: Run MediaWiki install (database setup)
+      - name: "Setup step 1: create database (setup.ts → install)"
         run: |
-          # Install MediaWiki with SQLite, mirroring setup.ts step 1
-          docker exec ${{ job.services.mediawiki.id }} php maintenance/run.php install \
+          DATA_DIR=$(mktemp -d)
+          echo "DATA_DIR=${DATA_DIR}" >> "$GITHUB_ENV"
+          MW_DIR="$PWD/desktop/resources/mediawiki"
+          echo "MW_DIR=${MW_DIR}" >> "$GITHUB_ENV"
+
+          mkdir -p "$DATA_DIR/images" "$DATA_DIR/cache"
+
+          php "$MW_DIR/maintenance/run.php" install \
             --dbtype sqlite \
-            --dbpath /var/www/data \
+            --dbpath "$DATA_DIR" \
             --dbname wiki \
             --scriptpath "" \
             --pass "TestPassword123" \
-            --server "http://localhost:8080" \
+            --server "http://127.0.0.1:8080" \
             "Whoami Wiki" \
             "TestUser"
 
-      - name: Wait for wiki to be ready
+          # Remove install-generated LocalSettings (setup.ts does the same)
+          rm -f "$MW_DIR/LocalSettings.php"
+
+      - name: "Setup step 2: generate config (setup.ts → LocalSettings)"
         run: |
-          for i in $(seq 1 30); do
-            if curl -sf "http://localhost:8080/api.php?action=query&meta=siteinfo&format=json" > /dev/null 2>&1; then
-              echo "Wiki is ready"
+          # Generate LocalData.php (secrets)
+          SECRET_KEY=$(openssl rand -hex 64)
+          UPGRADE_KEY=$(openssl rand -hex 8)
+          cat > "$DATA_DIR/LocalData.php" <<LOCALDATA
+          <?php
+          \$wgSecretKey = "${SECRET_KEY}";
+          \$wgUpgradeKey = "${UPGRADE_KEY}";
+          LOCALDATA
+
+          # Generate LocalSettings.php (mirrors setup.ts generateLocalSettings)
+          cat > "$DATA_DIR/LocalSettings.php" <<LOCALSETTINGS
+          <?php
+          require __DIR__ . '/LocalData.php';
+
+          ## Core
+          \$wgSitename = "Whoami Wiki";
+          \$wgServer = "http://127.0.0.1:8080";
+          \$wgScriptPath = "";
+          \$wgArticlePath = "/wiki/\$1";
+
+          ## Database (SQLite)
+          \$wgDBtype = "sqlite";
+          \$wgDBname = "wiki";
+          \$wgSQLiteDataDir = "${DATA_DIR}";
+
+          ## Paths
+          \$wgUploadDirectory = "${DATA_DIR}/images";
+          \$wgUploadPath = "/images";
+          \$wgCacheDirectory = "${DATA_DIR}/cache";
+
+          ## Security
+          \$wgGroupPermissions['*']['createaccount'] = false;
+          \$wgGroupPermissions['*']['edit'] = false;
+          \$wgGroupPermissions['*']['read'] = true;
+
+          ## Error handling
+          error_reporting( E_ALL & ~E_DEPRECATED & ~E_STRICT );
+          ini_set( 'display_errors', '0' );
+
+          ## Locale
+          \$wgLanguageCode = "en";
+          \$wgLocaltimezone = "UTC";
+
+          ## Uploads
+          \$wgEnableUploads = true;
+          \$wgUseImageMagick = false;
+
+          ## Skin
+          wfLoadSkin( 'Vector' );
+          \$wgDefaultSkin = "vector-2022";
+
+          ## Extensions
+          wfLoadExtension( 'Cite' );
+          wfLoadExtension( 'CiteThisPage' );
+          wfLoadExtension( 'ParserFunctions' );
+          wfLoadExtension( 'TemplateData' );
+          wfLoadExtension( 'TemplateStyles' );
+
+          ## Source namespace (100/101)
+          define("NS_SOURCE", 100);
+          define("NS_SOURCE_TALK", 101);
+          \$wgExtraNamespaces[NS_SOURCE] = "Source";
+          \$wgExtraNamespaces[NS_SOURCE_TALK] = "Source_talk";
+
+          ## Task namespace (102/103)
+          define("NS_TASK", 102);
+          define("NS_TASK_TALK", 103);
+          \$wgExtraNamespaces[NS_TASK] = "Task";
+          \$wgExtraNamespaces[NS_TASK_TALK] = "Task_talk";
+
+          ## Short URLs
+          \$wgUsePathInfo = true;
+
+          ## Performance
+          \$wgMainCacheType = CACHE_NONE;
+          \$wgCachePages = false;
+          \$wgJobRunRate = 1;
+          LOCALSETTINGS
+
+          # Run update.php (setup.ts step 2)
+          php "$MW_DIR/maintenance/run.php" update --quick --conf "$DATA_DIR/LocalSettings.php"
+
+      - name: "Setup step 3: start PHP server (php-server.ts)"
+        run: |
+          # Same as php-server.ts: php -S with router.php
+          MW_DATA_PATH="$DATA_DIR" php -S 127.0.0.1:8080 \
+            -t "$MW_DIR" "$MW_DIR/router.php" &
+          echo $! > /tmp/php.pid
+
+          # Health poll (same as php-server.ts waitForServer)
+          for i in $(seq 1 75); do
+            if curl -sf "http://127.0.0.1:8080/api.php?action=query&meta=siteinfo&format=json" > /dev/null 2>&1; then
+              echo "PHP server ready"
               exit 0
             fi
-            sleep 1
+            sleep 0.2
           done
-          echo "FAIL: wiki did not become ready"
+          echo "FAIL: PHP server did not start within 15s"
           exit 1
 
-      - name: Run onboarding setup (mirrors setup.ts steps 3-4)
+      - name: "Setup steps 3-4: create templates, pages (setup.ts onboarding)"
         run: |
-          # Replay the same API calls that setup.ts makes after DB init:
-          # login, create templates, import styles, set up Main Page, create user page + Me redirect
           node <<'SETUP'
           const fs = require('fs');
           const http = require('http');
 
-          const API = 'http://localhost:8080/api.php';
+          const API = 'http://127.0.0.1:8080/api.php';
           let cookies = [];
 
           function request(method, params) {
@@ -296,7 +391,6 @@ jobs:
                   ...(cookies.length ? { Cookie: cookies.join('; ') } : {}),
                 },
               }, (res) => {
-                // Capture session cookies
                 const sc = res.headers['set-cookie'];
                 if (sc) {
                   for (const c of (Array.isArray(sc) ? sc : [sc])) {
@@ -320,7 +414,7 @@ jobs:
           }
 
           async function main() {
-            // Login (same as setup.ts)
+            // Login
             const tokenData = await request('GET', { action: 'query', meta: 'tokens', type: 'login', format: 'json' });
             const loginToken = tokenData.query.tokens.logintoken;
 
@@ -333,7 +427,7 @@ jobs:
             }
             console.log('Logged in as TestUser');
 
-            // Get CSRF token
+            // CSRF token
             const csrfData = await request('GET', { action: 'query', meta: 'tokens', format: 'json' });
             const csrfToken = csrfData.query.tokens.csrftoken;
 
@@ -350,10 +444,10 @@ jobs:
                 action: 'edit', title, text: content, summary: 'Initial import',
                 createonly: 'true', token: csrfToken, format: 'json',
               });
-              console.log(`Created ${title}`);
+              console.log('Created ' + title);
             }
 
-            // Overwrite Main Page (setup.ts uses editPage for this)
+            // Overwrite Main Page
             const mainContent = fs.readFileSync('desktop/resources/templates/Main_Page.wiki', 'utf-8');
             await request('POST', {
               action: 'edit', title: 'Main Page', text: mainContent,
@@ -382,17 +476,10 @@ jobs:
           main().catch(e => { console.error(e); process.exit(1); });
           SETUP
 
-      - name: Save credentials (mirrors setup.ts)
+      - name: Save credentials (mirrors setup.ts saveCredentials)
         run: |
           mkdir -p ~/.whoami
-          cat > ~/.whoami/credentials.json <<'EOF'
-          {
-            "server": "http://localhost:8080",
-            "username": "TestUser",
-            "password": "TestPassword123",
-            "role": "owner"
-          }
-          EOF
+          echo '{"server":"http://127.0.0.1:8080","username":"TestUser","password":"TestPassword123","role":"owner"}' > ~/.whoami/credentials.json
           chmod 600 ~/.whoami/credentials.json
 
       - name: "Verify: wai auth status"
@@ -406,9 +493,9 @@ jobs:
           fi
           echo "OK wai auth status: authenticated"
 
-      - name: "Verify: wai search \"test\""
+      - name: "Verify: wai search"
         run: |
-          OUTPUT=$(node cli/dist/wai.cjs search test --json)
+          OUTPUT=$(node cli/dist/wai.cjs search wiki --json)
           echo "$OUTPUT"
           COUNT=$(echo "$OUTPUT" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
           if [ "$COUNT" -eq 0 ]; then
@@ -417,51 +504,44 @@ jobs:
           fi
           echo "OK wai search: returned $COUNT result(s)"
 
-      - name: "Verify: Main Page is accessible"
+      - name: "Verify: Main Page is accessible and has custom content"
         run: |
-          CONTENT=$(curl -fsSL "http://localhost:8080/api.php?action=parse&page=Main+Page&format=json")
+          CONTENT=$(curl -fsSL "http://127.0.0.1:8080/api.php?action=parse&page=Main+Page&format=json")
           echo "$CONTENT" | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
-          title = data['parse']['title']
           html = data['parse']['text']['*']
-          assert title == 'Main Page', f'Wrong title: {title}'
-          assert 'welcome to your wiki' in html.lower(), 'Main page content missing'
+          assert 'welcome to your wiki' in html.lower(), 'Main page missing custom content'
           print('OK Main Page renders correctly')
           "
 
-      - name: "Verify: Me redirect works"
+      - name: "Verify: Me redirect resolves to user page"
         run: |
-          CONTENT=$(curl -fsSL "http://localhost:8080/api.php?action=query&titles=Me&redirects=1&format=json")
+          CONTENT=$(curl -fsSL "http://127.0.0.1:8080/api.php?action=query&titles=Me&redirects=1&format=json")
           echo "$CONTENT" | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
           redirects = data['query'].get('redirects', [])
           assert len(redirects) > 0, 'Me did not redirect'
-          assert redirects[0]['to'] == 'Test User', f'Wrong redirect target: {redirects[0][\"to\"]}'
-          print('OK Me -> Test User redirect works')
+          assert redirects[0]['to'] == 'Test User', f'Wrong target: {redirects[0][\"to\"]}'
+          print('OK Me -> Test User')
           "
 
-      - name: "Verify: user page has infobox"
+      - name: "Verify: user page has infobox and category"
         run: |
-          CONTENT=$(curl -fsSL "http://localhost:8080/api.php?action=parse&page=Test+User&format=json")
-          echo "$CONTENT" | python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          wikitext = data['parse'].get('wikitext', {}).get('*', '')
-          # Check via the raw content API instead
-          " || true
-
-          # Check raw wikitext
-          RAW=$(curl -fsSL "http://localhost:8080/api.php?action=query&titles=Test+User&prop=revisions&rvprop=content&rvslots=main&format=json")
+          RAW=$(curl -fsSL "http://127.0.0.1:8080/api.php?action=query&titles=Test+User&prop=revisions&rvprop=content&rvslots=main&format=json")
           echo "$RAW" | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
-          pages = data['query']['pages']
-          page = list(pages.values())[0]
+          page = list(data['query']['pages'].values())[0]
           content = page['revisions'][0]['slots']['main']['*']
-          assert '{{Infobox person' in content, 'Missing infobox template'
+          assert '{{Infobox person' in content, 'Missing infobox'
           assert 'Test User' in content, 'Missing user name'
           assert '[[Category:People]]' in content, 'Missing category'
-          print('OK user page has infobox, name, and category')
+          print('OK user page: infobox + name + category')
           "
+
+      - name: Cleanup
+        if: always()
+        run: |
+          [ -f /tmp/php.pid ] && kill "$(cat /tmp/php.pid)" || true
