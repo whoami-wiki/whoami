@@ -6,16 +6,70 @@ on:
     paths:
       - "cli/**"
       - "web/app/cli/install.sh/**"
+      - "web/app/download/**"
+      - "plugins/**"
       - ".github/workflows/install-e2e.yml"
   pull_request:
     branches: [main]
     paths:
       - "cli/**"
       - "web/app/cli/install.sh/**"
+      - "web/app/download/**"
+      - "plugins/**"
       - ".github/workflows/install-e2e.yml"
 
 jobs:
-  install-e2e:
+  # ── Step 1: Desktop app download ─────────────────────────────────────
+  desktop-download:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify download page resolves latest desktop release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch releases the same way the download page does
+          RELEASES=$(curl -fsSL "https://api.github.com/repos/whoami-wiki/whoami/releases" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN")
+
+          # Find the latest desktop-v* release (mirrors getLatestDesktopRelease)
+          RELEASE=$(echo "$RELEASES" | python3 -c "
+          import json, sys
+          releases = json.load(sys.stdin)
+          desktop = [r for r in releases if r['tag_name'].startswith('desktop-v')]
+          if not desktop:
+              print('SKIP: no desktop release found yet', file=sys.stderr)
+              sys.exit(0)
+          r = desktop[0]
+          print(f'tag={r[\"tag_name\"]}')
+          dmgs = [a for a in r['assets'] if a['name'].endswith('.dmg')]
+          for a in dmgs:
+              print(f'dmg={a[\"name\"]}')
+              print(f'url={a[\"browser_download_url\"]}')
+          ")
+
+          if [ -z "$RELEASE" ]; then
+            echo "⚠ No desktop release exists yet — skipping download checks"
+            exit 0
+          fi
+
+          echo "$RELEASE"
+
+          # Verify each DMG URL is reachable (HEAD request)
+          echo "$RELEASE" | grep '^url=' | cut -d= -f2- | while read -r url; do
+            echo "Checking $url ..."
+            STATUS=$(curl -o /dev/null -sIw '%{http_code}' -L "$url")
+            if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 400 ]; then
+              echo "FAIL: $url returned HTTP $STATUS"
+              exit 1
+            fi
+            echo "OK ($STATUS)"
+          done
+
+  # ── Step 2: CLI install ──────────────────────────────────────────────
+  cli-install:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,8 +104,6 @@ jobs:
           mkdir -p fake-releases
           cp wai-v${VERSION}.tar.gz fake-releases/
           cp wai-v${VERSION}.tar.gz.sha256 fake-releases/
-
-          # Serve a fake GitHub releases API response
           echo '[{"tag_name": "cli-v'"${VERSION}"'"}]' > fake-releases/releases.json
 
           cd fake-releases
@@ -61,9 +113,6 @@ jobs:
 
       - name: Extract and patch install script
         run: |
-          # Extract the install script from the Next.js route handler,
-          # evaluate the template literal to produce real bash, and
-          # patch URLs to point at our local release server.
           node <<'NODESCRIPT'
           const fs = require('fs');
           const src = fs.readFileSync('web/app/cli/install.sh/route.ts', 'utf-8');
@@ -90,16 +139,213 @@ jobs:
           export WAI_INSTALL_DIR="$HOME/.local/bin"
           bash /tmp/install.sh
 
-      - name: Verify installation (wai --version)
+      - name: Verify wai --version
         run: |
           export PATH="$HOME/.local/bin:$PATH"
           wai --version
 
       - name: Verify PATH was configured
         run: |
-          grep -q '.local/bin' "$HOME/.bashrc" || echo "PATH entry found in existing PATH"
+          grep -q '.local/bin' "$HOME/.bashrc" || echo "PATH already in PATH"
 
       - name: Cleanup
         if: always()
         run: |
           [ -f /tmp/server.pid ] && kill "$(cat /tmp/server.pid)" || true
+
+  # ── Step 3: Extensions for each harness ──────────────────────────────
+  extensions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Claude Code plugin ───────────────────────────────────────────
+      - name: Validate Claude Code plugin structure
+        run: |
+          echo "Checking plugins/whoami/ structure..."
+
+          # Required files per the plugin spec
+          for f in \
+            plugins/whoami/CLAUDE.md \
+            plugins/whoami/agents/editor.md \
+            plugins/whoami/skills/editorial-guide/SKILL.md \
+          ; do
+            if [ ! -f "$f" ]; then
+              echo "FAIL: missing $f"
+              exit 1
+            fi
+            echo "  ✓ $f"
+          done
+
+          echo "Claude Code plugin structure OK"
+
+      # ── Codex extensions ─────────────────────────────────────────────
+      - name: Test Codex extension setup
+        run: |
+          echo "Simulating: git clone whoami-wiki/extensions && cp -r extensions/codex/.agents .agents"
+
+          git clone --depth 1 https://github.com/whoami-wiki/extensions.git /tmp/extensions
+
+          WORKDIR=$(mktemp -d)
+          cp -r /tmp/extensions/codex/.agents "$WORKDIR/.agents"
+
+          echo "Checking .agents/ directory..."
+          if [ ! -d "$WORKDIR/.agents" ]; then
+            echo "FAIL: .agents/ directory not created"
+            exit 1
+          fi
+
+          # Verify at least one agent file exists
+          AGENT_COUNT=$(find "$WORKDIR/.agents" -type f | wc -l)
+          if [ "$AGENT_COUNT" -eq 0 ]; then
+            echo "FAIL: .agents/ directory is empty"
+            exit 1
+          fi
+
+          echo "  ✓ .agents/ created with $AGENT_COUNT file(s)"
+          find "$WORKDIR/.agents" -type f | while read -r f; do
+            echo "    - ${f#$WORKDIR/}"
+          done
+          echo "Codex extension setup OK"
+
+      # ── OpenCode extensions ──────────────────────────────────────────
+      - name: Test OpenCode extension setup
+        run: |
+          echo "Simulating: cp -r extensions/opencode/.opencode .opencode && cp opencode.json"
+
+          WORKDIR=$(mktemp -d)
+          cp -r /tmp/extensions/opencode/.opencode "$WORKDIR/.opencode"
+          cp /tmp/extensions/opencode/opencode.json "$WORKDIR/opencode.json"
+
+          echo "Checking .opencode/ directory..."
+          if [ ! -d "$WORKDIR/.opencode" ]; then
+            echo "FAIL: .opencode/ directory not created"
+            exit 1
+          fi
+          if [ ! -f "$WORKDIR/opencode.json" ]; then
+            echo "FAIL: opencode.json not created"
+            exit 1
+          fi
+
+          # Validate opencode.json is valid JSON
+          python3 -c "import json; json.load(open('$WORKDIR/opencode.json'))"
+
+          OC_COUNT=$(find "$WORKDIR/.opencode" -type f | wc -l)
+          echo "  ✓ .opencode/ created with $OC_COUNT file(s)"
+          echo "  ✓ opencode.json is valid JSON"
+          find "$WORKDIR/.opencode" -type f | while read -r f; do
+            echo "    - ${f#$WORKDIR/}"
+          done
+          echo "OpenCode extension setup OK"
+
+  # ── Step 4: Setup verification ───────────────────────────────────────
+  verify-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install and build CLI
+        run: pnpm install && pnpm build
+        working-directory: cli
+
+      - name: Start mock MediaWiki API
+        run: |
+          # Lightweight mock that handles the two verification commands:
+          # 1. wai auth status → GET token + POST login
+          # 2. wai search "test" → GET query with list=search
+          node <<'MOCKSERVER' &
+          const http = require('http');
+          const url = require('url');
+
+          http.createServer((req, res) => {
+            const parsed = url.parse(req.url, true);
+            const q = parsed.query;
+            res.setHeader('Content-Type', 'application/json');
+
+            // Only handle /api.php
+            if (!parsed.pathname.endsWith('/api.php') && parsed.pathname !== '/api.php') {
+              res.statusCode = 404;
+              res.end('{}');
+              return;
+            }
+
+            // GET: login token
+            if (req.method === 'GET' && q.action === 'query' && q.meta === 'tokens') {
+              res.end(JSON.stringify({ query: { tokens: { logintoken: 'mock+\\' } } }));
+              return;
+            }
+
+            // GET: search
+            if (req.method === 'GET' && q.action === 'query' && q.list === 'search') {
+              res.end(JSON.stringify({
+                query: {
+                  search: [
+                    { title: 'Test Page', snippet: 'A <span class="searchmatch">test</span> page', wordcount: 42, size: 256 }
+                  ]
+                }
+              }));
+              return;
+            }
+
+            // POST: login (URLSearchParams body)
+            if (req.method === 'POST') {
+              let body = '';
+              req.on('data', c => body += c);
+              req.on('end', () => {
+                const params = new URLSearchParams(body);
+                if (params.get('action') === 'login') {
+                  res.end(JSON.stringify({ login: { result: 'Success', lgusername: params.get('lgname') } }));
+                  return;
+                }
+                res.statusCode = 400;
+                res.end('{}');
+              });
+              return;
+            }
+
+            res.statusCode = 404;
+            res.end('{}');
+          }).listen(8080, () => console.log('Mock MediaWiki API on :8080'));
+          MOCKSERVER
+
+          sleep 1
+
+      - name: "Verify: wai auth status"
+        env:
+          WIKI_SERVER: http://localhost:8080
+          WIKI_USERNAME: TestUser
+          WIKI_PASSWORD: testpass
+        run: |
+          OUTPUT=$(node cli/dist/wai.cjs auth status --json)
+          echo "$OUTPUT"
+
+          STATUS=$(echo "$OUTPUT" | python3 -c "import json,sys; print(json.load(sys.stdin)['status'])")
+          if [ "$STATUS" != "authenticated" ]; then
+            echo "FAIL: expected status 'authenticated', got '$STATUS'"
+            exit 1
+          fi
+          echo "✓ wai auth status: authenticated"
+
+      - name: "Verify: wai search \"test\""
+        env:
+          WIKI_SERVER: http://localhost:8080
+          WIKI_USERNAME: TestUser
+          WIKI_PASSWORD: testpass
+        run: |
+          OUTPUT=$(node cli/dist/wai.cjs search test --json)
+          echo "$OUTPUT"
+
+          COUNT=$(echo "$OUTPUT" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+          if [ "$COUNT" -eq 0 ]; then
+            echo "FAIL: search returned no results"
+            exit 1
+          fi
+          echo "✓ wai search: returned $COUNT result(s)"
