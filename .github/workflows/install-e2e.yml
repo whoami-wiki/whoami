@@ -5,72 +5,25 @@ on:
     branches: [main]
     paths:
       - "cli/**"
-      - "desktop/src/setup.ts"
+      - "desktop/src/**"
       - "desktop/resources/templates/**"
+      - "desktop/test/**"
       - "web/app/cli/install.sh/**"
-      - "web/app/download/**"
       - "plugins/**"
       - ".github/workflows/install-e2e.yml"
   pull_request:
     branches: [main]
     paths:
       - "cli/**"
-      - "desktop/src/setup.ts"
+      - "desktop/src/**"
       - "desktop/resources/templates/**"
+      - "desktop/test/**"
       - "web/app/cli/install.sh/**"
-      - "web/app/download/**"
       - "plugins/**"
       - ".github/workflows/install-e2e.yml"
 
 jobs:
-  # ── Step 1: Desktop app download ─────────────────────────────────────
-  desktop-download:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Verify download page resolves latest desktop release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          RELEASES=$(curl -fsSL "https://api.github.com/repos/whoami-wiki/whoami/releases" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN")
-
-          RELEASE=$(echo "$RELEASES" | python3 -c "
-          import json, sys
-          releases = json.load(sys.stdin)
-          desktop = [r for r in releases if r['tag_name'].startswith('desktop-v')]
-          if not desktop:
-              print('SKIP', file=sys.stderr)
-              sys.exit(0)
-          r = desktop[0]
-          print(f'tag={r[\"tag_name\"]}')
-          dmgs = [a for a in r['assets'] if a['name'].endswith('.dmg')]
-          for a in dmgs:
-              print(f'dmg={a[\"name\"]}')
-              print(f'url={a[\"browser_download_url\"]}')
-          ")
-
-          if [ -z "$RELEASE" ]; then
-            echo "No desktop release exists yet — skipping download checks"
-            exit 0
-          fi
-
-          echo "$RELEASE"
-
-          # Verify each DMG URL is reachable
-          echo "$RELEASE" | grep '^url=' | cut -d= -f2- | while read -r url; do
-            echo "Checking $url ..."
-            STATUS=$(curl -o /dev/null -sIw '%{http_code}' -L "$url")
-            if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 400 ]; then
-              echo "FAIL: $url returned HTTP $STATUS"
-              exit 1
-            fi
-            echo "OK ($STATUS)"
-          done
-
-  # ── Step 2: CLI install ──────────────────────────────────────────────
+  # ── Step 1+2: CLI install ────────────────────────────────────────────
   cli-install:
     runs-on: ubuntu-latest
     steps:
@@ -212,12 +165,12 @@ jobs:
           echo "OK .opencode/ created, opencode.json is valid JSON"
           find "$WORKDIR/.opencode" -type f -printf "  %P\n"
 
-  # ── Steps 1+4: Full setup and verification ───────────────────────────
-  # Replays the desktop app's onboarding flow against a real MediaWiki
-  # instance using system PHP + SQLite — the same stack the desktop app
-  # runs (php -S with router.php), just without the Electron shell.
+  # ── Steps 1+4: Download app, run setup, verify ───────────────────────
+  # Downloads the latest released DMG, installs the app, drives the
+  # setup wizard with Playwright, then verifies the wiki is running
+  # and the CLI can authenticate against it.
   setup-and-verify:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -229,258 +182,59 @@ jobs:
         with:
           version: latest
 
-      - name: Install PHP + extensions
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq php-cli php-sqlite3 php-xml php-mbstring php-intl php-curl
-
-      - name: Bundle MediaWiki (same as desktop build)
-        run: bash desktop/scripts/bundle-mediawiki.sh
-
       - name: Install and build CLI
         run: pnpm install && pnpm build
         working-directory: cli
 
-      - name: "Setup step 1: create database (setup.ts → install)"
+      - name: Download latest desktop release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          DATA_DIR=$(mktemp -d)
-          echo "DATA_DIR=${DATA_DIR}" >> "$GITHUB_ENV"
-          MW_DIR="$PWD/desktop/resources/mediawiki"
-          echo "MW_DIR=${MW_DIR}" >> "$GITHUB_ENV"
+          # Find the latest desktop-v* release and its arm64 DMG
+          RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/whoami-wiki/whoami/releases" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN")
 
-          mkdir -p "$DATA_DIR/images" "$DATA_DIR/cache"
+          DMG_URL=$(echo "$RELEASE_JSON" | python3 -c "
+          import json, sys
+          releases = json.load(sys.stdin)
+          desktop = [r for r in releases if r['tag_name'].startswith('desktop-v')]
+          if not desktop:
+              print('SKIP', file=sys.stderr)
+              sys.exit(1)
+          assets = desktop[0]['assets']
+          dmgs = [a for a in assets if a['name'].endswith('.dmg') and 'arm64' in a['name']]
+          if not dmgs:
+              # Fall back to any DMG
+              dmgs = [a for a in assets if a['name'].endswith('.dmg')]
+          if not dmgs:
+              print('No DMG found', file=sys.stderr)
+              sys.exit(1)
+          print(dmgs[0]['browser_download_url'])
+          ")
 
-          php "$MW_DIR/maintenance/run.php" install \
-            --dbtype sqlite \
-            --dbpath "$DATA_DIR" \
-            --dbname wiki \
-            --scriptpath "" \
-            --pass "TestPassword123" \
-            --server "http://127.0.0.1:8080" \
-            "Whoami Wiki" \
-            "TestUser"
+          echo "Downloading $DMG_URL ..."
+          curl -fsSL -o /tmp/whoami.dmg "$DMG_URL"
+          echo "Downloaded $(du -h /tmp/whoami.dmg | cut -f1)"
 
-          # Remove install-generated LocalSettings (setup.ts does the same)
-          rm -f "$MW_DIR/LocalSettings.php"
-
-      - name: "Setup step 2: generate config (setup.ts → LocalSettings)"
+      - name: Install app from DMG
         run: |
-          # Generate LocalData.php (secrets)
-          SECRET_KEY=$(openssl rand -hex 64)
-          UPGRADE_KEY=$(openssl rand -hex 8)
-          cat > "$DATA_DIR/LocalData.php" <<LOCALDATA
-          <?php
-          \$wgSecretKey = "${SECRET_KEY}";
-          \$wgUpgradeKey = "${UPGRADE_KEY}";
-          LOCALDATA
+          hdiutil attach /tmp/whoami.dmg -nobrowse -quiet
+          cp -R "/Volumes/whoami/whoami.app" /Applications/
+          hdiutil detach "/Volumes/whoami" -quiet
 
-          # Generate LocalSettings.php (mirrors setup.ts generateLocalSettings)
-          cat > "$DATA_DIR/LocalSettings.php" <<LOCALSETTINGS
-          <?php
-          require __DIR__ . '/LocalData.php';
+          # Remove quarantine so macOS doesn't block the unsigned launch
+          xattr -rd com.apple.quarantine /Applications/whoami.app
 
-          ## Core
-          \$wgSitename = "Whoami Wiki";
-          \$wgServer = "http://127.0.0.1:8080";
-          \$wgScriptPath = "";
-          \$wgArticlePath = "/wiki/\$1";
+          echo "Installed to /Applications/whoami.app"
+          echo "Version: $(/Applications/whoami.app/Contents/MacOS/whoami --version 2>/dev/null || echo 'n/a')"
 
-          ## Database (SQLite)
-          \$wgDBtype = "sqlite";
-          \$wgDBname = "wiki";
-          \$wgSQLiteDataDir = "${DATA_DIR}";
+      - name: Install Playwright
+        run: npx playwright install
 
-          ## Paths
-          \$wgUploadDirectory = "${DATA_DIR}/images";
-          \$wgUploadPath = "/images";
-          \$wgCacheDirectory = "${DATA_DIR}/cache";
-
-          ## Security
-          \$wgGroupPermissions['*']['createaccount'] = false;
-          \$wgGroupPermissions['*']['edit'] = false;
-          \$wgGroupPermissions['*']['read'] = true;
-
-          ## Error handling
-          error_reporting( E_ALL & ~E_DEPRECATED & ~E_STRICT );
-          ini_set( 'display_errors', '0' );
-
-          ## Locale
-          \$wgLanguageCode = "en";
-          \$wgLocaltimezone = "UTC";
-
-          ## Uploads
-          \$wgEnableUploads = true;
-          \$wgUseImageMagick = false;
-
-          ## Skin
-          wfLoadSkin( 'Vector' );
-          \$wgDefaultSkin = "vector-2022";
-
-          ## Extensions
-          wfLoadExtension( 'Cite' );
-          wfLoadExtension( 'CiteThisPage' );
-          wfLoadExtension( 'ParserFunctions' );
-          wfLoadExtension( 'TemplateData' );
-          wfLoadExtension( 'TemplateStyles' );
-
-          ## Source namespace (100/101)
-          define("NS_SOURCE", 100);
-          define("NS_SOURCE_TALK", 101);
-          \$wgExtraNamespaces[NS_SOURCE] = "Source";
-          \$wgExtraNamespaces[NS_SOURCE_TALK] = "Source_talk";
-
-          ## Task namespace (102/103)
-          define("NS_TASK", 102);
-          define("NS_TASK_TALK", 103);
-          \$wgExtraNamespaces[NS_TASK] = "Task";
-          \$wgExtraNamespaces[NS_TASK_TALK] = "Task_talk";
-
-          ## Short URLs
-          \$wgUsePathInfo = true;
-
-          ## Performance
-          \$wgMainCacheType = CACHE_NONE;
-          \$wgCachePages = false;
-          \$wgJobRunRate = 1;
-          LOCALSETTINGS
-
-          # Run update.php (setup.ts step 2)
-          php "$MW_DIR/maintenance/run.php" update --quick --conf "$DATA_DIR/LocalSettings.php"
-
-      - name: "Setup step 3: start PHP server (php-server.ts)"
-        run: |
-          # Same as php-server.ts: php -S with router.php
-          MW_DATA_PATH="$DATA_DIR" php -S 127.0.0.1:8080 \
-            -t "$MW_DIR" "$MW_DIR/router.php" &
-          echo $! > /tmp/php.pid
-
-          # Health poll (same as php-server.ts waitForServer)
-          for i in $(seq 1 75); do
-            if curl -sf "http://127.0.0.1:8080/api.php?action=query&meta=siteinfo&format=json" > /dev/null 2>&1; then
-              echo "PHP server ready"
-              exit 0
-            fi
-            sleep 0.2
-          done
-          echo "FAIL: PHP server did not start within 15s"
-          exit 1
-
-      - name: "Setup steps 3-4: create templates, pages (setup.ts onboarding)"
-        run: |
-          node <<'SETUP'
-          const fs = require('fs');
-          const http = require('http');
-
-          const API = 'http://127.0.0.1:8080/api.php';
-          let cookies = [];
-
-          function request(method, params) {
-            return new Promise((resolve, reject) => {
-              const isPost = method === 'POST';
-              const url = isPost ? API : `${API}?${new URLSearchParams(params)}`;
-              const body = isPost ? new URLSearchParams(params).toString() : null;
-              const parsed = new URL(url);
-
-              const req = http.request({
-                hostname: parsed.hostname,
-                port: parsed.port,
-                path: parsed.pathname + parsed.search,
-                method,
-                headers: {
-                  ...(isPost ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
-                  ...(cookies.length ? { Cookie: cookies.join('; ') } : {}),
-                },
-              }, (res) => {
-                const sc = res.headers['set-cookie'];
-                if (sc) {
-                  for (const c of (Array.isArray(sc) ? sc : [sc])) {
-                    const nv = c.split(';')[0];
-                    const name = nv.split('=')[0];
-                    cookies = cookies.filter(x => !x.startsWith(name + '='));
-                    cookies.push(nv);
-                  }
-                }
-                let data = '';
-                res.on('data', d => data += d);
-                res.on('end', () => {
-                  try { resolve(JSON.parse(data)); }
-                  catch { reject(new Error(`Bad JSON: ${data.slice(0, 200)}`)); }
-                });
-              });
-              req.on('error', reject);
-              if (body) req.write(body);
-              req.end();
-            });
-          }
-
-          async function main() {
-            // Login
-            const tokenData = await request('GET', { action: 'query', meta: 'tokens', type: 'login', format: 'json' });
-            const loginToken = tokenData.query.tokens.logintoken;
-
-            const loginResult = await request('POST', {
-              action: 'login', lgname: 'TestUser', lgpassword: 'TestPassword123',
-              lgtoken: loginToken, format: 'json',
-            });
-            if (loginResult.login?.result !== 'Success') {
-              throw new Error('Login failed: ' + JSON.stringify(loginResult));
-            }
-            console.log('Logged in as TestUser');
-
-            // CSRF token
-            const csrfData = await request('GET', { action: 'query', meta: 'tokens', format: 'json' });
-            const csrfToken = csrfData.query.tokens.csrftoken;
-
-            // Create templates (same files setup.ts imports)
-            const templates = [
-              ['Template:Gap', 'desktop/resources/templates/Gap.wiki'],
-              ['Template:Dialogue', 'desktop/resources/templates/Dialogue.wiki'],
-              ['Template:Infobox person', 'desktop/resources/templates/Infobox_person.wiki'],
-              ['MediaWiki:Common.css', 'desktop/resources/templates/infobox-styles.css'],
-            ];
-            for (const [title, file] of templates) {
-              const content = fs.readFileSync(file, 'utf-8');
-              await request('POST', {
-                action: 'edit', title, text: content, summary: 'Initial import',
-                createonly: 'true', token: csrfToken, format: 'json',
-              });
-              console.log('Created ' + title);
-            }
-
-            // Overwrite Main Page
-            const mainContent = fs.readFileSync('desktop/resources/templates/Main_Page.wiki', 'utf-8');
-            await request('POST', {
-              action: 'edit', title: 'Main Page', text: mainContent,
-              summary: 'Initial main page', token: csrfToken, format: 'json',
-            });
-            console.log('Updated Main Page');
-
-            // Create user page + Me redirect (setup.ts step 4)
-            const userName = 'Test User';
-            const namePage = '{{Infobox person\n| name = ' + userName + '\n}}\n\n\x27\x27\x27' + userName + '\x27\x27\x27.\n\n[[Category:People]]';
-            await request('POST', {
-              action: 'edit', title: userName, text: namePage,
-              summary: 'Initial page creation', createonly: 'true',
-              token: csrfToken, format: 'json',
-            });
-            console.log('Created user page: ' + userName);
-
-            await request('POST', {
-              action: 'edit', title: 'Me', text: '#REDIRECT [[' + userName + ']]',
-              summary: 'Redirect to user page', createonly: 'true',
-              token: csrfToken, format: 'json',
-            });
-            console.log('Created Me redirect');
-          }
-
-          main().catch(e => { console.error(e); process.exit(1); });
-          SETUP
-
-      - name: Save credentials (mirrors setup.ts saveCredentials)
-        run: |
-          mkdir -p ~/.whoami
-          echo '{"server":"http://127.0.0.1:8080","username":"TestUser","password":"TestPassword123","role":"owner"}' > ~/.whoami/credentials.json
-          chmod 600 ~/.whoami/credentials.json
+      - name: Run setup e2e test
+        run: node desktop/test/setup-e2e.cjs
+        timeout-minutes: 5
 
       - name: "Verify: wai auth status"
         run: |
@@ -504,44 +258,7 @@ jobs:
           fi
           echo "OK wai search: returned $COUNT result(s)"
 
-      - name: "Verify: Main Page is accessible and has custom content"
-        run: |
-          CONTENT=$(curl -fsSL "http://127.0.0.1:8080/api.php?action=parse&page=Main+Page&format=json")
-          echo "$CONTENT" | python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          html = data['parse']['text']['*']
-          assert 'welcome to your wiki' in html.lower(), 'Main page missing custom content'
-          print('OK Main Page renders correctly')
-          "
-
-      - name: "Verify: Me redirect resolves to user page"
-        run: |
-          CONTENT=$(curl -fsSL "http://127.0.0.1:8080/api.php?action=query&titles=Me&redirects=1&format=json")
-          echo "$CONTENT" | python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          redirects = data['query'].get('redirects', [])
-          assert len(redirects) > 0, 'Me did not redirect'
-          assert redirects[0]['to'] == 'Test User', f'Wrong target: {redirects[0][\"to\"]}'
-          print('OK Me -> Test User')
-          "
-
-      - name: "Verify: user page has infobox and category"
-        run: |
-          RAW=$(curl -fsSL "http://127.0.0.1:8080/api.php?action=query&titles=Test+User&prop=revisions&rvprop=content&rvslots=main&format=json")
-          echo "$RAW" | python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          page = list(data['query']['pages'].values())[0]
-          content = page['revisions'][0]['slots']['main']['*']
-          assert '{{Infobox person' in content, 'Missing infobox'
-          assert 'Test User' in content, 'Missing user name'
-          assert '[[Category:People]]' in content, 'Missing category'
-          print('OK user page: infobox + name + category')
-          "
-
       - name: Cleanup
         if: always()
         run: |
-          [ -f /tmp/php.pid ] && kill "$(cat /tmp/php.pid)" || true
+          [ -f /tmp/whoami-e2e.pid ] && kill "$(cat /tmp/whoami-e2e.pid)" 2>/dev/null || true
