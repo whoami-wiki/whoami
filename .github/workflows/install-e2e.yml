@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "cli/**"
+      - "desktop/src/setup.ts"
+      - "desktop/resources/templates/**"
       - "web/app/cli/install.sh/**"
       - "web/app/download/**"
       - "plugins/**"
@@ -13,6 +15,8 @@ on:
     branches: [main]
     paths:
       - "cli/**"
+      - "desktop/src/setup.ts"
+      - "desktop/resources/templates/**"
       - "web/app/cli/install.sh/**"
       - "web/app/download/**"
       - "plugins/**"
@@ -29,18 +33,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Fetch releases the same way the download page does
           RELEASES=$(curl -fsSL "https://api.github.com/repos/whoami-wiki/whoami/releases" \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: Bearer $GITHUB_TOKEN")
 
-          # Find the latest desktop-v* release (mirrors getLatestDesktopRelease)
           RELEASE=$(echo "$RELEASES" | python3 -c "
           import json, sys
           releases = json.load(sys.stdin)
           desktop = [r for r in releases if r['tag_name'].startswith('desktop-v')]
           if not desktop:
-              print('SKIP: no desktop release found yet', file=sys.stderr)
+              print('SKIP', file=sys.stderr)
               sys.exit(0)
           r = desktop[0]
           print(f'tag={r[\"tag_name\"]}')
@@ -51,13 +53,13 @@ jobs:
           ")
 
           if [ -z "$RELEASE" ]; then
-            echo "⚠ No desktop release exists yet — skipping download checks"
+            echo "No desktop release exists yet — skipping download checks"
             exit 0
           fi
 
           echo "$RELEASE"
 
-          # Verify each DMG URL is reachable (HEAD request)
+          # Verify each DMG URL is reachable
           echo "$RELEASE" | grep '^url=' | cut -d= -f2- | while read -r url; do
             echo "Checking $url ..."
             STATUS=$(curl -o /dev/null -sIw '%{http_code}' -L "$url")
@@ -159,12 +161,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ── Claude Code plugin ───────────────────────────────────────────
+      # Claude Code plugin
       - name: Validate Claude Code plugin structure
         run: |
           echo "Checking plugins/whoami/ structure..."
-
-          # Required files per the plugin spec
           for f in \
             plugins/whoami/CLAUDE.md \
             plugins/whoami/agents/editor.md \
@@ -174,73 +174,60 @@ jobs:
               echo "FAIL: missing $f"
               exit 1
             fi
-            echo "  ✓ $f"
+            echo "  OK $f"
           done
 
-          echo "Claude Code plugin structure OK"
+      # Codex + OpenCode (from extensions repo)
+      - name: Clone extensions repo
+        run: git clone --depth 1 https://github.com/whoami-wiki/extensions.git /tmp/extensions
 
-      # ── Codex extensions ─────────────────────────────────────────────
       - name: Test Codex extension setup
         run: |
-          echo "Simulating: git clone whoami-wiki/extensions && cp -r extensions/codex/.agents .agents"
-
-          git clone --depth 1 https://github.com/whoami-wiki/extensions.git /tmp/extensions
-
           WORKDIR=$(mktemp -d)
           cp -r /tmp/extensions/codex/.agents "$WORKDIR/.agents"
 
-          echo "Checking .agents/ directory..."
           if [ ! -d "$WORKDIR/.agents" ]; then
             echo "FAIL: .agents/ directory not created"
             exit 1
           fi
-
-          # Verify at least one agent file exists
           AGENT_COUNT=$(find "$WORKDIR/.agents" -type f | wc -l)
           if [ "$AGENT_COUNT" -eq 0 ]; then
             echo "FAIL: .agents/ directory is empty"
             exit 1
           fi
+          echo "OK .agents/ has $AGENT_COUNT file(s)"
+          find "$WORKDIR/.agents" -type f -printf "  %P\n"
 
-          echo "  ✓ .agents/ created with $AGENT_COUNT file(s)"
-          find "$WORKDIR/.agents" -type f | while read -r f; do
-            echo "    - ${f#$WORKDIR/}"
-          done
-          echo "Codex extension setup OK"
-
-      # ── OpenCode extensions ──────────────────────────────────────────
       - name: Test OpenCode extension setup
         run: |
-          echo "Simulating: cp -r extensions/opencode/.opencode .opencode && cp opencode.json"
-
           WORKDIR=$(mktemp -d)
           cp -r /tmp/extensions/opencode/.opencode "$WORKDIR/.opencode"
           cp /tmp/extensions/opencode/opencode.json "$WORKDIR/opencode.json"
 
-          echo "Checking .opencode/ directory..."
           if [ ! -d "$WORKDIR/.opencode" ]; then
             echo "FAIL: .opencode/ directory not created"
             exit 1
           fi
-          if [ ! -f "$WORKDIR/opencode.json" ]; then
-            echo "FAIL: opencode.json not created"
-            exit 1
-          fi
-
-          # Validate opencode.json is valid JSON
           python3 -c "import json; json.load(open('$WORKDIR/opencode.json'))"
+          echo "OK .opencode/ created, opencode.json is valid JSON"
+          find "$WORKDIR/.opencode" -type f -printf "  %P\n"
 
-          OC_COUNT=$(find "$WORKDIR/.opencode" -type f | wc -l)
-          echo "  ✓ .opencode/ created with $OC_COUNT file(s)"
-          echo "  ✓ opencode.json is valid JSON"
-          find "$WORKDIR/.opencode" -type f | while read -r f; do
-            echo "    - ${f#$WORKDIR/}"
-          done
-          echo "OpenCode extension setup OK"
-
-  # ── Step 4: Setup verification ───────────────────────────────────────
-  verify-setup:
+  # ── Steps 1+4: Full setup and verification ───────────────────────────
+  # Replays the desktop app's onboarding flow (setup.ts) against a real
+  # MediaWiki instance, then verifies the CLI can auth and search.
+  setup-and-verify:
     runs-on: ubuntu-latest
+    services:
+      mediawiki:
+        image: mediawiki:1.42
+        ports:
+          - 8080:80
+        options: >-
+          --health-cmd "curl -sf http://localhost/api.php?action=query&meta=siteinfo&format=json || exit 1"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v4
 
@@ -256,96 +243,225 @@ jobs:
         run: pnpm install && pnpm build
         working-directory: cli
 
-      - name: Start mock MediaWiki API
+      - name: Run MediaWiki install (database setup)
         run: |
-          # Lightweight mock that handles the two verification commands:
-          # 1. wai auth status → GET token + POST login
-          # 2. wai search "test" → GET query with list=search
-          node <<'MOCKSERVER' &
+          # Install MediaWiki with SQLite, mirroring setup.ts step 1
+          docker exec ${{ job.services.mediawiki.id }} php maintenance/run.php install \
+            --dbtype sqlite \
+            --dbpath /var/www/data \
+            --dbname wiki \
+            --scriptpath "" \
+            --pass "TestPassword123" \
+            --server "http://localhost:8080" \
+            "Whoami Wiki" \
+            "TestUser"
+
+      - name: Wait for wiki to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf "http://localhost:8080/api.php?action=query&meta=siteinfo&format=json" > /dev/null 2>&1; then
+              echo "Wiki is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "FAIL: wiki did not become ready"
+          exit 1
+
+      - name: Run onboarding setup (mirrors setup.ts steps 3-4)
+        run: |
+          # Replay the same API calls that setup.ts makes after DB init:
+          # login, create templates, import styles, set up Main Page, create user page + Me redirect
+          node <<'SETUP'
+          const fs = require('fs');
           const http = require('http');
-          const url = require('url');
 
-          http.createServer((req, res) => {
-            const parsed = url.parse(req.url, true);
-            const q = parsed.query;
-            res.setHeader('Content-Type', 'application/json');
+          const API = 'http://localhost:8080/api.php';
+          let cookies = [];
 
-            // Only handle /api.php
-            if (!parsed.pathname.endsWith('/api.php') && parsed.pathname !== '/api.php') {
-              res.statusCode = 404;
-              res.end('{}');
-              return;
-            }
+          function request(method, params) {
+            return new Promise((resolve, reject) => {
+              const isPost = method === 'POST';
+              const url = isPost ? API : `${API}?${new URLSearchParams(params)}`;
+              const body = isPost ? new URLSearchParams(params).toString() : null;
+              const parsed = new URL(url);
 
-            // GET: login token
-            if (req.method === 'GET' && q.action === 'query' && q.meta === 'tokens') {
-              res.end(JSON.stringify({ query: { tokens: { logintoken: 'mock+\\' } } }));
-              return;
-            }
-
-            // GET: search
-            if (req.method === 'GET' && q.action === 'query' && q.list === 'search') {
-              res.end(JSON.stringify({
-                query: {
-                  search: [
-                    { title: 'Test Page', snippet: 'A <span class="searchmatch">test</span> page', wordcount: 42, size: 256 }
-                  ]
+              const req = http.request({
+                hostname: parsed.hostname,
+                port: parsed.port,
+                path: parsed.pathname + parsed.search,
+                method,
+                headers: {
+                  ...(isPost ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
+                  ...(cookies.length ? { Cookie: cookies.join('; ') } : {}),
+                },
+              }, (res) => {
+                // Capture session cookies
+                const sc = res.headers['set-cookie'];
+                if (sc) {
+                  for (const c of (Array.isArray(sc) ? sc : [sc])) {
+                    const nv = c.split(';')[0];
+                    const name = nv.split('=')[0];
+                    cookies = cookies.filter(x => !x.startsWith(name + '='));
+                    cookies.push(nv);
+                  }
                 }
-              }));
-              return;
-            }
-
-            // POST: login (URLSearchParams body)
-            if (req.method === 'POST') {
-              let body = '';
-              req.on('data', c => body += c);
-              req.on('end', () => {
-                const params = new URLSearchParams(body);
-                if (params.get('action') === 'login') {
-                  res.end(JSON.stringify({ login: { result: 'Success', lgusername: params.get('lgname') } }));
-                  return;
-                }
-                res.statusCode = 400;
-                res.end('{}');
+                let data = '';
+                res.on('data', d => data += d);
+                res.on('end', () => {
+                  try { resolve(JSON.parse(data)); }
+                  catch { reject(new Error(`Bad JSON: ${data.slice(0, 200)}`)); }
+                });
               });
-              return;
+              req.on('error', reject);
+              if (body) req.write(body);
+              req.end();
+            });
+          }
+
+          async function main() {
+            // Login (same as setup.ts)
+            const tokenData = await request('GET', { action: 'query', meta: 'tokens', type: 'login', format: 'json' });
+            const loginToken = tokenData.query.tokens.logintoken;
+
+            const loginResult = await request('POST', {
+              action: 'login', lgname: 'TestUser', lgpassword: 'TestPassword123',
+              lgtoken: loginToken, format: 'json',
+            });
+            if (loginResult.login?.result !== 'Success') {
+              throw new Error('Login failed: ' + JSON.stringify(loginResult));
+            }
+            console.log('Logged in as TestUser');
+
+            // Get CSRF token
+            const csrfData = await request('GET', { action: 'query', meta: 'tokens', format: 'json' });
+            const csrfToken = csrfData.query.tokens.csrftoken;
+
+            // Create templates (same files setup.ts imports)
+            const templates = [
+              ['Template:Gap', 'desktop/resources/templates/Gap.wiki'],
+              ['Template:Dialogue', 'desktop/resources/templates/Dialogue.wiki'],
+              ['Template:Infobox person', 'desktop/resources/templates/Infobox_person.wiki'],
+              ['MediaWiki:Common.css', 'desktop/resources/templates/infobox-styles.css'],
+            ];
+            for (const [title, file] of templates) {
+              const content = fs.readFileSync(file, 'utf-8');
+              await request('POST', {
+                action: 'edit', title, text: content, summary: 'Initial import',
+                createonly: 'true', token: csrfToken, format: 'json',
+              });
+              console.log(`Created ${title}`);
             }
 
-            res.statusCode = 404;
-            res.end('{}');
-          }).listen(8080, () => console.log('Mock MediaWiki API on :8080'));
-          MOCKSERVER
+            // Overwrite Main Page (setup.ts uses editPage for this)
+            const mainContent = fs.readFileSync('desktop/resources/templates/Main_Page.wiki', 'utf-8');
+            await request('POST', {
+              action: 'edit', title: 'Main Page', text: mainContent,
+              summary: 'Initial main page', token: csrfToken, format: 'json',
+            });
+            console.log('Updated Main Page');
 
-          sleep 1
+            // Create user page + Me redirect (setup.ts step 4)
+            const userName = 'Test User';
+            const namePage = '{{Infobox person\n| name = ' + userName + '\n}}\n\n\x27\x27\x27' + userName + '\x27\x27\x27.\n\n[[Category:People]]';
+            await request('POST', {
+              action: 'edit', title: userName, text: namePage,
+              summary: 'Initial page creation', createonly: 'true',
+              token: csrfToken, format: 'json',
+            });
+            console.log('Created user page: ' + userName);
+
+            await request('POST', {
+              action: 'edit', title: 'Me', text: '#REDIRECT [[' + userName + ']]',
+              summary: 'Redirect to user page', createonly: 'true',
+              token: csrfToken, format: 'json',
+            });
+            console.log('Created Me redirect');
+          }
+
+          main().catch(e => { console.error(e); process.exit(1); });
+          SETUP
+
+      - name: Save credentials (mirrors setup.ts)
+        run: |
+          mkdir -p ~/.whoami
+          cat > ~/.whoami/credentials.json <<'EOF'
+          {
+            "server": "http://localhost:8080",
+            "username": "TestUser",
+            "password": "TestPassword123",
+            "role": "owner"
+          }
+          EOF
+          chmod 600 ~/.whoami/credentials.json
 
       - name: "Verify: wai auth status"
-        env:
-          WIKI_SERVER: http://localhost:8080
-          WIKI_USERNAME: TestUser
-          WIKI_PASSWORD: testpass
         run: |
           OUTPUT=$(node cli/dist/wai.cjs auth status --json)
           echo "$OUTPUT"
-
           STATUS=$(echo "$OUTPUT" | python3 -c "import json,sys; print(json.load(sys.stdin)['status'])")
           if [ "$STATUS" != "authenticated" ]; then
-            echo "FAIL: expected status 'authenticated', got '$STATUS'"
+            echo "FAIL: expected 'authenticated', got '$STATUS'"
             exit 1
           fi
-          echo "✓ wai auth status: authenticated"
+          echo "OK wai auth status: authenticated"
 
       - name: "Verify: wai search \"test\""
-        env:
-          WIKI_SERVER: http://localhost:8080
-          WIKI_USERNAME: TestUser
-          WIKI_PASSWORD: testpass
         run: |
           OUTPUT=$(node cli/dist/wai.cjs search test --json)
           echo "$OUTPUT"
-
           COUNT=$(echo "$OUTPUT" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
           if [ "$COUNT" -eq 0 ]; then
             echo "FAIL: search returned no results"
             exit 1
           fi
-          echo "✓ wai search: returned $COUNT result(s)"
+          echo "OK wai search: returned $COUNT result(s)"
+
+      - name: "Verify: Main Page is accessible"
+        run: |
+          CONTENT=$(curl -fsSL "http://localhost:8080/api.php?action=parse&page=Main+Page&format=json")
+          echo "$CONTENT" | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          title = data['parse']['title']
+          html = data['parse']['text']['*']
+          assert title == 'Main Page', f'Wrong title: {title}'
+          assert 'welcome to your wiki' in html.lower(), 'Main page content missing'
+          print('OK Main Page renders correctly')
+          "
+
+      - name: "Verify: Me redirect works"
+        run: |
+          CONTENT=$(curl -fsSL "http://localhost:8080/api.php?action=query&titles=Me&redirects=1&format=json")
+          echo "$CONTENT" | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          redirects = data['query'].get('redirects', [])
+          assert len(redirects) > 0, 'Me did not redirect'
+          assert redirects[0]['to'] == 'Test User', f'Wrong redirect target: {redirects[0][\"to\"]}'
+          print('OK Me -> Test User redirect works')
+          "
+
+      - name: "Verify: user page has infobox"
+        run: |
+          CONTENT=$(curl -fsSL "http://localhost:8080/api.php?action=parse&page=Test+User&format=json")
+          echo "$CONTENT" | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          wikitext = data['parse'].get('wikitext', {}).get('*', '')
+          # Check via the raw content API instead
+          " || true
+
+          # Check raw wikitext
+          RAW=$(curl -fsSL "http://localhost:8080/api.php?action=query&titles=Test+User&prop=revisions&rvprop=content&rvslots=main&format=json")
+          echo "$RAW" | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          pages = data['query']['pages']
+          page = list(pages.values())[0]
+          content = page['revisions'][0]['slots']['main']['*']
+          assert '{{Infobox person' in content, 'Missing infobox template'
+          assert 'Test User' in content, 'Missing user name'
+          assert '[[Category:People]]' in content, 'Missing category'
+          print('OK user page has infobox, name, and category')
+          "
