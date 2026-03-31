@@ -227,7 +227,8 @@ jobs:
           xattr -rd com.apple.quarantine /Applications/whoami.app
 
           echo "Installed to /Applications/whoami.app"
-          echo "Version: $(/Applications/whoami.app/Contents/MacOS/whoami --version 2>/dev/null || echo 'n/a')"
+          # Read version from Info.plist (don't launch the Electron binary directly)
+          echo "Version: $(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' /Applications/whoami.app/Contents/Info.plist)"
 
       - name: Install Playwright
         run: npx playwright install
