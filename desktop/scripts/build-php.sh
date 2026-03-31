@@ -112,11 +112,11 @@ if [ "$STATIC" = true ]; then
 
   # Download PHP sources and extension dependencies
   echo "==> Downloading PHP 8.3 sources..."
-  "$SPC" download --with-php=8.3 --for-extensions="$EXTENSIONS" --prefer-pre-built
+  "$SPC" download --with-php=8.3 --for-extensions="$EXTENSIONS" --for-libs="libjpeg" --prefer-pre-built
 
   # Build static PHP CLI
   echo "==> Compiling static PHP CLI..."
-  "$SPC" build "$EXTENSIONS" --build-cli
+  "$SPC" build "$EXTENSIONS" --build-cli --with-libs="libjpeg"
 
   # Copy the resulting binary
   cp buildroot/bin/php "$OUT/bin/php"
