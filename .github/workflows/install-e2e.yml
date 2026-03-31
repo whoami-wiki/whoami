@@ -25,7 +25,7 @@ on:
 jobs:
   # ── Step 1+2: CLI install ────────────────────────────────────────────
   cli-install:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -51,7 +51,7 @@ jobs:
           mkdir -p "wai-v${VERSION}/bin"
           cp cli/dist/wai.cjs "wai-v${VERSION}/bin/wai"
           tar -czf "wai-v${VERSION}.tar.gz" "wai-v${VERSION}"
-          sha256sum "wai-v${VERSION}.tar.gz" > "wai-v${VERSION}.tar.gz.sha256"
+          shasum -a 256 "wai-v${VERSION}.tar.gz" > "wai-v${VERSION}.tar.gz.sha256"
           echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
 
       - name: Start local release server
@@ -101,7 +101,7 @@ jobs:
 
       - name: Verify PATH was configured
         run: |
-          grep -q '.local/bin' "$HOME/.bashrc" || echo "PATH already in PATH"
+          grep -q '.local/bin' "$HOME/.zshrc" || echo "PATH already in PATH"
 
       - name: Cleanup
         if: always()
@@ -110,7 +110,7 @@ jobs:
 
   # ── Step 3: Extensions for each harness ──────────────────────────────
   extensions:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -149,7 +149,7 @@ jobs:
             exit 1
           fi
           echo "OK .agents/ has $AGENT_COUNT file(s)"
-          find "$WORKDIR/.agents" -type f -printf "  %P\n"
+          find "$WORKDIR/.agents" -type f | sed "s|$WORKDIR/||"
 
       - name: Test OpenCode extension setup
         run: |
@@ -163,7 +163,7 @@ jobs:
           fi
           python3 -c "import json; json.load(open('$WORKDIR/opencode.json'))"
           echo "OK .opencode/ created, opencode.json is valid JSON"
-          find "$WORKDIR/.opencode" -type f -printf "  %P\n"
+          find "$WORKDIR/.opencode" -type f | sed "s|$WORKDIR/||"
 
   # ── Steps 1+4: Download app, run setup, verify ───────────────────────
   # Downloads the latest released DMG, installs the app, drives the
