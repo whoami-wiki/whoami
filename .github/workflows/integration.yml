@@ -1,0 +1,51 @@
+name: Integration
+
+on:
+  push:
+    paths:
+      - 'desktop/**'
+      - 'cli/**'
+      - 'package.json'
+  pull_request:
+    paths:
+      - 'desktop/**'
+      - 'cli/**'
+      - 'package.json'
+
+jobs:
+  e2e:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install desktop dependencies
+        run: pnpm install
+        working-directory: desktop
+
+      - name: Build desktop app
+        run: pnpm build
+        working-directory: desktop
+
+      - name: Install CLI dependencies
+        run: pnpm install
+        working-directory: cli
+
+      - name: Build CLI
+        run: pnpm build
+        working-directory: cli
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+        working-directory: desktop
+
+      - name: Run integration tests
+        run: pnpm test:integration
+        working-directory: desktop

@@ -9,7 +9,9 @@
     "build:renderer": "vite build",
     "bundle-deps": "bash scripts/build-php.sh && bash scripts/bundle-mediawiki.sh && bash scripts/bundle-lua.sh && bash scripts/bundle-ffmpeg.sh",
     "dist": "tsc && vite build && electron-builder",
-    "reset": "rm -rf \"$HOME/Library/Application Support/whoami/data\""
+    "reset": "rm -rf \"$HOME/Library/Application Support/whoami/data\"",
+    "test:e2e": "npx playwright test --config playwright.config.ts e2e/install-flow.spec.ts",
+    "test:integration": "npx playwright test --config playwright.config.ts e2e/integration.spec.ts"
   },
   "dependencies": {
     "electron-updater": "^6.3.0",
@@ -22,6 +24,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

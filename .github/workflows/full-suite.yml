@@ -1,0 +1,134 @@
+name: Full Suite
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * *'  # daily at 6am UTC
+
+jobs:
+  cli-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install
+        run: pnpm install
+        working-directory: cli
+
+      - name: Unit tests
+        run: pnpm test
+        working-directory: cli
+
+  cli-install:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: cli
+
+      - name: Run install/build tests
+        run: bash test/install.test.sh
+        working-directory: cli
+
+  extensions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate extensions
+        run: npx tsx --test plugins/test/extensions.test.ts
+
+  desktop-e2e:
+    strategy:
+      matrix:
+        os: [macos-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: desktop
+
+      - name: Build desktop app
+        run: pnpm build
+        working-directory: desktop
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+        working-directory: desktop
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        working-directory: desktop
+
+  integration:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install desktop dependencies
+        run: pnpm install
+        working-directory: desktop
+
+      - name: Build desktop app
+        run: pnpm build
+        working-directory: desktop
+
+      - name: Install CLI dependencies
+        run: pnpm install
+        working-directory: cli
+
+      - name: Build CLI
+        run: pnpm build
+        working-directory: cli
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+        working-directory: desktop
+
+      - name: Run integration tests
+        run: pnpm test:integration
+        working-directory: desktop
