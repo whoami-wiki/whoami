@@ -1,13 +1,15 @@
-import { describe, it, beforeEach, afterEach } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { join } from 'node:path';
+import { execSync } from 'node:child_process';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
-const CLI_ENTRY = join(import.meta.dirname, '..', 'src', 'index.ts');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const CLI_DIR = join(__dirname, '..');
 
 function runCli(args: string[], extraEnv?: Record<string, string>): { stdout: string; stderr: string; exitCode: number } {
   // Build a clean env without wiki credentials
@@ -16,11 +18,14 @@ function runCli(args: string[], extraEnv?: Record<string, string>): { stdout: st
   delete env.WIKI_USERNAME;
   delete env.WIKI_PASSWORD;
 
+  const cmd = `node dist/wai.cjs ${args.map(a => JSON.stringify(a)).join(' ')}`;
   try {
-    const stdout = execFileSync('tsx', [CLI_ENTRY, ...args], {
+    const stdout = execSync(cmd, {
       encoding: 'utf-8',
       timeout: 10_000,
+      cwd: CLI_DIR,
       env,
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
     return { stdout, stderr: '', exitCode: 0 };
   } catch (err: any) {

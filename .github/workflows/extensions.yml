@@ -16,5 +16,8 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install tsx
+        run: npm install -g tsx
+
       - name: Validate plugin structure and content
-        run: npx tsx --test plugins/test/extensions.test.ts
+        run: tsx --test plugins/test/extensions.test.ts

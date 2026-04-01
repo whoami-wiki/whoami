@@ -24,6 +24,10 @@ jobs:
         run: pnpm install
         working-directory: cli
 
+      - name: Build
+        run: pnpm build
+        working-directory: cli
+
       - name: Unit tests
         run: pnpm test
         working-directory: cli

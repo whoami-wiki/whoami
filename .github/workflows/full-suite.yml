@@ -24,6 +24,10 @@ jobs:
         run: pnpm install
         working-directory: cli
 
+      - name: Build
+        run: pnpm build
+        working-directory: cli
+
       - name: Unit tests
         run: pnpm test
         working-directory: cli
@@ -61,8 +65,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install tsx
+        run: npm install -g tsx
+
       - name: Validate extensions
-        run: npx tsx --test plugins/test/extensions.test.ts
+        run: tsx --test plugins/test/extensions.test.ts
 
   desktop-e2e:
     strategy:
