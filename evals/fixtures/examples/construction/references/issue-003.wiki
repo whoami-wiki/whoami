@@ -1,0 +1,45 @@
+{{Infobox issue
+| id            = 003
+| type          = Missing Specification
+| severity      = Moderate
+| status        = Open
+| areas         = [[Area 03 — Primary Clarifiers]]
+| disciplines   = Civil, Geotechnical
+| discovered    = 2026-02-13
+| discovered_by = Agent (Task:0006)
+| drawings      = [[Drawing:C-301]]
+| specs         = [[Spec:01 10 00]]
+}}
+
+Issue 003 identifies a gap in the contract documents where dewatering is required but no dewatering specification section exists.
+
+== Description ==
+
+During geotech integration for Area 03, the Geotechnical Investigation Report (GeoEngineers, 2025-03-15, p. 18) was found to document groundwater at elevation 38.5 in the clarifier area.<ref name="geotech-gw">{{Cite document|title=Geotechnical Investigation Report|author=GeoEngineers|date=2025-03-15|page=18|note=Groundwater elevation at Area 03}}</ref> The proposed bottom of excavation for clarifier foundations is at approximately elevation 34.5 (top of structural fill below the 18-inch mat slab), placing the excavation approximately 4 feet below the water table.
+
+Specification Section 01 10 00 (Summary of Work), Paragraph 3.4.B states that "dewatering is required per the geotechnical report" but no standalone dewatering specification section (commonly CSI 31 23 19 — Dewatering) was found in the contract documents.<ref name="spec-summary">{{Cite spec|section=01 10 00|paragraph=3.4.B|title=Summary of Work}}</ref>
+
+This means the contractor has a contractual obligation to dewater but no specification defining the method, monitoring, or disposal requirements.
+
+== Impact ==
+
+* '''Schedule:''' Dewatering is on the critical path for clarifier construction. Without a clear specification, the contractor's dewatering plan cannot be reviewed against project requirements, potentially delaying foundation work.
+* '''Quality:''' Inadequate dewatering can cause foundation bearing capacity reduction, piping of fines, and settlement. The geotech report (p. 23) specifies an allowable bearing pressure of 4,000 PSF that assumes a dewatered condition.<ref name="geotech-bearing">{{Cite document|title=Geotechnical Investigation Report|author=GeoEngineers|date=2025-03-15|page=23|note=Bearing pressure assumes dewatered excavation}}</ref>
+* '''Cost:''' Dewatering scope and method may become a change order issue if the contractor argues the contract documents are insufficient to establish the dewatering requirements.
+* '''Environmental:''' Dewatering discharge may require permits (NPDES) depending on local requirements. This is not addressed in the contract documents.
+
+== Recommended Action ==
+
+# Issue an RFI requesting the Engineer to provide dewatering requirements or confirm that the contractor should treat dewatering as means and methods under Spec 01 10 00.
+# If treated as means and methods, the contractor should be required to submit a dewatering plan including: method (well points, sumps, or deep wells), monitoring plan (piezometers, settlement monitoring), discharge plan (location and treatment if needed), and contingency plan.
+# The geotechnical engineer should review and approve the dewatering plan before excavation begins.
+
+== Resolution ==
+
+Pending. No RFI submitted yet.
+
+== References ==
+<references />
+
+[[Category:Open issues]]
+[[Category:Area 03]]

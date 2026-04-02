@@ -1,0 +1,68 @@
+{{Infobox equipment
+| name         = Primary Sludge Pump PS-301A
+| tag          = PS-301A
+| type         = Centrifugal non-clog pump
+| area         = [[Area 03 — Primary Clarifiers]]
+| capacity     = 500 GPM at 30 ft TDH
+| motor        = 25 HP, 460V/3Ph/60Hz
+| power        = 25 HP
+| spec_section = [[Spec:43 21 00]]
+| submittal    = Pending ([[Construction:SUB-432100-001]])
+| status       = Not yet submitted
+}}
+
+PS-301A is the duty primary sludge pump serving Clarifiers 1 and 2 at [[Area 03 — Primary Clarifiers]]. It is paired with PS-301B (standby) to provide redundant sludge pumping from the center hoppers of the two clarifiers.
+
+== Design Parameters ==
+
+{| class="wikitable"
+|-
+! Parameter !! Value !! Source
+|-
+| Flow rate || 500 GPM || Spec 43 21 00, Para 2.2.A<ref name="spec-pump">{{Cite spec|section=43 21 00|paragraph=2.2.A|title=Centrifugal Sewage Pumps}}</ref>
+|-
+| Total dynamic head || 30 ft || Spec 43 21 00, Para 2.2.A
+|-
+| Motor || 25 HP, 460V/3Ph/60Hz || Spec 43 21 00, Para 2.2.B
+|-
+| Impeller type || Non-clog, open || Spec 43 21 00, Para 2.3.A
+|-
+| Minimum solids passage || 3 inches || Spec 43 21 00, Para 2.3.B
+|-
+| Seal type || Mechanical, double || Spec 43 21 00, Para 2.4.A
+|-
+| Material — casing || Cast iron, ASTM A48 Class 30 || Spec 43 21 00, Para 2.5.A
+|-
+| Material — impeller || Ductile iron, ASTM A536 || Spec 43 21 00, Para 2.5.B
+|-
+| Material — shaft || 416 stainless steel || Spec 43 21 00, Para 2.5.C
+|}
+
+== Location ==
+
+PS-301A is located in the sludge pump vault between Clarifiers 1 and 2, at approximate station 12+50 per [[Drawing:M-401]].<ref name="dwg-m-401">{{Cite drawing|number=M-401|rev=2|date=2025-11-15|title=Primary Clarifier Mechanical Plan}}</ref> Suction piping connects to the center hopper of each clarifier via 8-inch sludge withdrawal lines with isolation valves. Discharge connects to the 8-inch sludge force main running to [[Area 09 — Solids Handling]].
+
+== Electrical ==
+
+Power is fed from MCC-3 in the operations building via a dedicated VFD for speed control.<ref name="dwg-e-301">{{Cite drawing|number=E-301|rev=2|date=2025-11-15|title=Area 03 Electrical Single Line}}</ref> Emergency power is available via the standby generator.
+
+== Controls ==
+
+The pump is controlled by the sludge blanket level detector (ultrasonic) on the associated clarifier. Automatic operation adjusts pump runtime based on blanket depth. Manual override is available at the local control panel and from the SCADA system.<ref name="dwg-i-301">{{Cite drawing|number=I-301|rev=1|date=2025-11-15|title=Area 03 P&ID}}</ref>
+
+Alarm setpoints:
+* Sludge blanket high: 6 feet (start pump if not running)
+* Sludge blanket high-high: 8 feet (alarm to SCADA)
+* Pump seal leak: alarm to SCADA
+* Motor overtemperature: alarm and trip
+
+== Submittal Status ==
+
+The equipment submittal ([[Construction:SUB-432100-001]]) has not yet been received. All parameters listed above are from the specification requirements only. Manufacturer, model number, and certified performance data will be added when the submittal is reviewed.
+
+== References ==
+<references />
+
+[[Category:Equipment]]
+[[Category:Area 03]]
+[[Category:Mechanical]]

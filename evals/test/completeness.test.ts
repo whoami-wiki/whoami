@@ -283,7 +283,10 @@ See also: [[Jane Doe]]
 });
 
 describe('completeness grader — talk role', () => {
-  const TALK_PAGE = `== Editorial decisions ==
+  const TALK_PAGE = `== Verification status ==
+{{Verification|status=complete|last_verified=2026-02-15}}
+
+== Editorial decisions ==
 
 {{Closed}} Decided to focus on the Bangalore period.
 
@@ -299,13 +302,13 @@ Key findings from source review.
   it('scores 1.0 for a complete talk page', () => {
     const result = gradeCompleteness(TALK_PAGE, { role: 'talk' });
     assert.equal(result.score, 1, `Failed checks: ${result.details.filter((d) => !d.passed).map((d) => d.check).join(', ')}`);
-    assert.equal(result.details.length, 5);
+    assert.equal(result.details.length, 6);
     assert.ok(result.details.every((d) => d.passed));
   });
 
-  it('has 5 checks for talk role', () => {
+  it('has 6 checks for talk role', () => {
     const result = gradeCompleteness('', { role: 'talk' });
-    assert.equal(result.details.length, 5);
+    assert.equal(result.details.length, 6);
   });
 
   it('detects missing section heading', () => {

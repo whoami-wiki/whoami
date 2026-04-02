@@ -1,0 +1,63 @@
+<div style="max-width: 52em;">
+
+== Project Dashboard ==
+
+{| class="wikitable" style="width:100%"
+|-
+! Status !! Count
+|-
+| '''Areas documented''' || ''Use [[Special:AllPages|All Pages]] (namespace: Main) to see area pages''
+|-
+| '''Open Issues''' || ''See [[:Category:Open issues]]''
+|-
+| '''Pending Submittals''' || ''See [[:Category:Submittals]] or the [[Submittal Log]]''
+|-
+| '''Active RFIs''' || ''See [[:Category:RFIs]]''
+|}
+
+== Quick Navigation ==
+
+=== By Area ===
+''Area pages are created as drawings and specifications are analyzed. See [[:Category:Process Areas]] for the full list.''
+
+=== By Discipline ===
+* [[:Category:Civil]] — Site work, grading, piping
+* [[:Category:Structural]] — Foundations, walls, slabs
+* [[:Category:Mechanical]] — Equipment, pumps, HVAC
+* [[:Category:Electrical]] — Power distribution, lighting, grounding
+* [[:Category:Instrumentation]] — Controls, P&IDs, instrumentation
+
+=== Key Pages ===
+* [[Project Standards]] — Submittal procedures, RFI procedures, document precedence
+* [[Submittal Log]] — Tracks all required submittals and their status
+* [[Drawing Index]] — Master list of contract drawings
+
+== Getting Started ==
+
+This wiki is built from contract documents — drawings, specifications, geotechnical reports, and construction-phase documents (RFIs, submittals, field directives). The agent analyzes these documents and creates interlinked wiki pages with full source traceability.
+
+=== How it works ===
+
+# '''Ingest documents''' — Point the agent at PDF volumes. It splits, catalogs, and queues them for analysis.
+# '''Agent analyzes''' — Each drawing or spec is analyzed following a structured protocol and turned into wiki pages with citations.
+# '''Track changes''' — As RFIs, submittals, and field directives arrive, the agent updates affected pages and maintains a traceability chain.
+# '''Verify''' — Periodic verification cycles check that wiki content matches current document revisions.
+
+=== Key concepts ===
+
+* '''Every fact has a citation''' — dimensions, elevations, material specs all trace back to a specific drawing, spec paragraph, or construction document.
+* '''Talk pages track confidence''' — each page has a verification status (complete, in-progress, not-started) and lists active gaps where information is uncertain or missing.
+* '''Issues are project-level''' — drawing conflicts, spec ambiguities, and risk items are tracked as Issue pages so they can be resolved before construction reaches that work item.
+* '''Red links are expected''' — they indicate pages that haven't been created yet. As more documents are analyzed, red links turn blue.
+
+== Recent Activity ==
+
+See [[Special:RecentChanges]] for the latest wiki updates.
+
+== Need help? ==
+
+* Use <code>/</code> to search — it's fast
+* Run <code>wai project status</code> in the CLI for a project overview
+* Run <code>wai issue list --status open</code> to see unresolved issues
+
+</div>

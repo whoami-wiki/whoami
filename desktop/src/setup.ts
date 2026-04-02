@@ -23,6 +23,8 @@ interface SetupParams {
   name: string;
   username: string;
   password: string;
+  /** When set, configures a construction project wiki instead of a personal wiki */
+  projectMode?: boolean;
 }
 
 type StepId = "database" | "mediawiki" | "templates" | "userpage";
@@ -222,33 +224,119 @@ export async function runSetup(
   );
 
   // Overwrite the stock Main Page created by the install script
+  const mainPageFile = params.projectMode
+    ? "Main_Page_Construction.wiki"
+    : "Main_Page.wiki";
   await editPage(
     apiUrl,
     csrfToken,
     "Main Page",
-    readFileSync(join(templatesDir, "Main_Page.wiki"), "utf-8"),
+    readFileSync(join(templatesDir, mainPageFile), "utf-8"),
     "Initial main page",
   );
 
   send("templates", "done");
 
-  // 4. Create user's name page + [[Me]] redirect
+  // 4. Create initial content pages
   send("userpage", "running");
-  const namePage = `{{Infobox person\n| name = ${params.name}\n}}\n\n'''${params.name}'''.\n\n[[Category:People]]`;
-  await createPage(
-    apiUrl,
-    csrfToken,
-    params.name,
-    namePage,
-    "Initial page creation",
-  );
-  await createPage(
-    apiUrl,
-    csrfToken,
-    "Me",
-    `#REDIRECT [[${params.name}]]`,
-    "Redirect to user page",
-  );
+
+  if (params.projectMode) {
+    // Construction project: create Project Standards stub, Submittal Log, and Drawing Index
+    const projectName = params.name;
+
+    await createPage(
+      apiUrl,
+      csrfToken,
+      "Project Standards",
+      [
+        `{{Infobox spec`,
+        `| section    = 01 00 00`,
+        `| title      = Project Standards`,
+        `| division   = 01 — General Requirements`,
+        `}}`,
+        ``,
+        `'''${projectName}''' project standards extracted from Division 01 specifications.`,
+        ``,
+        `== Document Precedence ==`,
+        ``,
+        `''To be populated from contract documents.''`,
+        ``,
+        `== Submittal Procedures ==`,
+        ``,
+        `''To be populated from Spec 01 33 00 or equivalent.''`,
+        ``,
+        `== RFI Procedures ==`,
+        ``,
+        `''To be populated from Spec 01 26 00 or equivalent.''`,
+        ``,
+        `== Quality Control ==`,
+        ``,
+        `''To be populated from Spec 01 45 00 or equivalent.''`,
+        ``,
+        `== References ==`,
+        `<references />`,
+        ``,
+        `[[Category:Project Standards]]`,
+      ].join("\n"),
+      "Initial project standards stub",
+    );
+
+    await createPage(
+      apiUrl,
+      csrfToken,
+      "Submittal Log",
+      [
+        `== Submittal Log ==`,
+        ``,
+        `{| class="wikitable sortable"`,
+        `|-`,
+        `! Number !! Spec Section !! Description !! Status !! Date Submitted !! Date Reviewed`,
+        `|-`,
+        `| ''(auto-populated as specs are analyzed)'' || || || || ||`,
+        `|}`,
+        ``,
+        `[[Category:Project Standards]]`,
+      ].join("\n"),
+      "Initial submittal log",
+    );
+
+    await createPage(
+      apiUrl,
+      csrfToken,
+      "Drawing Index",
+      [
+        `== Drawing Index ==`,
+        ``,
+        `{| class="wikitable sortable"`,
+        `|-`,
+        `! Number !! Title !! Discipline !! Area !! Rev !! Date`,
+        `|-`,
+        `| ''(auto-populated as drawings are analyzed)'' || || || || ||`,
+        `|}`,
+        ``,
+        `[[Category:Project Standards]]`,
+      ].join("\n"),
+      "Initial drawing index",
+    );
+  } else {
+    // Personal wiki: create user's name page + [[Me]] redirect
+    const namePage = `{{Infobox person\n| name = ${params.name}\n}}\n\n'''${params.name}'''.\n\n[[Category:People]]`;
+    await createPage(
+      apiUrl,
+      csrfToken,
+      params.name,
+      namePage,
+      "Initial page creation",
+    );
+    await createPage(
+      apiUrl,
+      csrfToken,
+      "Me",
+      `#REDIRECT [[${params.name}]]`,
+      "Redirect to user page",
+    );
+  }
+
   send("userpage", "done");
 
   // Write shared credentials file so the CLI can pick them up

@@ -1,0 +1,154 @@
+{{Infobox drawing
+| number     = C-301
+| title      = Primary Clarifier Site Plan
+| discipline = Civil
+| area       = [[Area 03 — Primary Clarifiers]]
+| scale      = 1" = 40'
+| rev        = 3
+| rev_date   = 2025-11-15
+| sheet_size = D (24x36)
+| match_lines = C-302, C-303
+}}
+
+Drawing C-301 is the primary site plan for the clarifier complex at Area 03 of the Port Gardner Storage Facility. It establishes the horizontal layout, grading, and piping for the four 120-foot diameter circular primary clarifiers and associated structures.
+
+== Title Block ==
+
+{| class="wikitable"
+|-
+! Field !! Value
+|-
+| Drawing Number || C-301
+|-
+| Title || Primary Clarifier Site Plan
+|-
+| Project || Port Gardner Storage Facility
+|-
+| Sheet || 1 of 10 (Civil Area 03)
+|-
+| Scale || 1" = 40'
+|-
+| Revision || 3
+|-
+| Date || 2025-11-15
+|-
+| Checked by || JRM
+|-
+| Approved by || TAL
+|}
+
+Revision history from title block:
+* Rev 1 (2025-06-01): Initial IFC issue
+* Rev 2 (2025-09-10): Updated pipe alignments per comments
+* Rev 3 (2025-11-15): IFC set — updated clarifier spacing, added scum wet well
+
+== Observations ==
+
+Physical observations from the drawing, without interpretation:
+
+* Four large circles arranged in a 2×2 grid, each labeled "120'-0" DIA"
+* Circles labeled "Clarifier 1" through "Clarifier 4" from northwest to southeast
+* Center-to-center spacing between adjacent clarifiers: 160'-0" north-south, 165'-0" east-west
+* Dashed lines indicating underground piping (48" influent, 42" effluent, 8" sludge force main)
+* Solid lines indicating surface features (access roads, concrete slabs)
+* Hatched areas at two locations labeled "Scum Wet Well" and "Electrical Building"
+* Elevation markers at clarifier rim (44.0), center (32.0), and surrounding grade (46.5)
+* North arrow oriented toward upper right corner
+* Match line at south edge referencing C-302
+* Match line at east edge referencing C-303
+* Benchmark noted: BM-7 = 50.00 (brass cap in concrete, northeast corner of site)
+
+== Dimensions and Elevations ==
+
+=== Key Dimensions ===
+
+{| class="wikitable"
+|-
+! Element !! Dimension !! Note
+|-
+| Clarifier diameter || 120'-0" || All four identical
+|-
+| N-S center spacing || 160'-0" || Clarifiers 1–3, 2–4
+|-
+| E-W center spacing || 165'-0" || Clarifiers 1–2, 3–4
+|-
+| Influent pipe diameter || 48" || RCP
+|-
+| Effluent pipe diameter || 42" || RCP
+|-
+| Sludge force main || 8" || DIP
+|-
+| Access road width || 20'-0" || Between clarifier pairs
+|}
+
+=== Elevations ===
+
+{| class="wikitable"
+|-
+! Location !! Elevation
+|-
+| Clarifier rim || 44.0
+|-
+| Clarifier floor center || 32.0
+|-
+| Surrounding grade || 46.5
+|-
+| Influent pipe invert (entry to area) || 32.5
+|-
+| Effluent pipe invert (exit from area) || 34.0
+|-
+| Benchmark BM-7 || 50.00
+|}
+
+== Material and Specification Callouts ==
+
+* 48" influent pipe: "48" RCP, Spec 33 05 00"
+* 42" effluent pipe: "42" RCP, Spec 33 05 00"
+* 8" sludge force main: "8" DIP, Spec 33 05 00"
+* Access road: "8" PCC over 6" ABC, Spec 32 13 00"
+* Clarifier walls: "See S-302"
+
+== Cross-References ==
+
+{| class="wikitable"
+|-
+! Reference !! Target !! Verified
+|-
+| "See S-302" at clarifier outline || [[Drawing:S-302]] Foundation plan || Yes
+|-
+| "See S-305 Detail 7" at wall penetration || [[Drawing:S-305]] Structural details || Yes
+|-
+| "See M-401" at pump station || [[Drawing:M-401]] Mechanical plan || Yes
+|-
+| "See E-301" at electrical building || [[Drawing:E-301]] Electrical single line || Yes
+|-
+| Match line south → C-302 || [[Drawing:C-302]] || Pending
+|-
+| Match line east → C-303 || [[Drawing:C-303]] || Pending
+|-
+| Section A-A → C-306 || [[Drawing:C-306]] || Pending
+|}
+
+== Annotations and Notes ==
+
+General notes on the drawing:
+# All elevations reference NAVD88 datum
+# Contractor to verify all existing utility locations prior to excavation
+# Dewatering required per geotech report — see Spec 01 10 00
+# Minimum 24-hour hydrostatic test required per Spec 03 30 00
+# All RCP pipe joints per Spec 33 05 00
+# Coordinate all wall penetrations with structural (S-305) before forming
+
+== Engineering Interpretation ==
+
+The site plan establishes the primary clarifier complex as a compact 2×2 grid with generous spacing (40–45 feet clear between tank edges) for construction access and equipment installation. The 48-inch influent pipe at invert 32.5 enters from the west (headworks side) and the 42-inch effluent exits east toward the aeration basins at invert 34.0, establishing a 1.5-foot hydraulic gradient across the facility.
+
+The scum wet well placement near the southeast quadrant requires gravity flow from all four clarifiers. The elevation relationships between the scum discharge (shown on M-401 at 36.0) and the wet well should be verified — see [[Talk:Area 03 — Primary Clarifiers]] for the active gap on this conflict.
+
+The benchmark BM-7 at elevation 50.00 serves as the primary vertical control for the clarifier area.
+
+== References ==
+<references />
+
+[[Category:Civil drawings]]
+[[Category:Area 03]]

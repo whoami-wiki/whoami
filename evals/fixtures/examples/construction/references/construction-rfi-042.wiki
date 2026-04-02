@@ -1,0 +1,48 @@
+{{Infobox construction
+| type          = RFI
+| number        = RFI-042
+| subject       = Clarifier Wall Reinforcement at Penetrations — Conflicting Details
+| status        = Closed
+| date_issued   = 2026-01-20
+| issued_by     = Harbor Constructors (GC)
+| date_response = 2026-01-22
+| response_by   = MWH Design Engineers
+| spec_section  = [[Spec:03 30 00]]
+| areas         = [[Area 03 — Primary Clarifiers]]
+| drawings      = [[Drawing:S-302]], [[Drawing:S-305]]
+| cost_impact   = None
+| time_impact   = None
+}}
+
+RFI-042 was submitted by Harbor Constructors to resolve a conflict between two structural drawings regarding reinforcement at wall penetrations in the primary clarifiers.
+
+== Question ==
+
+Drawing S-302, Clarifier Foundation Plan (Rev 3), shows wall reinforcement at penetrations as #5 bars at 12 inches on center each way. Drawing S-305, Structural Details (Rev 3), Detail 7 — "Typical Wall Penetration Reinforcement" shows #5 bars at 8 inches on center each way for the same condition.
+
+Specification Section 03 30 00, Paragraph 2.3.B states "provide additional reinforcement at penetrations as detailed on drawings" without specifying which drawing governs.
+
+Which detail applies for wall penetrations greater than 6 inches diameter in the primary clarifier walls?<ref name="dwg-s-302">{{Cite drawing|number=S-302|rev=3|date=2025-11-15|title=Clarifier Foundation Plan}}</ref><ref name="dwg-s-305">{{Cite drawing|number=S-305|rev=3|date=2025-11-15|title=Structural Details|detail=Detail 7}}</ref><ref name="spec-rebar">{{Cite spec|section=03 30 00|paragraph=2.3.B|title=Cast-in-Place Concrete}}</ref>
+
+== Response ==
+
+Detail 7 on Drawing S-305 governs for all wall penetrations greater than 6 inches diameter. Use #5 bars at 8 inches on center each way, each face, for a distance of 2 times the penetration diameter from the edge of the opening. The note on S-302 is a general reference and does not override the specific detail.
+
+For penetrations 6 inches diameter or less, the standard wall reinforcement per S-302 (#5 at 12 inches on center) is adequate without additional reinforcement.
+
+No cost or time impact is anticipated as the contractor had not yet formed walls at the penetration locations.
+
+== Pages Updated ==
+
+The following wiki pages were updated as a result of this RFI:
+
+* '''[[Area 03 — Primary Clarifiers]]''' — Updated Structural → Walls section with corrected reinforcement spacing and RFI citation (2026-01-25)
+* '''[[Spec:03 30 00]]''' — Added note to Paragraph 2.3.B that S-305 Detail 7 governs at penetrations; added entry to Active Modifications table (2026-01-25)
+* '''[[Talk:Area 03 — Primary Clarifiers]]''' — Closed "Wall rebar spacing at penetrations" gap; added document history entry (2026-01-25)
+
+== References ==
+<references />
+
+[[Category:RFIs]]
+[[Category:Area 03]]
+[[Category:Closed]]

@@ -1,0 +1,145 @@
+{{Infobox spec
+| section    = 03 30 00
+| title      = Cast-in-Place Concrete
+| division   = 03 — Concrete
+| issued     = 2025-11-15
+| rev        = IFC
+| pages      = 18
+| areas      = [[Area 03 — Primary Clarifiers]], [[Area 04 — Aeration Basins]], [[Area 07 — Chemical Building]]
+| precedence = Governs over drawing notes for concrete material requirements
+}}
+
+Specification Section 03 30 00 governs all cast-in-place concrete work for the Port Gardner Storage Facility. This section covers material requirements, mix design criteria, placement procedures, and testing requirements for structural concrete used in water-retaining structures, foundations, walls, slabs, and miscellaneous concrete work across the project.
+
+== Part 1 — General ==
+
+=== 1.1 Summary ===
+
+{{Verbatim|This Section specifies cast-in-place concrete including formwork, reinforcement, concrete materials, mix proportioning, placement, finishing, and curing. Work includes but is not limited to: liquid-retaining structures, foundations, walls, elevated slabs, slabs-on-grade, equipment pads, and miscellaneous concrete.}}
+
+=== 1.2 Submittals ===
+
+The following submittals are required under this section:
+
+# '''Mix design submittals''' — for each concrete class, submit proposed mix design with supporting trial batch data per ASTM C192. Submit 30 days prior to first placement. (Para 1.2.A)
+# '''Reinforcement shop drawings''' — submit bar bending schedules and placement drawings per ACI 315. (Para 1.2.B)
+# '''Formwork drawings''' — submit for all liquid-retaining structures and walls over 10 feet in height. (Para 1.2.C)
+# '''Curing compound data sheets''' — submit manufacturer's technical data for curing compounds. (Para 1.2.D)
+# '''Concrete placement plan''' — submit for each liquid-retaining structure, including sequence, lift heights, joint locations, and cold weather procedures. (Para 1.2.E)
+
+=== 1.3 Quality Assurance ===
+
+{{Verbatim|Concrete placement shall be performed by a firm with minimum 5 years documented experience in water-retaining concrete structures. The firm shall demonstrate successful completion of at least 3 liquid-retaining structures of comparable size and complexity.}}
+
+Testing agency shall be an independent laboratory meeting ASTM C1077 and approved by the Engineer.
+
+=== 1.5 Testing and Inspection ===
+
+Testing requirements for concrete:
+
+* '''Compressive strength:''' Test per ASTM C39. One set of 4 cylinders (6×12 inch) per 50 CY or per day's placement, whichever is more frequent. (Para 1.5.A)
+* '''Slump:''' Test per ASTM C143 at point of placement. One test per truckload for liquid-retaining structures. (Para 1.5.B)
+* '''Air content:''' Test per ASTM C231 at same frequency as slump. (Para 1.5.C)
+* '''Temperature:''' Monitor per ASTM C1064 at point of placement. Record for each truckload. (Para 1.5.D)
+
+== Part 2 — Products ==
+
+=== 2.1 Concrete Materials ===
+
+==== 2.1.A Concrete Strength Classes ====
+
+{| class="wikitable"
+|-
+! Class !! 28-day f'c (PSI) !! Max w/c ratio !! Application
+|-
+| A-4500 || 4,500 || 0.45 || Liquid-retaining structures
+|-
+| B-4000 || 4,000 || 0.50 || Foundations, walls (non-liquid)
+|-
+| C-3000 || 3,000 || 0.55 || Slabs-on-grade, equipment pads
+|}
+
+{{Verbatim|Class A-4500 concrete shall be used for all liquid-retaining structures including but not limited to: clarifier walls and floors, aeration basin walls and floors, channel walls and floors, wet wells, and pump stations.}}
+
+==== 2.1.B Cement ====
+
+Cement: ASTM C150/C150M, Type I/II. Fly ash replacement: 20% maximum by weight, conforming to ASTM C618 Class F. Slag: not permitted without prior Engineer approval.
+
+==== 2.1.C Admixtures ====
+
+* Water-reducing: ASTM C494, Type A or D
+* Air-entraining: ASTM C260, target 5-7% for exterior elements
+* High-range water reducer: ASTM C494, Type F or G (liquid-retaining structures only with Engineer approval)
+
+=== 2.3 Reinforcement ===
+
+==== 2.3.A Bar Sizes ====
+
+Reinforcing steel: ASTM A615, Grade 60, deformed bars.
+
+==== 2.3.B Wall Reinforcement ====
+
+{{Verbatim|Liquid-retaining structure walls: #5 bars at 12 inches on center each face, each way, unless shown otherwise on Structural drawings. Provide additional reinforcement at penetrations, corners, and construction joints as detailed on drawings.}}
+
+Note: For wall penetrations greater than 6 inches diameter, use #5 at 8 inches on center each way per RFI-042 response (S-305 Detail 7 governs over this paragraph).<ref name="rfi-042">{{Cite rfi|number=RFI-042|date=2026-01-22|note=S-305 Detail 7 governs over Spec 03 30 00 Para 2.3.B for penetration reinforcement}}</ref>
+
+== Part 3 — Execution ==
+
+=== 3.1 Formwork ===
+
+{{Verbatim|Forms for liquid-retaining structures shall produce surfaces meeting ACI 347 Class A finish (smooth formed). Maximum form tie hole diameter: 1 inch. All form tie holes in liquid-retaining walls shall be plugged with non-shrink grout and sealed with approved waterstop compound.}}
+
+Maximum lift height for liquid-retaining walls: 12 feet. Construction joints between lifts shall include waterstop and keyed joints per structural details.
+
+=== 3.2 Reinforcement Placement ===
+
+Minimum concrete cover:
+* Formed surfaces exposed to liquid: 2 inches
+* Formed surfaces not exposed to liquid: 1-1/2 inches
+* Slabs on grade: 3 inches (bottom)
+* Top of slabs: 1-1/2 inches
+
+Reinforcement placement tolerances per ACI 117:
+* Cover: +1/2 inch, -3/8 inch
+* Spacing: ± 1 inch
+
+=== 3.3 Concrete Placement ===
+
+{{Verbatim|Concrete shall be placed within 90 minutes of batching. Maximum free-fall distance: 5 feet. Concrete temperature at point of placement shall be minimum 50°F and maximum 90°F. For liquid-retaining structures, maximum placement rate shall not exceed 4 feet of vertical rise per hour.}}
+
+Cold weather (below 40°F ambient): Provide heated enclosures and maintain concrete temperature above 50°F for 7 days minimum after placement.
+
+Hot weather (above 90°F ambient): Use chilled water, ice, or retarding admixtures. Do not place concrete when surface temperature exceeds 100°F.
+
+=== 3.4 Curing ===
+
+Liquid-retaining structures: Moist cure for minimum 7 days. Maintain wet burlap or continuous water spray. Curing compound is not permitted on surfaces that will be in contact with liquid.
+
+Other concrete: Moist cure or apply curing compound per manufacturer's recommendations. Minimum 7-day curing period.
+
+=== 3.5 Hydrostatic Testing ===
+
+{{Verbatim|All liquid-retaining structures shall be hydrostatically tested before backfill or equipment installation. Fill structure to overflow elevation and hold for minimum 24 hours. Maximum allowable leakage rate: 0.001 gallons per square foot of wetted surface per 24 hours. Any visible leakage through walls, floor, or joints is unacceptable regardless of rate.}}
+
+=== 3.6 Repair ===
+
+Minor surface defects (honeycombing less than 1 inch deep): Chip to sound concrete, dampen, and repair with approved non-shrink grout.
+
+Major defects (honeycombing greater than 1 inch deep, structural cracks, visible leakage): Submit repair procedure to Engineer for review before proceeding. Repair procedure shall include cause analysis and proposed corrective measures.
+
+== Active Modifications ==
+
+{| class="wikitable"
+|-
+! Document !! Date !! Paragraph !! Modification
+|-
+| [[Construction:RFI-042]] || 2026-01-22 || 2.3.B || Wall penetration reinforcement: #5 at 8" O.C. per S-305 Detail 7 governs
+|-
+| [[Construction:SUB-033000-001]] || 2026-02-10 || 2.1.A || Concrete mix design approved (Type I/II with 20% Class F fly ash)
+|}
+
+== References ==
+<references />
+
+[[Category:Division 03]]
+[[Category:Specifications]]
