@@ -58,7 +58,7 @@ export interface CheckpointSpec {
   skipReference?: boolean;
 }
 
-export type PageRole = 'person' | 'episode' | 'project' | 'talk' | 'source';
+export type PageRole = 'person' | 'episode' | 'project' | 'talk' | 'source' | 'area' | 'equipment' | 'drawing' | 'spec' | 'construction-doc' | 'issue';
 
 export interface PageResult {
   title: string;

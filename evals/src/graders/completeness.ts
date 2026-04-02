@@ -313,6 +313,7 @@ const TALK_CHECKS: Check[] = [
     test: (wikitext) =>
       /==\s*Editorial decisions\s*==/i.test(wikitext) ||
       /==\s*Editorial\s*==/i.test(wikitext) ||
+      /==\s*Coordination issues\s*==/i.test(wikitext) ||
       /\{\{Closed\}\}/i.test(wikitext) ||
       /\{\{Superseded\}\}/i.test(wikitext),
   },
@@ -330,9 +331,319 @@ const TALK_CHECKS: Check[] = [
     test: (wikitext) =>
       /==\s*Research notes\s*==/i.test(wikitext) ||
       /==\s*Source index\s*==/i.test(wikitext) ||
+      /==\s*Document history\s*==/i.test(wikitext) ||
       /==\s*Key dates\s*==/i.test(wikitext) ||
       /==\s*Key people\s*==/i.test(wikitext) ||
       /==\s*Sources?\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has verification status',
+    weight: 1,
+    test: (wikitext) =>
+      /\{\{Verification\b/i.test(wikitext) ||
+      /==\s*Verification status\s*==/i.test(wikitext),
+  },
+];
+
+// ============================================================
+// Construction: Area page checks
+// ============================================================
+
+const AREA_CHECKS: Check[] = [
+  {
+    name: 'Has Infobox area',
+    weight: 2,
+    test: (wikitext) => /\{\{Infobox area\b/i.test(wikitext),
+  },
+  {
+    name: 'Lead paragraph before first heading',
+    weight: 1,
+    test: (wikitext) => {
+      const firstHeading = wikitext.indexOf('==');
+      if (firstHeading === -1) return false;
+      const lead = wikitext.slice(0, firstHeading).trim();
+      return lead.length > 0;
+    },
+  },
+  {
+    name: 'Has discipline sections (Structural, Mechanical, etc.)',
+    weight: 3,
+    test: (wikitext) => {
+      const disciplines = ['Structural', 'Mechanical', 'Electrical', 'Civil', 'Instrumentation', 'Architectural'];
+      const found = disciplines.filter((d) => new RegExp(`==\\s*${d}`, 'i').test(wikitext));
+      return found.length >= 2;
+    },
+  },
+  {
+    name: 'Has Connected Systems section (upstream/downstream)',
+    weight: 2,
+    test: (wikitext) =>
+      /==\s*Connected Systems\s*==/i.test(wikitext) ||
+      (/upstream/i.test(wikitext) && /downstream/i.test(wikitext)),
+  },
+  {
+    name: 'Prose word count >= 400',
+    weight: 3,
+    test: (wikitext) => countProseWords(wikitext) >= 400,
+  },
+  {
+    name: 'At least 5 unique inline citations',
+    weight: 2,
+    test: (wikitext) => countUniqueRefs(wikitext) >= 5,
+  },
+  {
+    name: 'References section',
+    weight: 0.5,
+    test: (wikitext) => /==\s*References\s*==/.test(wikitext) && /<references\s*\/>/.test(wikitext),
+  },
+  {
+    name: 'At least one category tag',
+    weight: 0.5,
+    test: (wikitext) => /\[\[Category:[^\]]+\]\]/.test(wikitext),
+  },
+  {
+    name: 'Links to Drawing pages',
+    weight: 1,
+    test: (wikitext) => /\[\[Drawing:/.test(wikitext) || /\{\{Cite drawing\b/.test(wikitext),
+  },
+  {
+    name: 'Links to Spec pages',
+    weight: 1,
+    test: (wikitext) => /\[\[Spec:/.test(wikitext) || /\{\{Cite spec\b/.test(wikitext),
+  },
+];
+
+// ============================================================
+// Construction: Equipment page checks
+// ============================================================
+
+const EQUIPMENT_CHECKS: Check[] = [
+  {
+    name: 'Has Infobox equipment',
+    weight: 2,
+    test: (wikitext) => /\{\{Infobox equipment\b/i.test(wikitext),
+  },
+  {
+    name: 'Has tag number',
+    weight: 1,
+    test: (wikitext) => /\|\s*tag\s*=\s*\S+/.test(wikitext),
+  },
+  {
+    name: 'Has capacity or design parameters',
+    weight: 2,
+    test: (wikitext) =>
+      /\|\s*capacity\s*=\s*\S+/.test(wikitext) ||
+      /\|\s*motor\s*=\s*\S+/.test(wikitext) ||
+      /\|\s*power\s*=\s*\S+/.test(wikitext),
+  },
+  {
+    name: 'Links to area page',
+    weight: 1,
+    test: (wikitext) => /\|\s*area\s*=\s*\[\[/.test(wikitext),
+  },
+  {
+    name: 'Links to spec section',
+    weight: 1,
+    test: (wikitext) => /\|\s*spec_section\s*=\s*\[\[Spec:/.test(wikitext) || /\{\{Cite spec\b/.test(wikitext),
+  },
+  {
+    name: 'Has at least one citation',
+    weight: 1,
+    test: (wikitext) => /<ref/.test(wikitext),
+  },
+  {
+    name: 'At least one category tag',
+    weight: 0.5,
+    test: (wikitext) => /\[\[Category:[^\]]+\]\]/.test(wikitext),
+  },
+];
+
+// ============================================================
+// Construction: Drawing page checks
+// ============================================================
+
+const DRAWING_CHECKS: Check[] = [
+  {
+    name: 'Has Infobox drawing',
+    weight: 2,
+    test: (wikitext) => /\{\{Infobox drawing\b/i.test(wikitext),
+  },
+  {
+    name: 'Has Title Block section',
+    weight: 1,
+    test: (wikitext) => /==\s*Title Block\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has Observations section',
+    weight: 2,
+    test: (wikitext) => /==\s*Observations\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has Dimensions and Elevations section',
+    weight: 2,
+    test: (wikitext) =>
+      /==\s*Dimensions\s*(and|&)\s*Elevations\s*==/i.test(wikitext) ||
+      /==\s*Dimensional Analysis\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has Cross-References section',
+    weight: 2,
+    test: (wikitext) => /==\s*Cross.?References\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has Engineering Interpretation section (after observations)',
+    weight: 1.5,
+    test: (wikitext) => /==\s*Engineering Interpretation\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has revision number in infobox',
+    weight: 1,
+    test: (wikitext) => /\|\s*rev\s*=\s*\S+/.test(wikitext),
+  },
+  {
+    name: 'At least 3 content sections',
+    weight: 1,
+    test: (wikitext) => countContentSections(wikitext) >= 3,
+  },
+  {
+    name: 'Links to area or other drawings',
+    weight: 1,
+    test: (wikitext) => /\[\[Drawing:/.test(wikitext) || /\[\[Area /.test(wikitext),
+  },
+  {
+    name: 'At least one category tag',
+    weight: 0.5,
+    test: (wikitext) => /\[\[Category:[^\]]+\]\]/.test(wikitext),
+  },
+];
+
+// ============================================================
+// Construction: Spec page checks
+// ============================================================
+
+const SPEC_CHECKS: Check[] = [
+  {
+    name: 'Has Infobox spec',
+    weight: 2,
+    test: (wikitext) => /\{\{Infobox spec\b/i.test(wikitext),
+  },
+  {
+    name: 'Has Part structure (Part 1/2/3)',
+    weight: 2,
+    test: (wikitext) => /=\s*Part 1/i.test(wikitext) && /=\s*Part 2/i.test(wikitext),
+  },
+  {
+    name: 'Has verbatim contract language',
+    weight: 3,
+    test: (wikitext) => /\{\{Verbatim\b/.test(wikitext),
+  },
+  {
+    name: 'Has paragraph numbering in sections',
+    weight: 2,
+    test: (wikitext) => /==\s*\d+\.\d+\s+/m.test(wikitext),
+  },
+  {
+    name: 'Substantive content (>= 300 words)',
+    weight: 2,
+    test: (wikitext) => countProseWords(wikitext) >= 300,
+  },
+  {
+    name: 'At least one category tag',
+    weight: 0.5,
+    test: (wikitext) => /\[\[Category:[^\]]+\]\]/.test(wikitext),
+  },
+  {
+    name: 'Links to areas',
+    weight: 1,
+    test: (wikitext) => /\|\s*areas\s*=/.test(wikitext),
+  },
+];
+
+// ============================================================
+// Construction: Construction document checks (RFI/Submittal/etc.)
+// ============================================================
+
+const CONSTRUCTION_DOC_CHECKS: Check[] = [
+  {
+    name: 'Has Infobox construction',
+    weight: 2,
+    test: (wikitext) => /\{\{Infobox construction\b/i.test(wikitext),
+  },
+  {
+    name: 'Has document type',
+    weight: 1,
+    test: (wikitext) => /\|\s*type\s*=\s*\S+/.test(wikitext),
+  },
+  {
+    name: 'Has status',
+    weight: 1,
+    test: (wikitext) => /\|\s*status\s*=\s*\S+/.test(wikitext),
+  },
+  {
+    name: 'Has content sections (Question/Response, Contents/Comments)',
+    weight: 2,
+    test: (wikitext) =>
+      /==\s*Question\s*==/i.test(wikitext) ||
+      /==\s*Submittal Contents\s*==/i.test(wikitext) ||
+      /==\s*Directive\s*==/i.test(wikitext) ||
+      /==\s*Content\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has Pages Updated section',
+    weight: 2,
+    test: (wikitext) => /==\s*Pages Updated\s*==/i.test(wikitext),
+  },
+  {
+    name: 'At least one category tag',
+    weight: 0.5,
+    test: (wikitext) => /\[\[Category:[^\]]+\]\]/.test(wikitext),
+  },
+];
+
+// ============================================================
+// Construction: Issue page checks
+// ============================================================
+
+const ISSUE_CHECKS: Check[] = [
+  {
+    name: 'Has Infobox issue',
+    weight: 2,
+    test: (wikitext) => /\{\{Infobox issue\b/i.test(wikitext),
+  },
+  {
+    name: 'Has severity',
+    weight: 1,
+    test: (wikitext) => /\|\s*severity\s*=\s*\S+/.test(wikitext),
+  },
+  {
+    name: 'Has Description section',
+    weight: 2,
+    test: (wikitext) => /==\s*Description\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has Impact section',
+    weight: 1.5,
+    test: (wikitext) => /==\s*Impact\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has Recommended Action section',
+    weight: 1.5,
+    test: (wikitext) => /==\s*Recommended Action\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has Resolution section',
+    weight: 1,
+    test: (wikitext) => /==\s*Resolution\s*==/i.test(wikitext),
+  },
+  {
+    name: 'Has at least one citation',
+    weight: 1,
+    test: (wikitext) => /<ref/.test(wikitext) || /\{\{Cite /.test(wikitext),
+  },
+  {
+    name: 'At least one category tag',
+    weight: 0.5,
+    test: (wikitext) => /\[\[Category:[^\]]+\]\]/.test(wikitext),
   },
 ];
 
@@ -352,6 +663,18 @@ function getChecks(role: PageRole, checkpointId?: string): Check[] {
       return SOURCE_CHECKS;
     case 'talk':
       return TALK_CHECKS;
+    case 'area':
+      return AREA_CHECKS;
+    case 'equipment':
+      return EQUIPMENT_CHECKS;
+    case 'drawing':
+      return DRAWING_CHECKS;
+    case 'spec':
+      return SPEC_CHECKS;
+    case 'construction-doc':
+      return CONSTRUCTION_DOC_CHECKS;
+    case 'issue':
+      return ISSUE_CHECKS;
   }
 }
 

@@ -1,0 +1,73 @@
+== Verification status ==
+{{Verification|status=in-progress
+|note=Structural and civil sections extracted from IFC drawings (Rev 3). Mechanical equipment details pending sludge collector submittal. Electrical single line reviewed. I&C from P&ID Rev 1.
+|last_verified=2026-02-15
+|sources=C-301 through C-310 (Rev 3), S-302 (Rev 3), S-305 (Rev 3), M-401 (Rev 2), E-301 (Rev 2), I-301 (Rev 1), Spec 03 30 00, Spec 46 33 00, Spec 43 21 00, Geotech Report}}
+
+== Active gaps ==
+
+=== Clarifier mechanism vendor unknown ===
+{{Open}}
+Spec 46 33 00 lists performance requirements (350 ft·lb torque, 120 ft diameter, center-driven) but no basis-of-design manufacturer. Equipment page [[Primary Clarifier Mechanism CM-301]] created with spec requirements only. Awaiting [[Construction:SUB-463300-001]].
+
+=== Dewatering plan not specified ===
+{{Open}}
+Geotech report (p. 18) confirms groundwater at elevation 38.5, approximately 4 feet below proposed bottom of excavation. Spec 01 10 00 requires dewatering but no dewatering specification section was found in the contract documents. Contractor may need to submit a dewatering plan as part of means and methods. See [[Issue:003]].
+
+=== Scum wet well elevation conflict ===
+{{Open}}
+Mechanical drawing M-401 shows scum discharge at elevation 36.0 but civil plan C-305 shows the scum wet well rim at elevation 37.5. The 1.5-foot difference may prevent gravity flow. RFI recommended.
+
+== Resolved ==
+
+=== Wall rebar spacing at penetrations ===
+{{Closed}}
+S-302 showed #5 bars at 12" O.C. at wall penetrations. S-305 Detail 7 showed #5 at 8" O.C. for the same condition. Resolved by [[Construction:RFI-042]]: Detail 7 on S-305 governs. Use #5 at 8" O.C. each way for all wall penetrations greater than 6" diameter. Page updated 2026-01-25.
+
+== Coordination issues ==
+
+=== Mechanical penetrations through clarifier walls ===
+Mechanical drawings M-401 through M-403 show 14 pipe penetrations through clarifier walls. Structural details on S-305 cover only 3 standard sizes (6", 12", 24"). The remaining penetrations at non-standard sizes (8", 16", 36", 48") need structural reinforcement details. Tracked as [[Issue:005]].
+
+=== Electrical conduit routing ===
+Electrical conduit routing from MCC-3 to Clarifiers 3 and 4 crosses an active construction access road per E-301. Coordination with site logistics needed to maintain access during conduit installation. Not yet an issue — flagged for pre-construction meeting.
+
+== Document history ==
+
+=== Initial creation — Civil drawings ===
+2026-02-10. Created from C-301 through C-310, Rev 3 (IFC set dated 2025-11-15). Established area boundaries, elevations, connected systems. 2 gaps posted. See [[Task:0003]].
+
+=== Structural overlay ===
+2026-02-12. Structural sections added from S-302, S-305, S-308. Cross-reference conflict between S-302 and S-305 identified — gap posted. See [[Task:0005]].
+
+=== Geotech integration ===
+2026-02-13. Foundation and groundwater sections updated from Geotechnical Investigation Report. Dewatering gap posted, Issue:003 created. See [[Task:0006]].
+
+=== Mechanical overlay ===
+2026-02-14. Mechanical sections added from M-401 through M-405. Equipment stubs created for pumps PS-301A/B and PS-302A/B. Sludge collector gap posted (awaiting submittal). See [[Task:0008]].
+
+=== RFI-042 update ===
+2026-01-25. Structural section updated per RFI response. Closed wall rebar gap. See [[Task:0012]].
+
+=== Concrete submittal update ===
+2026-02-15. Materials section updated with approved concrete mix design from SUB-033000-001. See [[Task:0018]].
+
+== Agent log ==
+
+=== Task:0003 — Initial area page creation ===
+2026-02-10. Created from civil drawing set. 2 gaps posted.
+
+=== Task:0005 — Structural overlay ===
+2026-02-12. Added structural sections. 1 gap posted (rebar conflict).
+
+=== Task:0006 — Geotech integration ===
+2026-02-13. Added foundation and groundwater info. 1 gap posted, 1 issue created.
+
+=== Task:0008 — Mechanical overlay ===
+2026-02-14. Added mechanical sections. 1 gap posted, 4 equipment pages created.
+
+=== Task:0012 — RFI-042 update ===
+2026-01-25. Updated structural section. Closed 1 gap.
+
+=== Task:0018 — Concrete submittal update ===
+2026-02-15. Updated concrete materials with approved mix design.

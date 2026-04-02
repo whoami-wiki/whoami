@@ -1,0 +1,93 @@
+{{Infobox area
+| name         = Primary Clarifiers
+| area_number  = 03
+| image        = area-03-site-plan.jpg
+| caption      = Primary clarifier complex, looking northeast
+| location     = North plant, east of headworks
+| status       = Under Construction
+| disciplines  = Civil, Structural, Mechanical, Electrical, I&C
+| upstream     = [[Area 02 — Headworks]]
+| downstream   = [[Area 04 — Aeration Basins]]
+| key_drawings = [[Drawing:C-301]], [[Drawing:S-302]], [[Drawing:M-401]], [[Drawing:E-301]]
+| key_specs    = [[Spec:03 30 00]], [[Spec:46 33 00]], [[Spec:43 21 00]]
+}}
+
+Area 03 encompasses the primary clarifier complex at the Port Gardner Storage Facility, consisting of four 120-foot diameter circular clarifiers with associated sludge collection and scum removal systems. The clarifiers receive raw wastewater from the headworks via a 48-inch reinforced concrete influent pipe and provide primary settling before the aeration basins.<ref name="dwg-c-301">{{Cite drawing|number=C-301|rev=3|date=2025-11-15|title=Primary Clarifier Site Plan}}</ref> The facility is designed to handle an average daily flow of 24 MGD with a peak wet-weather flow of 72 MGD.<ref name="spec-summary">{{Cite spec|section=01 10 00|paragraph=1.2.A|title=Summary of Work}}</ref>
+
+== Structural ==
+
+The four primary clarifiers are cast-in-place reinforced concrete circular tanks. Each tank is 120 feet in diameter with a 12-foot side water depth and a floor slope of 1:12 toward the center sludge hopper.<ref name="dwg-s-302">{{Cite drawing|number=S-302|rev=3|date=2025-11-15|title=Clarifier Foundation Plan}}</ref>
+
+=== Walls ===
+
+Wall thickness is 18 inches at the base tapering to 12 inches at the top of wall.<ref name="spec-concrete">{{Cite spec|section=03 30 00|paragraph=2.3.B|title=Cast-in-Place Concrete}}</ref> Concrete is specified as 4,500 PSI at 28 days with a maximum water-cement ratio of 0.45.<ref name="spec-concrete-strength">{{Cite spec|section=03 30 00|paragraph=2.1.A|title=Cast-in-Place Concrete}}</ref> The approved concrete mix design uses Type I/II cement with 20% fly ash replacement.<ref name="sub-concrete">{{Cite submittal|number=SUB-033000-001|date=2026-02-10|status=Approved as Noted|note=Concrete mix design, 4500 PSI structural}}</ref>
+
+Reinforcement at wall penetrations greater than 6 inches diameter is #5 at 8 inches on center each way.<ref name="rfi-042">{{Cite rfi|number=RFI-042|date=2026-01-22|note=S-305 Detail 7 governs over S-302 at penetrations}}</ref> This was resolved through an RFI after conflicting details were found between [[Drawing:S-302]] and [[Drawing:S-305]].
+
+=== Foundation ===
+
+Clarifier foundations are 18-inch thick mat slabs on compacted structural fill. The geotechnical report recommends an allowable bearing pressure of 4,000 PSF for the primary clarifier area.<ref name="geotech">{{Cite document|title=Geotechnical Investigation Report|author=GeoEngineers|date=2025-03-15|page=23|note=Allowable bearing pressure at Area 03}}</ref> Groundwater was encountered at elevation 38.5 during the subsurface investigation, approximately 4 feet below the proposed bottom of excavation.<ref name="geotech-gw">{{Cite document|title=Geotechnical Investigation Report|author=GeoEngineers|date=2025-03-15|page=18|note=Groundwater elevation at Area 03}}</ref>
+
+== Mechanical ==
+
+=== Sludge Collection ===
+
+Each clarifier is equipped with a center-driven sludge collector mechanism rated for 350 ft·lb steady-state torque at 120 feet diameter.<ref name="spec-mech">{{Cite spec|section=46 33 00|paragraph=2.1.A|title=Center-Driven Sludge Collectors}}</ref> The mechanism drives two diametrically opposed scraper arms along the tank floor, conveying settled sludge toward the center hopper.
+
+The sludge collection equipment submittal has not yet been received. Equipment page [[Primary Clarifier Mechanism CM-301]] has been created with specification requirements only.
+
+=== Sludge Pumping ===
+
+Primary sludge is pumped from the center hopper of each clarifier by dedicated centrifugal non-clog pumps. Each clarifier has one duty pump and shares a common standby pump with the adjacent clarifier.<ref name="dwg-m-401">{{Cite drawing|number=M-401|rev=2|date=2025-11-15|title=Primary Clarifier Mechanical Plan}}</ref>
+
+* Pump PS-301A/B: Clarifiers 1 and 2, 500 GPM at 30 ft TDH, 25 HP<ref name="spec-pump">{{Cite spec|section=43 21 00|paragraph=2.2.A|title=Centrifugal Sewage Pumps}}</ref>
+* Pump PS-302A/B: Clarifiers 3 and 4, 500 GPM at 30 ft TDH, 25 HP
+
+=== Scum Removal ===
+
+A rotating scum skimmer on each clarifier directs floating material to a scum beach and trough. Scum is discharged by gravity to the scum wet well at elevation 36.0.<ref name="dwg-m-401" />
+
+== Electrical ==
+
+Power distribution for Area 03 is fed from MCC-3 located in the operations building. Each clarifier mechanism has a dedicated VFD for speed control.<ref name="dwg-e-301">{{Cite drawing|number=E-301|rev=2|date=2025-11-15|title=Area 03 Electrical Single Line}}</ref> Emergency power is available via the standby generator for all clarifier drives and one sludge pump per clarifier pair.
+
+== Instrumentation and Controls ==
+
+Each clarifier is instrumented with:
+* Sludge blanket level detector (ultrasonic)
+* Influent and effluent turbidity analyzers
+* Clarifier mechanism torque monitoring
+* Sludge pump flow meter (magnetic)<ref name="dwg-i-301">{{Cite drawing|number=I-301|rev=1|date=2025-11-15|title=Area 03 P&ID}}</ref>
+
+The sludge blanket detector automatically adjusts sludge pump runtime based on blanket depth, with high-level alarm at 6 feet and high-high alarm at 8 feet.
+
+== Connected Systems ==
+
+* '''Upstream:''' Raw wastewater from [[Area 02 — Headworks]] via 48-inch RCP influent pipe at invert elevation 32.5<ref name="dwg-c-301" />
+* '''Downstream:''' Primary effluent to [[Area 04 — Aeration Basins]] via 42-inch RCP at invert elevation 34.0; primary sludge to [[Area 09 — Solids Handling]] via 8-inch force main
+
+== Construction Requirements ==
+
+Clarifier construction follows a specific sequence mandated by the project specifications:<ref name="spec-sequence">{{Cite spec|section=01 10 00|paragraph=3.4.B|title=Summary of Work}}</ref>
+
+# Excavation and dewatering (dewatering required per geotech report)
+# Foundation preparation and mat slab placement
+# Wall forming and placement in two lifts (maximum 12-foot lift height)
+# Center column and mechanism support structure
+# Influent/effluent piping and wall penetrations
+# Mechanism installation and alignment
+# Hydrostatic testing (minimum 24 hours per [[Spec:03 30 00]])
+
+Each clarifier must pass hydrostatic testing before the adjacent clarifier wall forms are removed, to maintain site stability during construction.
+
+== References ==
+<references />
+
+== Bibliography ==
+{{Cite document|title=Civil Drawing Set|date=2025-11-15|note=C-301 through C-310, Rev 3}}
+{{Cite document|title=Structural Drawing Set|date=2025-11-15|note=S-302, S-305, S-308, Rev 3}}
+{{Cite document|title=Mechanical Drawing Set|date=2025-11-15|note=M-401 through M-405, Rev 2}}
+{{Cite document|title=Geotechnical Investigation Report|author=GeoEngineers|date=2025-03-15}}
+
+[[Category:Area 03]]
+[[Category:Process Areas]]
