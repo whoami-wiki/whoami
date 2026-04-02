@@ -1,0 +1,25 @@
+<includeonly><table class="infobox">
+<caption>{{{name|{{PAGENAME}}}}}</caption>
+{{#if:{{{image|}}}|<tr><td colspan="2" class="infobox-image">[[File:{{{image}}}|frameless|220px]]{{#if:{{{caption|}}}|<div style="font-size:90%">{{{caption}}}</div>}}</td></tr>}}
+{{#if:{{{type|}}}|<tr><th>Type</th><td>{{{type}}}</td></tr>}}
+{{#if:{{{areas|}}}|<tr><th>Areas</th><td>{{{areas}}}</td></tr>}}
+{{#if:{{{disciplines|}}}|<tr><th>Disciplines</th><td>{{{disciplines}}}</td></tr>}}
+{{#if:{{{key_drawings|}}}|<tr><th>Key drawings</th><td>{{{key_drawings}}}</td></tr>}}
+{{#if:{{{key_specs|}}}|<tr><th>Key specs</th><td>{{{key_specs}}}</td></tr>}}
+{{#if:{{{status|}}}|<tr><th>Status</th><td>{{{status}}}</td></tr>}}
+</table></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Infobox system
+| name         = Primary Sludge Collection
+| type         = Process Piping
+| areas        = [[Area 03|Area 03]], [[Area 09|Area 09]]
+| disciplines  = Mechanical, I&C
+| key_drawings = [[Drawing:M-401]], [[Drawing:M-901]]
+| key_specs    = [[Spec:40 05 00]]
+| status       = Design Complete
+}}
+</pre>
+
+[[Category:Templates]]
+</noinclude>

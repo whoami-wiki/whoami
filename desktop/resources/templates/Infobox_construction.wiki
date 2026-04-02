@@ -1,0 +1,57 @@
+<includeonly><table class="infobox">
+<caption>{{{type|Document}}} {{{number|{{PAGENAME}}}}}</caption>
+{{#if:{{{subject|}}}|<tr><td colspan="2" class="infobox-above" style="font-size:100%">{{{subject}}}</td></tr>}}
+{{#if:{{{type|}}}|<tr><th>Type</th><td>{{{type}}}</td></tr>}}
+{{#if:{{{status|}}}|<tr><th>Status</th><td>{{{status}}}</td></tr>}}
+{{#if:{{{date_issued|}}}|<tr><th>Issued</th><td>{{{date_issued}}}</td></tr>}}
+{{#if:{{{issued_by|}}}|<tr><th>Issued by</th><td>{{{issued_by}}}</td></tr>}}
+{{#if:{{{date_submitted|}}}|<tr><th>Submitted</th><td>{{{date_submitted}}}</td></tr>}}
+{{#if:{{{submitted_by|}}}|<tr><th>Submitted by</th><td>{{{submitted_by}}}</td></tr>}}
+{{#if:{{{date_response|}}}|<tr><th>Response</th><td>{{{date_response}}}</td></tr>}}
+{{#if:{{{response_by|}}}|<tr><th>Response by</th><td>{{{response_by}}}</td></tr>}}
+{{#if:{{{date_reviewed|}}}|<tr><th>Reviewed</th><td>{{{date_reviewed}}}</td></tr>}}
+{{#if:{{{reviewed_by|}}}|<tr><th>Reviewed by</th><td>{{{reviewed_by}}}</td></tr>}}
+{{#if:{{{spec_section|}}}|<tr><th>Spec section</th><td>{{{spec_section}}}</td></tr>}}
+{{#if:{{{areas|}}}|<tr><th>Areas</th><td>{{{areas}}}</td></tr>}}
+{{#if:{{{drawings|}}}|<tr><th>Drawings</th><td>{{{drawings}}}</td></tr>}}
+{{#if:{{{specs|}}}|<tr><th>Specs</th><td>{{{specs}}}</td></tr>}}
+{{#if:{{{cost_impact|}}}|<tr><th>Cost impact</th><td>{{{cost_impact}}}</td></tr>}}
+{{#if:{{{time_impact|}}}|<tr><th>Time impact</th><td>{{{time_impact}}}</td></tr>}}
+</table></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Infobox construction
+| type           = RFI
+| number         = RFI-042
+| subject        = Clarifier wall reinforcement at penetrations
+| status         = Closed
+| date_issued    = 2026-01-15
+| issued_by      = Contractor
+| date_response  = 2026-01-22
+| response_by    = Engineer of Record
+| areas          = [[Area 03 — Primary Clarifiers]]
+| drawings       = [[Drawing:S-302]], [[Drawing:S-305]]
+| specs          = [[Spec:03 30 00]]
+| cost_impact    = None
+| time_impact    = None
+}}
+</pre>
+
+Also works for submittals:
+<pre>
+{{Infobox construction
+| type           = Submittal
+| number         = SUB-033000-001
+| subject        = Concrete mix design — 4,500 PSI structural
+| status         = Approved as Noted
+| date_submitted = 2026-02-01
+| submitted_by   = Contractor
+| date_reviewed  = 2026-02-10
+| reviewed_by    = Engineer of Record
+| spec_section   = [[Spec:03 30 00]]
+| areas          = [[Area 03|Area 03]], [[Area 04|Area 04]]
+}}
+</pre>
+
+[[Category:Templates]]
+</noinclude>

@@ -1,0 +1,14 @@
+<includeonly>Submittal {{{number}}}{{#if:{{{status|}}}| — {{{status}}}}}{{#if:{{{date|}}}| ({{{date}}})}}{{#if:{{{note|}}}| — {{{note}}}}}</includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Cite submittal|number=SUB-033000-001|date=2026-02-10|status=Approved as Noted|note=Concrete mix design, 4500 PSI structural}}</nowiki></code>
+
+Renders as: Submittal SUB-033000-001 — Approved as Noted (2026-02-10) — Concrete mix design, 4500 PSI structural
+
+=== Parameters ===
+* '''number''' (required): Submittal number
+* '''date''' (required): Review/approval date
+* '''status''' (required): Approved, Approved as Noted, Revise and Resubmit, Rejected
+* '''note''' (optional): What was submitted
+
+[[Category:Citation templates]]
+</noinclude>

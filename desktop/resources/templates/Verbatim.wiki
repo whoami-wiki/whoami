@@ -1,0 +1,10 @@
+<includeonly><div class="verbatim-box"><div class="verbatim-label">CONTRACT LANGUAGE</div>{{{1}}}</div></includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Verbatim|Concrete shall have a minimum compressive strength of 4,500 psi at 28 days. Water-cement ratio shall not exceed 0.45.}}</nowiki></code>
+
+Renders the text in a distinct visual block labeled "CONTRACT LANGUAGE" to clearly distinguish exact specification text from wiki summary or interpretation.
+
+Use this template on Spec pages to preserve word-for-word contract language that may be needed for scope arguments, change order evaluation, or compliance verification.
+
+[[Category:Templates]]
+</noinclude>

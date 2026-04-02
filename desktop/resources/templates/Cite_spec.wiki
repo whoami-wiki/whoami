@@ -1,0 +1,13 @@
+<includeonly>Spec {{{section}}}{{#if:{{{paragraph|}}}|, §{{{paragraph}}}}}{{#if:{{{title|}}}| — {{{title}}}}}</includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Cite spec|section=03 30 00|paragraph=2.1.A|title=Cast-in-Place Concrete}}</nowiki></code>
+
+Renders as: Spec 03 30 00, §2.1.A — Cast-in-Place Concrete
+
+=== Parameters ===
+* '''section''' (required): CSI section number
+* '''paragraph''' (required): Paragraph or subparagraph number (e.g. 2.1.A, 3.5.2.b)
+* '''title''' (optional): Section title
+
+[[Category:Citation templates]]
+</noinclude>

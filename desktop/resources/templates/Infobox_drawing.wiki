@@ -1,0 +1,29 @@
+<includeonly><table class="infobox">
+<caption>{{{number|{{PAGENAME}}}}}</caption>
+{{#if:{{{title|}}}|<tr><td colspan="2" class="infobox-above">{{{title}}}</td></tr>}}
+{{#if:{{{discipline|}}}|<tr><th>Discipline</th><td>{{{discipline}}}</td></tr>}}
+{{#if:{{{area|}}}|<tr><th>Area</th><td>{{{area}}}</td></tr>}}
+{{#if:{{{scale|}}}|<tr><th>Scale</th><td>{{{scale}}}</td></tr>}}
+{{#if:{{{rev|}}}|<tr><th>Revision</th><td>{{{rev}}}</td></tr>}}
+{{#if:{{{rev_date|}}}|<tr><th>Rev date</th><td>{{{rev_date}}}</td></tr>}}
+{{#if:{{{sheet_size|}}}|<tr><th>Sheet size</th><td>{{{sheet_size}}}</td></tr>}}
+{{#if:{{{match_lines|}}}|<tr><th>Match lines</th><td>{{{match_lines}}}</td></tr>}}
+{{#if:{{{supersedes|}}}|<tr><th>Supersedes</th><td>{{{supersedes}}}</td></tr>}}
+</table></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Infobox drawing
+| number      = C-301
+| title       = Primary Clarifier Site Plan
+| discipline  = Civil
+| area        = [[Area 03 — Primary Clarifiers]]
+| scale       = 1" = 20'
+| rev         = 3
+| rev_date    = 2025-11-15
+| sheet_size  = D (24x36)
+| match_lines = [[Drawing:C-300]], [[Drawing:C-302]]
+}}
+</pre>
+
+[[Category:Templates]]
+</noinclude>

@@ -1,0 +1,29 @@
+<includeonly><div class="verification-box verification-{{{status}}}">{{#switch:{{{status}}}
+| complete = &#x1F7E2;
+| in-progress = &#x1F7E1;
+| not-started = &#x1F534;
+| issues = &#x26A0;&#xFE0F;
+| #default = &#x2753;
+}} '''{{#switch:{{{status}}}
+| complete = Verified
+| in-progress = In Progress
+| not-started = Not Started
+| issues = Issues Identified
+| #default = Unknown
+}}'''{{#if:{{{note|}}}|<span class="verification-note"> — {{{note}}}</span>}}{{#if:{{{last_verified|}}}|<div class="verification-meta">Last verified: {{{last_verified}}}</div>}}{{#if:{{{sources|}}}|<div class="verification-meta">Sources: {{{sources}}}</div>}}</div></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Verification|status=in-progress
+|note=Structural and civil extracted. Mechanical pending submittals.
+|last_verified=2026-02-15
+|sources=C-301 through C-310 (Rev 3), Spec 03 30 00}}
+</pre>
+
+=== Status values ===
+* '''complete''' — High confidence, directly extracted from source documents
+* '''in-progress''' — Partially extracted, some sections pending
+* '''not-started''' — Page exists but content not yet verified against sources
+* '''issues''' — Contradictions or problems found requiring resolution
+
+[[Category:Templates]]
+</noinclude>

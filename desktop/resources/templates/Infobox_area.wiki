@@ -1,0 +1,29 @@
+<includeonly><table class="infobox">
+<caption>{{{name|{{PAGENAME}}}}}</caption>
+{{#if:{{{image|}}}|<tr><td colspan="2" class="infobox-image">[[File:{{{image}}}|frameless|220px]]{{#if:{{{caption|}}}|<div style="font-size:90%">{{{caption}}}</div>}}</td></tr>}}
+{{#if:{{{area_number|}}}|<tr><th>Area</th><td>{{{area_number}}}</td></tr>}}
+{{#if:{{{location|}}}|<tr><th>Location</th><td>{{{location}}}</td></tr>}}
+{{#if:{{{status|}}}|<tr><th>Status</th><td>{{{status}}}</td></tr>}}
+{{#if:{{{disciplines|}}}|<tr><th>Disciplines</th><td>{{{disciplines}}}</td></tr>}}
+{{#if:{{{upstream|}}}|<tr><th>Upstream</th><td>{{{upstream}}}</td></tr>}}
+{{#if:{{{downstream|}}}|<tr><th>Downstream</th><td>{{{downstream}}}</td></tr>}}
+{{#if:{{{key_drawings|}}}|<tr><th>Key drawings</th><td>{{{key_drawings}}}</td></tr>}}
+{{#if:{{{key_specs|}}}|<tr><th>Key specs</th><td>{{{key_specs}}}</td></tr>}}
+</table></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Infobox area
+| name         = Primary Clarifiers
+| area_number  = 03
+| location     = North plant, east of headworks
+| status       = Under Construction
+| disciplines  = Civil, Structural, Mechanical
+| upstream     = [[Area 02 — Headworks]]
+| downstream   = [[Area 04 — Aeration Basins]]
+| key_drawings = [[Drawing:C-301]], [[Drawing:S-302]]
+| key_specs    = [[Spec:03 30 00]], [[Spec:46 33 00]]
+}}
+</pre>
+
+[[Category:Templates]]
+</noinclude>

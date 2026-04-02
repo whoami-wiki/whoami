@@ -1,0 +1,36 @@
+<includeonly><table class="infobox">
+<caption>{{{name|{{PAGENAME}}}}}</caption>
+{{#if:{{{image|}}}|<tr><td colspan="2" class="infobox-image">[[File:{{{image}}}|frameless|220px]]{{#if:{{{caption|}}}|<div style="font-size:90%">{{{caption}}}</div>}}</td></tr>}}
+{{#if:{{{tag|}}}|<tr><th>Tag</th><td>{{{tag}}}</td></tr>}}
+{{#if:{{{type|}}}|<tr><th>Type</th><td>{{{type}}}</td></tr>}}
+{{#if:{{{manufacturer|}}}|<tr><th>Manufacturer</th><td>{{{manufacturer}}}</td></tr>}}
+{{#if:{{{model|}}}|<tr><th>Model</th><td>{{{model}}}</td></tr>}}
+{{#if:{{{area|}}}|<tr><th>Area</th><td>{{{area}}}</td></tr>}}
+{{#if:{{{capacity|}}}|<tr><th>Capacity</th><td>{{{capacity}}}</td></tr>}}
+{{#if:{{{motor|}}}|<tr><th>Motor</th><td>{{{motor}}}</td></tr>}}
+{{#if:{{{power|}}}|<tr><th>Power</th><td>{{{power}}}</td></tr>}}
+{{#if:{{{material|}}}|<tr><th>Material</th><td>{{{material}}}</td></tr>}}
+{{#if:{{{weight|}}}|<tr><th>Weight</th><td>{{{weight}}}</td></tr>}}
+{{#if:{{{spec_section|}}}|<tr><th>Spec section</th><td>{{{spec_section}}}</td></tr>}}
+{{#if:{{{submittal|}}}|<tr><th>Submittal</th><td>{{{submittal}}}</td></tr>}}
+{{#if:{{{status|}}}|<tr><th>Status</th><td>{{{status}}}</td></tr>}}
+</table></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Infobox equipment
+| name         = Primary Sludge Pump PS-301A
+| tag          = PS-301A
+| type         = Centrifugal, non-clog
+| manufacturer = Flygt
+| model        = NP 3153
+| area         = [[Area 03 — Primary Clarifiers]]
+| capacity     = 500 GPM at 30 ft TDH
+| motor        = 25 HP, 460V, 3-phase
+| spec_section = [[Spec:46 33 00]]
+| submittal    = [[Construction:SUB-463300-001]]
+| status       = Submittal Pending
+}}
+</pre>
+
+[[Category:Templates]]
+</noinclude>

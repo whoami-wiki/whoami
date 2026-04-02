@@ -164,6 +164,54 @@ export async function runSetup(
     "Initial template import",
   );
 
+  // Construction project infoboxes
+  for (const name of [
+    "Infobox_area",
+    "Infobox_equipment",
+    "Infobox_system",
+    "Infobox_drawing",
+    "Infobox_spec",
+    "Infobox_construction",
+    "Infobox_issue",
+  ]) {
+    await createPage(
+      apiUrl,
+      csrfToken,
+      `Template:${name.replace(/_/g, " ")}`,
+      readFileSync(join(templatesDir, `${name}.wiki`), "utf-8"),
+      "Initial template import",
+    );
+  }
+
+  // Citation templates
+  for (const name of [
+    "Cite_drawing",
+    "Cite_spec",
+    "Cite_rfi",
+    "Cite_submittal",
+    "Cite_document",
+    "Cite_field",
+  ]) {
+    await createPage(
+      apiUrl,
+      csrfToken,
+      `Template:${name.replace(/_/g, " ")}`,
+      readFileSync(join(templatesDir, `${name}.wiki`), "utf-8"),
+      "Initial template import",
+    );
+  }
+
+  // Utility templates
+  for (const name of ["Verbatim", "Verification", "Superseded"]) {
+    await createPage(
+      apiUrl,
+      csrfToken,
+      `Template:${name}`,
+      readFileSync(join(templatesDir, `${name}.wiki`), "utf-8"),
+      "Initial template import",
+    );
+  }
+
   // Import Common.css
   await createPage(
     apiUrl,
@@ -405,15 +453,33 @@ function generateLocalSettings(opts: LocalSettingsOpts): string {
     "$wgScribuntoDefaultEngine = 'luastandalone';",
     `$wgScribuntoEngineConf['luastandalone']['luaPath'] = '${opts.resourcesPath}/lua/bin/lua';`,
     "",
-    "## Source namespace (100/101)",
-    'define("NS_SOURCE", 100);',
-    'define("NS_SOURCE_TALK", 101);',
-    '$wgExtraNamespaces[NS_SOURCE] = "Source";',
-    '$wgExtraNamespaces[NS_SOURCE_TALK] = "Source_talk";',
+    "## Drawing namespace (100/101)",
+    'define("NS_DRAWING", 100);',
+    'define("NS_DRAWING_TALK", 101);',
+    '$wgExtraNamespaces[NS_DRAWING] = "Drawing";',
+    '$wgExtraNamespaces[NS_DRAWING_TALK] = "Drawing_talk";',
     "",
-    "## Task namespace (102/103)",
-    'define("NS_TASK", 102);',
-    'define("NS_TASK_TALK", 103);',
+    "## Spec namespace (102/103)",
+    'define("NS_SPEC", 102);',
+    'define("NS_SPEC_TALK", 103);',
+    '$wgExtraNamespaces[NS_SPEC] = "Spec";',
+    '$wgExtraNamespaces[NS_SPEC_TALK] = "Spec_talk";',
+    "",
+    "## Construction namespace (104/105)",
+    'define("NS_CONSTRUCTION", 104);',
+    'define("NS_CONSTRUCTION_TALK", 105);',
+    '$wgExtraNamespaces[NS_CONSTRUCTION] = "Construction";',
+    '$wgExtraNamespaces[NS_CONSTRUCTION_TALK] = "Construction_talk";',
+    "",
+    "## Issue namespace (106/107)",
+    'define("NS_ISSUE", 106);',
+    'define("NS_ISSUE_TALK", 107);',
+    '$wgExtraNamespaces[NS_ISSUE] = "Issue";',
+    '$wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";',
+    "",
+    "## Task namespace (108/109)",
+    'define("NS_TASK", 108);',
+    'define("NS_TASK_TALK", 109);',
     '$wgExtraNamespaces[NS_TASK] = "Task";',
     '$wgExtraNamespaces[NS_TASK_TALK] = "Task_talk";',
     "",

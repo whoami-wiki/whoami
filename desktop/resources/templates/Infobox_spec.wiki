@@ -1,0 +1,26 @@
+<includeonly><table class="infobox">
+<caption>{{{section|{{PAGENAME}}}}}</caption>
+{{#if:{{{title|}}}|<tr><td colspan="2" class="infobox-above">{{{title}}}</td></tr>}}
+{{#if:{{{division|}}}|<tr><th>Division</th><td>{{{division}}}</td></tr>}}
+{{#if:{{{issued|}}}|<tr><th>Issued</th><td>{{{issued}}}</td></tr>}}
+{{#if:{{{rev|}}}|<tr><th>Revision</th><td>{{{rev}}}</td></tr>}}
+{{#if:{{{pages|}}}|<tr><th>Pages</th><td>{{{pages}}}</td></tr>}}
+{{#if:{{{areas|}}}|<tr><th>Areas</th><td>{{{areas}}}</td></tr>}}
+{{#if:{{{precedence|}}}|<tr><th>Precedence</th><td>{{{precedence}}}</td></tr>}}
+</table></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Infobox spec
+| section    = 03 30 00
+| title      = Cast-in-Place Concrete
+| division   = 03 — Concrete
+| issued     = 2025-09-01
+| rev        = 0
+| pages      = 28
+| areas      = [[Area 03|Area 03]], [[Area 04|Area 04]]
+| precedence = Governs over drawing notes per General Conditions 1.2.3
+}}
+</pre>
+
+[[Category:Templates]]
+</noinclude>

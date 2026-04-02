@@ -1,0 +1,215 @@
+---
+title: Construction Namespaces
+description: "How construction project wikis use namespaces to organize project documents and knowledge"
+---
+
+Namespaces separate different kinds of content so that each page has a clear purpose. The construction wiki uses MediaWiki's namespace system with five custom namespaces tailored to construction project documentation.
+
+A namespace appears as a prefix before the page title. Pages in the Main namespace have no prefix. All other namespaces use the format `Namespace:Page Title`.
+
+## Main
+
+The default namespace. Area pages, equipment pages, system pages, and project-level reference pages live here with no prefix.
+
+```
+Area 03 — Primary Clarifiers
+Primary Sludge Pump PS-301A
+Primary Sludge Collection System
+Project Standards
+Submittal Log
+Open Issues
+Codes and Standards
+```
+
+Main pages are the reader-facing technical content — what someone opens to understand a piece of the project. Multiple page types share this namespace (Area, Equipment, System, Reference) because they all serve the same purpose: synthesized, readable project knowledge.
+
+## Talk
+
+MediaWiki's built-in discussion namespace. Every Main page automatically gets a corresponding Talk page at `Talk:Page Title`.
+
+```
+Talk:Area 03 — Primary Clarifiers
+Talk:Primary Sludge Pump PS-301A
+```
+
+Talk pages serve as the verification and editorial layer. They hold verification status, active gaps, coordination issues, document history, and agent logs. Talk pages are not reader-facing — they document how a page was built and how confident you should be in its content.
+
+### Standard structure
+
+Talk pages use the following sections as needed, in this order. Not every talk page requires all sections. Omit any that have no content.
+
+1. **Verification status** — overall confidence indicator with source document list
+2. **Active gaps** — open questions, missing information, unresolved conflicts
+3. **Resolved** — closed questions with resolution source
+4. **Coordination issues** — trade coordination, sequencing conflicts, scope boundaries
+5. **Document history** — what source documents were ingested and when
+6. **Agent log** — chronological record of which tasks touched this page
+
+### Verification status
+
+The top section uses the `{{Verification}}` template to display a colored banner indicating confidence level.
+
+```wikitext
+== Verification status ==
+{{Verification|status=in-progress
+|note=Structural and civil extracted from IFC drawings. Mechanical
+pending equipment submittals. Electrical not yet started.
+|last_verified=2026-02-15
+|sources=C-301 through C-310 (Rev 3), S-302 (Rev 3), Spec 03 30 00}}
+```
+
+Status values:
+- **complete** — High confidence, directly extracted from source documents
+- **in-progress** — Partially extracted, some sections pending
+- **not-started** — Page exists but content not yet verified against sources
+- **issues** — Contradictions or problems found requiring resolution
+
+### Active gaps
+
+Each gap is a subsection marked `{{Open}}`. State the question, what's known, and what would resolve it.
+
+```wikitext
+=== Clarifier mechanism vendor unknown ===
+{{Open}}
+Spec 46 33 00 lists performance requirements but no basis-of-design
+manufacturer. Equipment page created with spec requirements only.
+Awaiting [[Construction:SUB-463300-001]].
+```
+
+### Resolved
+
+Each resolved question is a subsection marked `{{Closed}}`. When a resolution is later corrected, mark the old one `{{Superseded}}` and put the updated resolution directly below it.
+
+```wikitext
+=== Wall rebar spacing at penetrations ===
+{{Closed}}
+S-302 and S-305 Detail 7 conflicted. Resolved by
+[[Construction:RFI-042]]: Detail 7 governs, #5 at 8" O.C. each way.
+Page updated 2026-01-25.
+```
+
+### Coordination issues
+
+Construction-specific trade coordination problems and scope boundary questions.
+
+```wikitext
+=== Mechanical penetrations through clarifier walls ===
+Mechanical drawings M-401 show 14 penetrations through clarifier
+walls. Structural details on S-305 cover only 3 standard sizes.
+Remaining penetrations need coordination. Tracked in
+[[Construction:RFI-055]].
+```
+
+### Document history
+
+What source documents this page was built from and when they were ingested.
+
+```wikitext
+=== Initial creation — Civil drawings ===
+2026-02-10. Created from C-301 through C-310, Rev 3 (IFC set
+dated 2025-11-15). See [[Task:0003]].
+
+=== RFI-042 update ===
+2026-01-25. Structural section updated per RFI response. One gap
+closed. See [[Task:0012]].
+```
+
+### What does NOT belong on talk pages
+
+- Technical content meant for readers (that goes on the main page)
+- Full drawing analyses (those live on Drawing pages)
+- Verbatim spec text (lives on Spec pages)
+- Submittal/RFI content (lives on Construction pages)
+
+## Drawing
+
+A custom namespace (ID 100) for documenting construction drawings. Each drawing gets its own page containing the structured analysis: title block data, observations, dimensions, cross-references, and engineering interpretation.
+
+```
+Drawing:C-301
+Drawing:S-302
+Drawing:M-401
+```
+
+Drawing pages follow the drawing analysis protocol — literal observations first, engineering interpretation last. They are source documentation, not reader-facing content. Main pages (Area, Equipment) cite Drawing pages for specific facts.
+
+Categories organize drawings by discipline and area:
+
+```wikitext
+[[Category:Civil]]
+[[Category:Area 03]]
+```
+
+## Spec
+
+A custom namespace (ID 102) for specification section extractions. Each CSI section gets its own page with paragraph-level structure and verbatim contract language.
+
+```
+Spec:03 30 00 — Cast-in-Place Concrete
+Spec:46 33 00 — Submersible Pumps
+Spec:01 33 00 — Submittal Procedures
+```
+
+Spec pages preserve the exact contract language using the `{{Verbatim}}` template, with paragraph numbers as section anchors so citations can link to specific requirements (e.g., `Spec:03 30 00#2.1.A`).
+
+An **Active Modifications** table at the bottom tracks every RFI, submittal, or change order that has modified requirements in this section.
+
+## Construction
+
+A custom namespace (ID 104) for construction-phase documents — anything exchanged between parties after bid that modifies or clarifies the contract documents.
+
+```
+Construction:RFI-042
+Construction:SUB-033000-001
+Construction:FD-017
+Construction:SL-003
+```
+
+Construction pages all use the `{{Infobox construction}}` template with a `type` field to distinguish document types. Categories handle the subtype distinction:
+
+```wikitext
+[[Category:RFI]]
+[[Category:Submittal]]
+[[Category:Field Directive]]
+[[Category:Serial Letter]]
+```
+
+Every Construction page includes a **Pages Updated** section listing which Main, Drawing, or Spec pages were modified as a result of this document. This is the traceability chain — you can always trace a change on an Area page back to the Construction document that caused it.
+
+## Issue
+
+A custom namespace (ID 106) for project-level issues that require human action — drawing conflicts, spec incompatibilities, missing information, risk items, and coordination problems.
+
+```
+Issue:001
+Issue:002
+Issue:003
+```
+
+Issues are discovered by the agent during document analysis and tracked on the Open Issues summary page (Main namespace). Each issue page includes a description, impact assessment, recommended action, and resolution tracking.
+
+Unlike talk page gaps (which are page-specific), issues are project-level concerns that may affect multiple areas, require design changes, or need to be resolved before construction of a work item begins.
+
+## Task
+
+A custom namespace (ID 108) for agent work logs. Each task page documents what the agent did, which pages it created or modified, and what source documents it processed.
+
+```
+Task:0001
+Task:0003
+Task:0012
+```
+
+Tasks follow a lifecycle: pending, in-progress, then done or failed. The task page is a record of work, not content.
+
+## Summary
+
+| Namespace | Prefix | ID | Purpose |
+| --- | --- | --- | --- |
+| Main | | 0 | Area, Equipment, System pages and project references |
+| Talk | `Talk:` | 1 | Verification status, gaps, coordination issues |
+| Drawing | `Drawing:` | 100 | Drawing analysis pages |
+| Spec | `Spec:` | 102 | Specification extractions with verbatim text |
+| Construction | `Construction:` | 104 | RFIs, Submittals, Field Directives, Serial Letters |
+| Issue | `Issue:` | 106 | Project-level issues requiring human action |
+| Task | `Task:` | 108 | Agent work logs |

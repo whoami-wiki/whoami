@@ -1,0 +1,13 @@
+<includeonly>{{{number}}} Response{{#if:{{{date|}}}| ({{{date}}})}}{{#if:{{{note|}}}| — {{{note}}}}}</includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Cite rfi|number=RFI-042|date=2026-01-22|note=S-305 Detail 7 governs for wall penetration rebar}}</nowiki></code>
+
+Renders as: RFI-042 Response (2026-01-22) — S-305 Detail 7 governs for wall penetration rebar
+
+=== Parameters ===
+* '''number''' (required): RFI number
+* '''date''' (required): Response date
+* '''note''' (optional): Brief description of what the response established
+
+[[Category:Citation templates]]
+</noinclude>

@@ -1,0 +1,15 @@
+<includeonly>Drawing {{{number}}}{{#if:{{{rev|}}}| Rev.&nbsp;{{{rev}}}}}{{#if:{{{title|}}}|, {{{title}}}}}{{#if:{{{date|}}}| ({{{date}}})}}{{#if:{{{detail|}}}|, {{{detail}}}}}</includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Cite drawing|number=C-301|title=Primary Clarifier Site Plan|rev=3|date=2025-11-15|detail=Detail 7}}</nowiki></code>
+
+Renders as: Drawing C-301 Rev.&nbsp;3, Primary Clarifier Site Plan (2025-11-15), Detail 7
+
+=== Parameters ===
+* '''number''' (required): Drawing number
+* '''rev''' (required): Revision number
+* '''date''' (required): Revision date
+* '''title''' (optional): Drawing title
+* '''detail''' (optional): Specific detail, section cut, or note callout
+
+[[Category:Citation templates]]
+</noinclude>

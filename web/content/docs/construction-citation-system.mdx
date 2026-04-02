@@ -1,0 +1,205 @@
+---
+title: Construction Citation System
+description: "How citations link wiki content back to construction documents"
+---
+
+On a construction project, citations serve a specific purpose: **traceability**. When someone reads a claim on an Area page and wants to know where it came from — a drawing, a spec paragraph, an RFI response, an approved submittal — the citation points them to the exact source.
+
+This is especially important when requirements change. If an RFI response modifies a spec requirement, the citation chain shows: the Area page was updated, the new claim cites the RFI, and the old claim (visible in revision history) cited the original spec. You can always reconstruct what changed and why.
+
+## MediaWiki's native ref system
+
+All inline citations use `<ref>` tags, rendered via `<references />` at the bottom of the page in a `== References ==` section. This is standard MediaWiki.
+
+```wikitext
+Wall thickness is 18 inches at the base tapering to 12 inches.<ref name="spec-033000-2.3">
+{{Cite spec|section=03 30 00|paragraph=2.3.B|title=Cast-in-Place Concrete}}</ref>
+```
+
+## Citation templates
+
+Six templates for inline citations, matching the document types in a construction project.
+
+### Cite drawing
+
+For facts extracted from a construction drawing.
+
+```wikitext
+{{Cite drawing|number=C-301|title=Primary Clarifier Site Plan
+|rev=3|date=2025-11-15|detail=Detail 7}}
+```
+
+Renders as: Drawing C-301 Rev. 3, Primary Clarifier Site Plan (2025-11-15), Detail 7
+
+| Field | Required | Purpose |
+| --- | --- | --- |
+| `number` | yes | Drawing number — links to `Drawing:` page |
+| `rev` | yes | Revision number |
+| `date` | yes | Revision date |
+| `title` | no | Drawing title |
+| `detail` | no | Specific detail, section cut, or note callout |
+
+### Cite spec
+
+For requirements from a specification section. Links to a specific paragraph.
+
+```wikitext
+{{Cite spec|section=03 30 00|paragraph=2.1.A
+|title=Cast-in-Place Concrete}}
+```
+
+Renders as: Spec 03 30 00, §2.1.A — Cast-in-Place Concrete
+
+| Field | Required | Purpose |
+| --- | --- | --- |
+| `section` | yes | CSI section number — links to `Spec:` page |
+| `paragraph` | yes | Paragraph number (1.1, 2.1.A, 3.5.2.b) |
+| `title` | no | Section title |
+
+### Cite rfi
+
+For information from an RFI response.
+
+```wikitext
+{{Cite rfi|number=RFI-042|date=2026-01-22
+|note=S-305 Detail 7 governs for wall penetration rebar}}
+```
+
+Renders as: RFI-042 Response (2026-01-22) — S-305 Detail 7 governs for wall penetration rebar
+
+| Field | Required | Purpose |
+| --- | --- | --- |
+| `number` | yes | RFI number — links to `Construction:` page |
+| `date` | yes | Response date (not question date) |
+| `note` | no | What the response established |
+
+### Cite submittal
+
+For information from an approved submittal.
+
+```wikitext
+{{Cite submittal|number=SUB-033000-001|date=2026-02-10
+|status=Approved as Noted
+|note=Concrete mix design, 4500 PSI structural}}
+```
+
+Renders as: Submittal SUB-033000-001 — Approved as Noted (2026-02-10) — Concrete mix design, 4500 PSI structural
+
+| Field | Required | Purpose |
+| --- | --- | --- |
+| `number` | yes | Submittal number — links to `Construction:` page |
+| `date` | yes | Review/approval date |
+| `status` | yes | Approved, Approved as Noted, Revise and Resubmit, Rejected |
+| `note` | no | What was submitted |
+
+The status field matters because "Approved as Noted" means the submittal was modified — the notes may change requirements.
+
+### Cite document
+
+Catch-all for other project documents — geotech reports, environmental assessments, contract general conditions, owner's design criteria.
+
+```wikitext
+{{Cite document|title=Geotechnical Investigation Report
+|author=GeoEngineers|date=2025-03-15|page=23
+|note=Allowable bearing pressure 4,000 PSF}}
+```
+
+Renders as: Geotechnical Investigation Report, GeoEngineers (2025-03-15), p. 23 — Allowable bearing pressure 4,000 PSF
+
+| Field | Required | Purpose |
+| --- | --- | --- |
+| `title` | yes | Document title |
+| `date` | yes | Document date |
+| `author` | no | Issuing firm or individual |
+| `page` | no | Page number |
+| `section` | no | Section or article number |
+| `paragraph` | no | Paragraph number |
+| `note` | no | What this citation supports |
+
+Also handles contract documents:
+
+```wikitext
+{{Cite document|title=General Conditions|section=7.2
+|paragraph=7.2.3|note=Order of precedence}}
+```
+
+### Cite field
+
+For field observations, daily reports, inspection records, and test results.
+
+```wikitext
+{{Cite field|date=2026-03-15|observer=J. Smith
+|type=inspection|note=Rebar placement verified prior to pour, Clarifier 1}}
+```
+
+Renders as: Field inspection, J. Smith (2026-03-15) — Rebar placement verified prior to pour, Clarifier 1
+
+| Field | Required | Purpose |
+| --- | --- | --- |
+| `date` | yes | Date of observation |
+| `observer` | no | Who recorded it |
+| `type` | no | inspection, daily report, photo log, test result |
+| `note` | no | What was observed |
+
+## Granularity
+
+Not every sentence needs a citation. The goal is traceability, not exhaustiveness.
+
+### Always cite
+
+- **Dimensions and elevations** — always cite the drawing and revision they came from
+- **Material requirements** — cite the spec paragraph
+- **Equipment design parameters** — cite the spec or approved submittal
+- **Information from RFI responses** — always cite the RFI, since these override contract documents
+- **Information from submittals** — cite the submittal with approval status
+- **Claims that were corrected or disputed** — cite the resolution source
+- **Any fact that could be subject to a scope or change order argument**
+
+### Don't need individual citations
+
+- General descriptions of area purpose when it's obvious from context
+- Information already attributed inline ("Per Drawing C-301..." serves as its own locator)
+- Section headings and organizational structure
+
+## Named refs for reuse
+
+Many facts from the same drawing or spec paragraph share a source. Use named refs:
+
+```wikitext
+Wall thickness is 18 inches at the base.<ref name="dwg-s-302">
+{{Cite drawing|number=S-302|rev=3|date=2025-11-15
+|title=Clarifier Foundation Plan}}</ref>
+Side water depth is 12 feet.<ref name="dwg-s-302" />
+```
+
+## How citations chain through changes
+
+This is the key feature of the construction citation system. When a requirement changes, the citation chain tells the full story:
+
+1. **Original state:** Area page cites `{{Cite spec|section=03 30 00|paragraph=3.2.1}}`
+2. **Conflict discovered:** Agent posts gap on Talk page, creates `Issue:001`
+3. **RFI submitted:** `Construction:RFI-042` created with question
+4. **RFI response received:** `Construction:RFI-042` updated with response
+5. **Pages updated:** Area page citation changes to `{{Cite rfi|number=RFI-042|date=2026-01-22}}`
+6. **Traceability:** Revision history shows the old citation, Talk page shows the gap was closed, Construction page shows the full RFI exchange
+
+A reader sees current information with a clear source. Anyone who needs the history can trace it back through the revision log and the Construction page.
+
+## Page structure
+
+Every Area page and Equipment page ends with:
+
+```wikitext
+== References ==
+<references />
+
+== Bibliography ==
+{{Cite document|title=Civil Drawing Set|date=2025-11-15
+|note=C-301 through C-310, Rev 3}}
+{{Cite document|title=Structural Drawing Set|date=2025-11-15
+|note=S-302, S-305, S-308, Rev 3}}
+```
+
+**References** are inline citations. Each one traces a specific claim back to a specific source.
+
+**Bibliography** lists the full document sets consulted for the page. This tells a reader what drawings and specs the page was built from overall.

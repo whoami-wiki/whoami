@@ -77,9 +77,94 @@
   margin-bottom: 2px;
 }
 
-/* Source namespace — slightly larger font like article namespace */
+/* Verbatim template — contract language blocks */
+.verbatim-box {
+  background: #f5f5f5;
+  border: 1px solid #c0c0c0;
+  border-left: 4px solid #1a237e;
+  border-radius: 2px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  font-family: serif;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.verbatim-label {
+  font-family: sans-serif;
+  font-size: 0.7em;
+  font-weight: bold;
+  color: #1a237e;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* Verification status template */
+.verification-box {
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: 0.9em;
+}
+
+.verification-complete {
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+}
+
+.verification-in-progress {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+}
+
+.verification-not-started {
+  background: #ffebee;
+  border: 1px solid #ef9a9a;
+}
+
+.verification-issues {
+  background: #fff3e0;
+  border: 1px solid #ffcc80;
+}
+
+.verification-note {
+  font-style: italic;
+}
+
+.verification-meta {
+  font-size: 0.85em;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Drawing namespace */
 .ns-100 #mw-content-text,
 .ns-101 #mw-content-text {
+  font-size: 1em;
+}
+
+/* Spec namespace */
+.ns-102 #mw-content-text,
+.ns-103 #mw-content-text {
+  font-size: 1em;
+}
+
+/* Construction namespace */
+.ns-104 #mw-content-text,
+.ns-105 #mw-content-text {
+  font-size: 1em;
+}
+
+/* Issue namespace */
+.ns-106 #mw-content-text,
+.ns-107 #mw-content-text {
+  font-size: 1em;
+}
+
+/* Task namespace */
+.ns-108 #mw-content-text,
+.ns-109 #mw-content-text {
   font-size: 1em;
 }
 
@@ -103,5 +188,44 @@
 
   .dialogue blockquote {
     border-left-color: #636366;
+  }
+
+  .verbatim-box {
+    background: #1a1a2e;
+    border-color: #3a3a5c;
+    border-left-color: #7986cb;
+    color: #e0e0e0;
+  }
+
+  .verbatim-label {
+    color: #7986cb;
+  }
+
+  .verification-complete {
+    background: #1b3a1b;
+    border-color: #2e7d32;
+    color: #a5d6a7;
+  }
+
+  .verification-in-progress {
+    background: #3a3000;
+    border-color: #665800;
+    color: #ffe082;
+  }
+
+  .verification-not-started {
+    background: #3a1a1a;
+    border-color: #c62828;
+    color: #ef9a9a;
+  }
+
+  .verification-issues {
+    background: #3a2a00;
+    border-color: #e65100;
+    color: #ffcc80;
+  }
+
+  .verification-meta {
+    color: #999;
   }
 }

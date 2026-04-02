@@ -1,0 +1,14 @@
+<includeonly>Field {{#if:{{{type|}}}|{{{type}}}|observation}}{{#if:{{{observer|}}}|, {{{observer}}}}}{{#if:{{{date|}}}| ({{{date}}})}}{{#if:{{{note|}}}| — {{{note}}}}}</includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Cite field|date=2026-03-15|observer=J. Smith|type=inspection|note=Rebar placement verified prior to pour, Clarifier 1}}</nowiki></code>
+
+Renders as: Field inspection, J. Smith (2026-03-15) — Rebar placement verified prior to pour, Clarifier 1
+
+=== Parameters ===
+* '''date''' (required): Date of observation
+* '''observer''' (optional): Who recorded it
+* '''type''' (optional): inspection, daily report, photo log, test result (defaults to "observation")
+* '''note''' (optional): What was observed
+
+[[Category:Citation templates]]
+</noinclude>

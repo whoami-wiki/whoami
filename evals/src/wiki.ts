@@ -107,15 +107,33 @@ function generateLocalSettings(opts: {
     "$wgScribuntoDefaultEngine = 'luastandalone';",
     `$wgScribuntoEngineConf['luastandalone']['luaPath'] = '${LUA_PATH}';`,
     '',
-    '## Source namespace (100/101)',
-    'define("NS_SOURCE", 100);',
-    'define("NS_SOURCE_TALK", 101);',
-    '$wgExtraNamespaces[NS_SOURCE] = "Source";',
-    '$wgExtraNamespaces[NS_SOURCE_TALK] = "Source_talk";',
+    '## Drawing namespace (100/101)',
+    'define("NS_DRAWING", 100);',
+    'define("NS_DRAWING_TALK", 101);',
+    '$wgExtraNamespaces[NS_DRAWING] = "Drawing";',
+    '$wgExtraNamespaces[NS_DRAWING_TALK] = "Drawing_talk";',
     '',
-    '## Task namespace (102/103)',
-    'define("NS_TASK", 102);',
-    'define("NS_TASK_TALK", 103);',
+    '## Spec namespace (102/103)',
+    'define("NS_SPEC", 102);',
+    'define("NS_SPEC_TALK", 103);',
+    '$wgExtraNamespaces[NS_SPEC] = "Spec";',
+    '$wgExtraNamespaces[NS_SPEC_TALK] = "Spec_talk";',
+    '',
+    '## Construction namespace (104/105)',
+    'define("NS_CONSTRUCTION", 104);',
+    'define("NS_CONSTRUCTION_TALK", 105);',
+    '$wgExtraNamespaces[NS_CONSTRUCTION] = "Construction";',
+    '$wgExtraNamespaces[NS_CONSTRUCTION_TALK] = "Construction_talk";',
+    '',
+    '## Issue namespace (106/107)',
+    'define("NS_ISSUE", 106);',
+    'define("NS_ISSUE_TALK", 107);',
+    '$wgExtraNamespaces[NS_ISSUE] = "Issue";',
+    '$wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";',
+    '',
+    '## Task namespace (108/109)',
+    'define("NS_TASK", 108);',
+    'define("NS_TASK_TALK", 109);',
     '$wgExtraNamespaces[NS_TASK] = "Task";',
     '$wgExtraNamespaces[NS_TASK_TALK] = "Task_talk";',
     '',
@@ -265,6 +283,29 @@ export async function startWiki(port: number): Promise<WikiInstance> {
   importPage(confPath, 'Template:Gap', join(TEMPLATES_PATH, 'Gap.wiki'));
   importPage(confPath, 'Template:Dialogue', join(TEMPLATES_PATH, 'Dialogue.wiki'));
   importPage(confPath, 'Template:Infobox person', join(TEMPLATES_PATH, 'Infobox_person.wiki'));
+
+  // Construction project infoboxes
+  for (const name of [
+    'Infobox_area', 'Infobox_equipment', 'Infobox_system',
+    'Infobox_drawing', 'Infobox_spec', 'Infobox_construction',
+    'Infobox_issue',
+  ]) {
+    importPage(confPath, `Template:${name.replace(/_/g, ' ')}`, join(TEMPLATES_PATH, `${name}.wiki`));
+  }
+
+  // Citation templates
+  for (const name of [
+    'Cite_drawing', 'Cite_spec', 'Cite_rfi',
+    'Cite_submittal', 'Cite_document', 'Cite_field',
+  ]) {
+    importPage(confPath, `Template:${name.replace(/_/g, ' ')}`, join(TEMPLATES_PATH, `${name}.wiki`));
+  }
+
+  // Utility templates
+  for (const name of ['Verbatim', 'Verification', 'Superseded']) {
+    importPage(confPath, `Template:${name}`, join(TEMPLATES_PATH, `${name}.wiki`));
+  }
+
   importPage(confPath, 'MediaWiki:Common.css', join(TEMPLATES_PATH, 'infobox-styles.css'));
 
   // Start PHP built-in server

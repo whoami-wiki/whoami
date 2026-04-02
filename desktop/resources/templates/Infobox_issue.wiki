@@ -1,0 +1,35 @@
+<includeonly><table class="infobox">
+<caption>Issue {{{id|{{PAGENAME}}}}}</caption>
+{{#if:{{{type|}}}|<tr><th>Type</th><td>{{{type}}}</td></tr>}}
+{{#if:{{{severity|}}}|<tr><th>Severity</th><td>{{{severity}}}</td></tr>}}
+{{#if:{{{status|}}}|<tr><th>Status</th><td>{{{status}}}</td></tr>}}
+{{#if:{{{areas|}}}|<tr><th>Areas</th><td>{{{areas}}}</td></tr>}}
+{{#if:{{{disciplines|}}}|<tr><th>Disciplines</th><td>{{{disciplines}}}</td></tr>}}
+{{#if:{{{discovered|}}}|<tr><th>Discovered</th><td>{{{discovered}}}</td></tr>}}
+{{#if:{{{discovered_by|}}}|<tr><th>Discovered by</th><td>{{{discovered_by}}}</td></tr>}}
+{{#if:{{{assigned_to|}}}|<tr><th>Assigned to</th><td>{{{assigned_to}}}</td></tr>}}
+{{#if:{{{drawings|}}}|<tr><th>Drawings</th><td>{{{drawings}}}</td></tr>}}
+{{#if:{{{specs|}}}|<tr><th>Specs</th><td>{{{specs}}}</td></tr>}}
+{{#if:{{{resolved_by|}}}|<tr><th>Resolved by</th><td>{{{resolved_by}}}</td></tr>}}
+{{#if:{{{resolution_date|}}}|<tr><th>Resolution date</th><td>{{{resolution_date}}}</td></tr>}}
+</table></includeonly><noinclude>
+== Usage ==
+<pre>
+{{Infobox issue
+| id            = 001
+| type          = Drawing Conflict
+| severity      = Critical
+| status        = RFI Needed
+| areas         = [[Area 03 — Primary Clarifiers]]
+| disciplines   = Civil, Structural
+| discovered    = 2026-02-12
+| discovered_by = [[Task:0005]]
+| drawings      = [[Drawing:C-301]], [[Drawing:S-302]]
+}}
+</pre>
+
+Severity levels: Critical, Major, Minor, Informational.
+Types: Drawing Conflict, Spec Conflict, Missing Information, Risk Item, Coordination Issue.
+
+[[Category:Templates]]
+</noinclude>

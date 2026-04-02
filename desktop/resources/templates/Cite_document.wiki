@@ -1,0 +1,20 @@
+<includeonly>{{{title}}}{{#if:{{{author|}}}|, {{{author}}}}}{{#if:{{{date|}}}| ({{{date}}})}}{{#if:{{{page|}}}|, p.&nbsp;{{{page}}}}}{{#if:{{{section|}}}|, §{{{section}}}}}{{#if:{{{paragraph|}}}|.{{{paragraph}}}}}{{#if:{{{note|}}}| — {{{note}}}}}</includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Cite document|title=Geotechnical Investigation Report|author=GeoEngineers|date=2025-03-15|page=23|note=Allowable bearing pressure 4,000 PSF}}</nowiki></code>
+
+Renders as: Geotechnical Investigation Report, GeoEngineers (2025-03-15), p.&nbsp;23 — Allowable bearing pressure 4,000 PSF
+
+Also for contract documents:
+<code><nowiki>{{Cite document|title=General Conditions|section=7.2|paragraph=7.2.3|note=Order of precedence}}</nowiki></code>
+
+=== Parameters ===
+* '''title''' (required): Document title
+* '''date''' (required): Document date
+* '''author''' (optional): Issuing firm or individual
+* '''page''' (optional): Page number
+* '''section''' (optional): Section or article number
+* '''paragraph''' (optional): Paragraph number
+* '''note''' (optional): What this citation supports
+
+[[Category:Citation templates]]
+</noinclude>

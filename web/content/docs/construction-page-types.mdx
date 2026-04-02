@@ -1,0 +1,336 @@
+---
+title: Construction Page Types
+description: "Page types for construction project wikis"
+---
+
+Every piece of content has exactly one canonical home. The Main namespace holds three reader-facing page types: Area, Equipment, and System. Other namespaces hold source documentation (Drawing, Spec), construction-phase documents (Construction), and issue tracking (Issue). For namespace details, see [Construction Namespaces](/docs/construction-namespaces).
+
+## Area
+
+**Namespace**: Main (e.g. `Area 03 — Primary Clarifiers`)
+
+The hub page for a project area. This is the page someone opens to understand what's happening in a defined part of the project — what structures are there, what disciplines are involved, what's upstream and downstream, and what the current state of construction is.
+
+**What belongs here:**
+
+- Area description and function within the project
+- Technical details organized by discipline (Structural, Mechanical, Electrical, I&C)
+- Connected systems (upstream/downstream in the process flow)
+- Construction requirements and sequencing
+- Key drawing and spec references
+- Equipment lists with links to equipment pages
+- Source citations for every factual claim
+
+**What does NOT belong here:**
+
+- Full drawing analyses (those live on Drawing pages)
+- Verbatim spec text (those live on Spec pages)
+- RFI/submittal content (those live on Construction pages)
+- Verification status and open questions (those live on the Talk page)
+
+### Infobox
+
+```wikitext
+{{Infobox area
+| name         = Primary Clarifiers
+| area_number  = 03
+| location     = North plant, east of headworks
+| status       = Under Construction
+| disciplines  = Civil, Structural, Mechanical, Electrical, I&C
+| upstream     = [[Area 02 — Headworks]]
+| downstream   = [[Area 04 — Aeration Basins]]
+| key_drawings = [[Drawing:C-301]], [[Drawing:S-302]]
+| key_specs    = [[Spec:03 30 00]], [[Spec:46 33 00]]
+}}
+```
+
+### Standard sections
+
+1. Lead paragraph — one paragraph summarizing the area's purpose and scope
+2. Discipline sections (Structural, Mechanical, Electrical, I&C) — requirements with citations
+3. Connected Systems — upstream/downstream links
+4. Construction Requirements — sequencing, access, special conditions
+5. References — auto-generated from `<ref>` tags
+6. Bibliography — full document sets consulted
+
+### Lead paragraph convention
+
+State what the area is, what it does in the process, and its key physical characteristics. Keep it factual and concise.
+
+> Area 03 encompasses the primary clarifier complex, consisting of four 120-foot diameter circular clarifiers with associated sludge collection and scum removal systems. The clarifiers receive raw wastewater from the headworks and provide primary settling before the aeration basins.
+
+## Equipment
+
+**Namespace**: Main (e.g. `Primary Sludge Pump PS-301A`)
+
+A page for a significant piece of equipment — pumps, blowers, clarifier mechanisms, anything with a tag number, nameplate, or specification section. Equipment pages start as stubs from drawing/spec extraction and get enriched as submittals are approved.
+
+**What belongs here:**
+
+- Equipment tag, type, and design parameters from specifications
+- Manufacturer and model (once submittal is approved)
+- Capacity, motor, materials, weight
+- Installation requirements
+- Links to the area it serves, the spec that governs it, and any submittals
+
+**When to create an equipment page:** Any piece of equipment that has its own tag number on the drawings and its own specification section (or subsection) warrants a page. Minor accessories and commodity items do not.
+
+### Infobox
+
+```wikitext
+{{Infobox equipment
+| name         = Primary Sludge Pump PS-301A
+| tag          = PS-301A
+| type         = Centrifugal, non-clog
+| manufacturer = Flygt
+| model        = NP 3153
+| area         = [[Area 03 — Primary Clarifiers]]
+| capacity     = 500 GPM at 30 ft TDH
+| motor        = 25 HP, 460V, 3-phase
+| spec_section = [[Spec:46 33 00]]
+| submittal    = [[Construction:SUB-463300-001]]
+| status       = Approved
+}}
+```
+
+### Equipment page lifecycle
+
+1. **Stub from specs** — Tag number, type, design parameters from spec section. Manufacturer/model fields left blank. Status: "Submittal Pending."
+2. **Updated from drawings** — Physical location, elevation, piping connections added from drawing analysis.
+3. **Enriched from submittal** — Once the submittal is approved, manufacturer, model, and actual performance data are added. Status updates to "Approved" or "Approved as Noted."
+
+## System
+
+**Namespace**: Main (e.g. `Primary Sludge Collection System`)
+
+A page for systems that span multiple areas — process piping runs, electrical distribution, SCADA architecture, site utilities. System pages connect the dots that individual area pages can't.
+
+**When to create a system page:** When a system crosses area boundaries and understanding it requires seeing the full picture, not just area-by-area fragments.
+
+### Infobox
+
+```wikitext
+{{Infobox system
+| name         = Primary Sludge Collection
+| type         = Process Piping
+| areas        = [[Area 03|Area 03]], [[Area 09|Area 09]]
+| disciplines  = Mechanical, I&C
+| key_drawings = [[Drawing:M-401]], [[Drawing:M-901]]
+| key_specs    = [[Spec:40 05 00]]
+| status       = Design Complete
+}}
+```
+
+## Drawing (Drawing namespace)
+
+**Namespace**: Drawing (e.g. `Drawing:C-301`)
+
+The structured analysis of a single construction drawing, following the drawing analysis protocol. Drawing pages are source documentation — they capture what's on the sheet so that Main pages can cite specific facts.
+
+### Infobox
+
+```wikitext
+{{Infobox drawing
+| number      = C-301
+| title       = Primary Clarifier Site Plan
+| discipline  = Civil
+| area        = [[Area 03 — Primary Clarifiers]]
+| scale       = 1" = 20'
+| rev         = 3
+| rev_date    = 2025-11-15
+| sheet_size  = D (24x36)
+| match_lines = [[Drawing:C-300]], [[Drawing:C-302]]
+}}
+```
+
+### Standard sections
+
+1. **Title Block** — all title block text extracted
+2. **Legend and Symbols** — symbols and abbreviations used on this sheet
+3. **Observations** — raw physical observations only, no interpretation (15 bullets max)
+4. **Dimensions and Elevations** — all dimension strings, elevations, coordinates
+5. **Material and Specification Callouts** — material callouts, spec references, equipment tags
+6. **Annotations and Notes** — general notes, specific callouts, construction requirements
+7. **Cross-References** — table of detail/section callouts with verification status
+8. **Engineering Interpretation** — functional analysis, only after all observations are complete
+
+### Cross-reference table format
+
+```wikitext
+{| class="wikitable"
+! Callout !! References !! Verified
+|-
+| Detail A || [[Drawing:C-305]] Detail 3 || Yes
+|-
+| Section B-B || [[Drawing:C-306]] || Yes
+|-
+| See Structural || [[Drawing:S-302]] || {{Gap|Grid lines don't match}}
+|}
+```
+
+### Important rules
+
+- Never scale dimensions from images. Note "text illegible" rather than guessing.
+- Separate what is explicitly shown from what is typically implied.
+- Construction drawings are legal documents with precise meaning — accuracy over interpretation.
+
+## Spec (Spec namespace)
+
+**Namespace**: Spec (e.g. `Spec:03 30 00 — Cast-in-Place Concrete`)
+
+The extraction of a CSI specification section with paragraph-level structure and verbatim contract language.
+
+### Infobox
+
+```wikitext
+{{Infobox spec
+| section    = 03 30 00
+| title      = Cast-in-Place Concrete
+| division   = 03 — Concrete
+| issued     = 2025-09-01
+| rev        = 0
+| pages      = 28
+| areas      = [[Area 03|Area 03]], [[Area 04|Area 04]]
+| precedence = Governs over drawing notes per General Conditions 1.2.3
+}}
+```
+
+### Structure
+
+Spec pages mirror the CSI three-part structure with paragraph numbering as section headings:
+
+```wikitext
+= Part 1 — General =
+== 1.1 Summary ==
+=== A. Section Includes ===
+{{Verbatim|1. All cast-in-place concrete for structures shown on
+the Drawings. 2. Concrete finishing and curing.}}
+
+== 1.2 Submittals ==
+=== A. Product Data ===
+{{Verbatim|Submit manufacturer's product data for each concrete
+admixture, curing compound, bonding agent, and non-shrink grout.}}
+
+'''Status:''' [[Construction:SUB-033000-001]] — Approved as Noted
+```
+
+The `{{Verbatim}}` template renders exact contract language in a visually distinct block labeled "CONTRACT LANGUAGE" so it's never confused with wiki summary.
+
+### Active Modifications table
+
+Every Spec page ends with a table showing all changes from construction-phase documents:
+
+```wikitext
+== Active Modifications ==
+{| class="wikitable"
+! Source !! Paragraph !! Change
+|-
+| [[Construction:RFI-042]] || 3.2.1 || Rebar spacing at penetrations
+  clarified
+|-
+| [[Construction:SUB-033000-001]] || 2.1.A || Mix design approved
+  with noted retarder adjustment
+|}
+```
+
+## Construction (Construction namespace)
+
+**Namespace**: Construction (e.g. `Construction:RFI-042`)
+
+Construction-phase documents — RFIs, submittals, field directives, serial letters, shop drawings. Everything that arrives after bid and modifies or clarifies the contract documents.
+
+All types share the `{{Infobox construction}}` template with a `type` field. Categories distinguish subtypes.
+
+### RFI example
+
+```wikitext
+{{Infobox construction
+| type           = RFI
+| number         = RFI-042
+| subject        = Clarifier wall reinforcement at penetrations
+| status         = Closed
+| date_issued    = 2026-01-15
+| issued_by      = Contractor
+| date_response  = 2026-01-22
+| response_by    = Engineer of Record
+| areas          = [[Area 03 — Primary Clarifiers]]
+| drawings       = [[Drawing:S-302]], [[Drawing:S-305]]
+| cost_impact    = None
+| time_impact    = None
+}}
+
+== Question ==
+...
+
+== Response ==
+...
+
+== Pages Updated ==
+* [[Area 03 — Primary Clarifiers]] — Structural section updated
+* [[Drawing:S-302]] — Cross-reference note added
+
+[[Category:RFI]]
+[[Category:Closed]]
+[[Category:Area 03]]
+```
+
+### Required sections by type
+
+**RFI:** Question, Response, Pages Updated
+**Submittal:** Submittal Contents, Review Comments, Pages Updated
+**Field Directive:** Directive, Basis, Pages Updated
+**Serial Letter:** Content, Pages Updated
+
+The **Pages Updated** section is required for all types — it closes the traceability loop by recording exactly which wiki pages were modified as a result of this document.
+
+## Issue (Issue namespace)
+
+**Namespace**: Issue (e.g. `Issue:001`)
+
+Project-level issues requiring human action — drawing conflicts, spec incompatibilities, risk items, missing information, coordination problems.
+
+### Infobox
+
+```wikitext
+{{Infobox issue
+| id            = 001
+| type          = Drawing Conflict
+| severity      = Critical
+| status        = RFI Needed
+| areas         = [[Area 03 — Primary Clarifiers]]
+| disciplines   = Civil, Structural
+| discovered    = 2026-02-12
+| discovered_by = [[Task:0005]]
+| drawings      = [[Drawing:C-301]], [[Drawing:S-302]]
+}}
+```
+
+### Standard sections
+
+1. **Description** — what the issue is, with citations to the conflicting sources
+2. **Impact** — what happens if not resolved, schedule/cost/safety implications
+3. **Recommended Action** — what should be done (submit RFI, request design change, etc.)
+4. **Resolution** — how it was resolved, with link to the resolving document
+
+### Severity levels
+
+- **Critical** — must be resolved before affected work begins
+- **Major** — should be resolved soon, may affect procurement or scheduling
+- **Minor** — should be resolved but does not block work
+- **Informational** — noted for record, no action required
+
+### Issue types
+
+- **Drawing Conflict** — two drawings show contradictory information
+- **Spec Conflict** — two spec sections have incompatible requirements
+- **Missing Information** — required information not found in contract documents
+- **Risk Item** — condition that may cause problems during construction
+- **Coordination Issue** — trade coordination needed between disciplines
+
+## Task (Task namespace)
+
+**Namespace**: Task (e.g. `Task:0001`)
+
+Agent work logs — identical to the personal wiki's task system. Each task documents what was done, when, and what pages were affected.
+
+Tasks follow a lifecycle: pending, in-progress, then done or failed. The task page points to where content was published rather than reproducing it.

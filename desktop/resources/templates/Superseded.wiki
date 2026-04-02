@@ -1,0 +1,8 @@
+<includeonly><div style="background:#f3e5f5; border:1px solid #ce93d8; border-radius:4px; padding:4px 10px; margin:4px 0; font-size:0.85em; display:inline-block;">&#x1F7E3; <b>Superseded</b></div></includeonly><noinclude>
+== Usage ==
+<code><nowiki>{{Superseded}}</nowiki></code>
+
+Status marker for talk page items that have been superseded by a newer resolution. Used alongside <code><nowiki>{{Closed}}</nowiki></code> when an earlier resolution is later corrected.
+
+[[Category:Templates]]
+</noinclude>
