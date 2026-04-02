@@ -1,14 +1,43 @@
 import type { GraderResult, GraderCheck } from '../types.js';
 
-const VALID_TEMPLATES = ['message', 'voice note', 'photo', 'video', 'vault', 'testimony'];
-const REQUIRED_FIELDS = ['hash', 'date'];
+// Personal wiki citation templates
+const PERSONAL_TEMPLATES = ['message', 'voice note', 'photo', 'video', 'vault', 'testimony'];
+
+// Construction project citation templates
+const CONSTRUCTION_TEMPLATES = ['drawing', 'spec', 'rfi', 'submittal', 'document', 'field'];
+
+const VALID_TEMPLATES = [...PERSONAL_TEMPLATES, ...CONSTRUCTION_TEMPLATES];
+
+const REQUIRED_FIELDS_BY_TEMPLATE: Record<string, string[]> = {
+  // Personal wiki
+  message: ['hash', 'date'],
+  'voice note': ['hash', 'date'],
+  photo: ['hash', 'date'],
+  video: ['hash', 'date'],
+  vault: ['hash', 'type'],
+  testimony: ['date'],
+  // Construction project
+  drawing: ['number', 'rev', 'date'],
+  spec: ['section', 'paragraph'],
+  rfi: ['number', 'date'],
+  submittal: ['number', 'date', 'status'],
+  document: ['title', 'date'],
+  field: ['date'],
+};
+
 const TYPE_SPECIFIC_FIELDS: Record<string, string[]> = {
   message: [],
   'voice note': ['speaker'],
   photo: [],
   video: [],
-  vault: ['type'],
+  vault: [],
   testimony: ['speaker'],
+  drawing: ['title'],
+  spec: ['title'],
+  rfi: ['note'],
+  submittal: ['note'],
+  document: ['author', 'page'],
+  field: ['observer', 'type'],
 };
 
 interface ParsedCitation {
@@ -55,14 +84,10 @@ function validateCitation(citation: ParsedCitation): GraderCheck[] {
 
   if (!validTemplate) return checks;
 
-  for (const field of REQUIRED_FIELDS) {
-    // Accept either hash or snapshot as the identifier
-    // Testimony citations have no snapshot — skip hash/snapshot requirement
+  const requiredFields = REQUIRED_FIELDS_BY_TEMPLATE[citation.template] ?? [];
+  for (const field of requiredFields) {
     if (field === 'hash') {
-      if (citation.template === 'testimony') {
-        // Testimony has no digital snapshot — skip
-        continue;
-      }
+      // Accept either hash or snapshot as the identifier
       const hasId = 'hash' in citation.fields || 'snapshot' in citation.fields;
       checks.push({
         check: `Has hash or snapshot field`,
@@ -137,7 +162,11 @@ export function findUncitedClaims(wikitext: string): string[] {
 
       const hasDate = /\b\d{4}\b|\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\b/i.test(sentence);
       const hasProperNoun = /[A-Z][a-z]{2,}/.test(sentence);
-      const isFactual = hasDate || (hasProperNoun && sentence.length > 30);
+      // Construction-specific: dimensions, elevations, spec references, material callouts
+      const hasDimension = /\b\d+[\s-]?(?:inch|feet|foot|ft|in|mm|cm|m|psi|PSI|GPM|HP|kW|PSF)\b/.test(sentence);
+      const hasElevation = /\b(?:elev|elevation|el\.)\s*\d/i.test(sentence);
+      const hasSpecRef = /\b\d{2}\s+\d{2}\s+\d{2}\b/.test(sentence);
+      const isFactual = hasDate || (hasProperNoun && sentence.length > 30) || hasDimension || hasElevation || hasSpecRef;
 
       if (isFactual) {
         uncited.push(sentence.trim().slice(0, 80));

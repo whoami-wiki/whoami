@@ -34,10 +34,17 @@ import { snapshotCommand } from './commands/snapshot.js';
 import { exportCommand } from './commands/export.js';
 import { importCommand } from './commands/import.js';
 import { checkForUpdate, updateCommand } from './update.js';
+import { drawingCommand } from './commands/drawing.js';
+import { specCommand } from './commands/spec.js';
+import { constructionCommand } from './commands/construction.js';
+import { issueCommand } from './commands/issue.js';
+import { verifyCommand } from './commands/verify.js';
+import { projectCommand } from './commands/project.js';
+import { ingestCommand } from './commands/ingest.js';
 
 const VERSION = '1.2.1';
 
-const HELP = `wai — personal wiki CLI
+const HELP = `wai — construction project wiki CLI
 
 Usage:
   wai <command> [flags]
@@ -59,6 +66,28 @@ Talk Pages:
   talk read <page>            Read talk page
   talk create <page>          Create a new talk thread
 
+Drawings:
+  drawing list [--discipline X] [--area N]   List drawing pages
+  drawing read <number>                      Read a drawing analysis
+  drawing xref <number>                      Cross-references for a drawing
+
+Specifications:
+  spec list [--division N]                   List spec pages
+  spec read <section>                        Read a spec page
+  spec paragraph <section> <para>            Read a specific paragraph
+
+Construction Documents:
+  construction list [--type X] [--status X]  List RFIs, submittals, etc.
+  construction read <number>                 Read a document
+  construction add <type> --number N -s "…"  Create a new document
+  construction update <number> --status X    Update document status
+
+Issues:
+  issue list [--status X] [--severity X]     List project issues
+  issue read <id>                            Read an issue
+  issue add --type X --subject "…"           Create a new issue
+  issue resolve <id> --resolution "…"        Resolve an issue
+
 Tasks:
   task list [--status X]      List tasks (default: pending)
   task read <id>              Read a task
@@ -67,6 +96,19 @@ Tasks:
   task complete <id> [-m]     Complete an in-progress task
   task fail <id> [-m]         Fail an in-progress task
   task requeue <id>           Requeue a failed task
+
+Document Ingestion:
+  ingest volume <path> [--type X] [--name N] Split and catalog a volume
+  ingest status [name]                       Show ingestion progress
+  ingest analyze <name> [--area N]           Create analysis tasks
+
+Verification:
+  verify <title>              Check verification status of a page
+  verify --all [--stale N]    List all pages needing verification
+
+Project:
+  project status              Project dashboard
+  project precedence          Show document order of precedence
 
 Discovery:
   link <title>                Show page links (in/out)
@@ -144,6 +186,7 @@ async function main(): Promise<void> {
     'read', 'write', 'edit', 'create', 'search',
     'section', 'talk', 'upload', 'link', 'category', 'changes', 'source',
     'snapshot', 'task',
+    'drawing', 'spec', 'construction', 'issue', 'verify', 'project', 'ingest',
   ]);
 
   if (!wikiCommands.has(command)) {
@@ -188,6 +231,20 @@ async function main(): Promise<void> {
         return snapshotCommand(commandArgs, globals, client);
       case 'task':
         return taskCommand(commandArgs, globals, client);
+      case 'drawing':
+        return drawingCommand(commandArgs, globals, client);
+      case 'spec':
+        return specCommand(commandArgs, globals, client);
+      case 'construction':
+        return constructionCommand(commandArgs, globals, client);
+      case 'issue':
+        return issueCommand(commandArgs, globals, client);
+      case 'verify':
+        return verifyCommand(commandArgs, globals, client);
+      case 'project':
+        return projectCommand(commandArgs, globals, client);
+      case 'ingest':
+        return ingestCommand(commandArgs, globals, client);
       default:
         return Promise.resolve();
     }
