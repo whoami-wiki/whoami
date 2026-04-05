@@ -1,0 +1,18 @@
+services:
+  whoami:
+    build: .
+    container_name: whoami-wiki
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WIKI_ADMIN_USER=admin
+      - WIKI_ADMIN_PASS=changeme
+      - OWNER_NAME=
+      - WIKI_NAME=Whoami Wiki
+      - WIKI_SERVER_URL=http://localhost:8080
+    volumes:
+      - ./wiki-data:/config
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
