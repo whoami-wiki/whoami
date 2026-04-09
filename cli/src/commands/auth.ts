@@ -40,7 +40,9 @@ async function login(args: string[], globals: GlobalFlags): Promise<void> {
   // Interactive mode if any value is missing
   if (!server || !username || !password) {
     if (!server) {
-      server = 'http://localhost:8080';
+      // Desktop wiki server binds on 127.0.0.1, and localhost may resolve to ::1.
+      // Using IPv4 loopback avoids hitting unrelated services on IPv6 localhost.
+      server = 'http://127.0.0.1:8080';
     }
     if (!username) {
       const rl = createInterface({ input: process.stdin, output: process.stdout });
