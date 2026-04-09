@@ -1,59 +1,63 @@
 ---
 title: Data Sources
-description: "Supported input types and what each contributes to your encyclopedia"
+description: "Supported document types and what each contributes to your project wiki"
 ---
 
-whoami.wiki agents can work with many types of personal data. The more sources you provide, the richer and more accurate your encyclopedia pages become.
+The project wiki agents work with construction contract documents. The more document types you provide, the richer and more cross-referenced your wiki pages become.
 
-## Photos
+## Contract drawings
 
-The most common starting point. Agents extract EXIF metadata (dates, GPS coordinates, camera info) and analyze visual content to identify people, places, and events.
+The foundation of the project wiki. Agents analyze drawings following a structured observations-before-interpretation protocol, extracting dimensions, elevations, materials, cross-references, and design intent.
 
-**Formats**: JPEG, PNG, HEIC, WebP, TIFF
+**Formats**: PDF (individual sheets or split volumes), PNG, TIFF, JPEG
 
-Photos with GPS data are especially valuable — they can be cross-referenced with maps and location databases to identify venues and neighborhoods.
+Drawings are organized by discipline prefix:
+- **C** — Civil (site plans, grading, piping)
+- **S** — Structural (foundations, framing, details)
+- **M** — Mechanical (equipment plans, piping, HVAC)
+- **E** — Electrical (single lines, power distribution, lighting)
+- **I** — Instrumentation (P&IDs, control diagrams)
+- **A** — Architectural (floor plans, elevations, details)
 
-## Videos
+## Specifications
 
-Processed frame-by-frame at key intervals. Agents extract still frames for visual analysis, read visible text, identify scene changes, and use audio transcription.
+Technical specifications organized by CSI MasterFormat (XX XX XX). Agents extract Part 1/2/3 structure, preserve verbatim contract language, and identify submittal requirements.
 
-**Formats**: MP4, MOV, AVI
+**Formats**: PDF, Word documents
 
-## Messages and chats
+Key divisions commonly processed:
+- **Division 01** — General Requirements (procedures, standards, quality control)
+- **Division 03** — Concrete
+- **Division 31** — Earthwork
+- **Division 33** — Utilities
+- **Division 43** — Process equipment
 
-Chat logs capture conversations, emotions, and the day-to-day texture of relationships. Agents identify relationship arcs, key life events, shared experiences, and people.
+## RFIs (Requests for Information)
 
-**Supported platforms**: WhatsApp (`.txt` exports), iMessage (`chat.db`), Facebook Messenger (JSON), Telegram (JSON), Discord (data package), SMS (XML/CSV)
+Formal questions and engineer responses that clarify or modify contract requirements. Agents trace each RFI back to the affected drawings and specifications, and update all wiki pages in the traceability chain.
 
-## Voice notes
+## Submittals
 
-Audio recordings — standalone voice memos or voice messages from chat platforms. Transcribed and analyzed for content, context, and the people involved.
+Manufacturer data, shop drawings, mix designs, and other contractor-provided documents submitted for engineer review. Agents track submittal status and update equipment and spec pages when submittals are approved.
 
-## Location data
+## Geotechnical reports
 
-GPS timelines and check-in data. Provides the spatial dimension — where things happened, travel routes, daily patterns.
+Subsurface investigation reports providing soil conditions, groundwater elevations, bearing capacities, and construction recommendations. Agents cross-reference geotechnical data with structural foundations and earthwork specifications.
 
-**Sources**: Google Maps Timeline (via Takeout), Apple location data, Swarm/Foursquare check-ins
+**Formats**: PDF
 
-## Financial data
+## Field directives and change orders
 
-Bank and card transactions. Identifies restaurants, shops, transit, and venues visited. Especially useful for reconstructing trips when cross-referenced with photos and location data.
-
-**Format**: CSV exports from most banks
-
-## Social media archives
-
-Full data exports from social platforms. Provides posts, stories, likes, comments, and metadata.
-
-**Sources**: Instagram, Facebook, Twitter/X — request your data download from each platform's privacy settings
+Documents that modify the contract scope, schedule, or cost. Agents track which specifications and drawings are affected and update the wiki accordingly.
 
 ## How agents cross-reference
 
-When given multiple data sources, agents combine them to build richer narratives. An agent processing a trip might:
+When given multiple document types, agents combine them to build a complete picture. An agent processing an area might:
 
-1. Use photos for visual context and timestamps
-2. Use location history for precise routes and durations
-3. Use bank transactions to identify restaurants and venues
-4. Use messages for personal context and conversations that happened during the trip
+1. Use **drawings** for physical layout, dimensions, and elevations
+2. Use **specifications** for material requirements, testing criteria, and procedures
+3. Use **RFI responses** to resolve conflicts between drawings and specs
+4. Use **submittals** to update equipment pages with approved manufacturer data
+5. Use **geotechnical reports** to verify foundation design assumptions
 
-The more sources overlap in time, the more connections agents can make.
+The more document types overlap for a given area, the more connections agents can make — and the more issues they can identify before construction begins.

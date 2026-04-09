@@ -1,6 +1,6 @@
 ---
 name: editorial-guide
-description: Editorial standards, page conventions, citation system, and talk page structure for whoami.wiki. Use when writing, reviewing, or editing wiki pages.
+description: Editorial standards, page conventions, citation system, and talk page structure for ProjectWiki. Use when writing, reviewing, or editing wiki pages.
 user-invocable: false
 ---
 
@@ -8,129 +8,161 @@ user-invocable: false
 
 ## Page types
 
-### Person pages
+### Area pages
 
-**Namespace**: Main (e.g. `Jane Doe`)
+**Namespace**: Main (e.g. `Area 03 — Primary Clarifiers`)
 
-Encyclopedic article about a person. Documentary voice: third person, past tense, factual. The person page is a hub that links out to episode pages.
+Encyclopedic article about a process area or geographic zone of the project. Documentary voice: third person, present tense for design parameters. The area page is a hub linking drawings, specifications, equipment, and construction documents.
 
-**Lead paragraph**: Biographical identity first, relationship to wiki owner in one sentence, arc in one more. No statistics in the lead — save those for a dedicated section. No emotional framing.
+**Lead paragraph**: What the area is, its function, key dimensions. No document lists in the lead — save those for discipline sections.
 
-> Jane Doe (born 3 May 1997) is a Berlin-based photographer and former classmate. She and the wiki owner exchanged 6,200 Instagram DMs between March 2021 and May 2022, the largest one-on-one thread in the archive. They connected over film photography, collaborated on a zine, and met in person in Berlin in November 2021. The conversation faded after Jane moved to Tokyo in early 2022.
+> Area 03 encompasses the primary clarifier complex consisting of four 120-foot diameter circular clarifiers with associated sludge collection and scum removal systems. The clarifiers receive raw wastewater from the headworks via a 48-inch reinforced concrete influent pipe.
 
-**What belongs**: Biographical details, chronological arc (summarized not exhaustive), key statistics, links to episode pages, media embeds, source citations.
+**Standard sections**: Discipline sections (Structural, Mechanical, Electrical, I&C, Civil) — at least two, Connected Systems, Construction Requirements, References, Bibliography.
 
-**What doesn't belong**: Full voice note transcriptions, raw research notes, detailed retellings of specific episodes (those get their own episode pages).
+**What belongs**: Design parameters with citations to specific drawings and spec paragraphs, cross-references to equipment, drawing, and spec pages, construction sequencing requirements.
 
-**Blockquote discipline**: Only quote when exact words matter more than the information — confessions, turning points, self-descriptions that can't be paraphrased without losing the voice. Let paraphrasing carry the rest.
+**What doesn't belong**: Full drawing analyses (those get their own Drawing: pages), raw specification text without context (use `{{Verbatim}}` blocks sparingly for contractually significant language).
 
-**Episode references**: When the chronological arc mentions a story with its own episode page, summarize in one sentence and link out:
+### Equipment pages
 
-```wikitext
-On 14 August, Jane described a disastrous shoot at Tempelhof
-in a series of five voice notes (see [[Jane and the Tempelhof Disaster]]).
-```
+**Namespace**: Main (e.g. `PS-301A`)
 
-### Episode pages
+A page for a specific piece of equipment identified by its tag number. Includes design parameters, location, electrical, controls, and submittal status.
 
-**Naming**: `{Person} and the {Episode Title}` (e.g. `Jane and the Tempelhof Disaster`)
+**Key fields**: tag number, capacity/design parameters, area link, spec section link, submittal status.
 
-Self-contained page for a specific story, event, or extended narrative. More narrative latitude than person pages, but still third-person and factual. The storytelling comes from sequencing, detail, and well-chosen quotes — not from the writer's adjectives.
+### Drawing pages
 
-**Create when**: 3+ voice notes telling a connected story, or a sustained back-and-forth that would take more than two paragraphs to tell properly.
+**Namespace**: Drawing (e.g. `Drawing:C-301`)
 
-**What belongs**: Full contextual setup, the story with detail, all relevant voice note transcriptions inline, audio/video embeds, surrounding messages, links back to person page and related episodes.
+Structured analysis of a single contract drawing following the observations-before-interpretation protocol.
 
-**What it should feel like**: Reading one should feel like being shown a specific memory. Beginning, middle, end.
+**Standard sections**:
+1. Title Block — tabulated drawing metadata
+2. Observations — physical observations without interpretation
+3. Dimensions and Elevations — tabulated key measurements
+4. Material and Specification Callouts — materials referenced
+5. Cross-References — links to other drawings with verification status
+6. Annotations and Notes — general notes and special instructions
+7. Engineering Interpretation — analysis and significance (only after observations)
+
+**Key principle**: Observations come before interpretation. Record what you see on the drawing before analyzing what it means.
+
+### Spec pages
+
+**Namespace**: Spec (e.g. `Spec:03 30 00`)
+
+Specification section page following CSI MasterFormat numbering. Preserves Part 1/2/3 structure.
+
+**Standard sections**: Part 1 — General, Part 2 — Products, Part 3 — Execution, Active Modifications.
+
+**Key features**: Paragraph numbering preserved, `{{Verbatim}}` blocks for exact contract language, submittal requirements extracted and linked to Submittal Log.
+
+### Construction document pages
+
+**Namespace**: Construction (e.g. `Construction:RFI-042`)
+
+Unified page type for RFIs, submittals, field directives, change orders. The infobox `type` field distinguishes document types.
+
+**Standard sections by type**:
+- **RFI**: Question, Response, Pages Updated
+- **Submittal**: Submittal Contents, Review Comments, Pages Updated
+- **Field Directive**: Directive, Pages Updated
+
+**Pages Updated** is critical — it records which wiki pages were modified, maintaining the traceability chain.
+
+### Issue pages
+
+**Namespace**: Issue (e.g. `Issue:003`)
+
+Project-level issue tracking drawing conflicts, spec ambiguities, missing information, or risk items.
+
+**Standard sections**: Description, Impact, Recommended Action, Resolution.
+**Severity levels**: Critical, High, Moderate, Low.
 
 ## Editorial standards
 
 ### Core principles
 
 1. **One canonical home** — every piece of content lives in one place. Other pages link to it; they don't duplicate it.
-2. **Prefer splitting to growing** — a story that takes more than two paragraphs deserves its own page.
-3. **Documentary voice on person pages** — third person, past tense, factual. Like Wikipedia.
-4. **Episode pages allow storytelling** — still third-person and factual, but more narrative.
+2. **Prefer splitting to growing** — an equipment item needing more than two paragraphs deserves its own page.
+3. **Documentary voice on area pages** — third person, present tense for design, past tense for construction events.
+4. **Observations before interpretation on drawing pages** — record what you see before analyzing what it means.
 
 ### Don't interpret for the reader
 
-- **Don't editorialize**: Replace adjectives with specifics. "They exchanged 1,800 messages in five days, averaging 360 per day" — not "The conversation density was staggering."
-- **Don't inflate significance**: Cut "marking a pivotal turning point" and "reflecting a broader shift." If something is significant, facts demonstrate it without a caption.
-- **Don't use promotional language**: No "vibrant," "rich," "renowned," "groundbreaking," "nestled," "showcases."
-- **Don't attribute vaguely**: No "observers have noted" or "friends describe her as." Cite specific sources.
+- **Don't editorialize**: Replace adjectives with specifics. "The foundation requires 47 reinforcement details across 12 sheets" — not "The foundation design is extraordinarily complex."
+- **Don't inflate significance**: Cut "marking a pivotal phase" and "reflecting a broader design philosophy." Facts demonstrate significance.
+- **Don't use promotional language**: No "state-of-the-art," "innovative," "world-class," "cutting-edge."
+- **Don't attribute vaguely**: No "industry standards require" or "best practices suggest." Cite specific spec paragraphs.
 
 ### Prose quality
 
 - **Say "is" when you mean "is"**: Not "stands as" or "serves as."
 - **Keep sentences short**: Split anything over ~40 words.
-- **Vary rhythm**: Mix short and long sentences. Avoid the "rule of three" tic.
-- **Use punctuation precisely**: Don't overuse em dashes as a Swiss Army knife.
-- **Don't cycle through synonyms**: If you said "conversation," say "conversation" again.
-- **Avoid formulaic transitions**: Cut "moreover," "furthermore," "notably," "additionally."
-- **Don't frame by negation**: State what something is, not what it isn't.
+- **Vary rhythm**: Mix short and long sentences.
+- **Use punctuation precisely**: Don't overuse em dashes.
+- **Don't cycle through synonyms**: If you said "clarifier," say "clarifier" again.
+- **Avoid formulaic transitions**: Cut "moreover," "furthermore," "notably."
 - **Don't end sections with summaries**: No "In summary," "Overall," "In conclusion."
-
-For the full words-to-watch list, see [words-to-watch.md](words-to-watch.md).
 
 ### Quoting conventions
 
-Use direct quotes when:
-- The exact words matter (confessions, self-descriptions, turning points)
-- The phrasing is distinctive and can't be paraphrased without losing character
-- The quote is short (under ~30 words)
+Use `{{Verbatim}}` blocks when:
+- The exact contract language matters (scope definitions, performance criteria, warranty terms)
+- The phrasing has contractual significance and can't be paraphrased without losing meaning
+- The language may be relevant to change order or claim arguments
 
-Don't quote:
-- Routine factual statements that can be paraphrased
-- Three quotes in a row saying similar things
-- To show off the archive
-
-Integrate quotes grammatically into sentences. Save `{{Blockquote}}` for extended passages (2+ sentences) that need to stand alone.
+Don't use verbatim blocks for:
+- Routine procedural statements that can be paraphrased
+- Three blocks in a row saying similar things
+- General requirements that are standard across projects
 
 ## Talk page structure
 
 Talk pages use these sections as needed, in this order. Omit any with no content.
 
-1. **Active gaps** — open editorial questions marked `{{Open}}`
-2. **Resolved** — closed questions marked `{{Closed}}`, corrected ones `{{Superseded}}`
-3. **Editorial decisions** — choices about structure, scope, voice, what to include/exclude
-4. **Infrastructure** — technical issues and their resolutions
-5. **Agent log** — one entry per task: ID, date, what changed, link to task page
-6. **Research notes** — index of raw research materials (what exists, where it is, which pages consumed it)
-7. **Voice note transcriptions** — complete chronological index with inline audio embeds
+1. **Verification status** — `{{Verification}}` template with status (complete, in-progress, not-started), last verified date, and source documents
+2. **Active gaps** — open questions marked `{{Open}}` that need resolution
+3. **Resolved** — closed items marked `{{Closed}}`, corrected ones `{{Superseded}}`
+4. **Coordination issues** — cross-discipline coordination items
+5. **Document history** — chronological record of which documents contributed to this page
+6. **Agent log** — one entry per task: ID, date, what changed, link to task page
 
 ### Active gaps
 
 ```wikitext
-=== Birth year unknown ===
+=== Clarifier mechanism vendor unknown ===
 {{Open}}
-Likely 1996-1998 based on contextual clues. Never stated directly in DMs.
-Would require external source to confirm.
+Spec 46 33 00 lists performance requirements but no basis-of-design
+manufacturer. Will be resolved when submittal is received.
 ```
 
 ### Resolved
 
 ```wikitext
-=== Did they meet in person? ===
+=== Wall rebar spacing at penetrations ===
 {{Superseded}}
-Previously resolved as one meeting (dinner, Nov 12).
+Previously documented as #5 at 12" O.C. per Drawing S-302.
 
 {{Closed}}
-Three meetings confirmed via WhatsApp thread (snapshot 3f0390a3...):
-dinner (Nov 12), gallery opening (Nov 13), darkroom session (Nov 14).
+RFI-042 response (2026-01-22): S-305 Detail 7 governs. Use #5 at 8" O.C.
+for penetrations > 6" diameter. Area page and Spec 03 30 00 updated.
 ```
 
 ### Agent log
 
 ```wikitext
-=== Task:0008 — Initial page creation ===
-2026-02-15. Created page from Instagram DM research (6,200 messages).
-Posted 3 open gaps. See [[Task:0008]].
+=== Task:0003 — Area 03 initial analysis ===
+2026-02-15. Created area page from civil and structural drawings.
+Posted 3 open gaps. See [[Task:0003]].
 ```
 
 ### What does NOT belong on talk pages
 
-- Reader-facing content (goes on person/episode pages)
-- Duplicate research indexes
+- Reader-facing content (goes on area/equipment/drawing/spec pages)
+- Full document transcriptions
 
 ## Citation system
 
@@ -138,82 +170,91 @@ Inline citations use `<ref>` tags rendered via `<references />` in a `== Referen
 
 ### Inline citation templates
 
-**Cite message** — for text messages (DMs, chats):
+**Cite drawing** — for facts from contract drawings:
 ```wikitext
-<ref name="ig-2021-04-15">{{Cite message|snapshot=a1b2c3d4e5f6
-|date=2021-04-15|thread=janedoe_12345|note=Family background exchange}}</ref>
+<ref name="c-301">{{Cite drawing|sheet=C-301|date=2025-08-15
+|hash=a1b2c3d4e5f6|note=Civil site plan with pipe routing}}</ref>
 ```
 
-**Cite voice note** — for voice note content:
+**Cite spec** — for specification requirements:
 ```wikitext
-<ref>{{Cite voice note|number=7|date=2021-06-03|speaker=Jane
-|snapshot=a1b2c3d4e5f6|note=Darkroom discovery story}}</ref>
+<ref>{{Cite spec|section=03 30 00|paragraph=2.1.A|date=2025-06-01
+|hash=a1b2c3d4e5f6|note=Concrete mix requirements}}</ref>
 ```
 
-**Cite photo** — for facts derived from photos:
+**Cite rfi** — for RFI questions and responses:
 ```wikitext
-<ref>{{Cite photo|file=IMG_2847.jpg|hash=...|date=2021-05-20
-|snapshot=a1b2c3d4e5f6|note=University ID confirming enrollment}}</ref>
+<ref>{{Cite rfi|number=042|date=2026-01-22|hash=a1b2c3d4e5f6
+|note=Wall reinforcement at penetrations}}</ref>
 ```
 
-**Cite video** — for video content:
+**Cite submittal** — for approved submittal data:
 ```wikitext
-<ref>{{Cite video|file=berlin_gallery_opening.mp4|date=2021-11-12
-|snapshot=a1b2c3d4e5f6|note=Gallery opening footage}}</ref>
+<ref>{{Cite submittal|number=SUB-033000-001|date=2026-02-10
+|hash=a1b2c3d4e5f6|note=Concrete mix design approval}}</ref>
 ```
 
-All templates include: **snapshot** (vault hash), **date**, **note** (human-readable description).
+**Cite geotech** — for geotechnical report data:
+```wikitext
+<ref>{{Cite geotech|report=Geotechnical Investigation|boring=B-7
+|date=2025-03-15|hash=a1b2c3d4e5f6|note=Groundwater elevation}}</ref>
+```
+
+All templates include: **hash** (vault hash), **date**, **note** (human-readable description).
 
 ### Bibliography template
 
-**Cite vault** — for the Bibliography section, describes full vault snapshots consulted:
+**Cite vault** — for the Bibliography section, describes full document sets consulted:
 ```wikitext
-{{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
-|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
+{{Cite vault|type=drawings|snapshot=a1b2c3d4e5f6
+|timestamp=2025-08-15|note=Volume 3 — Civil Drawings, 45 sheets}}
 ```
 
-Additional fields: **type** (messages, photos, video, etc.), **timestamp** (date range).
+Additional fields: **type** (drawings, specs, reports, etc.), **timestamp** (date or date range).
 
 ### When to cite
 
-**Always cite**: Biographical facts, direct quotes, specific event dates, statistics, claims corrected or disputed on the talk page.
+**Always cite**: Design parameters, verbatim contract language, RFI responses, approved submittal data, claims corrected or superseded on the talk page.
 
-**Don't need citations**: Broadly sourced observations, information already attributed inline with a date, episode page content drawn from a defined set of voice notes listed at the top.
+**Don't need citations**: General descriptions evident from multiple drawings, information already attributed inline, drawing page content analyzing a single drawing identified in the title.
 
 ### Named refs for reuse
 
 ```wikitext
-Jane's mother is from Munich.<ref name="ig-2021-04-15" />
-Her father works in Zurich.<ref name="ig-2021-05-02">
-{{Cite message|snapshot=a1b2c3d4e5f6|date=2021-05-02
-|thread=janedoe_12345|note=Family details, father in Zurich}}</ref>
-She has a younger brother named Max.<ref name="ig-2021-04-15" />
+The influent pipe is 48 inches in diameter.<ref name="c-301" />
+It enters the distribution box at elevation 102.5 ft.<ref name="c-301">
+{{Cite drawing|sheet=C-301|date=2025-08-15|hash=a1b2c3d4e5f6
+|note=Civil site plan with pipe routing}}</ref>
+The distribution box splits flow to four clarifiers.<ref name="c-301" />
 ```
 
 ### Page structure
 
-Every person and episode page ends with:
+Every area and equipment page ends with:
 
 ```wikitext
 == References ==
 <references />
 
 == Bibliography ==
-{{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
-|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
-{{Cite vault|type=voice_notes|snapshot=b2c3d4e5f6a1
-|timestamp=2021-04-12/2021-06-03|note=47 voice notes, Jane and wiki owner}}
+{{Cite vault|type=drawings|snapshot=a1b2c3d4e5f6
+|timestamp=2025-08-15|note=Volume 3 — Civil Drawings, 45 sheets}}
+{{Cite vault|type=specs|snapshot=b2c3d4e5f6a1
+|timestamp=2025-06-01|note=Project Specifications, Divisions 01-46}}
 ```
 
-**References** = inline citations tracing specific claims to specific moments in the vault.
+**References** = inline citations tracing specific claims to specific documents in the vault.
 
-**Bibliography** = full vault snapshots consulted for the page overall.
+**Bibliography** = full document sets consulted for the page overall.
 
 ## Namespaces
 
 | Namespace | Prefix | ID | Purpose |
 |-----------|--------|----|---------|
-| Main | (none) | 0 | Person and episode pages |
-| Talk | `Talk:` | 1 | Editorial process and research notes |
-| Source | `Source:` | 100 | Data source documentation |
-| Task | `Task:` | 102 | Agent work logs |
+| Main | (none) | 0 | Area pages, equipment pages, project content |
+| Talk | `Talk:` | 1 | Verification status, gaps, coordination |
+| Drawing | `Drawing:` | 100 | Drawing analysis pages |
+| Spec | `Spec:` | 102 | Specification section pages |
+| Construction | `Construction:` | 104 | RFIs, submittals, field directives |
+| Issue | `Issue:` | 106 | Conflicts, ambiguities, risk items |
+| Task | `Task:` | 108 | Agent work logs |

@@ -1,67 +1,110 @@
 ---
 title: Page Types
-description: "The two reader-facing page types in whoami.wiki"
+description: "The page types used in construction project wiki"
 ---
 
-Every piece of content has exactly one canonical home. The Main namespace holds two reader-facing page types: person pages and episode pages. For non-reader-facing content (talk pages, task logs, source documentation), see [Namespaces](/docs/namespaces).
+Every piece of content has exactly one canonical home. Pages are organized by namespace and type, each with specific structure, editorial conventions, and infobox templates.
 
-## Person
+For namespace details, see [Namespaces](/docs/namespaces). For citation conventions, see [Citation System](/docs/citation-system).
 
-**Namespace**: Main (e.g. `Jane Doe`)
+## Area
 
-The encyclopedic article about a person. Written in documentary voice: third person, past tense, factual. The person page is a hub that links out to episode pages and other related content.
+**Namespace**: Main (e.g. `Area 03 — Primary Clarifiers`)
 
-**What belongs here:**
+The encyclopedic article about a process area or geographic zone of the project. Area pages serve as hubs linking drawings, specifications, equipment, and construction documents that affect that area.
 
-- Biographical details (family, education, career, personality, interests)
-- Chronological arc of the connection with the wiki owner, summarized not exhaustive
-- Key statistics (message counts, date ranges, volume breakdowns)
-- Links to episode pages for detailed stories
-- Media embeds (photos, audio, video) that serve the biography directly
-- Source citations
+**Standard sections:**
 
-**What does NOT belong here:**
-
-- Full voice note transcriptions (these live on episode pages or the talk page)
-- Raw research process notes (these go on the talk page)
-- Detailed retellings of specific episodes (these get their own pages)
-
-### Lead paragraph convention
-
-Keep it tight and neutral. Biographical identity first, relationship to the wiki owner in one sentence, the arc in one more sentence. Save statistics for the statistics section. No emotional framing.
-
-> Jane Doe (born 3 May 1997) is a Berlin-based photographer and former classmate. She and the wiki owner exchanged 6,200 Instagram DMs between March 2021 and May 2022, the largest one-on-one thread in the archive. They connected over film photography, collaborated on a zine, and met in person in Berlin in November 2021. The conversation faded after Jane moved to Tokyo in early 2022.
-
-### Blockquote discipline
-
-Only quote when the exact words matter more than the information: confessions, turning points, self-descriptions that can't be paraphrased without losing the voice. The count varies by person. Someone who speaks in measured paragraphs may need fewer quotes than someone whose personality lives in their phrasing. Let paraphrasing carry the rest, but don't paraphrase away the texture.
-
-### Episode references
-
-When the chronological arc mentions a story that has its own episode page, summarize it in one sentence and link out:
-
-```wikitext
-On 14 August, Jane described a disastrous shoot at Tempelhof
-in a series of five voice notes (see [[Jane and the Tempelhof Disaster]]).
-```
-
-## Episode
-
-**Naming**: `{Person} and the {Episode Title}` (e.g. `Jane and the Tempelhof Disaster`)
-
-A self-contained page for a specific story, event, or extended narrative told through messages or voice notes. Episodes are the texture of the wiki. They capture what it was like to know someone, not just the arc of the relationship.
+- Lead paragraph — what the area is, its function, key dimensions
+- Discipline sections (Structural, Mechanical, Electrical, I&C, Civil) — at least two
+- Connected Systems — upstream/downstream relationships
+- Construction Requirements — sequencing, special procedures
+- References and categories
 
 **What belongs here:**
 
-- Full contextual setup (what was happening that day, what prompted the story)
-- The story itself, told with appropriate detail
-- All relevant voice note transcriptions, inline with context
-- Audio/video embeds for the voice notes and media involved
-- Surrounding messages that frame the episode
-- Links back to the person page and to other related episodes
+- Design parameters with citations to specific drawings and spec paragraphs
+- Cross-references to equipment, drawing, and spec pages
+- Construction sequencing requirements
+- Verification status on the talk page
 
-**What an episode page should feel like:** Reading one should feel like being shown a specific memory. It has a beginning, middle, and end. It's the wiki equivalent of "okay so let me tell you about the time..."
+**Lead paragraph convention:**
 
-**When to create an episode page:** A good candidate is any narrative sequence involving 3+ voice notes telling a connected story, or a sustained back-and-forth about a specific event that would take more than two paragraphs to tell properly.
+> Area 03 encompasses the primary clarifier complex consisting of four 120-foot diameter circular clarifiers with associated sludge collection and scum removal systems. The clarifiers receive raw wastewater from the headworks via a 48-inch reinforced concrete influent pipe.
 
-**Source citations:** Each episode page should cite the specific message snapshot, message range, and voice note numbers it draws from.
+## Equipment
+
+**Namespace**: Main (e.g. `PS-301A`)
+
+A page for a specific piece of equipment identified by its tag number. Includes design parameters, location, electrical, controls, and submittal status.
+
+**Key fields:** tag number, capacity/design parameters, area link, spec section link, submittal status.
+
+## Drawing
+
+**Namespace**: Drawing (e.g. `Drawing:C-301`)
+
+A structured analysis of a single contract drawing. Follows an observations-before-interpretation protocol.
+
+**Standard sections:**
+
+1. Title Block — tabulated drawing metadata
+2. Observations — physical observations without interpretation
+3. Dimensions and Elevations — tabulated key dimensions and elevations
+4. Material and Specification Callouts — materials referenced on the drawing
+5. Cross-References — links to other drawings with verification status
+6. Annotations and Notes — general notes and special instructions
+7. Engineering Interpretation — analysis and significance (only after observations)
+
+**Key principle:** Observations come before interpretation. Record what you see on the drawing before analyzing what it means. This prevents confirmation bias and ensures nothing is missed.
+
+## Spec
+
+**Namespace**: Spec (e.g. `Spec:03 30 00`)
+
+A specification section page following CSI MasterFormat numbering. Preserves the Part 1/2/3 structure and uses `{{Verbatim}}` blocks for exact contract language.
+
+**Standard sections:**
+
+- Part 1 — General (scope, submittals, quality assurance)
+- Part 2 — Products (materials, equipment, fabrication)
+- Part 3 — Execution (preparation, installation, testing)
+- Active Modifications — table of RFIs/changes affecting this section
+
+**Key features:**
+
+- Paragraph numbering preserved (e.g., `=== 2.1 Concrete Materials ===`)
+- `{{Verbatim}}` template for exact contract language that may matter for scope or change arguments
+- Submittal requirements extracted and linked to the Submittal Log
+- Areas field linking to affected process areas
+
+## Construction document
+
+**Namespace**: Construction (e.g. `Construction:RFI-042`)
+
+A unified page type for RFIs, submittals, field directives, change orders, and other construction-phase documents. The infobox `type` field distinguishes between document types.
+
+**Standard sections by type:**
+
+- **RFI**: Question, Response, Pages Updated
+- **Submittal**: Submittal Contents, Review Comments, Pages Updated
+- **Field Directive**: Directive, Pages Updated
+
+**Pages Updated** is critical — it records which wiki pages were modified as a result of this document, maintaining the traceability chain.
+
+## Issue
+
+**Namespace**: Issue (e.g. `Issue:003`)
+
+A project-level issue tracking drawing conflicts, spec ambiguities, missing information, or risk items discovered during document analysis.
+
+**Standard sections:**
+
+- Description — what was found and where
+- Impact — schedule, quality, cost, environmental consequences
+- Recommended Action — specific steps to resolve
+- Resolution — outcome (or "Pending")
+
+**Severity levels:** Critical, High, Moderate, Low
+
+Issues are distinct from talk page Active Gaps. Issues are project-level problems requiring action (e.g., missing dewatering spec). Active Gaps are page-level uncertainties (e.g., unconfirmed vendor for a mechanism).

@@ -1,90 +1,91 @@
 ---
-title: Writing Your First Page
-description: "Go from zero to a published wiki page in minutes"
+title: Setting Up Your First Project
+description: "Go from contract documents to a populated project wiki"
 ---
 
-This tutorial walks you through creating your first encyclopedia page end-to-end. We'll write a Person page (the most common page type) by snapshotting data, drafting, layering in new sources, and refining with your own memories.
+This guide walks you through setting up a construction project wiki from scratch — ingesting contract documents, building the project framework, and letting agents analyze drawings and specifications into structured wiki pages.
 
-You don't need to spell out formatting rules, citation templates, or talk page conventions in your prompts. The [extension](/docs/installation#step-3-install-the-extension-for-your-agent-harness) handles all of that automatically.
+You don't need to spell out formatting rules, citation templates, or page conventions in your prompts. The [extension](/docs/installation#step-3-install-the-extension-for-your-agent-harness) handles all of that automatically.
 
-## Step 1: Snapshot a data source
+## Step 1: Set up the project
 
-Start by pointing the agent at a data source. Any export will work: an Instagram archive, a photo folder, a WhatsApp backup.
+Launch the desktop app and complete the setup wizard. Choose construction project mode and enter your project name. The wizard creates:
 
-```
-Snapshot my Instagram export at ~/Downloads/instagram-export
-```
+- **Main Page** with a project dashboard
+- **Project Standards** stub page
+- **Submittal Log** page
+- **Drawing Index** page
 
-The agent snapshots the files into the vault and creates a Source page with querying instructions so it can reference the data later.
+## Step 2: Ingest Division 01 specifications
 
-## Step 2: Survey and plan
-
-Before writing, ask the agent to survey what's in the snapshot. This catches gaps early: encrypted files, missing exports, low-quality data.
-
-```
-Survey the Instagram source I just snapshotted.
-```
-
-The agent enriches the Source page with key conversations, data quality notes, SQL recipes, and an assessment of what the source can and cannot tell you.
-
-## Step 3: Draft the page
+Start with the general requirements specs. These configure how the agent handles submittals, RFIs, and quality control for the rest of the project.
 
 ```
-Write a Person page for Alex from the Instagram data.
+Ingest the Division 01 specifications from ~/project/specs/division-01/
+and populate the Project Standards page.
 ```
 
-The agent extracts dates, locations, and people from the data, cross-references details to build a timeline, and drafts the page with an infobox, sections, citations, and embedded media. It also creates a Talk page noting gaps and episode candidates.
+The agent reads Division 01 specs (Summary of Work, Submittals, RFI Procedures, Quality Control) and populates the Project Standards page with document precedence, submittal procedures, and RFI procedures.
 
-Open the whoami app to view the page.
+## Step 3: Ingest drawings
 
-## Step 4: Layer in a new source
+Split your drawing volumes into individual pages, then point the agent at them:
 
-One source rarely tells the whole story. Point the agent at a second source and ask it to integrate:
+```bash
+# Split a PDF volume
+pdftk volume3-civil.pdf burst output pages/page_%03d.pdf
 
-```
-Snapshot ~/Downloads/whatsapp-export and revise the Alex page
-with the new data.
-```
-
-The agent confirms details that appear in both sources, fills gaps, and removes hedging where the new data resolves uncertainty. New facts get woven into existing sections rather than appended as a separate block.
-
-## Step 5: Extract episodes
-
-As the agent researches, it identifies events rich enough for their own pages: a first meeting, a trip, a milestone.
-
-```
-Create episode pages for the richest events on the Alex page.
+# Catalog and queue for analysis
+wai ingest volume pages/ --type drawings --name "Volume 3 — Civil"
+wai ingest analyze "Volume 3 — Civil"
 ```
 
-Each episode page gets its own narrative, citations, and embedded media, linked from the person page with a one-sentence summary.
+The agent analyzes each drawing following the structured protocol: title block extraction, physical observations, dimensional analysis, cross-reference verification, and engineering interpretation.
 
-## Step 6: Add your own memories
+## Step 4: Ingest specifications
 
-Data sources capture what was recorded, but you know the story. Share anecdotes, corrections, and context the data can't provide:
-
-```
-Some memories about Alex:
-- We got lost finding the restaurant and walked through a park
-  where Alex spent ten minutes befriending a stray cat.
-- At the concert someone behind us sang off-key and Alex couldn't
-  stop laughing. We moved seats twice.
-- We actually met on a Friday, not Thursday. I'd just finished
-  my last class of the week.
+```bash
+wai ingest volume specs/ --type specs --name "Project Specifications"
+wai ingest analyze "Project Specifications"
 ```
 
-The agent integrates your testimony into the page. Where your account conflicts with the digital record, both versions are noted on the Talk page.
+The agent extracts CSI Part 1/2/3 structure, preserves verbatim contract language, identifies submittal requirements, and pre-populates the Submittal Log.
 
-## Step 7: Verify and review
+## Step 5: Process construction documents
+
+As the project progresses, feed in RFIs, submittals, and field directives:
 
 ```
-Do a final editorial review of the Alex page.
+Process RFI-042 regarding clarifier wall reinforcement at penetrations.
+The response from the engineer is attached.
 ```
 
-The agent audits tone, balance, and gaps, ensures every factual claim has a citation, and produces a citation manifest pairing each claim with its source evidence.
+The agent creates the Construction document page, traces back to affected specifications and drawings, and updates all wiki pages that need to reflect the change — maintaining the traceability chain.
+
+## Step 6: Review issues
+
+As agents analyze documents, they identify conflicts, ambiguities, and gaps:
+
+```
+wai issue list --status open
+wai issue read 003
+```
+
+Review open issues and decide which need RFIs, which need design clarification, and which can be resolved with existing information.
+
+## Step 7: Verify
+
+Run periodic verification cycles to ensure wiki content matches current document revisions:
+
+```
+wai verify --all
+```
+
+The agent checks each page's verification status, flags stale information, and identifies pages that need updating based on new documents.
 
 ## Next steps
 
-- Add more data sources to enrich the page. See [Data Sources](/docs/data-sources)
 - Learn about the different [Page Types](/docs/page-types) you can create
 - Understand how citations work in the [Citation System](/docs/citation-system)
 - Explore the [CLI reference](/docs/cli) for all available commands
+- See [Namespaces](/docs/namespaces) for how content is organized

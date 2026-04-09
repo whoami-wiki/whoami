@@ -1,38 +1,38 @@
 ---
 title: Design
-description: "Architecture and design philosophy behind whoami.wiki"
+description: "Architecture and design philosophy behind ProjectWiki"
 ---
 
-whoami.wiki is a personal encyclopedia written by AI agents. Agents browse through personal data sources (messages, photos, voice notes, files) and produce structured wiki pages about life experiences, relationships, and memories. This page explains the ideas behind its design.
+ProjectWiki is a construction project encyclopedia written by AI agents. Agents analyze contract documents (drawings, specifications, RFIs, submittals) and produce structured wiki pages about process areas, equipment, and construction requirements. This page explains the ideas behind its design.
 
 ## MediaWiki
 
 The wiki runs on [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki), the open-source software that powers [Wikipedia](https://wikipedia.com). The models used by AI agents have extensive training on Wikipedia content, making the format naturally queryable and structured. Agents already understand how to produce articles with lead paragraphs, infoboxes, citations, categories, and linked references.
 
-A page about your grandmother works the same way as a page about a historical figure. A page about your road trip works the same way as a page about a famous expedition. The conventions are already learned and there is familiarity over how different types of knowledge can be organized.
+A page about a clarifier basin works the same way as a page about a real-world treatment plant. A page about a specification section works the same way as a technical encyclopedia article. The conventions are already learned and there is familiarity over how different types of knowledge can be organized.
 
 ## Content-addressed vault
 
-Your raw data (photos, messages, voice notes, documents) is stored in a content-addressed vault. Each file is identified by its hash, which provides:
+Your raw documents (drawings, specifications, reports, submittals) are stored in a content-addressed vault. Each file is identified by its hash, which provides:
 
-- **Immutability** — source data can't be accidentally modified
-- **Deduplication** — the same photo imported from multiple sources is stored once
-- **Provenance** — citations in wiki pages link back to exact source files
+- **Immutability** — source documents can't be accidentally modified
+- **Deduplication** — the same drawing imported from multiple sources is stored once
+- **Provenance** — citations in wiki pages link back to exact source documents
 
-The vault is the foundation that wiki pages are built on. Pages come and go, get rewritten and restructured, but the underlying data remains intact.
+The vault is the foundation that wiki pages are built on. Pages come and go, get rewritten and restructured, but the underlying contract documents remain intact.
 
 ## Dual-purpose encyclopedia
 
 The wiki serves two purposes simultaneously:
 
-1. **AI output** — agents write encyclopedia pages from your data
+1. **AI output** — agents write encyclopedia pages from your contract documents
 2. **AI input** — agents read existing pages to understand context when writing new ones
 
-A page about your grandmother becomes context when an agent writes a page about a family reunion. A page about a city you lived in becomes context for a page about your daily life there. The encyclopedia grows richer as more pages are added because each page informs future pages.
+A page about the primary clarifiers becomes context when an agent writes a page about the sludge handling system downstream. A page about the concrete specification becomes context for a page about the structural foundations. The encyclopedia grows richer as more pages are added because each page informs future pages.
 
 ## Task queue
 
-Agents interact with whoami.wiki through a task queue. Rather than running a single monolithic job, work is broken into discrete tasks (write a page, review a draft, add citations) that agents can claim, complete, or fail. This allows:
+Agents interact with ProjectWiki through a task queue. Rather than running a single monolithic job, work is broken into discrete tasks (analyze a drawing, process an RFI, update affected pages) that agents can claim, complete, or fail. This allows:
 
 - Multiple agents to work in parallel
 - Failed tasks to be retried or reassigned
@@ -40,6 +40,6 @@ Agents interact with whoami.wiki through a task queue. Rather than running a sin
 
 ## Less is more
 
-The system is designed around letting agents do what they're good at rather than over-constraining them. Rather than building elaborate pipelines and templates, whoami.wiki gives agents raw data and a wiki to write in, and lets them figure out the editorial approach.
+The system is designed around letting agents do what they're good at rather than over-constraining them. Rather than building elaborate pipelines and templates, ProjectWiki gives agents contract documents and a wiki to write in, and lets them figure out the editorial approach.
 
-This means agents can surprise you. They find connections across data sources that you didn't anticipate. They choose structures that fit the content rather than forcing everything into a rigid template. The tradeoff is less predictability, but the output is often better than what a rigid system would produce.
+This means agents can surprise you. They find conflicts between drawings and specifications that you didn't anticipate. They identify missing dewatering details or inconsistent elevation callouts. The tradeoff is less predictability, but the output is often better than what a rigid system would produce.

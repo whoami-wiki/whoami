@@ -3,7 +3,7 @@ title: CLI
 description: "Complete reference for all wai commands"
 ---
 
-The `wai` command-line tool is the primary interface for interacting with your whoami.wiki instance. It handles page editing, data ingestion, task management, and backup operations.
+The `wai` command-line tool is the primary interface for interacting with your ProjectWiki instance. It handles page editing, document ingestion, task management, and backup operations.
 
 ## Global flags
 
@@ -22,9 +22,9 @@ Read a wiki page.
 
 ```bash
 wai read <title>
-wai read "Summer 2023" --raw
-wai read "Summer 2023" --section 2
-wai read "Summer 2023" --offset 10 --limit 50
+wai read "Area 03 — Primary Clarifiers" --raw
+wai read "Area 03 — Primary Clarifiers" --section 2
+wai read "Area 03 — Primary Clarifiers" --offset 10 --limit 50
 ```
 
 **Flags**:
@@ -38,10 +38,10 @@ wai read "Summer 2023" --offset 10 --limit 50
 Write (overwrite) an entire page.
 
 ```bash
-wai write "Summer 2023" notes.txt
-wai write "Summer 2023" -c "Page content here"
-wai write "Summer 2023" -f notes.txt -m "Import notes"
-echo "content" | wai write "Summer 2023"
+wai write "Area 03 — Primary Clarifiers" notes.txt
+wai write "Area 03 — Primary Clarifiers" -c "Page content here"
+wai write "Area 03 — Primary Clarifiers" -f notes.txt -m "Import notes"
+echo "content" | wai write "Area 03 — Primary Clarifiers"
 ```
 
 **Flags**:
@@ -56,9 +56,9 @@ Content can be provided via `-c`, `-f`, a positional file argument, or stdin.
 Edit a page using find-and-replace.
 
 ```bash
-wai edit "Summer 2023" --old "old text" --new "new text"
-wai edit "Summer 2023" --old "typo" --new "fixed" --replace-all
-wai edit "Summer 2023" --old "old" --new "new" --dry-run
+wai edit "Area 03 — Primary Clarifiers" --old "old text" --new "new text"
+wai edit "Spec:03 30 00" --old "typo" --new "fixed" --replace-all
+wai edit "Drawing:C-301" --old "old" --new "new" --dry-run
 ```
 
 **Flags**:
@@ -74,8 +74,8 @@ Create a new page.
 
 ```bash
 wai create "New Page" -c "Page content"
-wai create "New Page" -f draft.txt -m "Initial draft"
-echo "content" | wai create "New Page"
+wai create "Drawing:M-401" -f draft.txt -m "Initial analysis"
+echo "content" | wai create "Issue:004"
 ```
 
 **Flags**:
@@ -88,8 +88,8 @@ echo "content" | wai create "New Page"
 Full-text search across all pages.
 
 ```bash
-wai search "tokyo 2023"
-wai search "birthday" --limit 20
+wai search "clarifier"
+wai search "reinforcement" --limit 20
 ```
 
 **Flags**:
@@ -100,9 +100,9 @@ wai search "birthday" --limit 20
 Upload a file to the wiki.
 
 ```bash
-wai upload photo.jpg
-wai upload photo.jpg --name "Vacation_Photo.jpg"
-wai upload photo.jpg -d "Photo from vacation" -m "Upload vacation photo"
+wai upload drawing.pdf
+wai upload drawing.pdf --name "C-301_Rev2.pdf"
+wai upload photo.jpg -d "Site photo of clarifier excavation" -m "Upload site photo"
 ```
 
 **Flags**:
@@ -117,7 +117,7 @@ wai upload photo.jpg -d "Photo from vacation" -m "Upload vacation photo"
 List all sections of a page.
 
 ```bash
-wai section list "Summer 2023"
+wai section list "Area 03 — Primary Clarifiers"
 ```
 
 ### `wai section read`
@@ -125,8 +125,8 @@ wai section list "Summer 2023"
 Read a specific section of a page.
 
 ```bash
-wai section read "Summer 2023" 2
-wai section read "Summer 2023" 2 --raw
+wai section read "Area 03 — Primary Clarifiers" 2
+wai section read "Spec:03 30 00" 3 --raw
 ```
 
 **Flags**:
@@ -139,8 +139,8 @@ wai section read "Summer 2023" 2 --raw
 Update a specific section of a page.
 
 ```bash
-wai section update "Summer 2023" 2 -c "New section content"
-wai section update "Summer 2023" 2 -f section.txt -m "Update section"
+wai section update "Area 03 — Primary Clarifiers" 2 -c "New section content"
+wai section update "Spec:03 30 00" 3 -f section.txt -m "Update section"
 ```
 
 **Flags**:
@@ -155,9 +155,9 @@ wai section update "Summer 2023" 2 -f section.txt -m "Update section"
 Read a page's talk page.
 
 ```bash
-wai talk read "Summer 2023"
-wai talk read "Summer 2023" --thread "Location details"
-wai talk read "Summer 2023" --raw
+wai talk read "Area 03 — Primary Clarifiers"
+wai talk read "Area 03 — Primary Clarifiers" --thread "Clarifier mechanism vendor unknown"
+wai talk read "Drawing:C-301" --raw
 ```
 
 **Flags**:
@@ -169,7 +169,7 @@ wai talk read "Summer 2023" --raw
 Create a new talk page thread.
 
 ```bash
-wai talk create "Summer 2023" -s "Missing details" -c "What hotel did we stay at?"
+wai talk create "Area 03 — Primary Clarifiers" -s "Missing dewatering spec" -c "No specification section covers dewatering requirements for this area."
 ```
 
 **Flags**:
@@ -185,9 +185,9 @@ wai talk create "Summer 2023" -s "Missing details" -c "What hotel did we stay at
 Show incoming and outgoing links for a page.
 
 ```bash
-wai link "Summer 2023"
-wai link "Summer 2023" --direction out
-wai link "Summer 2023" --direction in
+wai link "Area 03 — Primary Clarifiers"
+wai link "PS-301A" --direction out
+wai link "Spec:03 30 00" --direction in
 ```
 
 **Flags**:
@@ -199,7 +199,7 @@ List all categories, or list pages within a specific category.
 
 ```bash
 wai category
-wai category "Trips"
+wai category "Process Areas"
 ```
 
 ### `wai changes`
@@ -214,27 +214,66 @@ wai changes --limit 20
 **Flags**:
 - `-n, --limit <n>` — maximum number of results (default: 10)
 
-### `wai source list`
+### `wai issue list`
 
-List all pages in the Source namespace.
-
-```bash
-wai source list
-```
-
-### `wai place`
-
-Look up a place using the Google Places API.
+List issues by status.
 
 ```bash
-wai place "Eiffel Tower"
-wai place "coffee shops near me" --limit 10
+wai issue list
+wai issue list --status open
+wai issue list --status resolved
 ```
 
 **Flags**:
-- `-n, --limit <n>` — maximum number of results (default: 5)
+- `-s, --status <status>` — filter by status: `open`, `resolved` (default: open)
+- `-n, --limit <n>` — maximum number of results
 
-Requires a Google Places API key via the `GOOGLE_PLACES_API_KEY` environment variable or `googlePlacesApiKey` in `~/.whoami/config.json`.
+### `wai issue read`
+
+Read the details of a specific issue.
+
+```bash
+wai issue read 003
+```
+
+## Ingestion
+
+### `wai ingest volume`
+
+Ingest a directory of contract documents into the vault.
+
+```bash
+wai ingest volume ~/project/drawings/civil/ --type drawings --name "Volume 3 — Civil"
+wai ingest volume ~/project/specs/ --type specs --name "Project Specifications"
+wai ingest volume ~/project/geotech/ --type reports --name "Geotechnical Investigation"
+```
+
+**Flags**:
+- `--type <type>` — document type: `drawings`, `specs`, `reports`, `submittals`
+- `--name <name>` — volume name for the wiki index
+- `--dry-run` — preview what would be stored without writing
+
+### `wai ingest analyze`
+
+Queue a previously ingested volume for agent analysis.
+
+```bash
+wai ingest analyze "Volume 3 — Civil"
+wai ingest analyze "Project Specifications"
+```
+
+### `wai verify`
+
+Run a verification cycle to check wiki content against current document revisions.
+
+```bash
+wai verify --all
+wai verify "Area 03 — Primary Clarifiers"
+```
+
+**Flags**:
+- `--all` — verify all pages
+- `-n, --limit <n>` — maximum number of pages to verify
 
 ## Task queue
 
@@ -269,13 +308,13 @@ wai task read <id>
 Create a new task.
 
 ```bash
-wai task create -m "Write page about summer trip"
-wai task create -m "Categorize recent uploads" --source snapshot-abc123
+wai task create -m "Analyze civil drawings for Area 03"
+wai task create -m "Process RFI-042 and update affected pages"
 ```
 
 **Flags**:
 - `-m, --message <text>` — task description (required)
-- `--source <name>` — associate the task with a source
+- `--source <name>` — associate the task with a document volume
 
 ### `wai task claim`
 
@@ -291,7 +330,7 @@ Mark an in-progress task as completed.
 
 ```bash
 wai task complete <id>
-wai task complete <id> -m "Created 3 new pages"
+wai task complete <id> -m "Created area page and 4 drawing pages"
 ```
 
 **Flags**:
@@ -303,7 +342,7 @@ Mark an in-progress task as failed.
 
 ```bash
 wai task fail <id>
-wai task fail <id> -m "Missing location data"
+wai task fail <id> -m "Missing structural drawings for this area"
 ```
 
 **Flags**:
@@ -316,22 +355,6 @@ Return a failed or in-progress task to the pending queue.
 ```bash
 wai task requeue <id>
 ```
-
-## Data
-
-### `wai snapshot`
-
-Snapshot a directory into the content-addressable vault and create a Source page.
-
-```bash
-wai snapshot ~/Photos/summer-2023
-wai snapshot ~/exports/chat-logs --name "WhatsApp 2023"
-wai snapshot ~/data --dry-run
-```
-
-**Flags**:
-- `--name <name>` — override the source page name (default: directory basename)
-- `--dry-run` — preview what would be stored without writing
 
 ## Backup
 
@@ -352,7 +375,7 @@ wai export ~/backups --dry-run
 Import from a backup archive.
 
 ```bash
-wai import ~/backups/whoami-2023-12-01.tar
+wai import ~/backups/projectwiki-2026-01-15.tar
 wai import backup.tar --force
 wai import backup.tar --dry-run
 ```

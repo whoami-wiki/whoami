@@ -1,91 +1,103 @@
 ---
 title: Citation System
-description: "How citations link wiki content back to source material"
+description: "How citations link wiki content back to contract documents"
 ---
 
-On Wikipedia, citations exist for public verifiability. Here, the sources are private archives. Citations serve a different purpose: traceability. When a future agent (or the wiki owner) reads a claim and wants to find the original context, the citation should point them to a specific, locatable place in the vault.
+On Wikipedia, citations exist for public verifiability. Here, the sources are contract documents. Citations serve a different purpose: traceability. When a future agent (or the project team) reads a claim and wants to find the original contract basis, the citation should point them to a specific, locatable document in the vault.
 
 ## MediaWiki's native ref system
 
 All inline citations use `<ref>` tags, rendered via `<references />` at the bottom of the page in a `== References ==` section. This is standard MediaWiki and requires no custom extensions.
 
 ```wikitext
-Jane was born in Munich and moved to Berlin at eighteen.<ref name="ig-2021-04-15">
-{{Cite message|snapshot=a1b2c3d4e5f6|date=2021-04-15
-|thread=janedoe_12345|note=Family background exchange}}</ref>
+The clarifier walls use #5 rebar at 8" O.C. for penetrations greater than
+6" diameter.<ref name="rfi-042">
+{{Cite rfi|number=042|date=2026-01-22|hash=a1b2c3d4e5f6
+|note=Wall reinforcement at penetrations}}</ref>
 ```
 
 ## Citation templates
 
-Four templates for inline citations, matching common source types in personal archives. A fifth template, `{{Cite vault}}`, is used in the Bibliography section to describe full archives consulted.
+Five templates for inline citations, matching common source types in construction projects. A sixth template, `{{Cite vault}}`, is used in the Bibliography section to describe full document sets consulted.
 
-### Cite message
+### Cite drawing
 
-For text message content (DMs, chats).
-
-```wikitext
-{{Cite message|snapshot=a1b2c3d4e5f6|date=2021-04-15
-|thread=janedoe_12345|note=Family background exchange}}
-```
-
-Renders as: Instagram DM, 15 April 2021 (snapshot a1b2c3d4)
-
-### Cite voice note
-
-For voice note content.
+For facts derived from contract drawings.
 
 ```wikitext
-{{Cite voice note|number=7|date=2021-06-03|speaker=Jane
-|snapshot=a1b2c3d4e5f6|note=Darkroom discovery story}}
+{{Cite drawing|sheet=S-302|detail=7|date=2025-08-15
+|hash=a1b2c3d4e5f6|note=Wall reinforcement detail at penetrations}}
 ```
 
-Renders as: Voice note #7, Jane, 3 June 2021
+Renders as: Drawing S-302, Detail 7 (hash a1b2c3d4)
 
-### Cite photo
+### Cite spec
 
-For facts derived from photos or screenshots.
+For specification requirements.
 
 ```wikitext
-{{Cite photo|file=IMG_2847.jpg|hash=...|date=2021-05-20
-|snapshot=a1b2c3d4e5f6|note=University ID confirming enrollment}}
+{{Cite spec|section=03 30 00|paragraph=2.1.A|date=2025-06-01
+|hash=a1b2c3d4e5f6|note=Concrete mix requirements}}
 ```
 
-Renders as: Photo: IMG\_2847.jpg, 20 May 2021
+Renders as: Spec 03 30 00, §2.1.A (hash a1b2c3d4)
 
-### Cite video
+### Cite rfi
 
-For video content.
+For RFI questions and responses.
 
 ```wikitext
-{{Cite video|file=berlin_gallery_opening.mp4|date=2021-11-12
-|snapshot=a1b2c3d4e5f6|note=Gallery opening footage}}
+{{Cite rfi|number=042|date=2026-01-22|hash=a1b2c3d4e5f6
+|note=Wall reinforcement at penetrations}}
 ```
 
-Renders as: Video: berlin\_gallery\_opening.mp4, 12 November 2021
+Renders as: RFI-042, 22 January 2026
+
+### Cite submittal
+
+For approved submittal data.
+
+```wikitext
+{{Cite submittal|number=SUB-033000-001|date=2026-02-10
+|hash=a1b2c3d4e5f6|note=Concrete mix design approval}}
+```
+
+Renders as: Submittal SUB-033000-001, 10 February 2026
+
+### Cite geotech
+
+For geotechnical report data.
+
+```wikitext
+{{Cite geotech|report=Geotechnical Investigation|boring=B-7
+|date=2025-03-15|hash=a1b2c3d4e5f6|note=Groundwater elevation at clarifier site}}
+```
+
+Renders as: Geotech Report, Boring B-7, 15 March 2025
 
 ### Cite vault
 
-For the Bibliography section. Describes a full vault snapshot consulted during research.
+For the Bibliography section. Describes a full document set consulted during analysis.
 
 ```wikitext
-{{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
-|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
+{{Cite vault|type=drawings|snapshot=a1b2c3d4e5f6
+|timestamp=2025-08-15|note=Volume 3 — Civil Drawings, 45 sheets}}
 ```
 
-Renders as: Vault: Instagram DM thread with Jane Doe, Mar 2021–May 2022 (snapshot a1b2c3d4)
+Renders as: Vault: Volume 3 — Civil Drawings, Aug 2025 (snapshot a1b2c3d4)
 
 ### Common fields
 
 All templates include:
 
-- **snapshot** — the content-addressed vault snapshot hash (first 8 chars is fine for display)
-- **date** — the date of the source material
+- **hash** — the content-addressed vault hash of the source document (first 8 chars is fine for display)
+- **date** — the date of the source document
 - **note** — brief human-readable description of what this citation supports
 
 `{{Cite vault}}` additionally includes:
 
-- **type** — the kind of archive (messages, photos, video, etc.)
-- **timestamp** — the date range of the material
+- **type** — the kind of document set (drawings, specs, reports, etc.)
+- **timestamp** — the date or date range of the documents
 
 ## Granularity
 
@@ -93,61 +105,55 @@ Not every sentence needs a citation. The goal is traceability, not exhaustivenes
 
 ### Always cite
 
-- Biographical facts (birth place, school name, family details). These are scattered across thousands of messages and hard to relocate without a pointer
-- Direct quotes and blockquotes. Cite the date and message source or voice note number
-- Dates of specific events ("they met on 12 November"). Cite the source confirming the date
-- Statistics and counts. Cite how they were derived
-- Claims that were corrected or disputed on the talk page. Cite the resolution source
+- Design parameters (dimensions, elevations, material requirements). These come from specific drawing details or spec paragraphs and need clear pointers
+- Verbatim contract language in `{{Verbatim}}` blocks. Cite the specific spec section and paragraph
+- RFI responses that modify original contract requirements. Cite the RFI number and response date
+- Approved submittal data that updates equipment specifications. Cite the submittal number
+- Claims that were corrected or superseded on the talk page. Cite the resolution source
 
 ### Don't need individual citations
 
-- Broadly sourced observations ("photography became a recurring topic") that emerge across the entire thread
-- Information already attributed inline ("On 15 April, Jane said...") where the date itself serves as the locator
-- Content on episode pages where the entire page draws from a defined set of voice notes listed at the top
+- General descriptions of a process area's function that are evident from multiple drawings
+- Information already attributed inline ("Per Spec 03 30 00, §2.1.A...") where the reference itself serves as the locator
+- Content on drawing pages where the entire page analyzes a single drawing identified in the title
 
 ## Named refs for reuse
 
-Many facts from the same conversation session share a source. Use named refs:
+Many facts from the same drawing or spec paragraph share a source. Use named refs:
 
 ```wikitext
-Jane's mother is from Munich.<ref name="ig-2021-04-15" />
-Her father works in Zurich.<ref name="ig-2021-05-02">
-{{Cite message|snapshot=a1b2c3d4e5f6|date=2021-05-02
-|thread=janedoe_12345|note=Family details, father in Zurich}}</ref>
-She has a younger brother named Max.<ref name="ig-2021-04-15" />
+The influent pipe is 48 inches in diameter.<ref name="c-301" />
+It enters the distribution box at elevation 102.5 ft.<ref name="c-301">
+{{Cite drawing|sheet=C-301|date=2025-08-15|hash=a1b2c3d4e5f6
+|note=Civil site plan with pipe routing}}</ref>
+The distribution box splits flow to four clarifiers.<ref name="c-301" />
 ```
 
 ## Page structure
 
-Every person page and episode page ends with two sections:
+Every area page and equipment page ends with two sections:
 
 ```wikitext
 == References ==
 <references />
 
 == Bibliography ==
-{{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
-|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
-{{Cite vault|type=voice_notes|snapshot=b2c3d4e5f6a1
-|timestamp=2021-04-12/2021-06-03|note=47 voice notes, Jane and wiki owner}}
+{{Cite vault|type=drawings|snapshot=a1b2c3d4e5f6
+|timestamp=2025-08-15|note=Volume 3 — Civil Drawings, 45 sheets}}
+{{Cite vault|type=specs|snapshot=b2c3d4e5f6a1
+|timestamp=2025-06-01|note=Project Specifications, Divisions 01-46}}
 ```
 
-**References** are inline citations. Each one traces a specific claim back to a specific moment in the vault. They are auto-generated from `<ref>` tags.
+**References** are inline citations. Each one traces a specific claim back to a specific document in the vault. They are auto-generated from `<ref>` tags.
 
-**Bibliography** lists the full vault snapshots consulted for the page. This tells a reader (or agent) what data the page drew from overall, without tying it to individual claims.
-
-These serve different purposes from **[Source:](/docs/namespaces#source) pages**, which are system-level documentation of data sources available to agents (how to query them, what they contain, snapshot IDs). The relationship:
-
-- A `Source:Instagram DMs` page documents the data source and how agents access it
-- A `{{Cite vault}}` entry in the Bibliography says "this page used that data source, specifically this snapshot and date range"
-- A `{{Cite message}}` ref in the References says "this specific claim comes from this specific message"
+**Bibliography** lists the full document sets consulted for the page. This tells a reader (or agent) what contract documents the page drew from overall, without tying it to individual claims.
 
 ## Migration
 
 Existing pages should add citations incrementally. An agent doesn't need to cite every claim in one pass. A reasonable approach:
 
-1. **First pass** — cite all biographical facts in the Background section and all direct quotes/blockquotes
-2. **Second pass** — cite date-specific events in the chronological arc
-3. **Third pass** — cite anything flagged as corrected or disputed on the talk page
+1. **First pass** — cite all design parameters in discipline sections and all `{{Verbatim}}` blocks
+2. **Second pass** — cite RFI responses and submittal data that modified original requirements
+3. **Third pass** — cite anything flagged as corrected or superseded on the talk page
 
 This can be spread across multiple tasks.

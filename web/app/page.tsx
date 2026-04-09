@@ -9,9 +9,9 @@ export default function Home() {
       <div className="max-w-2xl w-full flex flex-col gap-8 py-18 px-6">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-1">
-            <div className="font-sans text-lg">whoami.wiki</div>
+            <div className="font-sans text-lg">ProjectWiki</div>
             <div className="font-sans text-md text-muted">
-              Your personal encyclopedia, written by agents
+              Construction project management, powered by agents
             </div>
           </div>
 
@@ -20,7 +20,7 @@ export default function Home() {
               <Button text="Get Started" accent="primary" isCircular />
             </Link>
             <Link href="/blog/personal-encyclopedias" tabIndex={-1}>
-              <Button text="Read Essay" accent="secondary" isCircular />
+              <Button text="Read Background" accent="secondary" isCircular />
             </Link>
           </div>
         </div>
@@ -28,9 +28,9 @@ export default function Home() {
         <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
 
         <div className="font-sans">
-          The whoami.wiki system turns your digital archives of photos, chats,
-          documents, location history, and different types of data into a living
-          encyclopedia about your life.
+          The ProjectWiki system turns construction contract documents —
+          drawings, specifications, RFIs, submittals — into a structured,
+          interlinked wiki with full source traceability.
         </div>
       </div>
 
@@ -70,13 +70,13 @@ export default function Home() {
           <dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-6 font-sans">
             <dt className="">Private by default</dt>
             <dd className="text-muted">
-              Your wiki and archive live on your machine. Nothing is stored
-              remotely.*
+              Your wiki and project documents live on your machine. Nothing is
+              stored remotely.*
             </dd>
             <dt className="">Export anytime</dt>
             <dd className="text-muted">
-              Full export to Markdown and original files. Share a single page
-              with family or back up everything.
+              Full export to Markdown and original files. Share a page with
+              your team or back up the entire project.
             </dd>
             <dt className="">Open source</dt>
             <dd className="text-muted">

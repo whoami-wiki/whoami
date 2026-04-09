@@ -1,7 +1,7 @@
 {
   "name": "wai",
   "version": "1.2.1",
-  "description": "whoami.wiki cli",
+  "description": "construction project wiki cli",
   "type": "module",
   "bin": {
     "wai": "dist/wai.cjs"

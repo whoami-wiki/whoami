@@ -1,14 +1,14 @@
 ---
 title: Installation
-description: "Install the whoami.wiki desktop app, CLI, and agent harness plugin"
+description: "Install the ProjectWiki desktop app, CLI, and agent harness plugin"
 ---
 
-whoami.wiki has two components that work together:
+ProjectWiki has two components that work together:
 
-- **Desktop App and CLI** — the encyclopedia you use to browse through pages and the `wai` command-line tool that agents use to interact with it
-- **Agent Harness and Extension** — a coding agent like [Claude Code](https://code.claude.com), [Codex](https://openai.com/codex), or [OpenCode](https://opencode.ai) and supporting files to guide editorial work
+- **Desktop App and CLI** — the project encyclopedia you use to browse pages and the `wai` command-line tool that agents use to interact with it
+- **Agent Harness and Extension** — a coding agent like [Claude Code](https://code.claude.com), [Codex](https://openai.com/codex), or [OpenCode](https://opencode.ai) and supporting files to guide document analysis
 
-<Note>We recommend using Claude Code with Opus 4.6. You can [view evals across different agent harnesses and models](/docs/choosing-harness-and-model) to help you choose.<br/><br/>While your wiki and archive stay on your machine, using agent harnesses with models hosted online will send your data to those providers. Use [OpenCode](https://opencode.ai) + local models for a fully offline experience.</Note>
+<Note>We recommend using Claude Code with Opus 4.6. You can [view evals across different agent harnesses and models](/docs/choosing-harness-and-model) to help you choose.<br/><br/>While your wiki and documents stay on your machine, using agent harnesses with models hosted online will send your data to those providers. Use [OpenCode](https://opencode.ai) + local models for a fully offline experience.</Note>
 
 <ArchOverview />
 
@@ -19,14 +19,14 @@ Download the installer for your platform:
 - <a href="/download?platform=macos-intel" target="_blank">macOS (Intel)</a>
 - Windows and Linux coming soon!
 
-Once installed, open the app and complete the onboarding flow to create your account.
+Once installed, open the app and complete the setup wizard. Choose construction project mode and enter your project name.
 
 ## Step 2: Install the CLI
 
 Install the `wai` command-line tool, which agents use to read and write wiki pages:
 
 ```bash
-curl -fsSL https://whoami.wiki/cli/install.sh | bash
+curl -fsSL https://projectwiki.dev/cli/install.sh | bash
 ```
 
 ## Step 3: Install the extension for your agent harness
@@ -35,37 +35,37 @@ The agent harness connects your AI coding tool to your wiki. Install the extensi
 
 ### Claude Code
 
-Add the whoami marketplace and install the plugin. Run these slash commands inside Claude Code:
+Add the ProjectWiki marketplace and install the plugin. Run these slash commands inside Claude Code:
 
 ```
-/plugin marketplace add whoami-wiki/extensions
-/plugin install whoami@whoami-marketplace
+/plugin marketplace add projectwiki/extensions
+/plugin install projectwiki@projectwiki-marketplace
 ```
 
 This installs the editor agent, editorial guide, and gives Claude Code access to wiki tools through the `wai` CLI.
 
 ### Codex
 
-Clone the [extensions repo](https://github.com/whoami-wiki/extensions) and copy the Codex configuration into your working directory:
+Clone the [extensions repo](https://github.com/arborist-ai/projectwiki-extensions) and copy the Codex configuration into your working directory:
 
 ```bash
-git clone https://github.com/whoami-wiki/extensions.git
-cp -r extensions/codex/.agents .agents
+git clone https://github.com/arborist-ai/projectwiki-extensions.git
+cp -r projectwiki-extensions/codex/.agents .agents
 ```
 
 This sets up the `.agents/` directory with the editor agent and editorial guide skill. Codex reads this directory automatically when you start a session.
 
 ### OpenCode
 
-Clone the [extensions repo](https://github.com/whoami-wiki/extensions) and copy the OpenCode configuration into your working directory:
+Clone the [extensions repo](https://github.com/arborist-ai/projectwiki-extensions) and copy the OpenCode configuration into your working directory:
 
 ```bash
-git clone https://github.com/whoami-wiki/extensions.git
-cp -r extensions/opencode/.opencode .opencode
-cp extensions/opencode/opencode.json opencode.json
+git clone https://github.com/arborist-ai/projectwiki-extensions.git
+cp -r projectwiki-extensions/opencode/.opencode .opencode
+cp projectwiki-extensions/opencode/opencode.json opencode.json
 ```
 
-This sets up the `.opencode/` directory with instructions and the whoami plugin. The plugin injects environment variables for the `wai` CLI and preserves editorial context across long sessions.
+This sets up the `.opencode/` directory with instructions and the ProjectWiki plugin. The plugin injects environment variables for the `wai` CLI and preserves project context across long sessions.
 
 ## Step 4: Verify the setup
 
@@ -83,6 +83,6 @@ wai search "test"
 
 ## Next steps
 
-Head to [Writing Your First Page](/docs/writing-your-first-page) to create your first encyclopedia page.
+Head to [Setting Up Your First Project](/docs/writing-your-first-page) to ingest your first contract documents.
 
 Having issues? Check the [Troubleshooting](/docs/troubleshooting) guide.

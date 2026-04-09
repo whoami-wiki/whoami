@@ -1,13 +1,13 @@
 ---
 name: create-fixture
-description: Create a new eval fixture for whoami.wiki from the user's personal archive data
+description: Create a new eval fixture for ProjectWiki from construction contract documents
 triggers: ["create-fixture", "new fixture", "add fixture"]
 user_invocable: true
 ---
 
 # Create Fixture
 
-Interactively create a new eval fixture for the whoami.wiki evaluation suite.
+Interactively create a new eval fixture for the ProjectWiki evaluation suite.
 
 ## Usage
 
@@ -15,9 +15,9 @@ Interactively create a new eval fixture for the whoami.wiki evaluation suite.
 
 Examples:
 - `/create-fixture` — start interactive fixture creation
-- `/create-fixture person` — create a person page fixture
-- `/create-fixture episode` — create an episode page fixture
-- `/create-fixture project` — create a project page fixture
+- `/create-fixture area` — create an area page fixture
+- `/create-fixture drawing` — create a drawing analysis fixture
+- `/create-fixture equipment` — create an equipment page fixture
 
 ## Steps
 
@@ -26,75 +26,62 @@ Examples:
 If no page type was provided as an argument, ask the user:
 
 > What type of page is this fixture for?
-> - **Person** — a biography of someone in your archive (friend, family, colleague)
-> - **Episode** — a specific event, trip, or milestone
-> - **Project** — a software project, creative work, or collaborative effort
+> - **Area** — a process area or geographic zone of the project (e.g., primary clarifiers, headworks)
+> - **Equipment** — a specific tagged equipment item (e.g., PS-301A)
+> - **Drawing** — analysis of a contract drawing sheet
+> - **Spec** — a specification section following CSI MasterFormat
 
 ### 2. Gather basic information
 
 Ask the user for:
 
-- **Subject name**: The primary subject (e.g., "Sarah Kim", "Tokyo trip", "Raycast plugin")
+- **Subject name**: The primary subject (e.g., "Area 03 — Primary Clarifiers", "Drawing:C-301", "Spec:03 30 00")
 - **Description**: One sentence describing the eval task
 - **Suite name**: Which suite to place this in (default: `incremental`)
 
-### 3. Identify data sources
+### 3. Identify document sources
 
-Ask the user what archive data they have available for this subject. For each source, collect:
+Ask the user what contract documents they have available. For each source, collect:
 
-- **Path**: Absolute path to the data on their machine
-- **Type**: One of: `instagram`, `whatsapp`, `messages`, `photos`, `location`, `transactions`, `shazam`, `uber_trips`, `github`, `slack`
+- **Path**: Absolute path to the documents on their machine
+- **Type**: One of: `drawings`, `specs`, `rfis`, `submittals`, `geotech`, `field_directives`, `change_orders`
 
 Guide them based on page type:
-- **Person**: Typically needs messaging sources (instagram, whatsapp, messages). Photos are a bonus.
-- **Episode**: Typically needs photos, location history, and messages. Transactions and transport data add richness.
-- **Project**: Typically needs a git repository and communication data (slack, messages).
+- **Area**: Typically needs drawings (multiple disciplines) and specifications. RFIs and submittals add richness.
+- **Equipment**: Typically needs drawings showing the equipment, specifications for the equipment type, and submittals with manufacturer data.
+- **Drawing**: Typically needs the drawing PDF itself plus related specifications for cross-referencing.
+- **Spec**: Typically needs the specification document plus related drawings and any RFIs that modify the section.
 
 ### 4. Design the checkpoint sequence
 
-Based on the page type and available sources, design the checkpoint sequence. Use the examples in `evals/fixtures/examples/` as templates.
+Based on the page type and available documents, design the checkpoint sequence. Use the examples in `evals/fixtures/examples/` as templates.
 
 **Standard checkpoint patterns by page type:**
 
-**Person:**
-1. `survey` — Snapshot first source, create source page
-2. `draft` — Write initial person page from first source (skipReference: true)
-3. `new-source` — Add remaining sources, revise page
-4. `episodes` — Create episode sub-pages for rich events
-5. `owner-input` — Integrate owner testimony (if anecdotes provided)
-6. `verify` — Final review + citation manifest
+**Area:**
+1. `ingest` — Ingest drawing volumes, create index entries
+2. `analyze` — Analyze drawings, write initial area and drawing pages (skipReference: true)
+3. `cross-ref` — Ingest specifications, cross-reference with drawings, update area page
+4. `construction` — Process RFIs, submittals, update affected pages
+5. `verify` — Verification cycle, check all pages against current documents
+6. `review` — Final editorial review + citation manifest
 
-**Episode:**
-1. `survey` — Snapshot photos/location, create source pages
-2. `draft` — Write day-by-day itinerary from spatial data (skipReference: true)
-3. `new-source` — Add messages/transactions, weave into narrative
-4. `persons` — Create person stubs for trip participants
-5. `owner-input` — Integrate owner memories (if anecdotes provided)
-6. `verify` — Final review + citation manifest
+**Equipment:**
+1. `ingest` — Ingest relevant drawings and specs
+2. `analyze` — Write equipment page from drawings and specs (skipReference: true)
+3. `cross-ref` — Process submittals with manufacturer data, update equipment page
+4. `verify` — Verification cycle
+5. `review` — Final review + citation manifest
 
-**Project:**
-1. `survey` — Snapshot git repo, create source page
-2. `draft` — Write project page from code/commits (skipReference: true)
-3. `new-source` — Add Slack/messages, integrate collaboration context
-4. `episodes` — Create episode pages for key development moments
-5. `verify` — Final review + citation manifest
+**Drawing:**
+1. `ingest` — Ingest the drawing PDF
+2. `analyze` — Analyze using observations-before-interpretation protocol (skipReference: true)
+3. `cross-ref` — Cross-reference with specifications
+4. `review` — Final review + citation manifest
 
-For each checkpoint, set appropriate `grade` targets using the subject name and roles. Set `threshold: 0.3` on the survey checkpoint.
+For each checkpoint, set appropriate `grade` targets using the subject name and roles. Set `threshold: 0.3` on the ingest checkpoint.
 
-### 5. Ask about owner anecdotes
-
-Ask:
-
-> Do you have personal memories or corrections about this subject that you'd like the agent to incorporate? These are things the digital sources can't capture — personal stories, context, corrections to what the data shows.
-
-If yes, collect entries interactively. For each entry ask:
-- What's the memory or correction?
-- What topic does it relate to?
-- Does it contradict anything in the digital sources?
-
-Write these to `owner-anecdotes.json` in the fixture directory.
-
-### 6. Ask about reference pages
+### 5. Ask about reference pages
 
 Ask:
 
@@ -107,7 +94,7 @@ Ask:
 
 If they want to write references now, help them draft wikitext pages following the editorial guide conventions. Save to the `references/` subdirectory and add entries to the `references` map in `case.json`.
 
-### 7. Generate the fixture
+### 6. Generate the fixture
 
 Determine the next available case number by listing existing directories in `evals/fixtures/<suite>/`:
 
@@ -115,40 +102,38 @@ Determine the next available case number by listing existing directories in `eva
 ls evals/fixtures/<suite>/
 ```
 
-Use the next sequential number with zero-padding (e.g., `004-person`, `005-trip`).
+Use the next sequential number with zero-padding (e.g., `004-area`, `005-drawing`).
 
 Create the fixture directory and write all files:
 
 ```
 evals/fixtures/<suite>/<NNN-type>/
 ├── case.json
-├── owner-anecdotes.json    (if anecdotes were provided)
 └── references/
     ├── <subject>.wiki      (if reference pages were written)
     └── talk-<subject>.wiki (if talk reference was written)
 ```
 
-### 8. Validate
+### 7. Validate
 
 After writing the files:
 
 1. Read back the `case.json` and verify it parses correctly
-2. Check that all source paths referenced in `case.json` exist on the user's machine
-3. Check that all files referenced in `references` and `ownerInput` exist in the fixture directory
+2. Check that all document source paths referenced in `case.json` exist on the user's machine
+3. Check that all files referenced in `references` exist in the fixture directory
 4. Confirm the fixture follows the TypeScript types in `evals/src/types.ts`
 
-### 9. Summary
+### 8. Summary
 
 Print a summary:
 
 ```
 Created fixture: evals/fixtures/<suite>/<case-id>/
-  Page type: Person
-  Subject: Sarah Kim
-  Sources: instagram, whatsapp
-  Checkpoints: survey → draft → new-source → episodes → owner-input → verify
+  Page type: Area
+  Subject: Area 03 — Primary Clarifiers
+  Sources: drawings (civil, structural), specs
+  Checkpoints: ingest → analyze → cross-ref → construction → verify → review
   References: yes/no
-  Owner anecdotes: 4 entries
 
 Run it with:
   cd evals && pnpm eval --suite <suite> --case <case-id> --harness claude-code
@@ -157,7 +142,7 @@ Run it with:
 ## Important notes
 
 - Source paths must be **absolute paths** on the user's machine
-- Fixture directories under `fixtures/incremental/` are gitignored — personal data stays local
-- The `snapshotId` field in sources starts empty and is populated at runtime by `wai snapshot`
+- Fixture directories under `fixtures/incremental/` are gitignored — project documents stay local
+- The `snapshotId` field in sources starts empty and is populated at runtime by `wai ingest`
 - Reference file paths in `case.json` are relative to the fixture directory
-- Use `slug-case` for reference filenames (e.g., `alex-chen.wiki`, `talk-alex-chen.wiki`)
+- Use `slug-case` for reference filenames (e.g., `area-03.wiki`, `drawing-c-301.wiki`)

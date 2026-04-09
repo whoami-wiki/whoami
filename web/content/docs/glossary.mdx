@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: "Definitions for every term used in whoami.wiki"
+description: "Definitions for every term used in ProjectWiki"
 ---
 
 Canonical definitions for the nouns and concepts used across the CLI, documentation, and agent instructions.
@@ -9,11 +9,11 @@ Canonical definitions for the nouns and concepts used across the CLI, documentat
 
 ### Page
 
-A wiki article in the main namespace. The fundamental unit of the encyclopedia. Has a title, content written in wikitext, a revision history, and belongs to one or more categories.
+A wiki article in any namespace. The fundamental unit of the encyclopedia. Has a title, content written in wikitext, a revision history, and belongs to one or more categories.
 
 ### Page type
 
-A grouping of pages that share a common structure and editorial approach. The current page types are **Person** and **Episode**, but new types may emerge as different kinds of personal data are added to the encyclopedia. See [Page Types](/docs/page-types) for details on each.
+A grouping of pages that share a common structure and editorial approach. The current page types are **Area**, **Equipment**, **Drawing**, **Spec**, **Construction document**, and **Issue**. See [Page Types](/docs/page-types) for details on each.
 
 ### Section
 
@@ -37,23 +37,31 @@ An internal link between pages. Syntax: `[[Page Name]]`. Wikilinks are how the e
 
 ### Red link
 
-A wikilink to a page that doesn't exist yet. Indicates a gap in the encyclopedia — a person, place, or event that's been mentioned but not yet documented.
+A wikilink to a page that doesn't exist yet. Indicates a gap in the encyclopedia — a piece of equipment, specification section, or drawing that's been mentioned but not yet documented.
 
 ## Discussion
 
 ### Talk page
 
-A discussion page paired with a main page, in the `Talk:` namespace (e.g., `Talk:Coorg Trip (2012)`). Used for editorial notes, open questions, and coordination between agents and humans.
+A discussion page paired with a main page, in the `Talk:` namespace (e.g., `Talk:Area 03 — Primary Clarifiers`). Used for verification status, active gaps, resolved items, coordination issues, and agent logs.
 
 ### Thread
 
 A topic within a talk page. Each thread has a subject line and content, and can be marked `{{Open}}` or `{{Closed}}`.
 
+### Verification status
+
+A `{{Verification}}` template on a talk page indicating whether the associated main page has been verified against current document revisions. States: complete, in-progress, not-started.
+
+### Active gap
+
+An open question on a talk page marked `{{Open}}` that needs resolution. Represents a page-level uncertainty (e.g., unconfirmed vendor for a mechanism). Distinct from project-level Issues.
+
 ## Data and storage
 
 ### Vault
 
-The content-addressed store on disk where source files are kept. Contains two subdirectories:
+The content-addressed store on disk where source documents are kept. Contains two subdirectories:
 
 - `objects/` — individual files stored by their SHA-256 hash
 - `snapshots/` — manifest files describing captured datasets
@@ -64,37 +72,29 @@ Files in the vault are immutable and deduplicated. The same file imported from m
 
 A single file stored in the vault, identified by its SHA-256 hash. Stored at `objects/{prefix}/{hash}` where prefix is the first two characters of the hash. Immutable once written.
 
-### Snapshot
+### Volume
 
-A captured copy of a directory at a point in time. Created by `wai snapshot <dir>`. Produces:
+A collection of contract documents ingested together. Created by `wai ingest volume <dir>`. Produces:
 
 1. **Objects** — individual files hashed and stored in the vault
 2. **Manifest** — a JSON file mapping file paths to their hashes
-3. **Source page** — a wiki page in the `Source:` namespace documenting the dataset
+3. **Index entries** — drawing or spec pages queued for analysis
 
-Identified by a deterministic snapshot ID.
-
-### Snapshot ID
-
-A 16-character hex string derived from the SHA-256 hash of a snapshot's manifest. Uniquely identifies a snapshot and its contents.
+Volumes organize documents by type (drawings, specs, reports) and can be analyzed as a batch.
 
 ### Manifest
 
-A JSON file listing all files in a snapshot with their relative paths and SHA-256 hashes. Stored in `vault/snapshots/{snapshotId}.json`. Deterministic — the same set of files always produces the same manifest.
-
-### Source page
-
-A wiki page in the `Source:` namespace (e.g., `Source:WhatsApp Alice`) documenting an ingested dataset. Created automatically by `wai snapshot`. Contains metadata (snapshot ID, file count, total size, file type breakdown) and querying instructions for programmatic access to the data in the vault.
+A JSON file listing all files in a volume with their relative paths and SHA-256 hashes. Stored in `vault/snapshots/{snapshotId}.json`. Deterministic — the same set of files always produces the same manifest.
 
 ### Data source
 
-A type of raw personal data that can be snapshotted and used to write pages. Supported types: photos, videos, messages and chats, voice notes, location data, financial data, and social media archives. See [Data Sources](/docs/data-sources) for details on each.
+A type of contract document that can be ingested and used to build wiki pages. Supported types: contract drawings, specifications, RFIs, submittals, geotechnical reports, field directives, and change orders. See [Data Sources](/docs/data-sources) for details on each.
 
 ## Citations
 
 ### Citation
 
-A reference linking a factual claim in a page to a specific piece of evidence in the vault. Uses `<ref>{{cite type | params}}</ref>` syntax with type-specific templates: `cite message`, `cite voice`, `cite photo`, `cite video`. Each citation includes a `hash` field pointing to an immutable object.
+A reference linking a factual claim in a page to a specific piece of evidence in the contract documents. Uses `<ref>{{cite type | params}}</ref>` syntax with type-specific templates: `cite drawing`, `cite spec`, `cite rfi`, `cite submittal`, `cite geotech`. Each citation includes a `hash` field pointing to an immutable object.
 
 ### Reference
 
@@ -102,13 +102,13 @@ A collected citation displayed in the `== References ==` section at the bottom o
 
 ### Hash
 
-The SHA-256 content-addressed identifier of a file in the vault. Used in citations to link claims to specific, immutable source files. Even if the original file is moved or renamed, the hash still resolves.
+The SHA-256 content-addressed identifier of a file in the vault. Used in citations to link claims to specific, immutable source documents. Even if the original file is moved or renamed, the hash still resolves.
 
 ## Tasks
 
 ### Task
 
-A work item tracking editorial work, stored as a page in the `Task:` namespace (e.g., `Task:0001`). Contains an `{{Infobox Task}}` with metadata and a description of what needs to be done.
+A work item tracking analysis or editorial work, stored as a page in the `Task:` namespace (e.g., `Task:0001`). Contains an `{{Infobox Task}}` with metadata and a description of what needs to be done.
 
 ### Task queue
 
@@ -123,6 +123,28 @@ The state machine a task moves through:
 - **done** — completed successfully
 - **failed** — could not be completed (can be requeued back to pending)
 
+## Construction concepts
+
+### Process area
+
+A geographic zone or functional area of the project (e.g., "Area 03 — Primary Clarifiers"). The primary organizational unit for construction content. Each area has a main page in the Main namespace.
+
+### Equipment tag
+
+A unique identifier for a piece of equipment (e.g., PS-301A). Follows project tagging conventions. Each tagged item gets its own page in the Main namespace.
+
+### CSI MasterFormat
+
+The Construction Specifications Institute numbering system for specification sections (XX XX XX format). Used for Spec namespace page titles (e.g., `Spec:03 30 00` for Cast-in-Place Concrete).
+
+### Discipline prefix
+
+A letter prefix on drawing numbers identifying the engineering discipline: C (Civil), S (Structural), M (Mechanical), E (Electrical), I (Instrumentation), A (Architectural).
+
+### Traceability chain
+
+The linked sequence from an original contract requirement through any modifications (RFIs, field directives, change orders) to the current wiki page content. Maintained via the Pages Updated section on Construction document pages.
+
 ## System components
 
 ### Wiki
@@ -131,7 +153,7 @@ The local MediaWiki instance that stores the encyclopedia. Runs at `http://local
 
 ### CLI (`wai`)
 
-The command-line tool for managing the wiki, snapshotting data, and operating the task queue. The primary interface for both humans and agent harnesses.
+The command-line tool for managing the wiki, ingesting documents, and operating the task queue. The primary interface for both humans and agent harnesses.
 
 ### Agent harness
 
@@ -143,9 +165,12 @@ The installable package that provides the agent harness for a specific coding to
 
 ### Namespace
 
-A MediaWiki organizational prefix for pages. The project uses four namespaces:
+A MediaWiki organizational prefix for pages. The project uses seven namespaces:
 
-- **Main** (no prefix) — regular encyclopedia pages
-- **Talk** (`Talk:`) — editorial discussion pages
-- **Source** (`Source:`) — documentation of ingested datasets
-- **Task** (`Task:`) — editorial work items
+- **Main** (no prefix) — area pages, equipment pages, project content
+- **Talk** (`Talk:`) — verification status, gaps, coordination
+- **Drawing** (`Drawing:`) — drawing analysis pages
+- **Spec** (`Spec:`) — specification section pages
+- **Construction** (`Construction:`) — RFIs, submittals, field directives
+- **Issue** (`Issue:`) — conflicts, ambiguities, risk items
+- **Task** (`Task:`) — agent work logs
