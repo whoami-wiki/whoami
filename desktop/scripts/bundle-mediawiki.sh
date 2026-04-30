@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Download MediaWiki 1.43 + extensions into resources/mediawiki/
+# Download MediaWiki 1.45 + extensions into resources/mediawiki/
 #
 # Extensions: Cite, CiteThisPage, ParserFunctions, Scribunto,
 #             TemplateData, TemplateStyles
@@ -9,8 +9,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$SCRIPT_DIR/.."
 OUT="$ROOT/resources/mediawiki"
-MW_VERSION="1.43"
-MW_FULL="1.43.0"
+MW_VERSION="1.45"
+MW_FULL="1.45.3"
 
 mkdir -p "$ROOT/.build"
 
@@ -58,7 +58,7 @@ if [ "$NEED_EXTENSIONS" = true ]; then
     fi
 
     echo "==> Downloading extension: $ext"
-    # Find the exact filename (e.g. Cite-REL1_43-918f705.tar.gz)
+    # Find the exact filename (e.g. Cite-REL1_45-918f705.tar.gz)
     EXT_FILE=$(grep -o "${ext}-${REL_TAG}-[a-f0-9]*\\.tar\\.gz" "$EXT_INDEX" | head -1)
     if [ -z "$EXT_FILE" ]; then
       echo "ERROR: Could not find $ext for $REL_TAG in ExtDist index"
@@ -79,11 +79,11 @@ fi
 # 2b. Download TimedMediaHandler from GitHub (not on ExtDist for 1.43)
 TMH_DIR="$OUT/extensions/TimedMediaHandler"
 if [ ! -d "$TMH_DIR" ]; then
-  echo "==> Downloading TimedMediaHandler (REL1_43 from GitHub)..."
-  TMH_TARBALL="$ROOT/.build/TimedMediaHandler-REL1_43.tar.gz"
+  echo "==> Downloading TimedMediaHandler (REL1_45 from GitHub)..."
+  TMH_TARBALL="$ROOT/.build/TimedMediaHandler-REL1_45.tar.gz"
   if [ ! -f "$TMH_TARBALL" ]; then
     curl -L -o "$TMH_TARBALL" \
-      "https://github.com/wikimedia/mediawiki-extensions-TimedMediaHandler/archive/refs/heads/REL1_43.tar.gz"
+      "https://github.com/wikimedia/mediawiki-extensions-TimedMediaHandler/archive/refs/heads/REL1_45.tar.gz"
   fi
   mkdir -p "$TMH_DIR"
   tar xzf "$TMH_TARBALL" --strip-components=1 -C "$TMH_DIR"
