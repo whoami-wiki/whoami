@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getPageStore, invalidateListCache } from '@/lib/server-services';
-import { DEFAULT_AUTHOR } from '@/lib/env';
+import { getPageStore, invalidateListCache, getSearchIndex, persistSearchIndex } from '@/lib/server-services';
+import { DEFAULT_AUTHOR, WHOAMI_ROOT } from '@/lib/env';
 import { isValidSlug } from '@core/pages/index.ts';
 import type { Page, PageMeta } from '@core/pages/index.ts';
+import { buildSearchDoc } from '@core/search/module.ts';
+import { loadDerivedRecord } from '@/lib/derived';
 
 const PutBody = z.object({
   body: z.string(),
@@ -61,6 +63,12 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
   }
 
   await pages.write(slug, page, DEFAULT_AUTHOR, parsed.data.summary);
+  const idx = await getSearchIndex();
+  const derived = page.meta.gedcom?.record
+    ? await loadDerivedRecord(WHOAMI_ROOT, page.meta.gedcom.record)
+    : null;
+  idx.upsert(buildSearchDoc(page, derived));
+  await persistSearchIndex();
   invalidateListCache();
   return NextResponse.json({ ok: true });
 }
@@ -70,6 +78,9 @@ export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ slug: s
   if (!isValidSlug(slug)) return NextResponse.json({ error: 'bad-slug' }, { status: 400 });
 
   await getPageStore().softDelete(slug, DEFAULT_AUTHOR);
+  const idx = await getSearchIndex();
+  idx.remove(slug);
+  await persistSearchIndex();
   invalidateListCache();
   return NextResponse.json({ ok: true });
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { reciteDrift, applyRecite } from '@core/gedcom/index.ts';
-import { invalidateListCache } from '@/lib/server-services';
+import { invalidateListCache, rebuildSearchIndexFromDisk } from '@/lib/server-services';
 import { WHOAMI_ROOT, PAGES_DIR, DEFAULT_AUTHOR } from '@/lib/env';
 
 export async function GET() {
@@ -28,5 +28,6 @@ export async function POST(req: NextRequest) {
     author: DEFAULT_AUTHOR,
   });
   invalidateListCache();
+  await rebuildSearchIndexFromDisk();
   return NextResponse.json({ updated });
 }

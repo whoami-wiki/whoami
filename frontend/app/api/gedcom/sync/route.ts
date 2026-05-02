@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { z } from 'zod';
 import { syncGedcom } from '@core/gedcom/index.ts';
-import { invalidateListCache } from '@/lib/server-services';
+import { invalidateListCache, rebuildSearchIndexFromDisk } from '@/lib/server-services';
 import { WHOAMI_ROOT, DEFAULT_AUTHOR } from '@/lib/env';
 
 const Body = z.object({
@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
       notes: parsed.data.notes,
     });
     invalidateListCache();
+    await rebuildSearchIndexFromDisk();
     return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json({ error: 'sync-failed', detail: (err as Error).message }, { status: 500 });
