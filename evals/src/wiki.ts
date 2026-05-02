@@ -86,10 +86,14 @@ export async function startWiki(opts: { port?: number } = {}): Promise<WikiInsta
     NODE_ENV: 'development',
   };
 
+  // detached: true puts the child in its own process group so we can signal
+  // the whole tree (npm + the next dev grandchild). Without this, child.kill()
+  // only signals npm and the grandchild keeps holding the port.
   const child: ChildProcess = spawn('npm', ['run', 'dev'], {
     cwd: FRONTEND_ROOT,
     env,
     stdio: ['ignore', 'pipe', 'pipe'],
+    detached: true,
   });
   // Bound stderr capture so long-running tests don't leak memory.
   const STDERR_CAP = 4096;
@@ -98,20 +102,26 @@ export async function startWiki(opts: { port?: number } = {}): Promise<WikiInsta
     stderrBuf = (stderrBuf + chunk.toString()).slice(-STDERR_CAP);
   });
 
+  // Signal the whole process group (npm + next dev grandchild). The negative
+  // PID is the POSIX convention for "send to process group with this id".
+  function killTree(signal: NodeJS.Signals): void {
+    if (!child.pid) return;
+    try { process.kill(-child.pid, signal); } catch { /* group may already be gone */ }
+  }
+
   try {
     await waitForServer(url);
   } catch (err) {
-    child.kill();
+    killTree('SIGTERM');
     rmSync(vaultPath, { recursive: true, force: true });
     throw new Error(`startWiki: ${(err as Error).message}\n--- stderr tail ---\n${stderrBuf.slice(-2000)}`);
   }
 
   const stop = async (): Promise<void> => {
     if (!child.killed) {
-      child.kill('SIGTERM');
+      killTree('SIGTERM');
       await new Promise<void>((resolve) => {
-        const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* ignore */ } resolve(); }, 2000);
-        // unref so this timer doesn't block process exit if the test runner is shutting down.
+        const t = setTimeout(() => { killTree('SIGKILL'); resolve(); }, 2000);
         t.unref();
         child.once('exit', () => { clearTimeout(t); resolve(); });
       });

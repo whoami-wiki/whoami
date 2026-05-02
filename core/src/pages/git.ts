@@ -24,6 +24,12 @@ export async function addAndCommit(
   const result = await git.commit(summary, paths, {
     '--author': `${author.name} <${author.email}>`,
   });
+  if (!result.commit) {
+    // simple-git swallows pre-commit hook failures and returns an empty commit
+    // string instead of throwing. Surface this as an error so PageStore.write's
+    // atomic-rollback path can react and the API can return 500.
+    throw new Error(`git commit produced no commit (likely a hook failure or empty change for ${paths.join(', ')})`);
+  }
   return result.commit;
 }
 

@@ -62,7 +62,11 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
     page = { slug, meta: defaultMeta(slug), body: parsed.data.body };
   }
 
-  await pages.write(slug, page, DEFAULT_AUTHOR, parsed.data.summary);
+  try {
+    await pages.write(slug, page, DEFAULT_AUTHOR, parsed.data.summary);
+  } catch (err) {
+    return NextResponse.json({ error: 'write-failed', detail: (err as Error).message }, { status: 500 });
+  }
   const idx = await getSearchIndex();
   const derived = page.meta.gedcom?.record
     ? await loadDerivedRecord(WHOAMI_ROOT, page.meta.gedcom.record)
@@ -77,7 +81,11 @@ export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ slug: s
   const { slug } = await ctx.params;
   if (!isValidSlug(slug)) return NextResponse.json({ error: 'bad-slug' }, { status: 400 });
 
-  await getPageStore().softDelete(slug, DEFAULT_AUTHOR);
+  try {
+    await getPageStore().softDelete(slug, DEFAULT_AUTHOR);
+  } catch (err) {
+    return NextResponse.json({ error: 'delete-failed', detail: (err as Error).message }, { status: 500 });
+  }
   const idx = await getSearchIndex();
   idx.remove(slug);
   await persistSearchIndex();
