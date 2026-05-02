@@ -6,6 +6,8 @@ import { CiteMessage } from './cite-message';
 import { Dialogue } from './dialogue';
 import { ColumnsList } from './columns-list';
 import { InfoboxCompany } from './infobox-company';
+import { InfoboxPerson } from './infobox-person';
+import type { DerivedRecord } from '@core/gedcom/types.ts';
 
 export const directiveComponents: Record<string, ComponentType<{ children?: ReactNode; [k: string]: unknown }>> = {
   open:              (p) => <Admonition kind="open">{p.children}</Admonition>,
@@ -18,4 +20,5 @@ export const directiveComponents: Record<string, ComponentType<{ children?: Reac
   dialogue:          (p) => <Dialogue speaker={p.speaker as string | undefined}>{p.children}</Dialogue>,
   'columns-list':    (p) => <ColumnsList cols={p.cols as string | undefined}>{p.children}</ColumnsList>,
   'infobox-company': (p) => <InfoboxCompany>{p.children}</InfoboxCompany>,
+  'infobox-person':  (p) => <InfoboxPerson derived={p.derived as DerivedRecord | null | undefined}>{p.children}</InfoboxPerson>,
 };
