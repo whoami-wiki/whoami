@@ -3,11 +3,29 @@ import { z } from 'zod';
 import { getPageStore, invalidateListCache } from '@/lib/server-services';
 import { DEFAULT_AUTHOR } from '@/lib/env';
 import { isValidSlug } from '@core/pages/index.ts';
+import type { Page, PageMeta } from '@core/pages/index.ts';
 
 const PutBody = z.object({
   body: z.string(),
   summary: z.string().min(1).max(200),
 });
+
+function defaultMeta(slug: string): PageMeta {
+  return {
+    title: titleCaseFromSlug(slug),
+    owner: DEFAULT_AUTHOR.name,
+    editors: [],
+    type: 'meta',
+    aliases: [],
+    categories: [],
+    created: new Date().toISOString().slice(0, 10),
+  };
+}
+
+function titleCaseFromSlug(slug: string): string {
+  const base = slug.endsWith('.talk') ? slug.slice(0, -5) : slug;
+  return base.split('-').map(w => w ? w[0]!.toUpperCase() + w.slice(1) : '').join(' ');
+}
 
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
   const { slug } = await ctx.params;
@@ -32,10 +50,17 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
   if (!parsed.success) return NextResponse.json({ error: 'bad-request' }, { status: 400 });
 
   const pages = getPageStore();
-  const existing = await pages.read(slug);
-  const updated = { ...existing, body: parsed.data.body };
+  // PUT is upsert: read existing meta if available, otherwise synthesize defaults.
+  let page: Page;
+  try {
+    const existing = await pages.read(slug);
+    page = { ...existing, body: parsed.data.body };
+  } catch (err) {
+    if (!(err as Error).message.includes('not found')) throw err;
+    page = { slug, meta: defaultMeta(slug), body: parsed.data.body };
+  }
 
-  await pages.write(slug, updated, DEFAULT_AUTHOR, parsed.data.summary);
+  await pages.write(slug, page, DEFAULT_AUTHOR, parsed.data.summary);
   invalidateListCache();
   return NextResponse.json({ ok: true });
 }
