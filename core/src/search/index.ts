@@ -1,4 +1,4 @@
-import FlexSearch from 'flexsearch';
+import { Document } from 'flexsearch';
 import type { SearchDoc, SearchHit } from './types.ts';
 
 export interface SearchIndex {
@@ -6,7 +6,7 @@ export interface SearchIndex {
   remove(slug: string): void;
   query(q: string, limit?: number): SearchHit[];
   // Internals exposed for persistence in persist.ts
-  _raw(): FlexSearch.Document<SearchDoc>;
+  _raw(): Document<SearchDoc>;
 }
 
 export function createSearchIndex(): SearchIndex {
@@ -27,8 +27,8 @@ export function createSearchIndex(): SearchIndex {
   };
 }
 
-function makeIndex(): FlexSearch.Document<SearchDoc> {
-  return new FlexSearch.Document<SearchDoc>({
+function makeIndex(): Document<SearchDoc> {
+  return new Document<SearchDoc>({
     document: {
       id: 'slug',
       index: [

@@ -5,7 +5,8 @@ import type { SearchIndex } from './index.ts';
 /** Serialize the index's shards to a single JSON file (atomic write). */
 export async function saveSearchIndex(idx: SearchIndex, path: string): Promise<void> {
   const shards: Record<string, unknown> = {};
-  await idx._raw().export((key, data) => {
+  // Async callback selects the Promise-returning overload; we await all shards.
+  await idx._raw().export(async (key: string, data: string) => {
     shards[String(key)] = data;
   });
   mkdirSync(dirname(path), { recursive: true });

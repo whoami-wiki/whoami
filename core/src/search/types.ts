@@ -1,4 +1,6 @@
 export interface SearchDoc {
+  // Index signature satisfies FlexSearch's DocumentData constraint.
+  [key: string]: string;
   slug: string;
   title: string;
   type: string;
