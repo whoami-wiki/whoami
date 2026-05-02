@@ -1,3 +1,5 @@
+import { parsePipeArgs } from '../wikitext-args.ts';
+
 const CITE_VAULT_RE = /\{\{Cite vault\s*\|([^}]+)\}\}/gi;
 
 export function transformCiteVault(text: string): string {
@@ -8,18 +10,6 @@ export function transformCiteVault(text: string): string {
       .join(' ');
     return `:::cite-vault{${attrs}}:::`;
   });
-}
-
-function parsePipeArgs(s: string): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const part of s.split('|')) {
-    const eq = part.indexOf('=');
-    if (eq === -1) continue;
-    const k = part.slice(0, eq).trim();
-    const v = part.slice(eq + 1).trim();
-    if (k) out[k] = v;
-  }
-  return out;
 }
 
 function escapeQuotes(v: string): string {
