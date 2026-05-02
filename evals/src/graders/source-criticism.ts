@@ -55,12 +55,12 @@ function scoreEvaluation(evaluation: RubricEvaluation): { score: number; details
 }
 
 export async function gradeSourceCriticism(
-  wikitext: string,
+  body: string,
 ): Promise<GraderResult> {
   const results: { score: number; details: GraderCheck[] }[] = [];
 
   for (let i = 0; i < SOURCE_CRITICISM_PASSES; i++) {
-    const evaluation = await evaluateWithRubric(wikitext, SOURCE_CRITICISM_RUBRIC);
+    const evaluation = await evaluateWithRubric(body, SOURCE_CRITICISM_RUBRIC);
     results.push(scoreEvaluation(evaluation));
   }
 

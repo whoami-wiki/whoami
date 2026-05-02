@@ -14,7 +14,7 @@ const WORDS_TO_WATCH = [
 ];
 
 const PERSON_EPISODE_RUBRIC = `
-Evaluate the wikitext page against these editorial standards:
+Evaluate the markdown page against these editorial standards:
 
 1. VOICE (deduction: -0.1 each, cap -0.4)
    - Must use third-person voice (no "I", "we", "my", "our" as the subject's voice)
@@ -39,9 +39,9 @@ Evaluate the wikitext page against these editorial standards:
    - Chronological or thematic section order
 
 4. SYNTAX (deduction: -0.1 each)
-   - Correct wikitext heading syntax (== Level 2 ==, === Level 3 ===)
-   - Properly formed [[wikilinks]]
-   - Properly formed {{templates}}
+   - Correct markdown heading syntax (## Level 2, ### Level 3)
+   - Properly formed [internal links]
+   - Properly formed directive blocks
    - No broken HTML tags
 `;
 
@@ -104,7 +104,7 @@ function scoreEvaluation(evaluation: RubricEvaluation): { score: number; details
 }
 
 export async function gradeEditorial(
-  wikitext: string,
+  body: string,
   role: 'person' | 'episode' | 'project' | 'talk',
 ): Promise<GraderResult> {
   const rubric = role === 'talk' ? TALK_RUBRIC : PERSON_EPISODE_RUBRIC;
@@ -112,7 +112,7 @@ export async function gradeEditorial(
   const results: { score: number; details: GraderCheck[] }[] = [];
 
   for (let i = 0; i < EDITORIAL_PASSES; i++) {
-    const evaluation = await evaluateWithRubric(wikitext, rubric);
+    const evaluation = await evaluateWithRubric(body, rubric);
     results.push(scoreEvaluation(evaluation));
   }
 

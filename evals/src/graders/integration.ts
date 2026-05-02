@@ -9,7 +9,7 @@ You will receive both versions. If a TALK PAGE is provided, use it to check whet
 
 1. STRUCTURAL_INTEGRATION (deduction: -0.15 each)
    - New facts placed in appropriate existing sections, not dumped in "Additional information"
-   - Infobox fields updated with newly available information
+   - Metadata fields updated with newly available information
    - Earlier hedging/unknown markers removed now that data is available
 
 2. NARRATIVE_COHERENCE (deduction: -0.15 each)
@@ -63,13 +63,13 @@ function scoreEvaluation(evaluation: RubricEvaluation): { score: number; details
 }
 
 export async function gradeIntegration(
-  previousWikitext: string,
-  currentWikitext: string,
-  talkWikitext?: string,
+  previousBody: string,
+  currentBody: string,
+  talkBody?: string,
 ): Promise<GraderResult> {
-  let combinedInput = `=== PREVIOUS VERSION ===\n${previousWikitext}\n\n=== CURRENT VERSION ===\n${currentWikitext}`;
-  if (talkWikitext) {
-    combinedInput += `\n\n=== TALK PAGE ===\n${talkWikitext}`;
+  let combinedInput = `=== PREVIOUS VERSION ===\n${previousBody}\n\n=== CURRENT VERSION ===\n${currentBody}`;
+  if (talkBody) {
+    combinedInput += `\n\n=== TALK PAGE ===\n${talkBody}`;
   }
 
   const results: { score: number; details: GraderCheck[] }[] = [];

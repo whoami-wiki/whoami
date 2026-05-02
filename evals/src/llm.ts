@@ -35,10 +35,10 @@ function parseJson<T>(raw: string): T {
 }
 
 export async function extractClaims(
-  wikitext: string,
+  body: string,
   sourceData: string,
 ): Promise<ClaimExtraction> {
-  const prompt = `Extract all factual claims from this wikitext page. For each claim, identify its type (date, location, name, or fact) and check whether it is supported by the source data provided.
+  const prompt = `Extract all factual claims from this markdown page. For each claim, identify its type (date, location, name, or fact) and check whether it is supported by the source data provided.
 
 Return a JSON object with this exact structure:
 {
@@ -51,8 +51,8 @@ A claim is "supported" if the source data contains evidence for it.
 A claim is "unsupported" if the source data doesn't mention it but it could be true.
 A claim is "fabricated" if the source data contradicts it.
 
-WIKITEXT:
-${wikitext}
+MARKDOWN:
+${body}
 
 SOURCE DATA:
 ${sourceData}
@@ -68,9 +68,9 @@ export interface ClaimOnlyExtraction {
 }
 
 export async function extractClaimsOnly(
-  wikitext: string,
+  body: string,
 ): Promise<ClaimOnlyExtraction> {
-  const prompt = `Extract all concrete, verifiable factual claims from this wikitext page. Focus on specific dates, names, quantities, locations, and events — not opinions or vague statements.
+  const prompt = `Extract all concrete, verifiable factual claims from this markdown page. Focus on specific dates, names, quantities, locations, and events — not opinions or vague statements.
 
 Return a JSON object with this exact structure:
 {
@@ -79,8 +79,8 @@ Return a JSON object with this exact structure:
   ]
 }
 
-WIKITEXT:
-${wikitext}
+MARKDOWN:
+${body}
 
 Return only the JSON object, no other text.`;
 
@@ -89,10 +89,10 @@ Return only the JSON object, no other text.`;
 }
 
 export async function evaluateWithRubric(
-  wikitext: string,
+  body: string,
   rubric: string,
 ): Promise<RubricEvaluation> {
-  const prompt = `Evaluate this wikitext page against the following rubric. Identify specific deductions.
+  const prompt = `Evaluate this markdown page against the following rubric. Identify specific deductions.
 
 Return a JSON object with this exact structure:
 {
@@ -107,8 +107,8 @@ Follow the deduction amounts specified in the rubric below.
 RUBRIC:
 ${rubric}
 
-WIKITEXT:
-${wikitext}
+MARKDOWN:
+${body}
 
 Return only the JSON object, no other text.`;
 
@@ -153,10 +153,10 @@ Return only the JSON object, no other text.`;
 }
 
 export async function extractCrossRefs(
-  wikitext: string,
+  body: string,
   sourceTypes: string[],
 ): Promise<CrossRefExtraction> {
-  const prompt = `Analyze this wikitext page and identify facts that combine information from multiple data source types.
+  const prompt = `Analyze this markdown page and identify facts that combine information from multiple data source types.
 
 The available source types are: ${sourceTypes.join(', ')}
 
@@ -169,8 +169,8 @@ Return a JSON object with this exact structure:
   ]
 }
 
-WIKITEXT:
-${wikitext}
+MARKDOWN:
+${body}
 
 Return only the JSON object, no other text.`;
 

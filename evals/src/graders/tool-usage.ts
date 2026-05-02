@@ -5,8 +5,8 @@ import type { GraderResult } from '../types.js';
  *
  * Checks:
  * 1. Used wai CLI at all
- * 2. Used wai snapshot to ingest source data
- * 3. Used wai read to read wiki content
+ * 2. Used wai read to inspect pages
+ * 3. Used wai search to find existing pages
  * 4. Used wai write/edit/create to author pages
  */
 export function gradeToolUsage(log: string | undefined): GraderResult {
@@ -26,13 +26,13 @@ export function gradeToolUsage(log: string | undefined): GraderResult {
       weight: 1,
     },
     {
-      name: 'Used wai snapshot for source ingestion',
-      test: () => /\bwai\s+snapshot\b/.test(log),
+      name: 'Used wai read to inspect pages',
+      test: () => /\bwai\s+read\b/.test(log),
       weight: 1,
     },
     {
-      name: 'Used wai read to inspect pages',
-      test: () => /\bwai\s+read\b/.test(log),
+      name: 'Used wai search to find existing pages',
+      test: () => /\bwai\s+search\b/.test(log),
       weight: 1,
     },
     {
