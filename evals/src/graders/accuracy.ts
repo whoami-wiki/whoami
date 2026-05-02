@@ -19,21 +19,21 @@ export interface AccuracyContext {
 }
 
 export async function gradeAccuracy(
-  wikitext: string,
+  body: string,
   context: AccuracyContext,
 ): Promise<GraderResult> {
   // Manifest-based verification (agent-produced claim/evidence pairs)
   if (context.manifest) {
-    return gradeAccuracyViaManifest(wikitext, context.manifest);
+    return gradeAccuracyViaManifest(body, context.manifest);
   }
 
   // Citation-based verification when vault is available
   if (context.vault) {
-    return gradeAccuracyViaCitations(wikitext, context.vault.vaultPath);
+    return gradeAccuracyViaCitations(body, context.vault.vaultPath);
   }
 
   // Fallback: blob-based verification
-  return gradeAccuracyViaBlob(wikitext, context.sourceData ?? '');
+  return gradeAccuracyViaBlob(body, context.sourceData ?? '');
 }
 
 function sanitizeManifestEvidence(manifest: CitationManifest): CitationManifest {
@@ -67,23 +67,39 @@ function sanitizeManifestEvidence(manifest: CitationManifest): CitationManifest 
 }
 
 /**
- * Strip wikitext markup for fuzzy text matching.
- * Removes refs, bold/italic, wikilinks, templates, HTML tags, and collapses whitespace.
+ * Strip markdown markup for fuzzy text matching.
+ * Removes citation/footnote refs, directives, emphasis markers, wikilinks, code, and collapses whitespace.
+ *
+ * TODO(plan-h2b-followup): markdown-aware claim extraction — currently uses a regex-based
+ * stripper, which is good enough for fuzzy substring matches but won't preserve nested
+ * structure for richer claim attribution.
  */
-function stripWikitextForMatching(text: string): string {
+function stripMarkdownForMatching(text: string): string {
   return text
-    .replace(/<ref[^>]*>[\s\S]*?<\/ref>/g, ' ')
-    .replace(/<ref[^/]*\/>/g, ' ')
-    .replace(/'{2,5}/g, '')
+    // Container directives (`:::name{...}\n...\n:::`)
+    .replace(/:::[a-z][\w-]*(?:\{[^}]*\})?\s*\n[\s\S]*?\n:::/gi, ' ')
+    // Leaf/text directives (`::name{...}` and `:name{...}`)
+    .replace(/::?[a-z][\w-]*\{[^}]*\}/gi, ' ')
+    // Footnote references like [^a]
+    .replace(/\[\^[^\]]+\]/g, ' ')
+    // Footnote definitions
+    .replace(/^\[\^[^\]]+\]:\s.*$/gm, ' ')
+    // Wikilinks [[Target|alt]] or [[Target]]
     .replace(/\[\[(?:[^|\]]*\|)?([^\]]*)\]\]/g, '$1')
-    .replace(/\{\{[^}]*\}\}/g, '')
+    // Markdown links [text](url) → text
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    // Bold/italic markers
+    .replace(/(\*\*|__|\*|_)/g, '')
+    // Inline code
+    .replace(/`+([^`]*)`+/g, '$1')
+    // HTML tags
     .replace(/<[^>]+>/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 async function gradeAccuracyViaManifest(
-  wikitext: string,
+  body: string,
   manifest: CitationManifest,
 ): Promise<GraderResult> {
   const sanitized = sanitizeManifestEvidence(manifest);
@@ -93,7 +109,7 @@ async function gradeAccuracyViaManifest(
   // not penalize the episode/person page accuracy score.
   // Claims with evidence always pass through (they get validated normally).
   // Claims without evidence are checked against the stripped page text.
-  const strippedPage = stripWikitextForMatching(wikitext);
+  const strippedPage = stripMarkdownForMatching(body);
   const claims = sanitized.claims.filter((c) => {
     if (c.evidence != null) return true;
     const snippet = c.claim.slice(0, 50);
@@ -117,8 +133,8 @@ async function gradeAccuracyViaManifest(
   let total = 0;
 
   // Separate testimony claims from evidence-backed claims (testimony is attributed, not machine-verifiable)
-  const testimonyWithEvidence = withEvidence.filter((c) => c.citation && /Cite testimony/i.test(c.citation));
-  const verifiableWithEvidence = withEvidence.filter((c) => !(c.citation && /Cite testimony/i.test(c.citation)));
+  const testimonyWithEvidence = withEvidence.filter((c) => c.citation && /(?:Cite\s+testimony|cite-testimony)/i.test(c.citation));
+  const verifiableWithEvidence = withEvidence.filter((c) => !(c.citation && /(?:Cite\s+testimony|cite-testimony)/i.test(c.citation)));
 
   for (const claim of testimonyWithEvidence) {
     correct += 1;
@@ -176,7 +192,7 @@ async function gradeAccuracyViaManifest(
 
   // Claims without evidence: testimony-cited claims are 'attributed', others are 'unsupported'
   for (const claim of withoutEvidence) {
-    const isTestimony = claim.citation && /Cite testimony/i.test(claim.citation);
+    const isTestimony = claim.citation && /(?:Cite\s+testimony|cite-testimony)/i.test(claim.citation);
     if (isTestimony) {
       // Properly cited owner testimony — not machine-verifiable but correctly attributed
       correct += 1;
@@ -208,10 +224,10 @@ async function gradeAccuracyViaManifest(
 }
 
 async function gradeAccuracyViaCitations(
-  wikitext: string,
+  body: string,
   vaultPath: string,
 ): Promise<GraderResult> {
-  const resolved = resolveCitations(wikitext, vaultPath);
+  const resolved = resolveCitations(body, vaultPath);
 
   if (resolved.length === 0) {
     return {
@@ -239,10 +255,10 @@ async function gradeAccuracyViaCitations(
     };
   }
 
-  // Step 1: Extract claims from wikitext (no source data)
+  // Step 1: Extract claims from page body (no source data)
   let extractedClaims: { text: string; type: string }[];
   try {
-    const extraction = await extractClaimsOnly(wikitext);
+    const extraction = await extractClaimsOnly(body);
     extractedClaims = extraction.claims;
   } catch (err) {
     return {
@@ -352,10 +368,10 @@ async function gradeAccuracyViaCitations(
 }
 
 async function gradeAccuracyViaBlob(
-  wikitext: string,
+  body: string,
   sourceData: string,
 ): Promise<GraderResult> {
-  const extraction = await extractClaims(wikitext, sourceData);
+  const extraction = await extractClaims(body, sourceData);
   const claims = extraction.claims;
 
   if (claims.length === 0) {
