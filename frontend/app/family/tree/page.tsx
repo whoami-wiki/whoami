@@ -113,7 +113,7 @@ function RelationList({
           {items.map(item => (
             <Link
               key={item.record}
-              href={familyTreeHref(rootRecord, item.record)}
+              href={familyTreeHref(item.record, item.record)}
               className="group rounded-xl border bg-white/80 px-3 py-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
             >
               <span className="font-medium">{item.name}</span>

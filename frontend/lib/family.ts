@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import yaml from 'js-yaml';
 import { buildFamilyBrowser, type BrowserPerson } from '@core/family/browser.ts';
@@ -99,14 +99,43 @@ export async function getFamily(): Promise<FamilyView | null> {
   };
 }
 
-function loadAllDerivedRecords(): Map<string, DerivedRecord> {
+export function loadDerivedRecordsForTree(derivedDir: string = DERIVED_DIR): Map<string, DerivedRecord> {
   const records = new Map<string, DerivedRecord>();
-  for (const entry of readdirSync(DERIVED_DIR, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith('.yml')) continue;
-    const raw = readFileSync(join(DERIVED_DIR, entry.name), 'utf-8');
-    const record = yaml.load(raw) as DerivedRecord;
-    if (record?.record && /^I\d+$/.test(record.record)) records.set(record.record, record);
+  let entries;
+  try {
+    entries = readdirSync(derivedDir, { withFileTypes: true });
+  } catch {
+    return records;
   }
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.yml')) continue;
+    try {
+      const raw = readFileSync(join(derivedDir, entry.name), 'utf-8');
+      const record = yaml.load(raw) as DerivedRecord;
+      if (record?.record && /^I\d+$/.test(record.record)) records.set(record.record, record);
+    } catch {
+      continue;
+    }
+  }
+  return records;
+}
+
+const DERIVED_RECORDS_TTL_MS = 2000;
+let _derivedRecordsCache: { records: Map<string, DerivedRecord>; expiresAt: number; mtimeMs: number } | null = null;
+
+function getCachedDerivedRecords(): Map<string, DerivedRecord> {
+  const now = Date.now();
+  let mtimeMs = 0;
+  try {
+    mtimeMs = statSync(DERIVED_DIR).mtimeMs;
+  } catch {
+    return new Map();
+  }
+  if (_derivedRecordsCache && _derivedRecordsCache.expiresAt > now && _derivedRecordsCache.mtimeMs === mtimeMs) {
+    return _derivedRecordsCache.records;
+  }
+  const records = loadDerivedRecordsForTree();
+  _derivedRecordsCache = { records, expiresAt: now + DERIVED_RECORDS_TTL_MS, mtimeMs };
   return records;
 }
 
@@ -131,7 +160,7 @@ export async function getFamilyTree(
   if (!/^I\d+$/.test(rootRecord)) return null;
   if (selectedRecord && !/^I\d+$/.test(selectedRecord)) return null;
 
-  const records = loadAllDerivedRecords();
+  const records = getCachedDerivedRecords();
   const core = buildFamilyBrowser({ records, rootRecord, selectedRecord });
   if (!core) return null;
 

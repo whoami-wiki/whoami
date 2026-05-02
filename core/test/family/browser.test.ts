@@ -65,12 +65,10 @@ test('buildFamilyBrowser: selected panel carries immediate relationships', () =>
   assert.deepEqual(view.selectedRelations.children.map(p => p.record), ['I3']);
 });
 
-test('buildFamilyBrowser: falls back to root when selected record is missing', () => {
+test('buildFamilyBrowser: returns null when explicit selected record is missing', () => {
   const records = new Map<string, DerivedRecord>([
     ['I1', person('I1', 'Steven')],
   ]);
 
-  const view = buildFamilyBrowser({ records, rootRecord: 'I1', selectedRecord: 'I404' })!;
-
-  assert.equal(view.selected.record, 'I1');
+  assert.equal(buildFamilyBrowser({ records, rootRecord: 'I1', selectedRecord: 'I404' }), null);
 });

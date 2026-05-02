@@ -135,6 +135,7 @@ export function buildFamilyBrowser(cfg: BuildFamilyBrowserConfig): FamilyBrowser
     group.maternal.sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  if (cfg.selectedRecord && !cfg.records.has(cfg.selectedRecord)) return null;
   const selectedRec = cfg.selectedRecord ? cfg.records.get(cfg.selectedRecord) : null;
   const selected = selectedRec ?? root;
   const selectedAncestor = ancestors.find(a => a.record === selected.record);
