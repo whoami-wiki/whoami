@@ -1,5 +1,9 @@
 import type { GedcomNode, DerivedRecord, DatedEvent, IndividualRef, ResidenceEvent, OccupationEvent, SourceRef } from './types.ts';
 import type { ParseResult } from './parser.ts';
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { join } from 'node:path';
+import yaml from 'js-yaml';
 
 function deriveParents(node: GedcomNode, ctx: ParseResult): IndividualRef[] {
   const out: IndividualRef[] = [];
@@ -112,4 +116,16 @@ function deriveDatedEvent(node: GedcomNode, tag: string): DatedEvent | null {
   const place = placeNode?.data?.trim() || null;
   if (!date && !place) return null;
   return { date, place };
+}
+
+export async function writeDerivedYaml(derivedDir: string, derived: DerivedRecord): Promise<string> {
+  mkdirSync(derivedDir, { recursive: true });
+  const path = join(derivedDir, `${derived.record}.yml`);
+  const text = yaml.dump(derived, { lineWidth: 200, sortKeys: false, noRefs: true });
+  writeFileSync(path, text);
+  return path;
+}
+
+export async function hashGedcomFile(path: string): Promise<string> {
+  return createHash('sha256').update(readFileSync(path)).digest('hex');
 }

@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
+import { mkdtempSync, rmSync, readFileSync as fsReadSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { parseGedcomFile } from '../../src/gedcom/parser.ts';
-import { deriveIndividual } from '../../src/gedcom/derive.ts';
+import { deriveIndividual, writeDerivedYaml, hashGedcomFile } from '../../src/gedcom/derive.ts';
 
 const FIX = (n: string) => join(import.meta.dirname, 'fixtures', n);
 
@@ -93,4 +95,26 @@ test('deriveIndividual: extracts source citations', async () => {
   const result = await parseGedcomFile(FIX('multi-event.ged'));
   const derived = deriveIndividual(result.individuals.get('I1')!, 'I1', result);
   assert.deepEqual(derived.sources, [{ record: 'S1' }]);
+});
+
+test('writeDerivedYaml: writes a stable YAML file', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'derived-'));
+  try {
+    const result = await parseGedcomFile(FIX('tiny.ged'));
+    const derived = deriveIndividual(result.individuals.get('I1')!, 'I1', result);
+    const path = await writeDerivedYaml(dir, derived);
+    const round1 = fsReadSync(path, 'utf-8');
+    await writeDerivedYaml(dir, derived);
+    const round2 = fsReadSync(path, 'utf-8');
+    assert.equal(round1, round2);
+    assert.match(round1, /record: I1/);
+    assert.match(round1, /name: John Doe/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('hashGedcomFile: returns 64-char hex digest', async () => {
+  const hash = await hashGedcomFile(FIX('tiny.ged'));
+  assert.match(hash, /^[0-9a-f]{64}$/);
 });
