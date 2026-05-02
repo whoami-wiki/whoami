@@ -70,3 +70,65 @@ test('syncGedcom: second run with same .ged is a no-op', async () => {
     cleanup();
   }
 });
+
+test('syncGedcom: detects added record', async () => {
+  const { root, cleanup } = await makeGenealogyRepo();
+  try {
+    const gedPath = join(root, 'genealogy', 'tiny.ged');
+    copyFileSync(FIX('tiny.ged'), gedPath);
+    const cfg = {
+      repoRoot: root,
+      genealogyDir: join(root, 'genealogy'),
+      gedFile: 'tiny.ged',
+      author: { name: 'Test', email: 'test@example.com' },
+      notes: 'sync',
+    };
+    await syncGedcom(cfg);
+
+    // Append a new individual to the .ged
+    const text = readFileSync(gedPath, 'utf-8').replace(
+      '0 TRLR',
+      '0 @I4@ INDI\n1 NAME New /Person/\n0 TRLR',
+    );
+    writeFileSync(gedPath, text);
+
+    const second = await syncGedcom(cfg);
+    if (second.kind !== 'wrote') throw new Error('expected wrote');
+    assert.deepEqual(second.diff.added, ['I4']);
+    assert.equal(second.diff.changed.length, 0);
+    assert.equal(second.diff.removed.length, 0);
+  } finally {
+    cleanup();
+  }
+});
+
+test('syncGedcom: detects changed record', async () => {
+  const { root, cleanup } = await makeGenealogyRepo();
+  try {
+    const gedPath = join(root, 'genealogy', 'tiny.ged');
+    copyFileSync(FIX('tiny.ged'), gedPath);
+    const cfg = {
+      repoRoot: root,
+      genealogyDir: join(root, 'genealogy'),
+      gedFile: 'tiny.ged',
+      author: { name: 'Test', email: 'test@example.com' },
+      notes: 'sync',
+    };
+    await syncGedcom(cfg);
+
+    // Change John's birth place
+    const text = readFileSync(gedPath, 'utf-8').replace(
+      'Pittsburgh, PA, USA',
+      'Cleveland, OH, USA',
+    );
+    writeFileSync(gedPath, text);
+
+    const second = await syncGedcom(cfg);
+    if (second.kind !== 'wrote') throw new Error('expected wrote');
+    assert.ok(second.diff.changed.includes('I1'));
+    assert.equal(second.diff.added.length, 0);
+    assert.equal(second.diff.removed.length, 0);
+  } finally {
+    cleanup();
+  }
+});
