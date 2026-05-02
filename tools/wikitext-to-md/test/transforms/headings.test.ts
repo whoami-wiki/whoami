@@ -2,6 +2,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { transformHeadings } from '../../src/transforms/headings.ts';
 
+test('converts = H1 =', () => {
+  assert.equal(transformHeadings('= Barash Family Tree ='), '# Barash Family Tree');
+});
+
 test('converts == H2 ==', () => {
   assert.equal(transformHeadings('== Residential arc =='), '## Residential arc');
 });
