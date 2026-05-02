@@ -17,8 +17,14 @@ const PageMetaSchema: z.ZodType<PageMeta> = z.object({
   aliases: z.array(z.string()),
   categories: z.array(z.string()),
   gedcom: GedcomRefSchema.optional(),
-  created: z.string().regex(ISO_DATE, 'expected YYYY-MM-DD'),
-  deletedAt: z.string().optional(),
+  created: z.union([
+    z.string().regex(ISO_DATE, 'expected YYYY-MM-DD'),
+    z.date().transform(d => d.toISOString().split('T')[0])
+  ]),
+  deletedAt: z.union([
+    z.string(),
+    z.date().transform(d => d.toISOString().split('T')[0])
+  ]).optional(),
 });
 
 export function parsePageMeta(input: unknown): PageMeta {
