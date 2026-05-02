@@ -1,15 +1,62 @@
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { simpleGit } from 'simple-git';
 import matter from 'gray-matter';
 import yaml from 'js-yaml';
 import type { ReciteEntry, DerivedRecord, SnapshotEntry } from './types.ts';
 import { latestSnapshot, readManifest } from './snapshots.ts';
+import type { AuthorIdentity } from '../pages/types.ts';
+
+// Matches the `snapshot:` line inside a `gedcom:` block (object form). Capture
+// group 1 is the prefix (everything up to and including "snapshot: "); group 2
+// is the existing hash. We replace ONLY the hash, preserving every other
+// formatting choice the original page made.
+const SNAPSHOT_LINE_RE = /(^gedcom:\s*\n(?:[^\S\n]+[^\n]*\n)*?[^\S\n]+snapshot:\s*)([0-9a-f]{6,})/m;
 
 export interface ReciteConfig {
   repoRoot: string;
   genealogyDir: string;
   pagesDir: string;
+}
+
+export interface ApplyReciteConfig extends ReciteConfig {
+  author: AuthorIdentity;
+}
+
+/**
+ * Advance every page's gedcom.snapshot to the latest manifest hash. Does NOT
+ * modify the page body or any other frontmatter field — uses a targeted regex
+ * to replace just the snapshot value, so applyRecite produces a one-line diff
+ * per page.
+ */
+export async function applyRecite(cfg: ApplyReciteConfig): Promise<string[]> {
+  const latest = await latestSnapshot(cfg.genealogyDir);
+  if (!latest) return [];
+  const updated: string[] = [];
+
+  for (const file of walkPages(cfg.pagesDir)) {
+    const text = readFileSync(file, 'utf-8');
+    const m = SNAPSHOT_LINE_RE.exec(text);
+    if (!m) continue;
+    const currentHash = m[2]!;
+    if (currentHash === latest.hash) continue;
+
+    const newText = text.replace(SNAPSHOT_LINE_RE, `$1${latest.hash}`);
+    if (newText === text) continue;
+    writeFileSync(file, newText);
+    updated.push(basename(file).replace(/\.md$/, ''));
+  }
+
+  if (updated.length === 0) return [];
+
+  const git = simpleGit(cfg.repoRoot);
+  await git.add(updated.map(s => `pages/${s}.md`));
+  await git.commit(
+    `gedcom: advance ${updated.length} page snapshot pointer(s) to ${latest.hash.slice(0, 12)}`,
+    undefined,
+    { '--author': `${cfg.author.name} <${cfg.author.email}>` },
+  );
+  return updated;
 }
 
 /**
