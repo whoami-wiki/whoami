@@ -12,6 +12,8 @@ import { createCodexHarness } from '../harnesses/codex.js';
 import { createOpenCodeHarness } from '../harnesses/opencode.js';
 import { createCursorHarness } from '../harnesses/cursor.js';
 import { startWiki, findFreePort, writePageDirect, type WikiInstance } from '../wiki.js';
+import { snapshotDirectory } from '../vault.js';
+import matter from 'gray-matter';
 
 /**
  * Derive a markdown-vault slug from a wiki page title.
@@ -175,15 +177,20 @@ function readManifest(
 }
 
 function readWikiPage(pageTitle: string, env: Record<string, string | undefined>): string {
-  return execWai(`read "${pageTitle}" --raw`, env);
+  // wai read <slug> outputs the body to stdout. Slug derived from title.
+  return execWai(`read "${titleToSlug(pageTitle)}"`, env);
 }
 
-function writeWikiPage(pageTitle: string, wikitext: string, env: Record<string, string | undefined>): void {
+function writeWikiPage(pageTitle: string, body: string, env: Record<string, string | undefined>): void {
+  // wai write <slug> --summary "..." --stdin reads body from stdin.
   try {
-    execSync(`wai write "${pageTitle}" -`, { env, encoding: 'utf-8', input: wikitext, timeout: 120_000 });
+    execSync(`wai write "${titleToSlug(pageTitle)}" --summary "runner update" --stdin`, {
+      env, encoding: 'utf-8', input: body, timeout: 120_000,
+    });
   } catch (err: unknown) {
-    // wai write exits 1 when content is identical ("No changes") — ignore that
     const stderr = (err as { stderr?: string }).stderr ?? '';
+    // Tolerate idempotent no-change writes (the new CLI doesn't currently emit
+    // "No changes", but keep the guard for forward-compat).
     if (!stderr.includes('No changes')) throw err;
   }
 }
@@ -215,17 +222,26 @@ async function restoreSourcePages(
 }
 
 function discoverAllPages(env: Record<string, string | undefined>): { title: string; ns: number }[] {
-  let changesJson: string;
-  try {
-    changesJson = execWai('changes -n 200 --json', env);
-  } catch {
-    return [];
+  // The old `wai changes -n 200 --json` was removed. Walk the vault's pages/
+  // directly: every .md file is a page; title comes from frontmatter; the
+  // Source:/Task: namespace concept is gone (legacy callers use the slug
+  // prefix as a stand-in via title-string matching).
+  const root = env['WHOAMI_ROOT'];
+  if (!root) return [];
+  const pagesDir = join(root, 'pages');
+  if (!existsSync(pagesDir)) return [];
+  const out: { title: string; ns: number }[] = [];
+  for (const entry of readdirSync(pagesDir, { withFileTypes: true })) {
+    if (entry.isDirectory()) continue;
+    if (!entry.name.endsWith('.md')) continue;
+    try {
+      const raw = readFileSync(join(pagesDir, entry.name), 'utf-8');
+      const fm = matter(raw);
+      const title = (fm.data?.['title'] as string) ?? entry.name.replace(/\.md$/, '');
+      out.push({ title, ns: 0 });
+    } catch { /* skip unparseable files */ }
   }
-  try {
-    return JSON.parse(changesJson);
-  } catch {
-    return [];
-  }
+  return out;
 }
 
 function discoverSourcePages(env: Record<string, string | undefined>): DiscoveredPage[] {
@@ -625,7 +641,10 @@ async function runCheckpointLoop(
           const sourcePath = isAbsolute(source.path) ? source.path : join(dir, source.path);
           log.log(`Snapshotting ${sourcePath} into vault`);
           try {
-            execWai(`snapshot "${sourcePath}"`, env);
+            const vault = env['WHOAMI_ROOT'];
+            if (!vault) throw new Error('WHOAMI_ROOT env not set');
+            const id = snapshotDirectory(vault, sourcePath);
+            log.log(`Snapshot ${id} written for ${sourcePath}`);
           } catch (err) {
             log.error(`Snapshot failed for ${sourcePath}: ${err}`);
           }
@@ -787,18 +806,12 @@ async function runCases(
     const caseStart = Date.now();
     log.log(`=== Case ${testCase.id}: ${testCase.description} ===`);
 
-    // Step 1: Create task
-    let taskId: string;
-    log.log('Creating task');
-    try {
-      const taskOutput = execWai(`task create -m "${testCase.description}"`, env);
-      const idMatch = taskOutput.match(/(\d{4})/);
-      taskId = idMatch ? idMatch[1] : 'unknown';
-      log.log(`Task created: ${taskId}`);
-    } catch (err) {
-      log.error(`Failed to create task for ${testCase.id}: ${err}`);
-      continue;
-    }
+    // Step 1: Synthesize a task identifier. The old `wai task create` command
+    // (Task: namespace) was removed in Plan G — task tracking is out-of-band
+    // now. We use a deterministic ID derived from the test case so logs and
+    // result files stay correlatable across runs.
+    const taskId = testCase.id.replace(/[^a-z0-9]/gi, '-').slice(0, 40);
+    log.log(`Task id (synthetic): ${taskId}`);
 
     const subject = testCase.subject ?? testCase.description.split(':').pop()?.trim() ?? testCase.id;
     const threshold = options.checkpointThreshold ?? testCase.checkpointThreshold ?? 0.7;
@@ -890,7 +903,10 @@ async function runCases(
         const sourcePath = isAbsolute(source.path) ? source.path : join(dir, source.path);
         log.log(`Snapshotting ${sourcePath} into vault`);
         try {
-          execWai(`snapshot "${sourcePath}"`, env);
+          const vault = env['WHOAMI_ROOT'];
+          if (!vault) throw new Error('WHOAMI_ROOT env not set');
+          const id = snapshotDirectory(vault, sourcePath);
+          log.log(`Snapshot ${id} written for ${sourcePath}`);
         } catch (err) {
           log.error(`Snapshot failed for ${sourcePath}: ${err}`);
         }

@@ -1,5 +1,6 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { join, relative, dirname } from 'node:path';
 
 export interface ManifestFile {
   path: string;
@@ -8,6 +9,47 @@ export interface ManifestFile {
 
 export interface Manifest {
   files: ManifestFile[];
+}
+
+/**
+ * Walk a source directory, hash every file, write each to vaultPath/objects/<prefix>/<hash>,
+ * write a manifest to vaultPath/snapshots/<id>.json, return the snapshot ID.
+ *
+ * Replaces the old `wai snapshot <dir>` CLI which was removed in Plan G —
+ * the runner needs vault snapshots so the citation-resolver can fetch source
+ * file contents by hash.
+ */
+export function snapshotDirectory(vaultPath: string, sourcePath: string): string {
+  const files: ManifestFile[] = [];
+  function walk(dir: string): void {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) { walk(full); continue; }
+      if (!entry.isFile()) continue;
+      const buf = readFileSync(full);
+      const hash = createHash('sha256').update(buf).digest('hex');
+      const objPath = join(vaultPath, 'objects', hash.slice(0, 2), hash);
+      mkdirSync(dirname(objPath), { recursive: true });
+      writeFileSync(objPath, buf);
+      files.push({ path: relative(sourcePath, full), hash });
+    }
+  }
+  if (statSync(sourcePath).isDirectory()) {
+    walk(sourcePath);
+  } else {
+    const buf = readFileSync(sourcePath);
+    const hash = createHash('sha256').update(buf).digest('hex');
+    const objPath = join(vaultPath, 'objects', hash.slice(0, 2), hash);
+    mkdirSync(dirname(objPath), { recursive: true });
+    writeFileSync(objPath, buf);
+    files.push({ path: relative(dirname(sourcePath), sourcePath), hash });
+  }
+  const manifest: Manifest = { files };
+  const snapshotId = createHash('sha256').update(JSON.stringify(manifest)).digest('hex').slice(0, 16);
+  const snapshotPath = join(vaultPath, 'snapshots', `${snapshotId}.json`);
+  mkdirSync(dirname(snapshotPath), { recursive: true });
+  writeFileSync(snapshotPath, JSON.stringify(manifest));
+  return snapshotId;
 }
 
 /**
