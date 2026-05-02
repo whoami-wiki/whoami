@@ -43,10 +43,10 @@ Follow the editorial guide for page type conventions, editorial standards, and c
 - `## Bibliography` section with `:::cite-vault:::` entries
 
 **Inline citations** — use markdown footnotes (`text[^id]` with a matching `[^id]: ...` definition) and the appropriate cite directive in the footnote body:
-- `:::cite-message{snapshot=... date=... thread=... note="..."}:::` for text messages
-- `:::cite-voice-note{number=... date=... speaker=... snapshot=... note="..."}:::` for voice notes
-- `:::cite-photo{file=... hash=... date=... snapshot=... note="..."}:::` for photos
-- `:::cite-video{file=... date=... snapshot=... note="..."}:::` for video
+- `::cite-message{snapshot=... date=... thread=... note="..."}` for text messages
+- `::cite-voice-note{number=... date=... speaker=... snapshot=... note="..."}` for voice notes
+- `::cite-photo{file=... hash=... date=... snapshot=... note="..."}` for photos
+- `::cite-video{file=... date=... snapshot=... note="..."}` for video
 - Include identifiers (JIDs, Z_PKs, thread paths) in `note` so future research can retrace your steps. Reuse the same footnote id across multiple references.
 
 **Other conventions**:

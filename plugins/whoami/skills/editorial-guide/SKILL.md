@@ -148,37 +148,41 @@ Inline citations use markdown footnote syntax (`text[^id]` in the body, `[^id]: 
 ```markdown
 Jane's mother is from Munich.[^ig-2021-04-15]
 
-[^ig-2021-04-15]: :::cite-message{snapshot=a1b2c3d4e5f6 date=2021-04-15 thread=janedoe_12345 note="Family background exchange"}:::
+[^ig-2021-04-15]: ::cite-message{snapshot=a1b2c3d4e5f6 date=2021-04-15 thread=janedoe_12345 note="Family background exchange"}
 ```
 
 **cite-voice-note** — for voice note content:
 ```markdown
 She first picked up a film camera in art class.[^vn-7]
 
-[^vn-7]: :::cite-voice-note{number=7 date=2021-06-03 speaker=Jane snapshot=a1b2c3d4e5f6 note="Darkroom discovery story"}:::
+[^vn-7]: ::cite-voice-note{number=7 date=2021-06-03 speaker=Jane snapshot=a1b2c3d4e5f6 note="Darkroom discovery story"}
 ```
 
 **cite-photo** — for facts derived from photos:
 ```markdown
 Jane enrolled at UdK in 2019.[^uni-id]
 
-[^uni-id]: :::cite-photo{file=IMG_2847.jpg hash=... date=2021-05-20 snapshot=a1b2c3d4e5f6 note="University ID confirming enrollment"}:::
+[^uni-id]: ::cite-photo{file=IMG_2847.jpg hash=... date=2021-05-20 snapshot=a1b2c3d4e5f6 note="University ID confirming enrollment"}
 ```
 
 **cite-video** — for video content:
 ```markdown
 The gallery opening drew about forty people.[^gallery-vid]
 
-[^gallery-vid]: :::cite-video{file=berlin_gallery_opening.mp4 date=2021-11-12 snapshot=a1b2c3d4e5f6 note="Gallery opening footage"}:::
+[^gallery-vid]: ::cite-video{file=berlin_gallery_opening.mp4 date=2021-11-12 snapshot=a1b2c3d4e5f6 note="Gallery opening footage"}
 ```
 
 All templates include: **snapshot** (vault hash), **date**, **note** (human-readable description).
+
+### Directive syntax
+
+**Directive shapes**: use `::name{attrs}` (single colon-pair, single line) for leaf directives that carry only attributes — citations (`::cite-vault`, `::cite-message`, `::cite-voice-note`, `::cite-photo`, `::cite-video`), admonitions (`::open`, `::closed`, `::superseded`, `::gap`). Use `:::name{attrs}` opening on its own line, body content on subsequent lines, and `:::` close on its own line for container directives that have a body — infoboxes, blockquotes, dialogue, columns-list. The one-line `:::name{...}:::` shape is invalid and won't render or be picked up by the eval graders.
 
 ### Bibliography template
 
 **cite-vault** — for the Bibliography section, describes full vault snapshots consulted:
 ```markdown
-:::cite-vault{type=messages snapshot=a1b2c3d4e5f6 timestamp="2021-03-01/2022-05-15" note="Instagram DM thread with Jane Doe"}:::
+::cite-vault{type=messages snapshot=a1b2c3d4e5f6 timestamp="2021-03-01/2022-05-15" note="Instagram DM thread with Jane Doe"}
 ```
 
 Additional fields: **type** (messages, photos, video, etc.), **timestamp** (date range).
@@ -198,8 +202,8 @@ Jane's mother is from Munich.[^ig-2021-04-15]
 Her father works in Zurich.[^ig-2021-05-02]
 She has a younger brother named Max.[^ig-2021-04-15]
 
-[^ig-2021-04-15]: :::cite-message{snapshot=a1b2c3d4e5f6 date=2021-04-15 thread=janedoe_12345 note="Family background exchange"}:::
-[^ig-2021-05-02]: :::cite-message{snapshot=a1b2c3d4e5f6 date=2021-05-02 thread=janedoe_12345 note="Family details, father in Zurich"}:::
+[^ig-2021-04-15]: ::cite-message{snapshot=a1b2c3d4e5f6 date=2021-04-15 thread=janedoe_12345 note="Family background exchange"}
+[^ig-2021-05-02]: ::cite-message{snapshot=a1b2c3d4e5f6 date=2021-05-02 thread=janedoe_12345 note="Family details, father in Zurich"}
 ```
 
 ### Page structure
@@ -209,13 +213,13 @@ Every person and episode page ends with:
 ```markdown
 ## References
 
-[^ig-2021-04-15]: :::cite-message{snapshot=a1b2c3d4e5f6 date=2021-04-15 thread=janedoe_12345 note="Family background exchange"}:::
-[^vn-7]: :::cite-voice-note{number=7 date=2021-06-03 speaker=Jane snapshot=a1b2c3d4e5f6 note="Darkroom discovery story"}:::
+[^ig-2021-04-15]: ::cite-message{snapshot=a1b2c3d4e5f6 date=2021-04-15 thread=janedoe_12345 note="Family background exchange"}
+[^vn-7]: ::cite-voice-note{number=7 date=2021-06-03 speaker=Jane snapshot=a1b2c3d4e5f6 note="Darkroom discovery story"}
 
 ## Bibliography
 
-:::cite-vault{type=messages snapshot=a1b2c3d4e5f6 timestamp="2021-03-01/2022-05-15" note="Instagram DM thread with Jane Doe"}:::
-:::cite-vault{type=voice_notes snapshot=b2c3d4e5f6a1 timestamp="2021-04-12/2021-06-03" note="47 voice notes, Jane and wiki owner"}:::
+::cite-vault{type=messages snapshot=a1b2c3d4e5f6 timestamp="2021-03-01/2022-05-15" note="Instagram DM thread with Jane Doe"}
+::cite-vault{type=voice_notes snapshot=b2c3d4e5f6a1 timestamp="2021-04-12/2021-06-03" note="47 voice notes, Jane and wiki owner"}
 ```
 
 **References** = inline citations tracing specific claims to specific moments in the vault.
