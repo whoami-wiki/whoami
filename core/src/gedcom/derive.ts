@@ -19,15 +19,52 @@ function deriveParents(node: GedcomNode, ctx: ParseResult): IndividualRef[] {
   return out;
 }
 
+function deriveSpousesAndChildren(
+  node: GedcomNode,
+  selfRecord: string,
+  ctx: ParseResult,
+): Pick<DerivedRecord, 'spouses' | 'children'> {
+  const spouses: DerivedRecord['spouses'] = [];
+  const children: DerivedRecord['children'] = [];
+
+  for (const fams of node.tree.filter(n => n.tag === 'FAMS')) {
+    const famPointer = (fams.data ?? '').replace(/^@|@$/g, '');
+    const fam = ctx.families.get(famPointer);
+    if (!fam) continue;
+    const married = fam.tree.find(n => n.tag === 'MARR')?.tree.find(n => n.tag === 'DATE')?.data?.trim() || null;
+
+    for (const tag of ['HUSB', 'WIFE'] as const) {
+      const link = fam.tree.find(n => n.tag === tag);
+      if (!link?.data) continue;
+      const partnerRecord = link.data.replace(/^@|@$/g, '');
+      if (partnerRecord === selfRecord) continue;
+      const partner = ctx.individuals.get(partnerRecord);
+      if (!partner) continue;
+      spouses.push({ record: partnerRecord, name: deriveName(partner), married });
+    }
+
+    for (const chil of fam.tree.filter(n => n.tag === 'CHIL')) {
+      const childRecord = (chil.data ?? '').replace(/^@|@$/g, '');
+      const child = ctx.individuals.get(childRecord);
+      if (!child) continue;
+      const born = child.tree.find(n => n.tag === 'BIRT')?.tree.find(n => n.tag === 'DATE')?.data?.trim() || null;
+      children.push({ record: childRecord, name: deriveName(child), born });
+    }
+  }
+
+  return { spouses, children };
+}
+
 export function deriveIndividual(node: GedcomNode, record: string, ctx: ParseResult): DerivedRecord {
+  const sc = deriveSpousesAndChildren(node, record, ctx);
   return {
     record,
     name: deriveName(node),
     birth: deriveDatedEvent(node, 'BIRT'),
     death: deriveDatedEvent(node, 'DEAT'),
     parents: deriveParents(node, ctx),
-    spouses: [],
-    children: [],
+    spouses: sc.spouses,
+    children: sc.children,
     residences: [],
     occupations: [],
     sources: [],
