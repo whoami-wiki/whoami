@@ -15,20 +15,25 @@ function buildPrompt(task: TestCase, wikiUrl: string): string {
 
 Task: ${task.description}
 
-Source directories to ingest:
+Source directories (already pre-staged into the vault by the runner):
 ${sources}
 
 Wiki URL: ${wikiUrl}
 
 Instructions:
-1. Snapshot each source directory using \`wai snapshot <dir>\`
-2. Read the ingested source pages using \`wai source list\` and \`wai read\`
-3. Extract facts from the source data
-4. Write a well-structured wikitext page following editorial standards
-5. Include proper citations using {{Cite ...}} templates
-6. Create the page using \`wai create\` or \`wai write\`
+1. Sources are pre-snapshotted by the runner — citation hashes already resolve. List source-prefixed pages with \`wai search source\`, then read each via \`wai read source-<name>\`.
+2. Extract facts from the source data (use \`jq\` / \`sqlite3\` against vault objects, per the source pages).
+3. Write a well-structured markdown page using:
+   - \`## Heading\` / \`### Subheading\` (NOT \`==Heading==\`)
+   - \`**bold**\` / \`*italic*\`
+   - \`[[Page]]\` wiki links (preserved as-is)
+   - \`![caption](/assets/path)\` for media
+   - Footnotes \`text[^id]\` with bodies \`[^id]: source\`
+4. Cite with leaf directives (single colon-pair, single line): \`::cite-message{snapshot=H date=YYYY-MM-DD ...}\`, \`::cite-vault{snapshot=H}\`, \`::cite-voice-note{speaker="X" ...}\`, \`::cite-testimony{speaker="X" date=D}\`.
+   Use container directives (triple-colon, body on subsequent lines, closed by \`:::\` on its own line) for \`:::blockquote{by="..."}\`, \`:::dialogue{speaker="..."}\`, \`:::infobox-person\`. The one-line \`:::name{...}:::\` form does NOT parse.
+5. Create/update the page via \`wai create <slug> --summary "<msg>" --stdin\` (or \`--file <path>\`) / \`wai write <slug> --summary "<msg>" --stdin\`. Slugs are lowercase-hyphenated (e.g. "Steven Barash" → \`steven-barash\`).
 
-Return the final wikitext of the page you created.`;
+Return the final markdown of the page you created.`;
 }
 
 export function createCursorHarness(model?: string): Harness {

@@ -15,12 +15,12 @@ function buildPrompt(task: TestCase, wikiUrl: string): string {
 
 Task: ${task.description}
 
-Sources:
+Sources (already pre-staged into the vault by the runner):
 ${sources}
 
 Wiki URL: ${wikiUrl}
 
-Use the wai CLI to read sources and create the page. Follow Wikipedia-style editorial standards.`;
+Use the wai CLI to read source pages (\`wai search source\`, \`wai read source-<name>\`) and to author your page (\`wai create <slug> --summary "<msg>" --stdin\` or \`wai write <slug> --summary "<msg>" --stdin\`; slugs are lowercase-hyphenated). Write the page in markdown: \`## Heading\`, \`**bold**\`, \`[[Page]]\` wiki links, \`![caption](/assets/path)\` for media, and markdown footnotes (\`text[^id]\`). Cite with leaf directives like \`::cite-message{snapshot=H date=D ...}\` and container directives like \`:::blockquote{by="X"}\\nbody\\n:::\` (triple-colon, body on subsequent lines, never one-line). Follow Wikipedia-style editorial standards.`;
 }
 
 export function createCodexHarness(model?: string): Harness {

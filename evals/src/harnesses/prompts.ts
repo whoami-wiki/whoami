@@ -7,24 +7,24 @@ export function buildSourcePrompt(task: TestCase, wikiUrl: string): string {
 
   return `You are developing source documentation pages for whoami.wiki.
 
-Task: Snapshot and document the following data sources.
+Task: Document the following data sources.
 
-Source directories to ingest:
+Source directories (already pre-staged into the vault by the runner):
 ${sources}
 
 Wiki URL: ${wikiUrl}
 
 Instructions:
-1. Snapshot each source directory using \`wai snapshot <dir>\`
-2. Read the generated source pages using \`wai source list\` and \`wai read\`
-3. The snapshot command creates minimal pages with only a file-type table.
-   Enrich each source page with detailed documentation:
-   - Open databases and files in the vault to extract statistics
+1. Sources are pre-snapshotted into the vault by the runner — you do NOT need to ingest them. Citation hashes will resolve.
+2. For each source, write a markdown page named \`source-<name>\` (slug, lowercase-hyphenated). Use \`wai write source-<name> --summary "init source page" --stdin\` to author it (or \`--file <path>\` to upload from disk).
+3. Read existing source pages with \`wai search source\` (find source-prefixed pages) and \`wai read source-<name>\` to inspect what is already there.
+4. Enrich each source page with detailed documentation:
+   - Open databases and files in the source directory to extract statistics
    - Add an overview table (account holder, platform, date range, total records)
    - Document key files, content breakdowns, top conversations
    - Add data quality notes and querying instructions (SQL recipes, key tables)
    - Follow the editorial guide's source page structure
-4. Update each source page using \`wai write\``;
+5. Update each source page using \`wai write source-<name> --summary "<msg>" --stdin\`.`;
 }
 
 export function buildContentPrompt(task: TestCase, wikiUrl: string): string {
@@ -39,7 +39,7 @@ Wiki URL: ${wikiUrl}
 Your goal is to write a rich, encyclopedic article about a person — not a data analysis report. The page should read like a Wikipedia biography grounded in primary sources.
 
 ### Phase 1: Understand the data landscape
-1. Run \`wai source list\` and \`wai read\` on each source page
+1. Run \`wai search source\` to list source-prefixed pages, then \`wai read source-<name>\` for each
 2. Study the **Top conversations** table to find relevant threads
 3. Note the **Querying** section — it shows how to resolve snapshot hashes to vault objects
 
@@ -53,12 +53,34 @@ This is the most important phase. You need to read actual message content, not j
 - **Extract direct quotes**: Find memorable or revealing statements that can be used as blockquotes. These bring the page to life.
 
 ### Phase 3: Write the page
-- **Infobox first**: Fill in as many fields as the data supports (name, birth_date, birth_place, home_town, education, occupation, relatives, etc.)
+- **Infobox first**: Fill in as many fields as the data supports. Use a container directive:
+  \`\`\`
+  :::infobox-person
+  name: Full Name
+  birth_date: 1990-01-01
+  birth_place: City, State
+  ...
+  :::
+  \`\`\`
 - **Lead paragraph**: Identify the person, their relationship to the wiki owner, and the arc of their connection — in documentary voice, not data-report voice.
-- **Sections**: Organize by topic (Background, Education, Work/Interests, Connection with [wiki owner], etc.), not by data source. Aim for 5+ sections with subsections.
+- **Sections**: Organize by topic with markdown headings (\`## Background\`, \`## Education\`, \`## Connection with [wiki owner]\`, etc.), not by data source. Aim for 5+ sections with subsections (\`### Subheading\`).
 - **Density**: Target 800+ words of prose. Include blockquotes, direct quotes, and specific details (dates, places, names).
-- **Citations**: Every factual claim needs a \`{{Cite message}}\` with snapshot, date, and thread fields. Use \`{{Cite vault}}\` in the Bibliography.
-- **Talk page**: Post open editorial gaps (unverified claims, missing data) as separate threads with \`{{Open}}\` tags.
+- **Citations**: Every factual claim needs a \`::cite-message{snapshot=H date=YYYY-MM-DD thread="..."}\` leaf directive (single line, single colon-pair). Use \`::cite-vault{snapshot=H}\` in the Bibliography.
+- **Talk page**: Talk pages are markdown files named \`<slug>.talk\` — write open editorial gaps (unverified claims, missing data) as separate threads using the \`::open\` admonition. Author via \`wai write <slug>.talk --summary "<msg>" --stdin\`.
+
+### Markdown directive syntax (critical)
+- **Leaf** directives are single-line, single colon-pair: \`::cite-message{snapshot=H ...}\`, \`::cite-vault{snapshot=H}\`, \`::cite-voice-note{speaker="X" ...}\`, \`::cite-testimony{speaker="X" date=D}\`, \`::open\`, \`::closed\`, \`::superseded\`, \`::gap\`.
+- **Container** directives are triple-colon, body on subsequent lines, closed by \`:::\` on its own line:
+  \`\`\`
+  :::blockquote{by="Person Name"}
+  Quoted text goes here.
+  :::
+  \`\`\`
+  Same shape for \`:::dialogue{speaker="X"}\`, \`:::infobox-person\`. The one-line \`:::name{...}:::\` form does NOT parse — never write that.
+- **Headings**: \`## H2\`, \`### H3\`. **Bold**: \`**bold**\`. **Italic**: \`*italic*\`.
+- **Wiki links**: \`[[Page]]\`, \`[[Page|alt]]\`, \`[[Page#section]]\` are preserved.
+- **Images**: \`![caption](/assets/name.jpg)\`.
+- **Footnotes** (formerly \`<ref>\`): \`text[^id]\` with the body \`[^id]: source\` later in the file. Footnotes auto-collect at the end — do not add a manual references section.
 
 ### Common mistakes to avoid
 - Writing a "thread analysis" or "message profile" instead of a biography
@@ -68,9 +90,14 @@ This is the most important phase. You need to read actual message content, not j
 - Omitting blockquotes and dialogue — these are expected in person pages
 
 ## Tools
-- \`wai source list\` / \`wai read "<title>"\` — read wiki pages
-- \`wai create "<title>"\` / \`wai write "<title>" <file>\` — create/update pages
-- \`wai talk create "<title>" -s "<subject>" -c "<content>"\` — post to talk page
+- \`wai search source\` — list source-prefixed pages
+- \`wai read <slug>\` — read a wiki page (slugs are lowercase-hyphenated; e.g. "Steven Barash" → \`steven-barash\`)
+- \`wai create <slug> --summary "<msg>" --stdin\` (or \`--file <path>\`) — create a new page
+- \`wai write <slug> --summary "<msg>" --stdin\` (or \`--file <path>\`) — overwrite an existing page
+- \`wai edit <slug>\` — open the page in \$EDITOR for in-place edits
+- \`wai delete <slug> --summary "<msg>"\` — delete a page
+- \`wai write <slug>.talk --summary "<msg>" --stdin\` — author/update a talk page
+- \`wai search <query>\` — search pages
 - Use \`jq\` and \`sqlite3\` to query vault objects per the source page instructions`;
 }
 
@@ -105,21 +132,21 @@ export function buildCheckpointPrompt(
 
   // New sources for this checkpoint
   if (checkpoint.sources && checkpoint.sources.length > 0) {
-    parts.push('### New sources to ingest');
+    parts.push('### New sources for this step');
     for (const s of checkpoint.sources) {
       parts.push(`- ${s.path}`);
     }
     parts.push('');
-    parts.push('Snapshot each new source directory using `wai snapshot <dir>`, then read the generated source pages with `wai source list` and `wai read`.');
+    parts.push('These source directories are pre-staged in the vault by the runner — citation hashes already resolve. For each new source, write a markdown source page via `wai write source-<name> --summary "init source page" --stdin`. Read existing source pages with `wai search source` and `wai read source-<name>`.');
     parts.push('');
   }
 
   // Existing pages from prior checkpoints
   if (priorPages.length > 0) {
     parts.push('### Existing wiki pages');
-    parts.push('The following pages already exist in the wiki from previous steps. Read them with `wai read "<title>"` to understand what has been done so far:');
+    parts.push('The following pages already exist in the wiki from previous steps. Read them with `wai read <slug>` (slugs are lowercase-hyphenated) to understand what has been done so far:');
     for (const title of priorPages) {
-      parts.push(`- "${title}"`);
+      parts.push(`- ${title}`);
     }
     parts.push('');
   }
@@ -146,13 +173,13 @@ export function buildCheckpointPrompt(
   if (ownerEntries && ownerEntries.length > 0) {
     parts.push('### Owner-provided context');
     parts.push('The wiki owner has shared personal memories and corrections.');
-    parts.push('Cite these using `{{Cite testimony|speaker=...|date=...}}`.');
-    parts.push('Where they conflict with digital source data, note the discrepancy on the Talk page.');
+    parts.push('Cite these using the leaf directive `::cite-testimony{speaker="..." date=YYYY-MM-DD}` (single line).');
+    parts.push('Where they conflict with digital source data, note the discrepancy on the talk page (`<slug>.talk`).');
     parts.push('');
     for (const entry of ownerEntries as OwnerAnecdote[]) {
       const label = entry.type ? `[${entry.type}]` : '';
       const topic = entry.topic ? ` (${entry.topic})` : '';
-      const conflict = entry.conflicts_with ? ` ⚠️ Conflicts with: ${entry.conflicts_with}` : '';
+      const conflict = entry.conflicts_with ? ` Conflicts with: ${entry.conflicts_with}` : '';
       parts.push(`- ${label}${topic} ${entry.content}${conflict}`);
     }
     parts.push('');
@@ -162,14 +189,15 @@ export function buildCheckpointPrompt(
   const mediaStages = ['survey', 'draft', 'new-source', 'episodes', 'persons', 'owner-input', 'verify'];
   if (mediaStages.includes(checkpoint.id)) {
     parts.push('### Media embedding');
-    parts.push('When you upload a file with `wai upload`, it becomes available at `[[File:filename.ext]]`. Embed uploaded files in the wikitext where they enrich the reader\'s understanding — don\'t embed everything, only files that add meaningful context to a section.');
+    parts.push('There is no `wai upload` command — assets are stored on disk. To embed media in a page:');
+    parts.push('1. Write the asset file directly to `~/whoami/assets/<path>` (create subdirectories as needed).');
+    parts.push('2. Reference it from markdown with standard image syntax: `![caption](/assets/<path>)`.');
     parts.push('');
-    parts.push('**Prefer individual files over contact sheets.** Upload each meaningful photo separately and embed it in the specific section it relates to — e.g. a concert photo in the Music section, a travel photo in the trip subsection. Use `[[File:name.jpg|thumb|caption]]` inline or `| image = name.jpg` in the infobox. Contact sheets are useful as a supplementary overview on source pages, but the main content pages should use individual images placed in context.');
+    parts.push('**Prefer individual files over contact sheets.** Save each meaningful photo separately and embed it in the specific section it relates to — e.g. a concert photo in the Music section, a travel photo in the trip subsection. Contact sheets are useful as a supplementary overview on source pages, but the main content pages should use individual images placed in context.');
     parts.push('');
-    parts.push('For audio: use `[[File:name.ogg]]` or `[[File:name.mp3]]` inline near the relevant text.');
+    parts.push('For audio/video, write the file under `~/whoami/assets/...` and reference it via `![caption](/assets/name.mp3)` near the relevant text.');
     parts.push('');
-
-    parts.push('Previously uploaded files are available as `[[File:...]]`. Check what files exist with `wai read "Special:ListFiles"` or look at source pages, and embed any that are relevant to the sections you are writing. Prefer placing individual photos in context rather than linking to contact sheets.');
+    parts.push('To find what assets already exist, list the `~/whoami/assets/` directory directly, or look at existing source pages to see what has been referenced.');
     parts.push('');
   }
 
@@ -185,11 +213,16 @@ export function buildCheckpointPrompt(
 
   // Tools reference
   parts.push('### Tools');
-  parts.push('- `wai source list` / `wai read "<title>"` — read wiki pages');
-  parts.push('- `wai snapshot <dir>` — snapshot a source directory into the vault');
-  parts.push('- `wai create "<title>"` / `wai write "<title>" <file>` — create/update pages');
-  parts.push('- `wai upload <file>` — upload a media file (image, audio, video) to the wiki');
-  parts.push('- `wai talk create "<title>" -s "<subject>" -c "<content>"` — post to talk page');
+  parts.push('- `wai search source` — list source-prefixed pages');
+  parts.push('- `wai read <slug>` — read a wiki page (slugs are lowercase-hyphenated)');
+  parts.push('- `wai create <slug> --summary "<msg>" --stdin` (or `--file <path>`) — create a new page');
+  parts.push('- `wai write <slug> --summary "<msg>" --stdin` (or `--file <path>`) — overwrite an existing page');
+  parts.push('- `wai edit <slug>` — open the page in $EDITOR for in-place edits');
+  parts.push('- `wai delete <slug> --summary "<msg>"` — delete a page');
+  parts.push('- `wai write <slug>.talk --summary "<msg>" --stdin` — author/update a talk page (talk pages are `<slug>.talk` markdown files)');
+  parts.push('- `wai search <query>` — full-text search');
+  parts.push('- `wai sync-gedcom <file>` — import a GEDCOM file');
+  parts.push('- Assets: write files directly under `~/whoami/assets/<path>` and reference via `![caption](/assets/<path>)`');
   parts.push('- Use `jq` and `sqlite3` to query vault objects per the source page instructions');
   parts.push('- Use `convert` / `montage` (ImageMagick) for image processing (contact sheets, thumbnails)');
   parts.push('- Use `ffmpeg` / `ffprobe` for audio/video processing (extraction, thumbnails, duration)');
