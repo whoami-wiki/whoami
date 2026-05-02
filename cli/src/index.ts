@@ -11,6 +11,7 @@ import { runEdit } from './commands/edit.js';
 import { runDelete } from './commands/delete.js';
 import { runSyncGedcom } from './commands/sync-gedcom.js';
 import { runRecite } from './commands/recite.js';
+import { runSearch } from './commands/search.js';
 import { runHealthz } from './commands/healthz.js';
 import { ApiError } from './api-client.js';
 
@@ -29,6 +30,8 @@ Pages:
   create <slug> [--file F]    Create a new page (refuses if exists)
   edit <slug>                 Edit a page in $EDITOR
   delete <slug> --yes         Soft-delete a page (moves to _archived)
+  search <query> [--limit N]  Search pages, body, aliases, categories,
+                                and GEDCOM-derived fields
 
 GEDCOM:
   sync-gedcom --ged-file F    Sync GEDCOM .ged → derived/ + commit
@@ -47,7 +50,7 @@ Common flags:
 Server URL: ${getServer()}  (override: WHOAMI_SERVER, ~/.whoami/config.json)
 
 Removed in this migration (track future plans for replacements):
-  search, upload, link, changes, category, source, task, place,
+  upload, link, changes, category, source, task, place,
   snapshot, export, import, talk, section, auth
 `;
 
@@ -100,7 +103,7 @@ async function resolveBody(args: Args): Promise<string> {
 }
 
 const REMOVED = new Set([
-  'search', 'upload', 'link', 'changes', 'category', 'source', 'task',
+  'upload', 'link', 'changes', 'category', 'source', 'task',
   'place', 'snapshot', 'export', 'import', 'talk', 'section', 'auth',
 ]);
 
@@ -163,6 +166,12 @@ async function main(): Promise<number> {
       }
       case 'recite': {
         await runRecite({ apply: !!args.flags.apply, client, write });
+        break;
+      }
+      case 'search': {
+        const query = args.positional[0] ?? '';
+        const limit = parseInt(String(args.flags.limit ?? '25'), 10) || 25;
+        await runSearch({ query, limit, json: !!args.flags.json, client, write });
         break;
       }
       case 'healthz': {

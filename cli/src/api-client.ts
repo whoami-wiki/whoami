@@ -45,6 +45,12 @@ export interface ReciteEntry {
   changedFields: string[];
 }
 
+export interface SearchResult {
+  slug: string;
+  title: string;
+  type: string;
+}
+
 export class ApiClient {
   constructor(private readonly baseUrl: string) {}
 
@@ -74,6 +80,11 @@ export class ApiClient {
 
   async applyRecite(): Promise<{ updated: string[] }> {
     return this.json('POST', '/api/gedcom/recite', { apply: true });
+  }
+
+  async search(q: string, limit = 25): Promise<{ results: SearchResult[] }> {
+    const params = new URLSearchParams({ q, limit: String(limit) });
+    return this.json('GET', `/api/search?${params.toString()}`);
   }
 
   private async json<T>(method: string, path: string, body?: unknown): Promise<T> {
