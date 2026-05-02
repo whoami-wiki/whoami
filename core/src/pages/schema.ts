@@ -20,11 +20,11 @@ const PageMetaSchema: z.ZodType<PageMeta, any, any> = z.object({
   gedcom: GedcomRefSchema.optional(),
   created: z.union([
     z.string().regex(ISO_DATE, 'expected YYYY-MM-DD'),
-    z.date().transform(d => d.toISOString().split('T')[0])
+    z.date().transform(d => d.toISOString().slice(0, 10))
   ]),
   deletedAt: z.union([
     z.string(),
-    z.date().transform(d => d.toISOString().split('T')[0])
+    z.date().transform(d => d.toISOString().slice(0, 10))
   ]).optional(),
 });
 

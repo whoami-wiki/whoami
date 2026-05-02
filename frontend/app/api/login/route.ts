@@ -14,9 +14,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'bad-request' }, { status: 400 });
   }
 
+  // Pass null when neither header is present so AuthService skips rate-limiting
+  // rather than putting every header-stripped request in a single shared bucket.
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     ?? req.headers.get('x-real-ip')
-    ?? 'unknown';
+    ?? null;
 
   const result = await getAuthService().login(parsed.data.username, parsed.data.password, ip);
   if (result.kind === 'error') {

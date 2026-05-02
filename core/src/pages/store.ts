@@ -74,6 +74,7 @@ export function createPageStore(cfg: PageStoreConfig): PageStore {
             title: page.meta.title,
             type: page.meta.type,
             categories: page.meta.categories,
+            aliases: page.meta.aliases,
             isTalk,
             isArchived: !!page.meta.deletedAt,
           });

@@ -9,14 +9,15 @@ export async function withLock<T>(key: string, body: () => Promise<T>): Promise<
   const prev = queues.get(key) ?? Promise.resolve();
   let release!: () => void;
   const next = new Promise<void>((res) => { release = res; });
-  queues.set(key, prev.then(() => next));
+  const queued = prev.then(() => next);
+  queues.set(key, queued);
 
   await prev;
   try {
     return await body();
   } finally {
     release();
-    if (queues.get(key) === prev.then(() => next)) {
+    if (queues.get(key) === queued) {
       queues.delete(key);
     }
   }

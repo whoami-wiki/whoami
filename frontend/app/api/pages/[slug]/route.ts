@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getPageStore, getAuthService } from '@/lib/server-services';
+import { getPageStore, invalidateListCache } from '@/lib/server-services';
+import { requireAuth } from '@/lib/route-helpers';
 import { isValidSlug } from '@core/pages/index.ts';
-import { verifyCsrfToken } from '@core/auth/index.ts';
 
 const PutBody = z.object({
   body: z.string(),
@@ -27,34 +27,22 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
   const { slug } = await ctx.params;
   if (!isValidSlug(slug)) return NextResponse.json({ error: 'bad-slug' }, { status: 400 });
 
-  // CSRF: double-submit
-  const sessionId = req.cookies.get('session')?.value;
-  const csrfCookie = req.cookies.get('csrf')?.value;
-  const csrfHeader = req.headers.get('x-csrf-token');
-  if (!sessionId || !csrfCookie || !csrfHeader || !verifyCsrfToken(csrfCookie, csrfHeader)) {
-    return NextResponse.json({ error: 'csrf' }, { status: 403 });
-  }
-
-  const auth = getAuthService();
-  const session = await auth.validateSession(sessionId);
-  if (!session) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-
-  const pages = getPageStore();
-  try {
-    await auth.requireOwnerOrEditor(slug, session.user, pages);
-  } catch {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
-  }
+  const auth = await requireAuth(req, slug);
+  if (auth instanceof NextResponse) return auth;
 
   const json = await req.json().catch(() => null);
   const parsed = PutBody.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: 'bad-request' }, { status: 400 });
 
-  // Trust boundary: read on-disk frontmatter to preserve owner; never accept owner from request body
-  const existing = await pages.read(slug);
+  // Trust boundary: read on-disk frontmatter to preserve owner; never accept
+  // owner from request body. requireAuth already read the page during the
+  // owner check, but it doesn't return it (the AuthService API hides that).
+  // Reading again is two file reads of one small file — acceptable today.
+  const existing = await auth.pages.read(slug);
   const updated = { ...existing, body: parsed.data.body };
 
-  await pages.write(slug, updated, { name: session.user.username, email: `${session.user.username}@local` }, parsed.data.summary);
+  await auth.pages.write(slug, updated, auth.author, parsed.data.summary);
+  invalidateListCache();
   return NextResponse.json({ ok: true });
 }
 
@@ -62,24 +50,10 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ slug: st
   const { slug } = await ctx.params;
   if (!isValidSlug(slug)) return NextResponse.json({ error: 'bad-slug' }, { status: 400 });
 
-  const sessionId = req.cookies.get('session')?.value;
-  const csrfCookie = req.cookies.get('csrf')?.value;
-  const csrfHeader = req.headers.get('x-csrf-token');
-  if (!sessionId || !csrfCookie || !csrfHeader || !verifyCsrfToken(csrfCookie, csrfHeader)) {
-    return NextResponse.json({ error: 'csrf' }, { status: 403 });
-  }
+  const auth = await requireAuth(req, slug);
+  if (auth instanceof NextResponse) return auth;
 
-  const auth = getAuthService();
-  const session = await auth.validateSession(sessionId);
-  if (!session) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-
-  const pages = getPageStore();
-  try {
-    await auth.requireOwnerOrEditor(slug, session.user, pages);
-  } catch {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
-  }
-
-  await pages.softDelete(slug, { name: session.user.username, email: `${session.user.username}@local` });
+  await auth.pages.softDelete(slug, auth.author);
+  invalidateListCache();
   return NextResponse.json({ ok: true });
 }

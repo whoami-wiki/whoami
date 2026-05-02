@@ -29,6 +29,7 @@ export interface PageMetaSummary {
   title: string;
   type: PageType;
   categories: string[];
+  aliases: string[];
   isTalk: boolean;
   isArchived: boolean;
 }

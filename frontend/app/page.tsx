@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { getPageStore } from '@/lib/server-services';
+import { getCachedList } from '@/lib/server-services';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const pages = await getPageStore().list();
+  const { list: pages } = await getCachedList();
   const main = pages.filter(p => !p.isTalk && !p.isArchived);
   const talk = pages.filter(p => p.isTalk && !p.isArchived);
 
