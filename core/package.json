@@ -11,6 +11,7 @@
   "dependencies": {
     "flexsearch": "^0.8.212",
     "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.1",
     "parse-gedcom": "^2.0.1",
     "simple-git": "^3.27.0",
     "zod": "^3.23.8"
