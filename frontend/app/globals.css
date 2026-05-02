@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -127,4 +128,20 @@
   html {
     @apply font-sans;
   }
+}
+
+@layer components {
+  .directive {
+    @apply my-4 rounded-md border-l-4 border-blue-500 bg-slate-50 dark:bg-slate-900 p-4;
+  }
+  .directive-infobox-person, .directive-infobox-company {
+    @apply float-right ml-4 max-w-xs border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-sm;
+  }
+  .directive-cite-vault, .directive-cite-message {
+    @apply text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 p-2 border-l-2;
+  }
+  .directive-open { @apply bg-yellow-50 dark:bg-yellow-950 border-yellow-500; }
+  .directive-closed { @apply bg-green-50 dark:bg-green-950 border-green-500; }
+  .directive-superseded { @apply bg-red-50 dark:bg-red-950 border-red-500; }
+  .redlink { @apply text-red-600 underline decoration-dashed; }
 }
