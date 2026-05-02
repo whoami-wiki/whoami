@@ -26,13 +26,12 @@ export interface PageMeta {
 
 export interface Warning {
   page: string;
-  kind: 'malformed-cite-vault' | 'unknown-template' | 'complex-table' | 'missing-frontmatter-field';
+  kind: 'malformed-cite-vault';
   detail: string;
 }
 
 export interface Report {
   pagesWritten: number;
-  pagesSkipped: number;
   redirects: number;
   warnings: Warning[];
   snapshotHash: string;

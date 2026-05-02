@@ -92,7 +92,6 @@ async function main(): Promise<void> {
 
   const report: Report = {
     pagesWritten,
-    pagesSkipped: raw.length - results.length,
     redirects: redirects.length,
     warnings,
     snapshotHash: hash,

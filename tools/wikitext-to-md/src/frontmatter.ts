@@ -19,8 +19,11 @@ export function renderFrontmatter(meta: PageMeta): string {
   return lines.join('\n') + '\n';
 }
 
-function yamlScalar(s: string): string {
-  // Quote if value contains YAML-significant characters or leading/trailing whitespace.
+/**
+ * Quote a value if it contains YAML-significant characters or leading/trailing
+ * whitespace; otherwise return it bare. Shared with the infobox transforms.
+ */
+export function yamlScalar(s: string): string {
   if (/[:#\[\]{}'"|>&!*%@`,\n]/.test(s) || /^\s|\s$/.test(s)) {
     return `"${s.replace(/"/g, '\\"')}"`;
   }
@@ -28,5 +31,5 @@ function yamlScalar(s: string): string {
 }
 
 function flowArray(xs: string[]): string {
-  return `[${xs.join(', ')}]`;
+  return `[${xs.map(yamlScalar).join(', ')}]`;
 }
