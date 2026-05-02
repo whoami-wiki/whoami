@@ -1,8 +1,9 @@
 import type { GraderResult, GraderCheck, PageRole } from '../types.js';
+import { parsePageContent } from './parse-page.js';
 
 interface Check {
   name: string;
-  test: (wikitext: string, opts?: CompletenessOptions) => boolean;
+  test: (body: string, opts?: CompletenessOptions) => boolean;
   /** Weight for scoring. Higher = more impact. Default 1. */
   weight: number;
 }
@@ -14,113 +15,194 @@ export interface CompletenessOptions {
   checkpointId?: string;
 }
 
+const SECTION_STOP_WORDS = new Set([
+  'references',
+  'footnotes',
+  'see also',
+  'bibliography',
+]);
+
 /**
- * Count prose words in wikitext, excluding templates, headings, categories, and ref tags.
+ * Strip markdown structural noise (directives, headings, footnotes, wikilink
+ * brackets, image refs) and return the running word count of the prose.
  */
-function countProseWords(wikitext: string): number {
-  let text = wikitext;
-  // Strip templates, ref tags, categories, headings, HTML tags, tables
-  text = text.replace(/\{\{[^}]*\}\}/gs, '');
-  text = text.replace(/<ref[^>]*>.*?<\/ref>/gs, '');
-  text = text.replace(/<ref[^/]*\/>/g, '');
-  text = text.replace(/<references\s*\/>/g, '');
-  text = text.replace(/\[\[Category:[^\]]+\]\]/g, '');
-  text = text.replace(/^==+.*==+\s*$/gm, '');
-  text = text.replace(/<[^>]+>/g, '');
-  text = text.replace(/\{\|[\s\S]*?\|\}/g, '');
-  // Strip wikilinks but keep display text
+function countProseWords(body: string): number {
+  let text = body;
+  // Strip container directives (whole multi-line blocks)
+  text = text.replace(/^:::[a-z-]+(?:\{[^}]*\})?\n[\s\S]*?\n:::\s*$/gm, '');
+  // Strip leaf directives (single-line)
+  text = text.replace(/^::[a-z-]+(?:\{[^}]*\})?\s*$/gm, '');
+  // Strip footnote definitions
+  text = text.replace(/^\[\^[^\]]+\]:.*(?:\n[ \t]+.*)*$/gm, '');
+  // Strip footnote refs
+  text = text.replace(/\[\^[^\]]+\]/g, '');
+  // Strip headings
+  text = text.replace(/^#+\s.*$/gm, '');
+  // Strip wikilinks (preserve display text)
   text = text.replace(/\[\[(?:[^|\]]*\|)?([^\]]*)\]\]/g, '$1');
+  // Strip markdown image refs
+  text = text.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
   return text.split(/\s+/).filter((w) => w.length > 0).length;
 }
 
 /**
- * Count level-2 section headings (== Heading ==), excluding References/Bibliography/See also.
+ * Count level-2 headings, excluding References/Footnotes/See also/Bibliography.
  */
-function countContentSections(wikitext: string): number {
-  const matches = wikitext.match(/^==\s*([^=].*?)\s*==\s*$/gm);
-  if (!matches) return 0;
-  return matches.filter((m) => !/References|Bibliography|See also/i.test(m)).length;
+function countContentSections(body: string): number {
+  return parsePageContent(body)
+    .headings.filter(
+      (h) => h.depth === 2 && !SECTION_STOP_WORDS.has(h.text.toLowerCase()),
+    ).length;
 }
 
 /**
- * Count level-3 subsection headings (=== Heading ===).
+ * Count level-3 subsection headings.
  */
-function countSubsections(wikitext: string): number {
-  const matches = wikitext.match(/^===\s*[^=].*===\s*$/gm);
-  return matches ? matches.length : 0;
+function countSubsections(body: string): number {
+  return parsePageContent(body).headings.filter((h) => h.depth === 3).length;
 }
 
 /**
- * Count unique <ref name="..."> tags (named citations).
+ * Count unique footnote labels referenced in the body, e.g. `[^a]`, `[^ig-2022]`.
  */
-function countUniqueRefs(wikitext: string): number {
-  const named = wikitext.match(/<ref\s+name="[^"]+"/g);
-  if (!named) return 0;
-  const names = new Set(named.map((r) => r.match(/"([^"]+)"/)?.[1]).filter(Boolean));
-  return names.size;
+function countUniqueFootnotes(body: string): number {
+  const labels = new Set<string>();
+  for (const m of body.matchAll(/\[\^([^\]]+)\]/g)) {
+    if (m[1]) labels.add(m[1]);
+  }
+  return labels.size;
+}
+
+function hasInfobox(body: string): boolean {
+  return parsePageContent(body).directives.some(
+    (d) =>
+      d.name === 'infobox-person' ||
+      d.name === 'infobox-company' ||
+      d.name === 'infobox-episode' ||
+      d.name === 'infobox-project',
+  );
+}
+
+function hasBlockquote(body: string): boolean {
+  return parsePageContent(body).directives.some((d) => d.name === 'blockquote');
+}
+
+function countDialogue(body: string): number {
+  return parsePageContent(body).directives.filter((d) => d.name === 'dialogue')
+    .length;
+}
+
+function hasMedia(body: string): boolean {
+  // Markdown image refs e.g. ![caption](/assets/photo.jpg) or audio/video directives
+  if (/!\[[^\]]*\]\([^)]*\)/.test(body)) return true;
+  return parsePageContent(body).directives.some(
+    (d) => d.name === 'audio' || d.name === 'video' || d.name === 'audio-clip',
+  );
+}
+
+function hasCiteVault(body: string): boolean {
+  return parsePageContent(body).directives.some(
+    (d) => d.name === 'cite-vault' || d.name.startsWith('cite-'),
+  );
+}
+
+function hasCategory(body: string): boolean {
+  // Categories are now frontmatter (YAML), but also accept legacy directive form
+  if (/^---\s*\n[\s\S]*?\bcategor(?:y|ies)\s*:/m.test(body)) return true;
+  return parsePageContent(body).directives.some((d) => d.name === 'category');
 }
 
 // ============================================================
 // Person / Episode checks
 // ============================================================
 
-// Structural checks — necessary but low weight (boilerplate)
 const STRUCTURAL_CHECKS: Check[] = [
   {
     name: 'Lead paragraph before first heading',
     weight: 1,
-    test: (wikitext) => {
-      const firstHeading = wikitext.indexOf('==');
+    test: (body) => {
+      const firstHeading = body.search(/^#+\s/m);
       if (firstHeading === -1) return false;
-      const lead = wikitext.slice(0, firstHeading).trim();
-      return lead.length > 0;
+      const lead = body.slice(0, firstHeading).trim();
+      // Strip any frontmatter or directives — check there's actual prose
+      const stripped = lead
+        .replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, '')
+        .replace(/^:::[a-z-]+(?:\{[^}]*\})?\n[\s\S]*?\n:::\s*$/gm, '')
+        .replace(/^::[a-z-]+(?:\{[^}]*\})?\s*$/gm, '')
+        .trim();
+      return stripped.length > 0;
     },
   },
   {
-    name: 'Infobox template with required fields',
+    name: 'Infobox directive with required fields',
     weight: 2,
-    test: (wikitext) => {
-      const infoboxMatch = wikitext.match(/\{\{Infobox\b[^}]*\}\}/s);
-      if (!infoboxMatch) return false;
-      const infobox = infoboxMatch[0];
-      return infobox.includes('|') && infobox.length > 20;
+    test: (body) => {
+      const infoboxes = parsePageContent(body).directives.filter(
+        (d) =>
+          d.name === 'infobox-person' ||
+          d.name === 'infobox-company' ||
+          d.name === 'infobox-episode' ||
+          d.name === 'infobox-project',
+      );
+      if (infoboxes.length === 0) return false;
+      // Must have substantive body content (key:value pairs)
+      return infoboxes.some((i) => (i.body ?? '').length > 10);
     },
   },
   {
     name: 'Body section with substantive prose',
     weight: 1,
-    test: (wikitext) => {
-      const sectionRegex = /^==\s*[^=].*==\s*$/gm;
-      let match: RegExpExecArray | null;
-      const sectionStarts: number[] = [];
-      while ((match = sectionRegex.exec(wikitext)) !== null) {
-        sectionStarts.push(match.index + match[0].length);
+    test: (body) => {
+      const headingRegex = /^(#+)\s+(.*)$/gm;
+      const matches: Array<{ index: number; end: number; depth: number; text: string }> = [];
+      let m: RegExpExecArray | null;
+      while ((m = headingRegex.exec(body)) !== null) {
+        matches.push({
+          index: m.index,
+          end: m.index + m[0].length,
+          depth: m[1].length,
+          text: m[2].trim(),
+        });
       }
-      for (let i = 0; i < sectionStarts.length; i++) {
-        const start = sectionStarts[i];
-        const end = i + 1 < sectionStarts.length ? sectionStarts[i + 1] : wikitext.length;
-        const content = wikitext.slice(start, end).trim();
-        const headingBefore = wikitext.slice(Math.max(0, start - 80), start);
-        if (/References|Bibliography/i.test(headingBefore)) continue;
+      for (let i = 0; i < matches.length; i++) {
+        if (matches[i].depth !== 2) continue;
+        if (SECTION_STOP_WORDS.has(matches[i].text.toLowerCase())) continue;
+        const start = matches[i].end;
+        const next = matches.find((mm, j) => j > i && mm.depth <= 2);
+        const end = next ? next.index : body.length;
+        const content = body.slice(start, end).trim();
         if (content.length > 50) return true;
       }
       return false;
     },
   },
   {
-    name: 'References section with <references />',
+    name: 'References / footnotes section present',
     weight: 0.5,
-    test: (wikitext) => /==\s*References\s*==/.test(wikitext) && /<references\s*\/>/.test(wikitext),
+    test: (body) => {
+      // Either a "References" heading + at least one footnote definition, or
+      // any footnote definition at all.
+      const hasFootnoteDefs = /^\[\^[^\]]+\]:/m.test(body);
+      return hasFootnoteDefs;
+    },
   },
   {
-    name: 'Bibliography section with {{Cite vault}}',
+    name: 'Bibliography section with cite-vault directive',
     weight: 0.5,
-    test: (wikitext) => /==\s*Bibliography\s*==/.test(wikitext) && /\{\{Cite vault\b/.test(wikitext),
+    test: (body) => {
+      const headings = parsePageContent(body).headings;
+      const hasBibHeading = headings.some(
+        (h) =>
+          h.depth === 2 &&
+          /^bibliography$/i.test(h.text.trim()),
+      );
+      return hasBibHeading && hasCiteVault(body);
+    },
   },
   {
     name: 'At least one category tag',
     weight: 0.5,
-    test: (wikitext) => /\[\[Category:[^\]]+\]\]/.test(wikitext),
+    test: (body) => hasCategory(body),
   },
 ];
 
@@ -129,29 +211,25 @@ const DEPTH_CHECKS: Check[] = [
   {
     name: 'Prose word count >= 800',
     weight: 3,
-    test: (wikitext) => countProseWords(wikitext) >= 800,
+    test: (body) => countProseWords(body) >= 800,
   },
   {
     name: 'At least 5 content sections',
     weight: 3,
-    test: (wikitext) => countContentSections(wikitext) >= 5,
+    test: (body) => countContentSections(body) >= 5,
   },
   {
-    name: 'At least 3 subsections (===)',
+    name: 'At least 3 subsections (###)',
     weight: 2,
-    test: (wikitext) => countSubsections(wikitext) >= 3,
+    test: (body) => countSubsections(body) >= 3,
   },
   {
     name: 'At least 10 unique inline citations',
     weight: 2,
-    test: (wikitext) => countUniqueRefs(wikitext) >= 10,
+    test: (body) => countUniqueFootnotes(body) >= 10,
   },
 ];
 
-/**
- * Return depth checks with thresholds relative to the checkpoint stage.
- * Early checkpoints (draft) have lower thresholds since not all sources are available yet.
- */
 function getDepthChecks(checkpointId?: string): Check[] {
   if (!checkpointId) return DEPTH_CHECKS;
 
@@ -163,12 +241,16 @@ function getDepthChecks(checkpointId?: string): Check[] {
     proseMin = 400;
     sectionsMin = 3;
     citationsMin = 5;
-  } else if (checkpointId === 'new-source' || checkpointId === 'episodes' || checkpointId === 'persons' || checkpointId === 'owner-input') {
+  } else if (
+    checkpointId === 'new-source' ||
+    checkpointId === 'episodes' ||
+    checkpointId === 'persons' ||
+    checkpointId === 'owner-input'
+  ) {
     proseMin = 700;
     sectionsMin = 5;
     citationsMin = 10;
   } else {
-    // verify, survey, or default — full thresholds
     return DEPTH_CHECKS;
   }
 
@@ -176,22 +258,22 @@ function getDepthChecks(checkpointId?: string): Check[] {
     {
       name: `Prose word count >= ${proseMin}`,
       weight: 3,
-      test: (wikitext: string) => countProseWords(wikitext) >= proseMin,
+      test: (body: string) => countProseWords(body) >= proseMin,
     },
     {
       name: `At least ${sectionsMin} content sections`,
       weight: 3,
-      test: (wikitext: string) => countContentSections(wikitext) >= sectionsMin,
+      test: (body: string) => countContentSections(body) >= sectionsMin,
     },
     {
-      name: 'At least 3 subsections (===)',
+      name: 'At least 3 subsections (###)',
       weight: 2,
-      test: (wikitext: string) => countSubsections(wikitext) >= 3,
+      test: (body: string) => countSubsections(body) >= 3,
     },
     {
       name: `At least ${citationsMin} unique inline citations`,
       weight: 2,
-      test: (wikitext: string) => countUniqueRefs(wikitext) >= citationsMin,
+      test: (body: string) => countUniqueFootnotes(body) >= citationsMin,
     },
   ];
 }
@@ -201,37 +283,36 @@ const RICHNESS_CHECKS: Check[] = [
   {
     name: 'Has blockquotes or dialogue',
     weight: 1.5,
-    test: (wikitext) => {
-      // Formal blockquote/dialogue templates
-      if (/\{\{Blockquote\b/.test(wikitext) || /\{\{Dialogue\b/.test(wikitext) || /<blockquote>/i.test(wikitext)) return true;
-      // Inline quoted passages (>15 chars) integrated into prose — editorial guide
-      // recommends this for short quotes, reserving {{Blockquote}} for extended passages
-      const inlineQuotes = wikitext.match(/"[^"]{15,}"/g);
+    test: (body) => {
+      if (hasBlockquote(body) || countDialogue(body) > 0) return true;
+      // Inline quoted passages (>15 chars) — short quotes integrated into prose
+      const inlineQuotes = body.match(/"[^"]{15,}"/g);
       return inlineQuotes !== null && inlineQuotes.length >= 3;
     },
   },
   {
     name: 'Has embedded media (images, audio, video)',
     weight: 1.5,
-    test: (wikitext) => /\[\[File:/.test(wikitext) || /\{\{Audio clip\b/.test(wikitext),
+    test: (body) => hasMedia(body),
   },
 ];
 
 const PERSON_EPISODE_LINK: Check = {
   name: 'Links to episode pages',
   weight: 0.5,
-  test: (wikitext, opts) => {
-    if (!opts?.expectedEpisodes || opts.expectedEpisodes.length === 0) return true;
-    return opts.expectedEpisodes.some((ep) => wikitext.includes(`[[${ep}`));
+  test: (body, opts) => {
+    if (!opts?.expectedEpisodes || opts.expectedEpisodes.length === 0)
+      return true;
+    return opts.expectedEpisodes.some((ep) => body.includes(`[[${ep}`));
   },
 };
 
 const EPISODE_PERSON_LINK: Check = {
   name: 'Links back to person page',
   weight: 0.5,
-  test: (wikitext, opts) => {
+  test: (body, opts) => {
     if (!opts?.subject) return true;
-    return wikitext.includes(`[[${opts.subject}`);
+    return body.includes(`[[${opts.subject}`);
   },
 };
 
@@ -243,44 +324,59 @@ const SOURCE_CHECKS: Check[] = [
   {
     name: 'Has snapshot identifier',
     weight: 1,
-    test: (wikitext) => /snapshot\s*=\s*\S+/i.test(wikitext) || /\{\{Cite vault\b[^}]*snapshot/i.test(wikitext),
+    test: (body) => {
+      // Frontmatter or directive attribute with snapshot
+      if (/snapshot\s*[:=]\s*\S+/i.test(body)) return true;
+      const directives = parsePageContent(body).directives;
+      return directives.some((d) => d.attrs.snapshot || d.attrs.snapshotId);
+    },
   },
   {
     name: 'Has source type metadata',
     weight: 1,
-    test: (wikitext) => {
-      if (/type\s*=\s*\S+/i.test(wikitext)) return true;
-      if (/\|\s*(facebook|whatsapp|photos|messages|transactions|voice[_ ]?notes|location)\s*[\|\}]/i.test(wikitext)) return true;
-      const lead = wikitext.slice(0, 500).toLowerCase();
-      return /\b(facebook|whatsapp|instagram|photos?|messages?|transactions?|voice\s*notes?|location|android|ios)\b/.test(lead);
+    test: (body) => {
+      if (/^\s*type\s*[:=]\s*\S+/im.test(body)) return true;
+      const directives = parsePageContent(body).directives;
+      if (directives.some((d) => d.attrs.type)) return true;
+      const lead = body.slice(0, 500).toLowerCase();
+      return /\b(facebook|whatsapp|instagram|photos?|messages?|transactions?|voice\s*notes?|location|android|ios)\b/.test(
+        lead,
+      );
     },
   },
   {
     name: 'Has file listing or content summary',
     weight: 1,
-    test: (wikitext) => {
-      const stripped = wikitext.replace(/\{\{[^}]*\}\}/g, '').replace(/^==.*==$/gm, '').trim();
+    test: (body) => {
+      // Strip directives and headings and check substance remains
+      const stripped = body
+        .replace(/^:::[a-z-]+(?:\{[^}]*\})?\n[\s\S]*?\n:::\s*$/gm, '')
+        .replace(/^::[a-z-]+(?:\{[^}]*\})?\s*$/gm, '')
+        .replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, '')
+        .replace(/^#+\s.*$/gm, '')
+        .trim();
       return stripped.length > 100;
     },
   },
   {
     name: 'Has at least one category tag',
     weight: 0.5,
-    test: (wikitext) => /\[\[Category:[^\]]+\]\]/.test(wikitext),
+    test: (body) => hasCategory(body),
   },
   {
     name: 'At least 2 content sections',
     weight: 2,
-    test: (wikitext) => countContentSections(wikitext) >= 2,
+    test: (body) => countContentSections(body) >= 2,
   },
   {
-    name: 'Substantive content (>= 500 chars beyond templates)',
+    name: 'Substantive content (>= 500 chars beyond directives)',
     weight: 2,
-    test: (wikitext) => {
-      const stripped = wikitext
-        .replace(/\{\{[^}]*\}\}/gs, '')
-        .replace(/^==.*==$/gm, '')
-        .replace(/\[\[Category:[^\]]+\]\]/g, '')
+    test: (body) => {
+      const stripped = body
+        .replace(/^:::[a-z-]+(?:\{[^}]*\})?\n[\s\S]*?\n:::\s*$/gm, '')
+        .replace(/^::[a-z-]+(?:\{[^}]*\})?\s*$/gm, '')
+        .replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, '')
+        .replace(/^#+\s.*$/gm, '')
         .trim();
       return stripped.length >= 500;
     },
@@ -295,44 +391,70 @@ const TALK_CHECKS: Check[] = [
   {
     name: 'Has at least one section heading',
     weight: 1,
-    test: (wikitext) => /^==\s*[^=].*==\s*$/m.test(wikitext),
+    test: (body) => parsePageContent(body).headings.some((h) => h.depth === 2),
   },
   {
     name: 'No lead prose before first heading',
     weight: 1,
-    test: (wikitext) => {
-      const firstHeading = wikitext.indexOf('==');
+    test: (body) => {
+      const firstHeading = body.search(/^#+\s/m);
       if (firstHeading === -1) return false;
-      const lead = wikitext.slice(0, firstHeading).trim();
-      return lead.length === 0;
+      const lead = body.slice(0, firstHeading).trim();
+      const stripped = lead
+        .replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, '')
+        .trim();
+      return stripped.length === 0;
     },
   },
   {
     name: 'Has editorial decisions or rationale',
     weight: 2,
-    test: (wikitext) =>
-      /==\s*Editorial decisions\s*==/i.test(wikitext) ||
-      /==\s*Editorial\s*==/i.test(wikitext) ||
-      /\{\{Closed\}\}/i.test(wikitext) ||
-      /\{\{Superseded\}\}/i.test(wikitext),
+    test: (body) => {
+      const headings = parsePageContent(body).headings;
+      if (
+        headings.some(
+          (h) =>
+            h.depth === 2 &&
+            /^editorial(\s+decisions?)?$/i.test(h.text.trim()),
+        )
+      )
+        return true;
+      const directives = parsePageContent(body).directives;
+      return directives.some(
+        (d) => d.name === 'closed' || d.name === 'superseded',
+      );
+    },
   },
   {
     name: 'Has active gaps or open questions',
     weight: 1.5,
-    test: (wikitext) =>
-      /\{\{Open\}\}/i.test(wikitext) ||
-      /==\s*Active gaps\s*==/i.test(wikitext) ||
-      /==\s*Open questions\s*==/i.test(wikitext),
+    test: (body) => {
+      const headings = parsePageContent(body).headings;
+      if (
+        headings.some(
+          (h) =>
+            h.depth === 2 &&
+            /^(active\s+gaps|open\s+questions)$/i.test(h.text.trim()),
+        )
+      )
+        return true;
+      const directives = parsePageContent(body).directives;
+      return directives.some((d) => d.name === 'open');
+    },
   },
   {
     name: 'Has research notes or source index',
     weight: 1.5,
-    test: (wikitext) =>
-      /==\s*Research notes\s*==/i.test(wikitext) ||
-      /==\s*Source index\s*==/i.test(wikitext) ||
-      /==\s*Key dates\s*==/i.test(wikitext) ||
-      /==\s*Key people\s*==/i.test(wikitext) ||
-      /==\s*Sources?\s*==/i.test(wikitext),
+    test: (body) => {
+      const headings = parsePageContent(body).headings;
+      return headings.some(
+        (h) =>
+          h.depth === 2 &&
+          /^(research\s+notes|source\s+index|key\s+dates|key\s+people|sources?)$/i.test(
+            h.text.trim(),
+          ),
+      );
+    },
   },
 ];
 
@@ -343,11 +465,26 @@ const TALK_CHECKS: Check[] = [
 function getChecks(role: PageRole, checkpointId?: string): Check[] {
   switch (role) {
     case 'person':
-      return [...STRUCTURAL_CHECKS, ...getDepthChecks(checkpointId), ...RICHNESS_CHECKS, PERSON_EPISODE_LINK];
+      return [
+        ...STRUCTURAL_CHECKS,
+        ...getDepthChecks(checkpointId),
+        ...RICHNESS_CHECKS,
+        PERSON_EPISODE_LINK,
+      ];
     case 'project':
-      return [...STRUCTURAL_CHECKS, ...getDepthChecks(checkpointId), ...RICHNESS_CHECKS, PERSON_EPISODE_LINK];
+      return [
+        ...STRUCTURAL_CHECKS,
+        ...getDepthChecks(checkpointId),
+        ...RICHNESS_CHECKS,
+        PERSON_EPISODE_LINK,
+      ];
     case 'episode':
-      return [...STRUCTURAL_CHECKS, ...getDepthChecks(checkpointId), ...RICHNESS_CHECKS, EPISODE_PERSON_LINK];
+      return [
+        ...STRUCTURAL_CHECKS,
+        ...getDepthChecks(checkpointId),
+        ...RICHNESS_CHECKS,
+        EPISODE_PERSON_LINK,
+      ];
     case 'source':
       return SOURCE_CHECKS;
     case 'talk':
@@ -355,13 +492,16 @@ function getChecks(role: PageRole, checkpointId?: string): Check[] {
   }
 }
 
-export function gradeCompleteness(wikitext: string, options?: CompletenessOptions): GraderResult {
+export function gradeCompleteness(
+  body: string,
+  options?: CompletenessOptions,
+): GraderResult {
   const role = options?.role ?? 'person';
   const checks = getChecks(role, options?.checkpointId);
   const totalWeight = checks.reduce((sum, c) => sum + c.weight, 0);
 
   const details: GraderCheck[] = checks.map((check) => {
-    const passed = check.test(wikitext, options);
+    const passed = check.test(body, options);
     return {
       check: check.name,
       passed,
