@@ -1,61 +1,15 @@
-import { parseArgs } from 'node:util';
-import { type WikiClient } from '../wiki-client.js';
-import { UsageError, WaiError } from '../errors.js';
-import { resolveContent } from '../content.js';
-import { type GlobalFlags, outputJson, outputResult } from '../output.js';
+import type { ApiClient } from '../api-client.js';
 
-export async function writeCommand(
-  args: string[],
-  globals: GlobalFlags,
-  client: WikiClient,
-): Promise<void> {
-  const { values, positionals } = parseArgs({
-    args,
-    options: {
-      content: { type: 'string', short: 'c' },
-      file: { type: 'string', short: 'f' },
-      summary: { type: 'string', short: 'm' },
-    },
-    allowPositionals: true,
-    strict: false,
-  });
+export interface WriteOptions {
+  slug: string;
+  body: string;
+  summary: string;
+  client: Pick<ApiClient, 'write'>;
+  write: (s: string) => void;
+}
 
-  const title = positionals[0];
-  if (!title) throw new UsageError('Usage: wai write <title> [-c content | -f file | -] [-m summary]');
-
-  // Support positional file arg: wai write "Title" file.txt
-  // Also support "-" as explicit stdin marker: wai write "Title" -
-  const fileArg = positionals[1];
-  const file = (values.file as string | undefined) ??
-    (fileArg && fileArg !== '-' ? fileArg : undefined);
-
-  const content = await resolveContent({
-    content: values.content as string | undefined,
-    file,
-  });
-
-  if (!content.trim()) {
-    throw new WaiError('Refusing to write empty content. Use -c, -f, or pipe non-empty content to stdin.', 1);
-  }
-
-  const result = await client.writePage(title, content, values.summary as string | undefined);
-
-  if (result.noChange) {
-    if (globals.json) {
-      outputJson(result);
-    } else {
-      console.error(`No changes to "${result.title}" (rev ${result.oldRevid})`);
-    }
-    process.exitCode = 1;
-    return;
-  }
-
-  if (globals.json) {
-    outputJson(result);
-  } else {
-    outputResult('Wrote', result.title, {
-      rev: `${result.oldRevid} → ${result.newRevid}`,
-      summary: values.summary as string | undefined,
-    });
-  }
+export async function runWrite(opts: WriteOptions): Promise<void> {
+  if (!opts.summary) throw new Error('--summary is required');
+  await opts.client.write(opts.slug, opts.body, opts.summary);
+  opts.write(`wrote ${opts.slug}\n`);
 }
