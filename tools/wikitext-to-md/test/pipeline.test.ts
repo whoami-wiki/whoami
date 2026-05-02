@@ -29,6 +29,7 @@ test('converts a person page end-to-end', () => {
     createdAt: '20260429140700',
   };
   const out = convertPage(raw, HASH, OWNER);
+  if (out.kind !== 'page') throw new Error('expected page');
   assert.match(out.md, /^---/);
   assert.match(out.md, /title: Abby Rickelman/);
   assert.match(out.md, /categories: \[People, Family\]/);
@@ -38,7 +39,6 @@ test('converts a person page end-to-end', () => {
   // Note: '''Abby Rickelman''' should now be transformed to **Abby Rickelman**
   // because Task 20 (bold-italic) is in the pipeline.
   assert.match(out.md, /\*\*Abby Rickelman\*\* \(born 1991\) is a first cousin of \[\[Steven Barash\]\]\./);
-  assert.equal(out.kind, 'page');
   assert.equal(out.warnings.length, 0);
 });
 
