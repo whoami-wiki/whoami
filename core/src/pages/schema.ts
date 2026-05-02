@@ -9,7 +9,8 @@ const GedcomRefSchema = z.object({
   snapshot: z.string().min(1),
 });
 
-const PageMetaSchema: z.ZodType<PageMeta> = z.object({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const PageMetaSchema: z.ZodType<PageMeta, any, any> = z.object({
   title: z.string().min(1),
   owner: z.string().min(1),
   editors: z.array(z.string()),
