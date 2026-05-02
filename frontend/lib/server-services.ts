@@ -1,6 +1,11 @@
 import { createPageStore, type PageStore, type PageMetaSummary } from '@core/pages/index.ts';
 import { buildSlugIndex, type SlugIndex } from './wikilinks';
-import { WHOAMI_ROOT, PAGES_DIR } from './env.ts';
+import { join } from 'node:path';
+import {
+  createSearchIndex, loadSearchIndex, saveSearchIndex, rebuildSearchIndex,
+  type SearchIndex,
+} from '@core/search/module.ts';
+import { WHOAMI_ROOT, PAGES_DIR, SEARCH_INDEX_FILE } from './env.ts';
 
 let _pages: PageStore | null = null;
 
@@ -35,4 +40,40 @@ export async function getCachedList(): Promise<{ list: PageMetaSummary[]; index:
 
 export function invalidateListCache(): void {
   _listCache = null;
+}
+
+let _search: SearchIndex | null = null;
+let _searchReady: Promise<void> | null = null;
+
+export async function getSearchIndex(): Promise<SearchIndex> {
+  if (!_search) {
+    _search = createSearchIndex();
+    _searchReady = (async () => {
+      const loaded = await loadSearchIndex(_search!, SEARCH_INDEX_FILE);
+      if (!loaded) {
+        await rebuildSearchIndex(_search!, {
+          pagesDir: join(WHOAMI_ROOT, 'pages'),
+          genealogyDir: join(WHOAMI_ROOT, 'genealogy'),
+        });
+        await saveSearchIndex(_search!, SEARCH_INDEX_FILE);
+      }
+    })();
+  }
+  await _searchReady;
+  return _search!;
+}
+
+export async function persistSearchIndex(): Promise<void> {
+  if (!_search) return;
+  await saveSearchIndex(_search, SEARCH_INDEX_FILE);
+}
+
+export async function rebuildSearchIndexFromDisk(): Promise<void> {
+  const idx = createSearchIndex();
+  await rebuildSearchIndex(idx, {
+    pagesDir: join(WHOAMI_ROOT, 'pages'),
+    genealogyDir: join(WHOAMI_ROOT, 'genealogy'),
+  });
+  await saveSearchIndex(idx, SEARCH_INDEX_FILE);
+  _search = idx;
 }
