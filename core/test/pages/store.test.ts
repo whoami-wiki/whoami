@@ -179,3 +179,26 @@ test('PageStore.write: working tree is clean after commit failure', async () => 
     repo.cleanup();
   }
 });
+
+test('PageStore.softDelete: moves file to _archived/ and marks deletedAt', async () => {
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const page: Page = {
+      slug: 'gone',
+      meta: { title: 'Gone', owner: 's', editors: [], type: 'person', aliases: [], categories: [], created: '2026-04-29' },
+      body: 'body',
+    };
+    await store.write('gone', page, { name: 'A', email: 'a@x' }, 'create');
+    await store.softDelete('gone', { name: 'A', email: 'a@x' });
+
+    await assert.rejects(store.read('gone'), /not found/i);
+
+    const archivedPath = join(repo.pagesDir, '_archived', 'gone.md');
+    const { readFileSync } = await import('node:fs');
+    const raw = readFileSync(archivedPath, 'utf-8');
+    assert.match(raw, /deletedAt: /);
+  } finally {
+    repo.cleanup();
+  }
+});

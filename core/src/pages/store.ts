@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync, existsSync, writeFileSync, fsyncSync, openSync, closeSync, renameSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { readFileSync, readdirSync, existsSync, writeFileSync, fsyncSync, openSync, closeSync, renameSync, mkdirSync } from 'node:fs';
+import { join, basename, relative } from 'node:path';
 import type { Page, PageMetaSummary, AuthorIdentity, Revision } from './types.ts';
 import { parsePage, serializePage } from './frontmatter.ts';
 import { assertValidSlug } from './slug.ts';
@@ -16,6 +16,7 @@ export interface PageStore {
   write(slug: string, page: Page, author: AuthorIdentity, summary: string): Promise<void>;
   list(): Promise<PageMetaSummary[]>;
   history(slug: string, limit?: number): Promise<Revision[]>;
+  softDelete(slug: string, author: AuthorIdentity): Promise<void>;
 }
 
 export function createPageStore(cfg: PageStoreConfig): PageStore {
@@ -84,6 +85,29 @@ export function createPageStore(cfg: PageStoreConfig): PageStore {
     async history(slug, limit = 50) {
       assertValidSlug(slug);
       return fileHistory(cfg.repoRoot, pathFor(slug), limit);
+    },
+
+    async softDelete(slug, author) {
+      assertValidSlug(slug);
+      const src = pathFor(slug);
+      if (!existsSync(src)) throw new Error(`page not found: ${slug}`);
+      const archivedDir = join(cfg.pagesDir, '_archived');
+      const dst = join(archivedDir, `${slug}.md`);
+
+      await withLock(slug, async () => {
+        const page = parsePage(slug, readFileSync(src, 'utf-8'));
+        page.meta.deletedAt = new Date().toISOString();
+        mkdirSync(archivedDir, { recursive: true });
+        writeFileSync(dst, serializePage(page));
+
+        const { simpleGit } = await import('simple-git');
+        const git = simpleGit(cfg.repoRoot);
+        await git.rm([relative(cfg.repoRoot, src)]);
+        await git.add(relative(cfg.repoRoot, dst));
+        await git.commit(`soft-delete ${slug}`, undefined, {
+          '--author': `${author.name} <${author.email}>`,
+        });
+      });
     },
   };
 }
