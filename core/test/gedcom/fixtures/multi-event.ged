@@ -1,0 +1,17 @@
+0 HEAD
+1 SOUR test-fixture
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @S1@ SOUR
+1 TITL 1928 Teofipol Census
+0 @I1@ INDI
+1 NAME Aidele /Ayzman/
+1 RESI
+2 DATE FROM 1881 TO 1928
+2 PLAC Teofipol, Khmelnytsky, Ukraine
+1 OCCU Seamstress
+2 DATE FROM 1900
+1 SOUR @S1@
+0 TRLR

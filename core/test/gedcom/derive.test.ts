@@ -72,3 +72,25 @@ test('deriveIndividual: spouse "married" is null when FAM has no MARR DATE', asy
     fam.tree = original;
   }
 });
+
+test('deriveIndividual: extracts residences', async () => {
+  const result = await parseGedcomFile(FIX('multi-event.ged'));
+  const derived = deriveIndividual(result.individuals.get('I1')!, 'I1', result);
+  assert.equal(derived.residences.length, 1);
+  assert.equal(derived.residences[0]!.date, 'FROM 1881 TO 1928');
+  assert.equal(derived.residences[0]!.place, 'Teofipol, Khmelnytsky, Ukraine');
+});
+
+test('deriveIndividual: extracts occupations', async () => {
+  const result = await parseGedcomFile(FIX('multi-event.ged'));
+  const derived = deriveIndividual(result.individuals.get('I1')!, 'I1', result);
+  assert.equal(derived.occupations.length, 1);
+  assert.equal(derived.occupations[0]!.title, 'Seamstress');
+  assert.equal(derived.occupations[0]!.date, 'FROM 1900');
+});
+
+test('deriveIndividual: extracts source citations', async () => {
+  const result = await parseGedcomFile(FIX('multi-event.ged'));
+  const derived = deriveIndividual(result.individuals.get('I1')!, 'I1', result);
+  assert.deepEqual(derived.sources, [{ record: 'S1' }]);
+});

@@ -1,4 +1,4 @@
-import type { GedcomNode, DerivedRecord, DatedEvent, IndividualRef } from './types.ts';
+import type { GedcomNode, DerivedRecord, DatedEvent, IndividualRef, ResidenceEvent, OccupationEvent, SourceRef } from './types.ts';
 import type { ParseResult } from './parser.ts';
 
 function deriveParents(node: GedcomNode, ctx: ParseResult): IndividualRef[] {
@@ -55,6 +55,32 @@ function deriveSpousesAndChildren(
   return { spouses, children };
 }
 
+function deriveResidences(node: GedcomNode): ResidenceEvent[] {
+  return node.tree
+    .filter(n => n.tag === 'RESI')
+    .map(resi => ({
+      date: resi.tree.find(n => n.tag === 'DATE')?.data?.trim() || null,
+      place: resi.tree.find(n => n.tag === 'PLAC')?.data?.trim() || null,
+    }))
+    .filter(r => r.date || r.place);
+}
+
+function deriveOccupations(node: GedcomNode): OccupationEvent[] {
+  return node.tree
+    .filter(n => n.tag === 'OCCU')
+    .map(occu => ({
+      title: (occu.data ?? '').trim(),
+      date: occu.tree.find(n => n.tag === 'DATE')?.data?.trim() || null,
+    }))
+    .filter(o => o.title);
+}
+
+function deriveSources(node: GedcomNode): SourceRef[] {
+  return node.tree
+    .filter(n => n.tag === 'SOUR' && n.data)
+    .map(s => ({ record: (s.data ?? '').replace(/^@|@$/g, '') }));
+}
+
 export function deriveIndividual(node: GedcomNode, record: string, ctx: ParseResult): DerivedRecord {
   const sc = deriveSpousesAndChildren(node, record, ctx);
   return {
@@ -65,9 +91,9 @@ export function deriveIndividual(node: GedcomNode, record: string, ctx: ParseRes
     parents: deriveParents(node, ctx),
     spouses: sc.spouses,
     children: sc.children,
-    residences: [],
-    occupations: [],
-    sources: [],
+    residences: deriveResidences(node),
+    occupations: deriveOccupations(node),
+    sources: deriveSources(node),
   };
 }
 
