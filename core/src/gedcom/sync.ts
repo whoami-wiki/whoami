@@ -32,12 +32,18 @@ export async function syncGedcom(cfg: SyncConfig): Promise<SyncResult> {
   const gedPath = join(cfg.genealogyDir, cfg.gedFile);
   const hash = await hashGedcomFile(gedPath);
   const last = await latestSnapshot(cfg.genealogyDir);
-  if (last && last.hash === hash) {
+  const derivedDir = join(cfg.genealogyDir, 'derived');
+  // No-op only when the .ged hash is unchanged AND derived/ is already populated.
+  // Pre-Plan-D installs (Plan B's migration import) wrote a snapshot entry but
+  // not the derived/ tree, so on the first sync after Plan D we want to do the
+  // work even though hash matches.
+  const derivedReady = existsSync(derivedDir)
+    && readdirSync(derivedDir).some(n => n.endsWith('.yml'));
+  if (last && last.hash === hash && derivedReady) {
     return { kind: 'no-op', reason: 'unchanged-hash' };
   }
 
   const parsed = await parseGedcomFile(gedPath);
-  const derivedDir = join(cfg.genealogyDir, 'derived');
 
   // Read existing derived/ for diff
   const existing = new Map<string, string>();
@@ -74,14 +80,18 @@ export async function syncGedcom(cfg: SyncConfig): Promise<SyncResult> {
     if (existsSync(path)) unlinkSync(path);
   }
 
-  // Append snapshot manifest entry
+  // Append snapshot manifest entry — no-ops if hash matches latest (e.g.
+  // back-filling derived/ for an existing Plan B snapshot).
   const entry: SnapshotEntry = {
     hash,
     date: new Date().toISOString(),
     file: cfg.gedFile,
     notes: cfg.notes,
   };
-  await appendSnapshot(cfg.genealogyDir, entry);
+  const appended = await appendSnapshot(cfg.genealogyDir, entry);
+  // If we didn't append (hash matched Plan B's entry), the canonical snapshot
+  // is the existing one. Use it for the result so callers see the real date.
+  const effectiveEntry = appended ? entry : (await latestSnapshot(cfg.genealogyDir))!;
 
   // Single commit. `git add -A <derivedDir>` stages adds, mods, AND deletions.
   const git = simpleGit(cfg.repoRoot);
@@ -95,6 +105,6 @@ export async function syncGedcom(cfg: SyncConfig): Promise<SyncResult> {
     kind: 'wrote',
     diff,
     commit: result.commit,
-    snapshot: entry,
+    snapshot: effectiveEntry,
   };
 }
