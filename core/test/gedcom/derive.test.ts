@@ -29,3 +29,20 @@ test('deriveIndividual: birth without place keeps place null', async () => {
   const derived = deriveIndividual(i2, 'I2', result);
   assert.deepEqual(derived.birth, { date: '5 MAR 1952', place: null });
 });
+
+test('deriveIndividual: extracts parents from FAMC', async () => {
+  const result = await parseGedcomFile(FIX('tiny.ged'));
+  const child = result.individuals.get('I3')!;
+  const derived = deriveIndividual(child, 'I3', result);
+  const records = derived.parents.map(p => p.record).sort();
+  assert.deepEqual(records, ['I1', 'I2']);
+  const names = derived.parents.map(p => p.name).sort();
+  assert.deepEqual(names, ['Jane Doe', 'John Doe']);
+});
+
+test('deriveIndividual: returns empty parents for top of tree', async () => {
+  const result = await parseGedcomFile(FIX('tiny.ged'));
+  const i1 = result.individuals.get('I1')!;
+  const derived = deriveIndividual(i1, 'I1', result);
+  assert.deepEqual(derived.parents, []);
+});

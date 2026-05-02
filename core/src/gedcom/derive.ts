@@ -1,5 +1,23 @@
-import type { GedcomNode, DerivedRecord, DatedEvent } from './types.ts';
+import type { GedcomNode, DerivedRecord, DatedEvent, IndividualRef } from './types.ts';
 import type { ParseResult } from './parser.ts';
+
+function deriveParents(node: GedcomNode, ctx: ParseResult): IndividualRef[] {
+  const out: IndividualRef[] = [];
+  for (const famc of node.tree.filter(n => n.tag === 'FAMC')) {
+    const famPointer = (famc.data ?? '').replace(/^@|@$/g, '');
+    const fam = ctx.families.get(famPointer);
+    if (!fam) continue;
+    for (const tag of ['HUSB', 'WIFE'] as const) {
+      const link = fam.tree.find(n => n.tag === tag);
+      if (!link?.data) continue;
+      const parentRecord = link.data.replace(/^@|@$/g, '');
+      const parent = ctx.individuals.get(parentRecord);
+      if (!parent) continue;
+      out.push({ record: parentRecord, name: deriveName(parent) });
+    }
+  }
+  return out;
+}
 
 export function deriveIndividual(node: GedcomNode, record: string, ctx: ParseResult): DerivedRecord {
   return {
@@ -7,7 +25,7 @@ export function deriveIndividual(node: GedcomNode, record: string, ctx: ParseRes
     name: deriveName(node),
     birth: deriveDatedEvent(node, 'BIRT'),
     death: deriveDatedEvent(node, 'DEAT'),
-    parents: [],
+    parents: deriveParents(node, ctx),
     spouses: [],
     children: [],
     residences: [],

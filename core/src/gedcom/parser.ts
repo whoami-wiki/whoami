@@ -36,7 +36,12 @@ function normalize(node: RawNode): GedcomNode {
   const tag = node.type ?? node.tag ?? '';
   // xref_id lives in node.data.xref_id in 2.x; older versions put it in node.pointer
   const pointer = node.data?.xref_id ?? node.pointer;
-  const data = node.value ?? (typeof (node as Record<string, unknown>).data === 'string' ? (node as unknown as { data: string }).data : undefined);
+  // In 2.x, data is an object; value is the text after the tag.
+  // For pointers (FAMC, HUSB, WIFE), the pointer is in node.data.pointer
+  let data = node.value ?? (typeof (node as Record<string, unknown>).data === 'string' ? (node as unknown as { data: string }).data : undefined);
+  if (!data && node.data?.pointer) {
+    data = node.data.pointer;
+  }
   const kids = node.children ?? node.tree ?? [];
   return {
     tag,
