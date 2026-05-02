@@ -132,4 +132,8 @@
 
 @layer components {
   .redlink { @apply text-red-600 underline decoration-dashed; }
+  .family-tree-surface {
+    background:
+      linear-gradient(135deg, oklch(0.985 0.006 260) 0%, oklch(0.965 0.012 235) 42%, oklch(0.985 0.012 20) 100%);
+  }
 }
