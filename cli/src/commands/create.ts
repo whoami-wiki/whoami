@@ -1,41 +1,22 @@
-import { parseArgs } from 'node:util';
-import { type WikiClient } from '../wiki-client.js';
-import { UsageError } from '../errors.js';
-import { resolveContent } from '../content.js';
-import { type GlobalFlags, outputJson, outputResult } from '../output.js';
+import type { ApiClient } from '../api-client.js';
+import { NotFound } from '../api-client.js';
 
-export async function createCommand(
-  args: string[],
-  globals: GlobalFlags,
-  client: WikiClient,
-): Promise<void> {
-  const { values, positionals } = parseArgs({
-    args,
-    options: {
-      content: { type: 'string', short: 'c' },
-      file: { type: 'string', short: 'f' },
-      summary: { type: 'string', short: 'm' },
-    },
-    allowPositionals: true,
-    strict: false,
-  });
+export interface CreateOptions {
+  slug: string;
+  body: string;
+  summary: string;
+  client: Pick<ApiClient, 'read' | 'write'>;
+  write: (s: string) => void;
+}
 
-  const title = positionals[0];
-  if (!title) throw new UsageError('Usage: wai create <title> [-c content | -f file | stdin] [-m summary]');
-
-  const content = await resolveContent({
-    content: values.content as string | undefined,
-    file: values.file as string | undefined,
-  });
-
-  const result = await client.createPage(title, content, values.summary as string | undefined);
-
-  if (globals.json) {
-    outputJson(result);
-  } else {
-    outputResult('Created', result.title, {
-      rev: String(result.newRevid),
-      summary: values.summary as string | undefined,
-    });
+export async function runCreate(opts: CreateOptions): Promise<void> {
+  if (!opts.summary) throw new Error('--summary is required');
+  let exists = true;
+  try { await opts.client.read(opts.slug); } catch (err) {
+    if (err instanceof NotFound) exists = false;
+    else throw err;
   }
+  if (exists) throw new Error(`page ${opts.slug} already exists — use 'wai write' to overwrite or 'wai edit' to modify`);
+  await opts.client.write(opts.slug, opts.body, opts.summary);
+  opts.write(`created ${opts.slug}\n`);
 }
