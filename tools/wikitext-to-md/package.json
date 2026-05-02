@@ -1,0 +1,26 @@
+{
+  "name": "@whoami/wikitext-to-md",
+  "version": "0.1.0",
+  "description": "One-shot converter: MediaWiki SQLite → Markdown for the family-wiki migration",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "wikitext-to-md": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/index.ts",
+    "test": "tsx --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  }
+}
