@@ -35,7 +35,7 @@ test('converts a person page end-to-end', () => {
   assert.match(out.md, /categories: \[People, Family\]/);
   assert.match(out.md, /gedcom:\n  file: barash-tree\.ged\n  record: I123\n  snapshot: a1a48f25952a3294/);
   assert.match(out.md, /:::infobox-person/);
-  assert.match(out.md, /:::cite-vault\{type="genealogy"/);
+  assert.match(out.md, /::cite-vault\{type="genealogy"/);
   // Note: '''Abby Rickelman''' should now be transformed to **Abby Rickelman**
   // because Task 20 (bold-italic) is in the pipeline.
   assert.match(out.md, /\*\*Abby Rickelman\*\* \(born 1991\) is a first cousin of \[\[Steven Barash\]\]\./);

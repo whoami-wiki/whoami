@@ -8,7 +8,7 @@ test('converts {{Gap|note}} to :::gap with body', () => {
 });
 
 test('handles empty body {{Gap}}', () => {
-  assert.equal(transformGap('{{Gap}}'), ':::gap:::');
+  assert.equal(transformGap('{{Gap}}'), '::gap');
 });
 
 test('passes through unrelated text', () => {

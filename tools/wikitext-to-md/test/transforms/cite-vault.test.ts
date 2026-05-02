@@ -7,21 +7,21 @@ test('converts a basic cite vault to a directive', () => {
   const output = transformCiteVault(input);
   assert.equal(
     output,
-    ':::cite-vault{type="genealogy" snapshot="barash-tree" note="Barash Family Tree.ged record I123"}:::'
+    '::cite-vault{type="genealogy" snapshot="barash-tree" note="Barash Family Tree.ged record I123"}'
   );
 });
 
 test('preserves args when only note= is set', () => {
   const input = '{{Cite vault|note=hello}}';
   const output = transformCiteVault(input);
-  assert.equal(output, ':::cite-vault{note="hello"}:::');
+  assert.equal(output, '::cite-vault{note="hello"}');
 });
 
 test('handles multiple cite vaults on one page', () => {
   const input = '{{Cite vault|note=A}}\n\nMore text.\n\n{{Cite vault|note=B}}';
   const output = transformCiteVault(input);
-  assert.match(output, /:::cite-vault\{note="A"\}:::/);
-  assert.match(output, /:::cite-vault\{note="B"\}:::/);
+  assert.match(output, /::cite-vault\{note="A"\}/);
+  assert.match(output, /::cite-vault\{note="B"\}/);
 });
 
 test('escapes double quotes inside arg values', () => {

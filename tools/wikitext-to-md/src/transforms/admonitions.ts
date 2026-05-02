@@ -1,7 +1,7 @@
 const ADMONITIONS: ReadonlyArray<[RegExp, string]> = [
-  [/\{\{Open\}\}/g, ':::open:::'],
-  [/\{\{Closed\}\}/g, ':::closed:::'],
-  [/\{\{Superseded\}\}/g, ':::superseded:::'],
+  [/\{\{Open\}\}/g, '::open'],
+  [/\{\{Closed\}\}/g, '::closed'],
+  [/\{\{Superseded\}\}/g, '::superseded'],
 ];
 
 export function transformAdmonitions(text: string): string {

@@ -7,7 +7,7 @@ test('converts cite message to directive', () => {
   const output = transformCiteMessage(input);
   assert.equal(
     output,
-    ':::cite-message{snapshot="vault-2024-03" date="2024-03-15" thread="Mom"}:::'
+    '::cite-message{snapshot="vault-2024-03" date="2024-03-15" thread="Mom"}'
   );
 });
 
