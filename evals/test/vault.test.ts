@@ -226,8 +226,8 @@ describe('resolveCitations', () => {
       JSON.stringify(msgData),
     );
 
-    const wikitext = '{{Cite message | snapshot=329f2f56f6122638 | date=2019-11-14 | thread=test_contact_100200300 | author=Contact}}';
-    const results = resolveCitations(wikitext, vaultPath);
+    const body = '::cite-message{snapshot=329f2f56f6122638 date=2019-11-14 thread=test_contact_100200300 author=Contact}';
+    const results = resolveCitations(body, vaultPath);
 
     assert.equal(results.length, 1);
     assert.equal(results[0].resolved, true);
@@ -235,8 +235,8 @@ describe('resolveCitations', () => {
   });
 
   it('returns unresolved for missing manifest', () => {
-    const wikitext = '{{Cite message | snapshot=nonexistent | date=2019-11-14 | thread=test | author=Test}}';
-    const results = resolveCitations(wikitext, vaultPath);
+    const body = '::cite-message{snapshot=nonexistent date=2019-11-14 thread=test author=Test}';
+    const results = resolveCitations(body, vaultPath);
 
     assert.equal(results.length, 1);
     assert.equal(results[0].resolved, false);
@@ -249,15 +249,15 @@ describe('resolveCitations', () => {
     mkdirSync(join(vaultPath, 'objects', prefix), { recursive: true });
     writeFileSync(join(vaultPath, 'objects', prefix, hash), 'raw object data');
 
-    const wikitext = `{{Cite photo | hash=${hash} | date=2020-01-01}}`;
-    const results = resolveCitations(wikitext, vaultPath);
+    const body = `::cite-photo{snapshot=${hash} date=2020-01-01}`;
+    const results = resolveCitations(body, vaultPath);
 
     assert.equal(results.length, 1);
     assert.equal(results[0].resolved, true);
     assert.ok(results[0].sourceExcerpt.includes('raw object data'));
   });
 
-  it('handles wikitext with no citations', () => {
+  it('handles body with no citations', () => {
     const results = resolveCitations('Just some text.', vaultPath);
     assert.equal(results.length, 0);
   });
@@ -285,12 +285,13 @@ describe('resolveCitations', () => {
     };
     writeFileSync(join(vaultPath, 'objects', prefix, hash), JSON.stringify(msgData));
 
-    const wikitext = [
-      '{{Cite message | snapshot=snap123 | date=2019-11-14 | thread=thread_1 | author=Alice}}',
-      '{{Cite message | snapshot=snap123 | date=2019-11-15 | thread=thread_1 | author=Alice}}',
+    const body = [
+      '::cite-message{snapshot=snap123 date=2019-11-14 thread=thread_1 author=Alice}',
+      '',
+      '::cite-message{snapshot=snap123 date=2019-11-15 thread=thread_1 author=Alice}',
     ].join('\n');
 
-    const results = resolveCitations(wikitext, vaultPath);
+    const results = resolveCitations(body, vaultPath);
     assert.equal(results.length, 2);
     assert.equal(results[0].resolved, true);
     assert.equal(results[1].resolved, true);

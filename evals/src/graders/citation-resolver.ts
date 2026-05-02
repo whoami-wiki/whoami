@@ -9,7 +9,7 @@ import {
 } from '../vault.js';
 
 export interface ResolvedCitation {
-  /** The raw citation template text */
+  /** A textual representation of the citation (template + fields) */
   raw: string;
   /** Extracted source excerpt (messages near date, or confirmation of file existence) */
   sourceExcerpt: string;
@@ -26,66 +26,66 @@ export interface ResolvedCitation {
  */
 type CacheKey = string;
 
+function renderRaw(template: string, fields: Record<string, string>): string {
+  const attrs = Object.entries(fields)
+    .map(([k, v]) => `${k}=${v}`)
+    .join(' ');
+  return `::cite-${template}{${attrs}}`;
+}
+
 /**
- * Resolve citations from wikitext against the vault.
+ * Resolve citations from a markdown body against the vault.
  *
- * For message/voice note templates: find the thread directory in the manifest,
+ * For message/voice-note templates: find the thread directory in the manifest,
  * read the message JSON, and filter by date.
  *
  * For photo/video templates: confirm the file exists in the manifest.
  *
- * For direct hash citations: read the object directly.
+ * For vault templates: confirm snapshot exists in manifest.
  */
 export function resolveCitations(
-  wikitext: string,
+  body: string,
   vaultPath: string,
 ): ResolvedCitation[] {
-  const citations = parseCitations(wikitext);
+  const citations = parseCitations(body);
   const results: ResolvedCitation[] = [];
 
   // Cache: snapshotId:thread -> parsed JSON string
   const threadCache = new Map<CacheKey, string | null>();
 
   for (const citation of citations) {
-    const { fields, raw, template } = citation;
+    const { fields, template } = citation;
+    const raw = renderRaw(template, fields);
 
-    const snapshotId = fields['snapshot'] ?? fields['hash'];
+    const snapshotId = fields['snapshot'];
     const date = fields['date'];
     const thread = fields['thread'];
-
-    // Direct hash with no snapshot — try reading object directly
-    if (fields['hash'] && !fields['snapshot']) {
-      const buf = readObject(vaultPath, fields['hash']);
-      if (buf) {
-        results.push({
-          raw,
-          sourceExcerpt: buf.toString('utf-8').slice(0, 2000),
-          resolved: true,
-          sourceKey: `hash:${fields['hash']}`,
-        });
-      } else {
-        results.push({
-          raw,
-          sourceExcerpt: '',
-          resolved: false,
-          error: `Object not found: ${fields['hash']}`,
-        });
-      }
-      continue;
-    }
 
     if (!snapshotId) {
       results.push({
         raw,
         sourceExcerpt: '',
         resolved: false,
-        error: 'No snapshot or hash field',
+        error: 'No snapshot field',
       });
       continue;
     }
 
     const manifest = readManifest(vaultPath, snapshotId);
     if (!manifest) {
+      // For photo/video, fall back to treating snapshot as a direct object hash
+      if (template === 'photo' || template === 'video') {
+        const buf = readObject(vaultPath, snapshotId);
+        if (buf) {
+          results.push({
+            raw,
+            sourceExcerpt: buf.toString('utf-8').slice(0, 2000),
+            resolved: true,
+            sourceKey: `hash:${snapshotId}`,
+          });
+          continue;
+        }
+      }
       results.push({
         raw,
         sourceExcerpt: '',
@@ -95,7 +95,7 @@ export function resolveCitations(
       continue;
     }
 
-    if (template === 'message' || template === 'voice note') {
+    if (template === 'message' || template === 'voice-note') {
       // Use date or timestamp field
       const dateField = date ?? fields['timestamp'];
       const excerpt = resolveMessageCitation(
@@ -129,7 +129,7 @@ export function resolveCitations(
         sourceKey: `${snapshotId}:${thread ?? 'unknown'}`,
       });
     } else if (template === 'photo' || template === 'video') {
-      const mediaResolved = resolveMediaCitation(manifest, vaultPath, thread, fields['hash']);
+      const mediaResolved = resolveMediaCitation(manifest, vaultPath, thread, fields['snapshot']);
       results.push({
         raw,
         sourceExcerpt: mediaResolved ? `[${template} file confirmed in manifest]` : '',
@@ -138,7 +138,7 @@ export function resolveCitations(
         sourceKey: `${snapshotId}:media`,
       });
     } else if (template === 'vault') {
-      // Cite vault: confirm snapshot exists in manifest (bibliographic reference)
+      // cite-vault: confirm snapshot exists in manifest (bibliographic reference)
       results.push({
         raw,
         sourceExcerpt: `[Vault reference confirmed: snapshot ${snapshotId}, ${manifest.files.length} files]`,
@@ -146,7 +146,6 @@ export function resolveCitations(
         sourceKey: `${snapshotId}:vault`,
       });
     } else {
-      // Unknown template — try best effort with hash
       results.push({
         raw,
         sourceExcerpt: '',
@@ -255,7 +254,7 @@ function resolveMediaCitation(
   // If we have a direct hash, check if the object exists
   if (hash) {
     const buf = readObject(vaultPath, hash);
-    return buf !== null;
+    if (buf !== null) return true;
   }
 
   // Otherwise check if there are media files in the thread
