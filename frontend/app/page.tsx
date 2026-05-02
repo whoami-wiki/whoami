@@ -17,6 +17,7 @@ export default async function HomePage() {
         </div>
         <div className="flex gap-4 text-sm">
           <Link href="/family" className="text-blue-600 hover:underline">Family →</Link>
+          <Link href="/family/tree" className="text-blue-600 hover:underline">Tree →</Link>
           <Link href="/search" className="text-blue-600 hover:underline">Search →</Link>
         </div>
       </div>

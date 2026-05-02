@@ -75,6 +75,9 @@ export default async function FamilyPage() {
       <p className="text-muted-foreground mb-6">
         Direct ancestors of <span className="font-semibold">{view.self.name}</span>, traced through paternal and maternal lines.
       </p>
+      <p className="mb-6">
+        <Link href="/family/tree" className="text-primary underline-offset-4 hover:underline">Browse the family tree</Link>
+      </p>
       <div className="mb-8">
         <PersonCard a={view.self} />
       </div>
