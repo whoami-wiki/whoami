@@ -1,12 +1,12 @@
-import type { GedcomNode, DerivedRecord, DatedEvent, IndividualRef, ResidenceEvent, OccupationEvent, SourceRef } from './types.ts';
+import type { GedcomNode, DerivedRecord, DatedEvent, ParentRef, ResidenceEvent, OccupationEvent, SourceRef } from './types.ts';
 import type { ParseResult } from './parser.ts';
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import yaml from 'js-yaml';
 
-function deriveParents(node: GedcomNode, ctx: ParseResult): IndividualRef[] {
-  const out: IndividualRef[] = [];
+function deriveParents(node: GedcomNode, ctx: ParseResult): ParentRef[] {
+  const out: ParentRef[] = [];
   for (const famc of node.tree.filter(n => n.tag === 'FAMC')) {
     const famPointer = (famc.data ?? '').replace(/^@|@$/g, '');
     const fam = ctx.families.get(famPointer);
@@ -17,7 +17,11 @@ function deriveParents(node: GedcomNode, ctx: ParseResult): IndividualRef[] {
       const parentRecord = link.data.replace(/^@|@$/g, '');
       const parent = ctx.individuals.get(parentRecord);
       if (!parent) continue;
-      out.push({ record: parentRecord, name: deriveName(parent) });
+      out.push({
+        record: parentRecord,
+        name: deriveName(parent),
+        role: tag === 'HUSB' ? 'father' : 'mother',
+      });
     }
   }
   return out;

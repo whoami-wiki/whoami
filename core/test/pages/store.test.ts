@@ -72,6 +72,34 @@ test('PageStore.list: returns summaries for all pages', async () => {
   }
 });
 
+test('PageStore.list: includes gedcom record for exact joins', async () => {
+  const repo = await makeTestRepo();
+  try {
+    writeFileSync(join(repo.pagesDir, 'steven-barash.md'), `---
+title: Steven Nicholas Barash
+owner: steven
+editors: []
+type: person
+aliases: []
+categories: [Family]
+gedcom:
+  file: Barash-Family-Tree.ged
+  record: I28906360944
+  snapshot: abc123
+created: 2026-04-29
+---
+
+Body.
+`);
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const list = await store.list();
+    const page = list.find(p => p.slug === 'steven-barash')!;
+    assert.equal((page as { gedcomRecord?: string }).gedcomRecord, 'I28906360944');
+  } finally {
+    repo.cleanup();
+  }
+});
+
 test('PageStore.list: skips _meta and _archived directories', async () => {
   const repo = await makeTestRepo();
   try {

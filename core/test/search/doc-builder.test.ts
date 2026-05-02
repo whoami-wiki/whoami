@@ -38,8 +38,8 @@ test('buildSearchDoc: page + derived', () => {
     birth: { date: '1991', place: 'Pittsburgh' },
     death: null,
     parents: [
-      { record: 'I1', name: 'Yaroslav Rickelman' },
-      { record: 'I2', name: 'Irene Burmenko' },
+      { record: 'I1', name: 'Yaroslav Rickelman', role: 'father' },
+      { record: 'I2', name: 'Irene Burmenko', role: 'mother' },
     ],
     spouses: [{ record: 'I3', name: 'Thomas Campanella', married: null }],
     children: [],

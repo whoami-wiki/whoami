@@ -30,6 +30,7 @@ export interface PageMetaSummary {
   type: PageType;
   categories: string[];
   aliases: string[];
+  gedcomRecord?: string;
   isTalk: boolean;
   isArchived: boolean;
 }

@@ -12,6 +12,12 @@ export interface IndividualRef {
   name: string;
 }
 
+/** Like IndividualRef but tagged with which side of a marriage they were on
+ *  in the parent family record. Used for parents[] in a DerivedRecord. */
+export interface ParentRef extends IndividualRef {
+  role: 'father' | 'mother';
+}
+
 /** A dated event such as BIRT, DEAT, MARR. Date and place are both optional. */
 export interface DatedEvent {
   date: string | null;          // raw GEDCOM DATE value, e.g. "12 JAN 1950" or "ABT 1880"
@@ -38,7 +44,7 @@ export interface DerivedRecord {
   name: string;                         // "Abby Rickelman"
   birth: DatedEvent | null;
   death: DatedEvent | null;
-  parents: IndividualRef[];
+  parents: ParentRef[];
   spouses: { record: string; name: string; married: string | null }[];
   children: { record: string; name: string; born: string | null }[];
   residences: ResidenceEvent[];
