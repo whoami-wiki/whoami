@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdtempSync, unlinkSync, rmdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -23,7 +23,6 @@ export function editInEditor(initial: string): string {
     if (r.status !== 0) throw new Error(`editor exited with status ${r.status}`);
     return readFileSync(file, 'utf-8');
   } finally {
-    try { unlinkSync(file); } catch { /* ignore */ }
-    try { rmdirSync(dir); } catch { /* ignore */ }
+    rmSync(dir, { recursive: true, force: true });
   }
 }

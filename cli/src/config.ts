@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
@@ -13,14 +13,12 @@ export interface WaiConfig {
 export function getServer(): string {
   const env = process.env.WHOAMI_SERVER;
   if (env) return env.replace(/\/$/, '');
-  if (existsSync(CONFIG_FILE)) {
-    try {
-      const data = JSON.parse(readFileSync(CONFIG_FILE, 'utf-8')) as Partial<WaiConfig>;
-      if (typeof data.server === 'string' && data.server.length > 0) {
-        return data.server.replace(/\/$/, '');
-      }
-    } catch { /* fall through */ }
-  }
+  try {
+    const data = JSON.parse(readFileSync(CONFIG_FILE, 'utf-8')) as Partial<WaiConfig>;
+    if (typeof data.server === 'string' && data.server.length > 0) {
+      return data.server.replace(/\/$/, '');
+    }
+  } catch { /* missing or malformed: fall through to default */ }
   return DEFAULT_SERVER;
 }
 

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { isValidElement, type ReactElement, type ReactNode } from 'react';
 import type { DerivedRecord } from '@core/gedcom/types.ts';
 import yaml from 'js-yaml';
+import { toSlug } from '@/lib/slug';
 
 interface Props {
   derived?: DerivedRecord | null;
@@ -79,15 +80,11 @@ function PersonList({ items }: { items: { record: string; name: string }[] }) {
       {items.map((p, i) => (
         <span key={p.record}>
           {i > 0 ? ', ' : ''}
-          <Link href={`/${slugifyName(p.name)}`} className="text-blue-600 hover:underline">{p.name}</Link>
+          <Link href={`/${toSlug(p.name)}`} className="text-blue-600 hover:underline">{p.name}</Link>
         </span>
       ))}
     </span>
   );
-}
-
-function slugifyName(name: string): string {
-  return name.toLowerCase().replace(/['']/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-');
 }
 
 function extractFieldsFromChildren(children: ReactNode): Record<string, string> {
