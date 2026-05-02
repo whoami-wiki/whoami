@@ -6,6 +6,8 @@
 
 **Architecture:** Each format-specific grader's `parseX(wikitext)` regex is replaced with a parser that consumes `parsePageContent(md): ParsedPage` (directives + headings + wikilinks) plus `gray-matter` for frontmatter. Grader signatures change `wikitext: string` → `body: string` (the markdown body) but remain otherwise compatible. The runner switches from MW API + `php maintenance/run.php edit` calls to `writePageDirect(vault, slug, body, meta)` for seeding and `wai` CLI for agent-driven writes. Integration tests live alongside the H2a `harness.test.ts` under `evals/test/integration/`.
 
+**Directive shape convention (important):** remark-directive only accepts two forms — leaf `::name{attrs}` (single colon-pair, single line, no body) and container `:::name{attrs}\n…body…\n:::` (triple colons, body and close on subsequent lines). The one-line `:::name{...}:::` form that appeared in the Plan F1 conversion table is **not valid syntax** — it parses to zero directives. This plan standardizes on **leaf** for citations (`::cite-vault{...}`) since they have no body, and **container** for infoboxes (`:::infobox-person\n…\n:::`) and admonitions with prose. Footnote-definition bodies are opaque to remark-directive — citations must live as leaf directives in the page body, not nested inside `[^id]: …` blocks.
+
 **Tech Stack:** Node `node:test`, `tsx`, the existing `parsePageContent` from H2a, `gray-matter` (already in evals from H2a), the bundled `wai` CLI (`cli/dist/wai.cjs`). Tests `fetch()` the API directly or `execSync` the CLI. No new deps.
 
 **Reference spec:** `docs/superpowers/specs/2026-05-01-family-wiki-migration-design.md` — Phase 5 ("Eval rewrite") and the Verification list.
@@ -59,6 +61,56 @@ evals/
 
 ---
 
+## Phase 0 — Fix H2a collateral damage (directive syntax)
+
+### Task 0: Repatch SKILL.md and editor.md to use valid directive shapes
+
+**Files:**
+- Modify: `plugins/whoami/skills/editorial-guide/SKILL.md`
+- Modify: `plugins/whoami/agents/editor.md`
+
+H2a's conversion table specified one-line `:::name{...}:::` for citations, which **does not parse** under remark-directive (verified empirically: produces 0 directives). Both docs were rewritten with this invalid syntax. Patch in place to use the leaf form `::cite-vault{...}` for citations.
+
+- [ ] **Step 1: Find every invalid one-line directive in both files**
+
+```bash
+grep -nE ':::[a-z-]+\{[^}]*\}:::' /Users/nyetwork/dev/whoami/plugins/whoami/skills/editorial-guide/SKILL.md /Users/nyetwork/dev/whoami/plugins/whoami/agents/editor.md
+```
+
+- [ ] **Step 2: Replace each with the leaf form**
+
+Pattern: `:::name{attrs}:::` → `::name{attrs}`
+
+For example:
+- `:::cite-vault{type=photo snapshot=H note="N"}:::` → `::cite-vault{type=photo snapshot=H note="N"}`
+- `:::cite-message{snapshot=H date=D thread=T}:::` → `::cite-message{snapshot=H date=D thread=T}`
+
+Container directives that have a body (e.g. `:::infobox-person\n…yaml…\n:::`, `:::blockquote{by="..."}\n…text…\n:::`, `:::dialogue{speaker="..."}\n…line…\n:::`) are **valid** and stay unchanged.
+
+- [ ] **Step 3: Add a "Directive shapes" callout to SKILL.md**
+
+Find the section that explains the directive system (likely after the page-types section or in the citations section). Add a short paragraph:
+
+> **Directive syntax**: use `::name{attrs}` (single colon-pair, single line) for leaf directives that carry only attributes — citations (`::cite-vault`, `::cite-message`), admonitions (`::open`, `::closed`, `::superseded`, `::gap`). Use `:::name{attrs}` opening on its own line, body content on subsequent lines, and `:::` close on its own line for container directives that have a body — infoboxes, blockquotes, dialogue, columns-list. The one-line `:::name{...}:::` shape is invalid and won't render.
+
+- [ ] **Step 4: Verify zero invalid one-liners remain**
+
+```bash
+grep -cE ':::[a-z-]+\{[^}]*\}:::' /Users/nyetwork/dev/whoami/plugins/whoami/skills/editorial-guide/SKILL.md /Users/nyetwork/dev/whoami/plugins/whoami/agents/editor.md
+```
+
+Expected: `0` for both.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd /Users/nyetwork/dev/whoami
+git add plugins/whoami/skills/editorial-guide/SKILL.md plugins/whoami/agents/editor.md
+git commit -m "docs: fix invalid one-line directive syntax in SKILL.md + editor.md (H2a fallout)"
+```
+
+---
+
 ## Phase 1 — Format-specific graders + their tests
 
 ### Task 1: Citations (parser + grader + resolver + tests)
@@ -71,7 +123,7 @@ evals/
 
 The original `parseCitations(wikitext)` walks `/\{\{Cite\s+(\w+)\s*\|([^}]*)\}\}/g`. New design: `parseCitations(body): ParsedCitation[]` consumes `parsePageContent(body).directives`, filters where `name.startsWith('cite-')`, normalizes the directive name to a template (`cite-vault` → `'vault'`, `cite-message` → `'message'`, etc.), and copies attrs.
 
-Markdown footnote-wrapped citations are common (e.g. `[^abc]:\n:::cite-vault{type=photo snapshot=H note="N"}:::`). `parsePageContent` extracts directives regardless of footnote nesting because remark normalizes footnote definitions as their own AST nodes. Verify: in step 1 test fixtures, both fenced-block citations and footnote-wrapped citations should be detected.
+**Citation shape**: leaf directive `::cite-vault{snapshot=H date=D type=T}` (single colon-pair, single line). Container `:::cite-vault{}\n…\n:::` would also parse but citations have no body. Footnote-definition bodies (`[^a]: …`) are opaque to remark-directive — citations live as standalone leaf directives in the page body, not nested in footnote defs. The convention used in Plan H2a's editorial guide and editor agent (after Task 0) is: place a footnote ref `[^a]` at the cited claim, and put the leaf directive `::cite-vault{...}` either inline next to the claim or on a separate line near it.
 
 - [ ] **Step 1: Failing test — `evals/test/citations.test.ts` (verbatim)**
 
@@ -81,8 +133,8 @@ import assert from 'node:assert/strict';
 import { gradeCitations, parseCitations, findUncitedClaims } from '../src/graders/citations.js';
 
 describe('parseCitations (markdown)', () => {
-  it('parses a vault citation directive', () => {
-    const md = ':::cite-vault{type=photo snapshot=abc123 note="From the export"}:::';
+  it('parses a vault citation leaf directive', () => {
+    const md = '::cite-vault{type=photo snapshot=abc123 note="From the export"}';
     const citations = parseCitations(md);
     assert.equal(citations.length, 1);
     assert.equal(citations[0]!.template, 'vault');
@@ -92,7 +144,7 @@ describe('parseCitations (markdown)', () => {
   });
 
   it('parses a message citation', () => {
-    const md = ':::cite-message{snapshot=def456 date=2024-01-01 thread=Alice note="DM"}:::';
+    const md = '::cite-message{snapshot=def456 date=2024-01-01 thread=Alice note="DM"}';
     const citations = parseCitations(md);
     assert.equal(citations.length, 1);
     assert.equal(citations[0]!.template, 'message');
@@ -102,17 +154,22 @@ describe('parseCitations (markdown)', () => {
 
   it('parses multiple citations in body', () => {
     const md = `
-Text :::cite-vault{snapshot=a date=2024-01-01}::: more text :::cite-message{snapshot=b date=2024-02-01 thread=Bob}:::
+::cite-vault{snapshot=a date=2024-01-01 type=photo}
+
+::cite-message{snapshot=b date=2024-02-01 thread=Bob}
 `;
     const citations = parseCitations(md);
     assert.equal(citations.length, 2);
   });
 
-  it('parses footnote-wrapped citations', () => {
+  it('parses citations adjacent to claims (footnote-ref pattern)', () => {
+    // Citations live in the body, not inside [^a]: blocks (those are opaque to
+    // remark-directive). The convention: footnote ref next to the claim, the
+    // ::cite-* directive on its own line nearby.
     const md = `
-Some claim.[^a]
+Alice was born in 1990.[^a]
 
-[^a]: :::cite-vault{snapshot=H date=2024-03-15 type=photo}:::
+::cite-vault{snapshot=H date=1990-03-15 type=record}
 `;
     const citations = parseCitations(md);
     assert.equal(citations.length, 1);
@@ -131,7 +188,7 @@ describe('gradeCitations (markdown)', () => {
     const md = `
 A claim.[^a]
 
-[^a]: :::cite-vault{snapshot=abc date=2024-01-01 type=photo}:::
+::cite-vault{snapshot=abc date=2024-01-01 type=photo}
 `;
     const result = gradeCitations(md);
     assert.equal(result.grader, 'citations');
@@ -139,13 +196,13 @@ A claim.[^a]
   });
 
   it('penalizes missing required fields', () => {
-    const md = ':::cite-vault{type=photo}:::';  // missing snapshot + date
+    const md = '::cite-vault{type=photo}';  // missing snapshot + date
     const result = gradeCitations(md);
     assert.ok(result.score < 1, 'expected score < 1 for missing fields');
   });
 
   it('penalizes unknown template', () => {
-    const md = ':::cite-bogus{snapshot=x date=2024}:::';
+    const md = '::cite-bogus{snapshot=x date=2024}';
     const result = gradeCitations(md);
     assert.ok(result.score < 1, 'expected score < 1 for unknown template');
   });
@@ -159,7 +216,7 @@ describe('findUncitedClaims', () => {
   });
 
   it('does not flag claims that have a footnote ref', () => {
-    const md = 'Alice was born on March 15, 1990.[^a]\n\n[^a]: :::cite-vault{snapshot=x date=1990-03-15 type=record}:::';
+    const md = 'Alice was born on March 15, 1990.[^a]\n\n::cite-vault{snapshot=x date=1990-03-15 type=record}';
     const flagged = findUncitedClaims(md);
     assert.equal(flagged.length, 0);
   });
@@ -281,7 +338,15 @@ For specifics, read the existing `citation-resolver.ts` and adapt in place. Don'
 
 - [ ] **Step 5: Port `evals/test/vault.test.ts`**
 
-The vault tests primarily exercise `readManifest`/`readObject`/`extractMessagesNearDate` (vault module) — those don't change. The `resolveCitations` test (around line 270+) needs a markdown body input instead of wikitext. Port it: replace `{{Cite vault|hash=H|date=D}}` style fixtures with `:::cite-vault{snapshot=H date=D type=photo}:::` and update the field-lookup expectations from `hash` to `snapshot`.
+Most of `vault.test.ts` exercises `readManifest`/`readObject`/`findInManifest`/`findAllInManifest`/`extractMessagesNearDate` from `src/vault.ts` — those are vault-storage tests, format-agnostic, **leave them alone**.
+
+The only block that needs porting is the `describe('resolveCitations'…)` block at the bottom of the file. Identify it with:
+
+```bash
+grep -n "describe.*resolveCitations\|resolveCitations(" /Users/nyetwork/dev/whoami/evals/test/vault.test.ts | head
+```
+
+Inside that block, every fixture string of the shape `{{Cite vault|hash=H|...}}` becomes the leaf directive `::cite-vault{snapshot=H ...}`. Field name change: `hash=` → `snapshot=`. Field name change in assertions too: any `citation.fields.hash` → `citation.fields.snapshot`. The vault file path / snapshot lookup logic in `resolveCitations` itself uses `snapshot` (you've already adapted it in Step 4); the test fixtures just need to match.
 
 - [ ] **Step 6: Run tests**
 
@@ -1058,9 +1123,10 @@ After all 10 tasks complete:
 
 ## Definition of Done
 
-- All 10 tasks complete; `evals/` typechecks (zero `@ts-nocheck`) and both `npm test` (unit) and `npm run test:integration` are green.
+- All **11** tasks complete (Task 0 + 10 numbered tasks); `evals/` typechecks (zero `@ts-nocheck`) and both `npm test` (unit) and `npm run test:integration` are green.
+- SKILL.md and editor.md teach valid leaf-directive syntax for citations.
 - All format-specific graders consume markdown bodies; LLM rubrics + tool-usage refreshed.
 - `runner/e2e.ts` compiles cleanly and runs against the new wiki shape.
 - 4 new integration test files cover the spec's verification list (XSS+slug, GEDCOM, atomic-write, perf).
-- Branch `migration-spec` has ~10 new commits on top of `def1300`.
+- Branch `migration-spec` has ~11 new commits on top of `def1300`.
 - Out of scope (deferred to a future plan): Plan A backup eval; agent-harness API-key wiring (Claude Code / Codex / etc. — those exist but live runs need keys and are out of scope for plan H2b's verification).
