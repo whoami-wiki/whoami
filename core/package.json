@@ -9,6 +9,7 @@
     "test": "tsx --test \"test/**/*.test.ts\""
   },
   "dependencies": {
+    "flexsearch": "^0.8.212",
     "gray-matter": "^4.0.3",
     "parse-gedcom": "^2.0.1",
     "simple-git": "^3.27.0",
