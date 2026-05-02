@@ -65,12 +65,14 @@ More prose.
   );
 });
 
-test('parsePageContent: extracts wikilinks', () => {
-  const md = 'See [[Jane Doe]] and [[Tempelhof Disaster|the disaster]] for details.';
+test('parsePageContent: extracts wikilinks (target / target+alt / target+anchor / all three)', () => {
+  const md = 'See [[Jane Doe]], [[Tempelhof Disaster|the disaster]], [[Page#section]], [[Page#section|alt label]].';
   const out = parsePageContent(md);
   assert.deepEqual(out.wikilinks, [
     { target: 'Jane Doe' },
     { target: 'Tempelhof Disaster', alt: 'the disaster' },
+    { target: 'Page', anchor: 'section' },
+    { target: 'Page', anchor: 'section', alt: 'alt label' },
   ]);
 });
 

@@ -19,6 +19,7 @@ export interface HeadingEntry {
 
 export interface WikilinkEntry {
   target: string;
+  anchor?: string;
   alt?: string;
 }
 
@@ -28,7 +29,9 @@ export interface ParsedPage {
   wikilinks: WikilinkEntry[];
 }
 
-const WIKILINK_RE = /\[\[([^\]|#]+?)(?:\|([^\]]+?))?\]\]/g;
+// Matches [[Target]], [[Target#anchor]], [[Target|alt]], [[Target#anchor|alt]].
+// Mirrors frontend/lib/wikilinks.ts.
+const WIKILINK_RE = /\[\[([^\]|#]+?)(?:#([^\]|]+?))?(?:\|([^\]]+?))?\]\]/g;
 
 const processor = unified().use(remarkParse).use(remarkGfm).use(remarkDirective);
 
@@ -61,9 +64,12 @@ export function parsePageContent(md: string): ParsedPage {
   });
 
   for (const m of md.matchAll(WIKILINK_RE)) {
-    const target = m[1]!.trim();
-    const alt = m[2]?.trim();
-    wikilinks.push(alt ? { target, alt } : { target });
+    const entry: WikilinkEntry = { target: m[1]!.trim() };
+    const anchor = m[2]?.trim();
+    const alt = m[3]?.trim();
+    if (anchor) entry.anchor = anchor;
+    if (alt) entry.alt = alt;
+    wikilinks.push(entry);
   }
 
   return { directives, headings, wikilinks };

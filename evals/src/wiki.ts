@@ -91,8 +91,12 @@ export async function startWiki(opts: { port?: number } = {}): Promise<WikiInsta
     env,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
+  // Bound stderr capture so long-running tests don't leak memory.
+  const STDERR_CAP = 4096;
   let stderrBuf = '';
-  child.stderr?.on('data', (chunk: Buffer) => { stderrBuf += chunk.toString(); });
+  child.stderr?.on('data', (chunk: Buffer) => {
+    stderrBuf = (stderrBuf + chunk.toString()).slice(-STDERR_CAP);
+  });
 
   try {
     await waitForServer(url);
@@ -107,14 +111,16 @@ export async function startWiki(opts: { port?: number } = {}): Promise<WikiInsta
       child.kill('SIGTERM');
       await new Promise<void>((resolve) => {
         const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* ignore */ } resolve(); }, 2000);
+        // unref so this timer doesn't block process exit if the test runner is shutting down.
+        t.unref();
         child.once('exit', () => { clearTimeout(t); resolve(); });
       });
     }
   };
 
   const destroy = async (): Promise<void> => {
-    await stop();
-    rmSync(vaultPath, { recursive: true, force: true });
+    try { await stop(); }
+    finally { rmSync(vaultPath, { recursive: true, force: true }); }
   };
 
   return {
