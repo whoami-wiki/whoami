@@ -155,3 +155,27 @@ test('PageStore.history: returns commit log for a slug', async () => {
     repo.cleanup();
   }
 });
+
+test('PageStore.write: working tree is clean after commit failure', async () => {
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const page: Page = {
+      slug: 'r',
+      meta: { title: 'R', owner: 's', editors: [], type: 'person', aliases: [], categories: [], created: '2026-04-29' },
+      body: 'first',
+    };
+    await store.write('r', page, { name: 'A', email: 'a@x' }, 'first');
+
+    // Force commit to fail by passing an invalid email (contains spaces)
+    await assert.rejects(
+      store.write('r', { ...page, body: 'second' }, { name: 'A', email: 'invalid email with spaces' }, 'second'),
+    );
+
+    // The on-disk content must match the last good commit
+    const after = await store.read('r');
+    assert.equal(after.body.trim(), 'first');
+  } finally {
+    repo.cleanup();
+  }
+});

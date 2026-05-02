@@ -6,12 +6,19 @@ function client(repoRoot: string): SimpleGit {
   return simpleGit(repoRoot);
 }
 
+function validateEmail(email: string): void {
+  if (!/^[^\s@]+@[^\s@]+$/.test(email)) {
+    throw new Error(`invalid email format: ${email}`);
+  }
+}
+
 export async function addAndCommit(
   repoRoot: string,
   paths: string[],
   author: AuthorIdentity,
   summary: string,
 ): Promise<string> {
+  validateEmail(author.email);
   const git = client(repoRoot);
   await git.add(paths);
   const result = await git.commit(summary, paths, {
