@@ -52,9 +52,9 @@ cli/
 │   ├── config.ts                   # CREATE: replaces auth.ts; server URL only
 │   ├── slug.ts                     # CREATE: title→slug canonicalizer
 │   ├── body-input.ts               # CREATE: file/stdin/EDITOR helpers
-│   ├── output.ts                   # KEEP
-│   ├── errors.ts                   # KEEP (drops AuthError usage)
-│   ├── update.ts                   # KEEP
+│   ├── output.ts                   # DELETE (per-command write callbacks replace)
+│   ├── errors.ts                   # DELETE (ApiError in api-client.ts replaces)
+│   ├── update.ts                   # DELETE (self-updater dropped for v2 pre-release)
 │   ├── content.ts                  # DELETE (MediaWiki content helpers)
 │   ├── auth.ts                     # DELETE (replaced by config.ts)
 │   ├── data-path.ts                # DELETE (only used by snapshot)
@@ -183,9 +183,21 @@ test('toSlug: passes through valid slugs', () => {
 test('toSlug: strips leading/trailing whitespace', () => {
   assert.equal(toSlug('  Steven Barash  '), 'steven-barash');
 });
+
+test('toSlug: strips non-alphanumeric chars (slashes, punctuation)', () => {
+  assert.equal(toSlug('page/sub'), 'page-sub');
+  assert.equal(toSlug("Mary O'Neil"), 'mary-oneil');
+  assert.equal(toSlug('Foo: Bar?'), 'foo-bar');
+});
+
+test('toSlug: empty/junk input returns empty string', () => {
+  assert.equal(toSlug(''), '');
+  assert.equal(toSlug('---'), '');
+  assert.equal(toSlug('!@#$'), '');
+});
 ```
 
-- [ ] **Step 2: Run, expect 6 fail**
+- [ ] **Step 2: Run, expect 8 fail**
 
 ```bash
 cd /Users/nyetwork/dev/whoami/cli && npm test
@@ -194,20 +206,25 @@ cd /Users/nyetwork/dev/whoami/cli && npm test
 - [ ] **Step 3: Implement `cli/src/slug.ts`**
 
 ```ts
+/**
+ * Canonicalize a user-provided title into the slug shape that core/pages
+ * accepts: ^[a-z0-9][a-z0-9-]*(\.talk)?$. Non-alphanumeric chars are
+ * collapsed to hyphens, then leading/trailing hyphens are stripped.
+ */
 export function toSlug(input: string): string {
   const trimmed = input.trim();
   const talk = trimmed.endsWith('.talk');
   const base = talk ? trimmed.slice(0, -5) : trimmed;
   const slug = base
     .toLowerCase()
-    .replace(/['']/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/['']/g, '')          // strip apostrophes (no separator)
+    .replace(/[^a-z0-9]+/g, '-')   // anything else → hyphen
+    .replace(/^-+|-+$/g, '');      // strip edges
   return talk ? `${slug}.talk` : slug;
 }
 ```
 
-- [ ] **Step 4: Run, all 6 pass**
+- [ ] **Step 4: Run, all 8 pass**
 
 - [ ] **Step 5: Commit**
 
@@ -399,11 +416,24 @@ export interface Page {
   body: string;
 }
 
-export interface SyncResult {
-  kind: 'wrote' | 'no-op';
-  diff?: { added: string[]; changed: string[]; removed: string[] };
-  commit?: string;
-  reason?: string;
+export type SyncResult =
+  | {
+      kind: 'wrote';
+      diff: { added: string[]; changed: string[]; removed: string[] };
+      commit: string;
+      snapshot: { hash: string; date: string; file: string; notes: string };
+    }
+  | {
+      kind: 'no-op';
+      reason: 'unchanged-hash';
+    };
+
+export interface ReciteEntry {
+  slug: string;
+  record: string;
+  citedSnapshot: string;
+  latestSnapshot: string;
+  changedFields: string[];
 }
 
 export class ApiClient {
@@ -429,7 +459,7 @@ export class ApiClient {
     return this.json('POST', '/api/gedcom/sync', { gedFile, notes });
   }
 
-  async reciteDrift(): Promise<{ drift: { slug: string; record: string; cited: string; current: string }[] }> {
+  async reciteDrift(): Promise<{ drift: ReciteEntry[] }> {
     return this.json('GET', '/api/gedcom/recite');
   }
 
@@ -773,7 +803,9 @@ export async function runEdit(opts: EditOptions): Promise<void> {
   const page = await opts.client.read(opts.slug);
   const editor = opts.openEditor ?? editInEditor;
   const next = editor(page.body);
-  if (next === page.body) {
+  // Compare with trailing whitespace stripped — most editors auto-add a final
+  // newline, which would otherwise look like a change every time.
+  if (next.trimEnd() === page.body.trimEnd()) {
     opts.write('no changes\n');
     return;
   }
@@ -939,10 +971,10 @@ export async function runSyncGedcom(opts: SyncGedcomOptions): Promise<void> {
   if (!opts.notes) throw new Error('--notes is required');
   const result = await opts.client.syncGedcom(opts.gedFile, opts.notes);
   if (result.kind === 'no-op') {
-    opts.write(`no-op: ${result.reason ?? 'unchanged'}\n`);
+    opts.write(`no-op: ${result.reason}\n`);
   } else {
-    const d = result.diff!;
-    opts.write(`commit ${result.commit?.slice(0, 8)}: +${d.added.length} ~${d.changed.length} -${d.removed.length}\n`);
+    const d = result.diff;
+    opts.write(`commit ${result.commit.slice(0, 8)}: +${d.added.length} ~${d.changed.length} -${d.removed.length}\n`);
   }
 }
 ```
@@ -959,7 +991,14 @@ test('sync-gedcom: prints diff summary on wrote', async () => {
   await runSyncGedcom({
     gedFile: 'tree.ged',
     notes: 'test',
-    client: { syncGedcom: async () => ({ kind: 'wrote' as const, diff: { added: ['I1'], changed: [], removed: [] }, commit: 'abcdef1234' }) } as any,
+    client: {
+      syncGedcom: async () => ({
+        kind: 'wrote' as const,
+        diff: { added: ['I1'], changed: [], removed: [] },
+        commit: 'abcdef1234',
+        snapshot: { hash: 'abc', date: '2026-05-02T00:00:00Z', file: 'tree.ged', notes: 'test' },
+      }),
+    } as any,
     write: (s) => { out += s; },
   });
   assert.match(out, /\+1 ~0 -0/);
@@ -970,7 +1009,7 @@ test('sync-gedcom: prints no-op message', async () => {
   await runSyncGedcom({
     gedFile: 'tree.ged',
     notes: 'test',
-    client: { syncGedcom: async () => ({ kind: 'no-op' as const, reason: 'unchanged-hash' }) } as any,
+    client: { syncGedcom: async () => ({ kind: 'no-op' as const, reason: 'unchanged-hash' as const }) } as any,
     write: (s) => { out += s; },
   });
   assert.match(out, /no-op/);
@@ -1017,7 +1056,8 @@ export async function runRecite(opts: ReciteOptions): Promise<void> {
     return;
   }
   for (const d of r.drift) {
-    opts.write(`${d.slug}: ${d.cited.slice(0, 8)} → ${d.current.slice(0, 8)} (${d.record})\n`);
+    const fields = d.changedFields.length > 0 ? ` [${d.changedFields.join(', ')}]` : '';
+    opts.write(`${d.slug}: ${d.citedSnapshot.slice(0, 8)} → ${d.latestSnapshot.slice(0, 8)} (${d.record})${fields}\n`);
   }
 }
 ```
@@ -1146,6 +1186,12 @@ function parseArgs(argv: string[]): Args {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]!;
     if (a.startsWith('--')) {
+      const eq = a.indexOf('=');
+      if (eq !== -1) {
+        // --flag=value
+        flags[a.slice(2, eq)] = a.slice(eq + 1);
+        continue;
+      }
       const key = a.slice(2);
       const next = argv[i + 1];
       if (next !== undefined && !next.startsWith('--')) {
@@ -1167,6 +1213,11 @@ async function resolveBody(args: Args): Promise<string> {
   if (typeof args.flags.file === 'string') return readFromFile(args.flags.file);
   if (args.flags.stdin) return await readFromStdin();
   if (args.positional[1] !== undefined) return args.positional[1];
+  // No body source given. If stdin is a TTY, the user probably forgot;
+  // erroring is friendlier than hanging on a blank prompt forever.
+  if (process.stdin.isTTY) {
+    throw new Error('no body provided — pass --file F, --stdin, or pipe content via stdin');
+  }
   return await readFromStdin();
 }
 
@@ -1286,11 +1337,16 @@ git commit -m "feat: cli — new dispatcher routing to ApiClient commands"
 
 ### Task 13: Delete obsolete files + tests
 
+The auto-update self-updater (`update.ts`, 24h GitHub-releases cache) is also dropped — for the v2 pre-release the user manages installs manually; we can re-add when v2.0.0 stabilizes. `output.ts` and `errors.ts` go too — the new commands use injected `write` callbacks and the typed `ApiError` from `api-client.ts`.
+
 **Files (DELETE):**
 - `cli/src/wiki-client.ts`
 - `cli/src/auth.ts`
 - `cli/src/content.ts`
 - `cli/src/data-path.ts`
+- `cli/src/output.ts` (replaced by per-command `write` callbacks)
+- `cli/src/errors.ts` (replaced by `ApiError` in `api-client.ts`)
+- `cli/src/update.ts` (self-updater dropped for v2 pre-release)
 - `cli/src/commands/auth.ts`
 - `cli/src/commands/category.ts`
 - `cli/src/commands/changes.ts`
@@ -1316,6 +1372,7 @@ git commit -m "feat: cli — new dispatcher routing to ApiClient commands"
 ```bash
 cd /Users/nyetwork/dev/whoami
 git rm cli/src/wiki-client.ts cli/src/auth.ts cli/src/content.ts cli/src/data-path.ts \
+       cli/src/output.ts cli/src/errors.ts cli/src/update.ts \
        cli/src/commands/auth.ts cli/src/commands/category.ts cli/src/commands/changes.ts \
        cli/src/commands/export.ts cli/src/commands/import.ts cli/src/commands/link.ts \
        cli/src/commands/place.ts cli/src/commands/search.ts cli/src/commands/section.ts \
