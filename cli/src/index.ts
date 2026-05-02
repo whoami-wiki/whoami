@@ -1,231 +1,197 @@
 #!/usr/bin/env node
 
-// Suppress DEP0169 url.parse() deprecation emitted by proxy-from-env (axios dependency).
-// proxy-from-env v2 fixes this, but axios still pins ^1.1.0.
-const _emit = process.emit;
-// @ts-expect-error — narrowing the overloaded signature is not worth the noise
-process.emit = function (event: string, ...args: unknown[]) {
-  if (event === 'warning' && (args[0] as any)?.code === 'DEP0169') return false;
-  return _emit.apply(process, [event, ...args] as unknown as Parameters<typeof _emit>);
-};
+import { ApiClient } from './api-client.js';
+import { getServer, setServer } from './config.js';
+import { toSlug } from './slug.js';
+import { readFromFile, readFromStdin } from './body-input.js';
+import { runRead } from './commands/read.js';
+import { runWrite } from './commands/write.js';
+import { runCreate } from './commands/create.js';
+import { runEdit } from './commands/edit.js';
+import { runDelete } from './commands/delete.js';
+import { runSyncGedcom } from './commands/sync-gedcom.js';
+import { runRecite } from './commands/recite.js';
+import { runHealthz } from './commands/healthz.js';
+import { ApiError } from './api-client.js';
 
-import { resolveCredentials } from './auth.js';
-import { WikiClient } from './wiki-client.js';
-import { WaiError, UsageError, AuthError } from './errors.js';
-import { type GlobalFlags } from './output.js';
+const VERSION = '2.0.0-pre.0';
 
-// Commands
-import { authCommand } from './commands/auth.js';
-import { readCommand } from './commands/read.js';
-import { writeCommand } from './commands/write.js';
-import { editCommand } from './commands/edit.js';
-import { createCommand } from './commands/create.js';
-import { searchCommand } from './commands/search.js';
-import { sectionCommand } from './commands/section.js';
-import { talkCommand } from './commands/talk.js';
-import { uploadCommand } from './commands/upload.js';
-import { linkCommand } from './commands/link.js';
-import { categoryCommand } from './commands/category.js';
-import { changesCommand } from './commands/changes.js';
-import { sourceCommand } from './commands/source.js';
-import { taskCommand } from './commands/task.js';
-import { placeCommand } from './commands/place.js';
-import { snapshotCommand } from './commands/snapshot.js';
-import { exportCommand } from './commands/export.js';
-import { importCommand } from './commands/import.js';
-import { checkForUpdate, updateCommand } from './update.js';
-
-const VERSION = '1.2.1';
-
-const HELP = `wai — personal wiki CLI
+const HELP = `wai — whoami.wiki cli (markdown migration)
 
 Usage:
-  wai <command> [flags]
+  wai <command> [args]
 
 Pages:
-  read <title>                Read a wiki page
-  write <title> [file]         Write (overwrite) entire page
-  edit <title>                Edit a page (find and replace)
-  create <title>              Create a new page
-  search <query>              Full-text search
-  upload <file>               Upload a file
+  read <slug>                 Read a page (body to stdout; --json for full)
+  write <slug> [--file F]     Write (overwrite) a page
+                                body from --file F, --stdin, or positional arg
+                                requires --summary
+  create <slug> [--file F]    Create a new page (refuses if exists)
+  edit <slug>                 Edit a page in $EDITOR
+  delete <slug> --yes         Soft-delete a page (moves to _archived)
 
-Sections:
-  section list <title>        List sections of a page
-  section read <title> <n>    Read a specific section
-  section update <title> <n>  Update a specific section
+GEDCOM:
+  sync-gedcom --ged-file F    Sync GEDCOM .ged → derived/ + commit
+              --notes "..."
+  recite                      Report stale snapshot pointers
+  recite --apply              Advance pointers in pages
 
-Talk Pages:
-  talk read <page>            Read talk page
-  talk create <page>          Create a new talk thread
+Server:
+  healthz                     Ping the API
+  config server <url>         Set server URL in ~/.whoami/config.json
 
-Tasks:
-  task list [--status X]      List tasks (default: pending)
-  task read <id>              Read a task
-  task create -m "msg"        Create a new task
-  task claim <id>             Claim a pending task
-  task complete <id> [-m]     Complete an in-progress task
-  task fail <id> [-m]         Fail an in-progress task
-  task requeue <id>           Requeue a failed task
+Common flags:
+  --json                      JSON output (where applicable)
+  --summary <text>            Edit summary (required for write/create/edit)
 
-Discovery:
-  link <title>                Show page links (in/out)
-  category [name]             List categories or pages in one
-  changes                     Recent changes
-  place <query>               Look up a place (Google Places)
+Server URL: ${getServer()}  (override: WHOAMI_SERVER, ~/.whoami/config.json)
 
-Data:
-  source list                 List pages in the Source namespace
-  snapshot <dir>              Snapshot a directory into the vault
-
-Backup:
-  export <dir>                Export full wiki backup
-  import <file>               Import from a backup
-
-Auth:
-  auth login                  Store wiki credentials
-  auth logout                 Remove stored credentials
-  auth status                 Show connection status
-  update                      Update to latest version
-
-Flags:
-  -j, --json       Output as JSON
-  -q, --quiet      Suppress non-essential output
-  -h, --help       Show help
-  -V, --version    Show version
+Removed in this migration (track future plans for replacements):
+  search, upload, link, changes, category, source, task, place,
+  snapshot, export, import, talk, section, auth
 `;
 
-// ── Main ──────────────────────────────────────────────────────────────
+interface Args {
+  cmd: string | undefined;
+  positional: string[];
+  flags: Record<string, string | boolean>;
+}
 
-async function main(): Promise<void> {
-  const allArgs = process.argv.slice(2);
-
-  // Handle --version / --help early
-  if (allArgs.includes('--version') || allArgs.includes('-V')) {
-    console.log(VERSION);
-    return;
+function parseArgs(argv: string[]): Args {
+  const positional: string[] = [];
+  const flags: Record<string, string | boolean> = {};
+  let cmd: string | undefined;
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i]!;
+    if (a.startsWith('--')) {
+      const eq = a.indexOf('=');
+      if (eq !== -1) {
+        // --flag=value
+        flags[a.slice(2, eq)] = a.slice(eq + 1);
+        continue;
+      }
+      const key = a.slice(2);
+      const next = argv[i + 1];
+      if (next !== undefined && !next.startsWith('--')) {
+        flags[key] = next;
+        i++;
+      } else {
+        flags[key] = true;
+      }
+    } else if (cmd === undefined) {
+      cmd = a;
+    } else {
+      positional.push(a);
+    }
   }
-  if (allArgs.length === 0 || allArgs.includes('--help') || allArgs.includes('-h')) {
+  return { cmd, positional, flags };
+}
+
+async function resolveBody(args: Args): Promise<string> {
+  if (typeof args.flags.file === 'string') return readFromFile(args.flags.file);
+  if (args.flags.stdin) return await readFromStdin();
+  if (args.positional[1] !== undefined) return args.positional[1];
+  // No body source given. If stdin is a TTY, the user probably forgot;
+  // erroring is friendlier than hanging on a blank prompt forever.
+  if (process.stdin.isTTY) {
+    throw new Error('no body provided — pass --file F, --stdin, or pipe content via stdin');
+  }
+  return await readFromStdin();
+}
+
+const REMOVED = new Set([
+  'search', 'upload', 'link', 'changes', 'category', 'source', 'task',
+  'place', 'snapshot', 'export', 'import', 'talk', 'section', 'auth',
+]);
+
+async function main(): Promise<number> {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.flags.version || args.cmd === 'version' || args.cmd === '--version') {
+    process.stdout.write(`${VERSION}\n`);
+    return 0;
+  }
+  if (!args.cmd || args.cmd === 'help' || args.flags.help) {
     process.stdout.write(HELP);
-    return;
+    return 0;
   }
 
-  // Extract global flags
-  const globals: GlobalFlags = { json: false, quiet: false };
-  const args: string[] = [];
-  for (const arg of allArgs) {
-    if (arg === '-j' || arg === '--json') globals.json = true;
-    else if (arg === '-q' || arg === '--quiet') globals.quiet = true;
-    else args.push(arg);
+  if (REMOVED.has(args.cmd)) {
+    process.stderr.write(`wai: '${args.cmd}' is not yet supported in the markdown migration.\n`);
+    return 2;
   }
 
-  const command = args[0];
-  const commandArgs = args.slice(1);
+  const client = new ApiClient(getServer());
+  const write = (s: string) => process.stdout.write(s);
 
-  // Start background update check (fire-and-forget)
-  const updateNotice = checkForUpdate(VERSION);
-
-  // Commands that don't need wiki auth
-  switch (command) {
-    case 'auth':
-      return run(authCommand(commandArgs, globals), updateNotice);
-    case 'place':
-      return run(placeCommand(commandArgs, globals), updateNotice);
-    case 'export':
-      return run(exportCommand(commandArgs, globals), updateNotice);
-    case 'import':
-      return run(importCommand(commandArgs, globals), updateNotice);
-    case 'update':
-      return updateCommand();
-  }
-
-  // Validate command before attempting auth
-  const wikiCommands = new Set([
-    'read', 'write', 'edit', 'create', 'search',
-    'section', 'talk', 'upload', 'link', 'category', 'changes', 'source',
-    'snapshot', 'task',
-  ]);
-
-  if (!wikiCommands.has(command)) {
-    console.error(`Unknown command: ${command}`);
-    console.error('Run `wai --help` for usage.');
-    process.exitCode = 2;
-    return;
-  }
-
-  // Wiki commands need credentials and a logged-in client
-  const creds = resolveCredentials();
-  const client = new WikiClient(creds.server);
-  await client.login(creds.username, creds.password);
-
-  const cmdPromise = ((): Promise<void> => {
-    switch (command) {
-      case 'read':
-        return readCommand(commandArgs, globals, client);
-      case 'write':
-        return writeCommand(commandArgs, globals, client);
-      case 'edit':
-        return editCommand(commandArgs, globals, client);
-      case 'create':
-        return createCommand(commandArgs, globals, client);
-      case 'search':
-        return searchCommand(commandArgs, globals, client);
-      case 'section':
-        return sectionCommand(commandArgs, globals, client);
-      case 'talk':
-        return talkCommand(commandArgs, globals, client);
-      case 'upload':
-        return uploadCommand(commandArgs, globals, client);
-      case 'link':
-        return linkCommand(commandArgs, globals, client);
-      case 'category':
-        return categoryCommand(commandArgs, globals, client);
-      case 'changes':
-        return changesCommand(commandArgs, globals, client);
-      case 'source':
-        return sourceCommand(commandArgs, globals, client);
-      case 'snapshot':
-        return snapshotCommand(commandArgs, globals, client);
-      case 'task':
-        return taskCommand(commandArgs, globals, client);
-      default:
-        return Promise.resolve();
+  try {
+    switch (args.cmd) {
+      case 'read': {
+        const slug = toSlug(args.positional[0] ?? '');
+        await runRead({ slug, json: !!args.flags.json, client, write });
+        break;
+      }
+      case 'write': {
+        const slug = toSlug(args.positional[0] ?? '');
+        const body = await resolveBody(args);
+        const summary = String(args.flags.summary ?? '');
+        await runWrite({ slug, body, summary, client, write });
+        break;
+      }
+      case 'create': {
+        const slug = toSlug(args.positional[0] ?? '');
+        const body = await resolveBody(args);
+        const summary = String(args.flags.summary ?? '');
+        await runCreate({ slug, body, summary, client, write });
+        break;
+      }
+      case 'edit': {
+        const slug = toSlug(args.positional[0] ?? '');
+        const summary = String(args.flags.summary ?? '');
+        await runEdit({ slug, summary, client, write });
+        break;
+      }
+      case 'delete': {
+        const slug = toSlug(args.positional[0] ?? '');
+        await runDelete({ slug, yes: !!args.flags.yes, client, write });
+        break;
+      }
+      case 'sync-gedcom': {
+        const gedFile = String(args.flags['ged-file'] ?? '');
+        const notes = String(args.flags.notes ?? '');
+        await runSyncGedcom({ gedFile, notes, client, write });
+        break;
+      }
+      case 'recite': {
+        await runRecite({ apply: !!args.flags.apply, client, write });
+        break;
+      }
+      case 'healthz': {
+        await runHealthz({ client, write });
+        break;
+      }
+      case 'config': {
+        if (args.positional[0] === 'server' && args.positional[1]) {
+          setServer(args.positional[1]);
+          write(`saved server=${args.positional[1]}\n`);
+        } else {
+          write(`server=${getServer()}\n`);
+        }
+        break;
+      }
+      default: {
+        process.stderr.write(`wai: unknown command '${args.cmd}'. Run 'wai help' for usage.\n`);
+        return 2;
+      }
     }
-  })();
-
-  return run(cmdPromise, updateNotice);
+    return 0;
+  } catch (err) {
+    if (err instanceof ApiError) {
+      process.stderr.write(`wai: ${err.message}\n`);
+      return 1;
+    }
+    process.stderr.write(`wai: ${(err as Error).message}\n`);
+    return 1;
+  }
 }
 
-/** Run a command, then print update notice to stderr if available. */
-async function run(cmd: Promise<void>, updateNotice: Promise<string | null>): Promise<void> {
-  await cmd;
-  const notice = await updateNotice;
-  if (notice) console.error(notice);
-}
-
-main().catch((err: unknown) => {
-  if (err instanceof WaiError) {
-    if (!((err instanceof UsageError) || (err instanceof AuthError))) {
-      console.error(`Error: ${err.message}`);
-    } else {
-      console.error(err.message);
-    }
-    process.exitCode = err.exitCode;
-  } else if (err instanceof Error) {
-    // Axios errors
-    const axiosErr = err as any;
-    if (axiosErr.response?.data?.error) {
-      console.error(`API error: ${axiosErr.response.data.error.info}`);
-      process.exitCode = 1;
-    } else if (axiosErr.code === 'ECONNREFUSED') {
-      console.error(`Cannot connect to wiki server. Is it running?`);
-      process.exitCode = 3;
-    } else {
-      console.error(`Error: ${err.message}`);
-      process.exitCode = 1;
-    }
-  } else {
-    console.error('Unexpected error');
-    process.exitCode = 1;
-  }
-});
+main().then(code => process.exit(code));
