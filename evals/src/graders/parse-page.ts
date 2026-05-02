@@ -29,6 +29,12 @@ export interface ParsedPage {
   wikilinks: WikilinkEntry[];
 }
 
+// Directive name prefixes — keep grader-side checks consistent.
+export const CITE_PREFIX = 'cite-';
+export const INFOBOX_PREFIX = 'infobox-';
+export const isCiteDirective = (name: string): boolean => name.startsWith(CITE_PREFIX);
+export const isInfoboxDirective = (name: string): boolean => name.startsWith(INFOBOX_PREFIX);
+
 // Matches [[Target]], [[Target#anchor]], [[Target|alt]], [[Target#anchor|alt]].
 // Mirrors frontend/lib/wikilinks.ts.
 const WIKILINK_RE = /\[\[([^\]|#]+?)(?:#([^\]|]+?))?(?:\|([^\]]+?))?\]\]/g;
@@ -43,7 +49,9 @@ export function parsePageContent(md: string): ParsedPage {
   if (md.trim() === '') return { directives, headings, wikilinks };
 
   const tree = processor.parse(md);
-  visit(tree as never, (node: never) => {
+  // unist Node types are heavily generic; cast to any to bypass the visitor's
+  // strict node-shape generic (we narrow in the body via the `n` cast).
+  visit(tree as any, (node: any) => {
     const n = node as { type: string; depth?: number; name?: string; attributes?: Record<string, string>; children?: unknown[] };
     if (n.type === 'heading' && typeof n.depth === 'number') {
       headings.push({ depth: n.depth, text: textOf(n.children) });

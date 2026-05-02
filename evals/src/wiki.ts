@@ -21,11 +21,15 @@ export interface WikiInstance {
   destroy: () => Promise<void>;
 }
 
+// Mirror of core/src/pages/types.ts PageType. Kept inline so evals stays
+// standalone (no relative imports from core).
+export type PageType = 'person' | 'family' | 'event' | 'tree' | 'meta';
+
 export interface PageMetaInput {
   title?: string;
   owner?: string;
   editors?: string[];
-  type?: string;
+  type?: PageType;
   aliases?: string[];
   categories?: string[];
   gedcom?: { file: string; record: string; snapshot: string };

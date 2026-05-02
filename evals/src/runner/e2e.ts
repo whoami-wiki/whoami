@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, writeFileSync, mkdirSync, appendFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, appendFileSync, existsSync, statSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { join, resolve, isAbsolute } from 'node:path';
 import { execSync } from 'node:child_process';
@@ -183,16 +183,9 @@ function readWikiPage(pageTitle: string, env: Record<string, string | undefined>
 
 function writeWikiPage(pageTitle: string, body: string, env: Record<string, string | undefined>): void {
   // wai write <slug> --summary "..." --stdin reads body from stdin.
-  try {
-    execSync(`wai write "${titleToSlug(pageTitle)}" --summary "runner update" --stdin`, {
-      env, encoding: 'utf-8', input: body, timeout: 120_000,
-    });
-  } catch (err: unknown) {
-    const stderr = (err as { stderr?: string }).stderr ?? '';
-    // Tolerate idempotent no-change writes (the new CLI doesn't currently emit
-    // "No changes", but keep the guard for forward-compat).
-    if (!stderr.includes('No changes')) throw err;
-  }
+  execSync(`wai write "${titleToSlug(pageTitle)}" --summary "runner update" --stdin`, {
+    env, encoding: 'utf-8', input: body, timeout: 120_000,
+  });
 }
 
 async function restoreSourcePages(
@@ -221,15 +214,23 @@ async function restoreSourcePages(
   return cp1;
 }
 
+// Memoization for discoverAllPages: each checkpoint has 4 discovery call
+// sites and the vault rarely changes within a checkpoint. Keyed by vault root
+// + pages-dir mtime so a write between calls invalidates the cache.
+const _discoverCache = new Map<string, { mtime: number; pages: { title: string; ns: number }[] }>();
+
 function discoverAllPages(env: Record<string, string | undefined>): { title: string; ns: number }[] {
   // The old `wai changes -n 200 --json` was removed. Walk the vault's pages/
-  // directly: every .md file is a page; title comes from frontmatter; the
-  // Source:/Task: namespace concept is gone (legacy callers use the slug
-  // prefix as a stand-in via title-string matching).
+  // directly: every .md file is a page; title comes from frontmatter.
   const root = env['WHOAMI_ROOT'];
   if (!root) return [];
   const pagesDir = join(root, 'pages');
   if (!existsSync(pagesDir)) return [];
+
+  const stat = statSync(pagesDir);
+  const cached = _discoverCache.get(root);
+  if (cached && cached.mtime === stat.mtimeMs) return cached.pages;
+
   const out: { title: string; ns: number }[] = [];
   for (const entry of readdirSync(pagesDir, { withFileTypes: true })) {
     if (entry.isDirectory()) continue;
@@ -241,6 +242,7 @@ function discoverAllPages(env: Record<string, string | undefined>): { title: str
       out.push({ title, ns: 0 });
     } catch { /* skip unparseable files */ }
   }
+  _discoverCache.set(root, { mtime: stat.mtimeMs, pages: out });
   return out;
 }
 

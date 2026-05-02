@@ -1,5 +1,5 @@
 import type { GraderResult, GraderCheck, PageRole } from '../types.js';
-import { parsePageContent } from './parse-page.js';
+import { parsePageContent, isCiteDirective, isInfoboxDirective } from './parse-page.js';
 
 interface Check {
   name: string;
@@ -74,13 +74,7 @@ function countUniqueFootnotes(body: string): number {
 }
 
 function hasInfobox(body: string): boolean {
-  return parsePageContent(body).directives.some(
-    (d) =>
-      d.name === 'infobox-person' ||
-      d.name === 'infobox-company' ||
-      d.name === 'infobox-episode' ||
-      d.name === 'infobox-project',
-  );
+  return parsePageContent(body).directives.some(d => isInfoboxDirective(d.name));
 }
 
 function hasBlockquote(body: string): boolean {
@@ -101,9 +95,7 @@ function hasMedia(body: string): boolean {
 }
 
 function hasCiteVault(body: string): boolean {
-  return parsePageContent(body).directives.some(
-    (d) => d.name === 'cite-vault' || d.name.startsWith('cite-'),
-  );
+  return parsePageContent(body).directives.some(d => isCiteDirective(d.name));
 }
 
 function hasCategory(body: string): boolean {
@@ -137,13 +129,7 @@ const STRUCTURAL_CHECKS: Check[] = [
     name: 'Infobox directive with required fields',
     weight: 2,
     test: (body) => {
-      const infoboxes = parsePageContent(body).directives.filter(
-        (d) =>
-          d.name === 'infobox-person' ||
-          d.name === 'infobox-company' ||
-          d.name === 'infobox-episode' ||
-          d.name === 'infobox-project',
-      );
+      const infoboxes = parsePageContent(body).directives.filter(d => isInfoboxDirective(d.name));
       if (infoboxes.length === 0) return false;
       // Must have substantive body content (key:value pairs)
       return infoboxes.some((i) => (i.body ?? '').length > 10);

@@ -1,5 +1,5 @@
 import type { GraderResult, GraderCheck, PageRole } from '../types.js';
-import { parsePageContent } from './parse-page.js';
+import { parsePageContent, isInfoboxDirective } from './parse-page.js';
 import { parseCitations } from './citations.js';
 
 function extractHeadings(body: string): string[] {
@@ -10,7 +10,7 @@ function extractHeadings(body: string): string[] {
 }
 
 function extractInfoboxFields(body: string): string[] {
-  const ibox = parsePageContent(body).directives.find(d => d.name.startsWith('infobox-'));
+  const ibox = parsePageContent(body).directives.find(d => isInfoboxDirective(d.name));
   if (!ibox?.body) return [];
   const fields: string[] = [];
   for (const line of ibox.body.split('\n')) {

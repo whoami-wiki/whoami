@@ -1,5 +1,5 @@
 import type { GraderResult, GraderCheck } from '../types.js';
-import { parsePageContent } from './parse-page.js';
+import { parsePageContent, CITE_PREFIX, isCiteDirective } from './parse-page.js';
 
 const VALID_TEMPLATES = ['message', 'voice-note', 'photo', 'video', 'vault', 'testimony'];
 const REQUIRED_FIELDS = ['snapshot', 'date'];
@@ -17,8 +17,6 @@ export interface ParsedCitation {
   fields: Record<string, string>;
 }
 
-const CITE_PREFIX = 'cite-';
-
 function templateOf(name: string): string {
   return name.startsWith(CITE_PREFIX) ? name.slice(CITE_PREFIX.length) : name;
 }
@@ -27,7 +25,7 @@ export function parseCitations(body: string): ParsedCitation[] {
   const parsed = parsePageContent(body);
   const out: ParsedCitation[] = [];
   for (const d of parsed.directives) {
-    if (!d.name.startsWith(CITE_PREFIX)) continue;
+    if (!isCiteDirective(d.name)) continue;
     out.push({ template: templateOf(d.name), fields: { ...d.attrs } });
   }
   return out;
