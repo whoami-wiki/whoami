@@ -3,9 +3,8 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { z } from 'zod';
 import { syncGedcom } from '@core/gedcom/index.ts';
-import { verifyCsrfToken } from '@core/auth/index.ts';
-import { getAuthService, invalidateListCache } from '@/lib/server-services';
-import { WHOAMI_ROOT } from '@/lib/env';
+import { invalidateListCache } from '@/lib/server-services';
+import { WHOAMI_ROOT, DEFAULT_AUTHOR } from '@/lib/env';
 
 const Body = z.object({
   gedFile: z.string().regex(/^[a-z0-9._-]+\.ged$/i),
@@ -13,17 +12,6 @@ const Body = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  // CSRF + session check (same pattern as /api/pages/[slug] PUT)
-  const sessionId = req.cookies.get('session')?.value;
-  const csrfCookie = req.cookies.get('csrf')?.value;
-  const csrfHeader = req.headers.get('x-csrf-token');
-  if (!sessionId || !csrfCookie || !csrfHeader || !verifyCsrfToken(csrfCookie, csrfHeader)) {
-    return NextResponse.json({ error: 'csrf' }, { status: 403 });
-  }
-  const auth = getAuthService();
-  const session = await auth.validateSession(sessionId);
-  if (!session) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-
   const json = await req.json().catch(() => null);
   const parsed = Body.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: 'bad-request' }, { status: 400 });
@@ -37,7 +25,7 @@ export async function POST(req: NextRequest) {
       repoRoot: WHOAMI_ROOT,
       genealogyDir,
       gedFile: parsed.data.gedFile,
-      author: { name: session.user.username, email: `${session.user.username}@local` },
+      author: DEFAULT_AUTHOR,
       notes: parsed.data.notes,
     });
     invalidateListCache();
