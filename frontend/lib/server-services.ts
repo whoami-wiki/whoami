@@ -3,7 +3,7 @@ import { buildSlugIndex, type SlugIndex } from './wikilinks';
 import { join } from 'node:path';
 import {
   createSearchIndex, loadSearchIndex, saveSearchIndex, rebuildSearchIndex,
-  type SearchIndex,
+  type SearchIndex, type SearchResult,
 } from '@core/search/module.ts';
 import { WHOAMI_ROOT, PAGES_DIR, SEARCH_INDEX_FILE } from './env.ts';
 
@@ -76,4 +76,20 @@ export async function rebuildSearchIndexFromDisk(): Promise<void> {
   });
   await saveSearchIndex(idx, SEARCH_INDEX_FILE);
   _search = idx;
+}
+
+export async function searchAndJoin(query: string, limit: number): Promise<SearchResult[]> {
+  if (!query.trim()) return [];
+  const idx = await getSearchIndex();
+  const hits = idx.query(query, limit);
+  if (hits.length === 0) return [];
+  const { list } = await getCachedList();
+  const bySlug = new Map(list.map(p => [p.slug, p]));
+  const results: SearchResult[] = [];
+  for (const h of hits) {
+    const meta = bySlug.get(h.slug);
+    if (!meta || meta.isArchived) continue;
+    results.push({ slug: h.slug, title: meta.title, type: meta.type });
+  }
+  return results;
 }

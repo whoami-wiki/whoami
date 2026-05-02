@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { getCachedList, getSearchIndex } from '@/lib/server-services';
-import type { SearchResult } from '@core/search/module.ts';
+import { searchAndJoin } from '@/lib/server-services';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,19 +10,7 @@ interface Props {
 export default async function SearchPage({ searchParams }: Props) {
   const { q = '' } = await searchParams;
   const trimmed = q.trim();
-
-  const results: SearchResult[] = [];
-  if (trimmed) {
-    const idx = await getSearchIndex();
-    const hits = idx.query(trimmed, 50);
-    const { list } = await getCachedList();
-    const bySlug = new Map(list.map(p => [p.slug, p]));
-    for (const h of hits) {
-      const meta = bySlug.get(h.slug);
-      if (!meta || meta.isArchived) continue;
-      results.push({ slug: h.slug, title: meta.title, type: meta.type });
-    }
-  }
+  const results = await searchAndJoin(trimmed, 50);
 
   return (
     <main className="mx-auto max-w-3xl p-6">
