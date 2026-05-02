@@ -57,3 +57,29 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
   await pages.write(slug, updated, { name: session.user.username, email: `${session.user.username}@local` }, parsed.data.summary);
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
+  const { slug } = await ctx.params;
+  if (!isValidSlug(slug)) return NextResponse.json({ error: 'bad-slug' }, { status: 400 });
+
+  const sessionId = req.cookies.get('session')?.value;
+  const csrfCookie = req.cookies.get('csrf')?.value;
+  const csrfHeader = req.headers.get('x-csrf-token');
+  if (!sessionId || !csrfCookie || !csrfHeader || !verifyCsrfToken(csrfCookie, csrfHeader)) {
+    return NextResponse.json({ error: 'csrf' }, { status: 403 });
+  }
+
+  const auth = getAuthService();
+  const session = await auth.validateSession(sessionId);
+  if (!session) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+
+  const pages = getPageStore();
+  try {
+    await auth.requireOwnerOrEditor(slug, session.user, pages);
+  } catch {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+  }
+
+  await pages.softDelete(slug, { name: session.user.username, email: `${session.user.username}@local` });
+  return NextResponse.json({ ok: true });
+}
