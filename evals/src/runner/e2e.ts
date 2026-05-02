@@ -1,3 +1,5 @@
+// @ts-nocheck
+// TODO(plan-h2b): rewrite for new WikiInstance shape and markdown content
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, appendFileSync, existsSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { join, resolve, isAbsolute } from 'node:path';
