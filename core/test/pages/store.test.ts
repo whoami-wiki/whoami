@@ -4,6 +4,7 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { createPageStore } from '../../src/pages/index.ts';
 import { makeTestRepo } from './helpers.ts';
+import type { Page } from '../../src/pages/types.ts';
 
 const SAMPLE = (title: string, type = 'person'): string => `---
 title: ${title}
@@ -82,6 +83,74 @@ test('PageStore.list: skips _meta and _archived directories', async () => {
     const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
     const list = await store.list();
     assert.deepEqual(list.map(p => p.slug), ['a']);
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test('PageStore.write: writes file and creates a commit', async () => {
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    await store.write('alex',
+      {
+        slug: 'alex',
+        meta: {
+          title: 'Alex',
+          owner: 'steven',
+          editors: [],
+          type: 'person',
+          aliases: [],
+          categories: [],
+          created: '2026-04-29',
+        },
+        body: 'Body.\n',
+      },
+      { name: 'Steven', email: 'steven@example.com' },
+      'create alex',
+    );
+    const page = await store.read('alex');
+    assert.equal(page.meta.title, 'Alex');
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test('PageStore.write: serializes concurrent writes to the same slug', async () => {
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const base = (body: string): Page => ({
+      slug: 'race',
+      meta: { title: 'Race', owner: 's', editors: [], type: 'person', aliases: [], categories: [], created: '2026-04-29' },
+      body,
+    });
+    await Promise.all([
+      store.write('race', base('one'), { name: 's', email: 's@x' }, 'one'),
+      store.write('race', base('two'), { name: 's', email: 's@x' }, 'two'),
+    ]);
+    const page = await store.read('race');
+    assert.match(page.body, /one|two/);
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test('PageStore.history: returns commit log for a slug', async () => {
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const page: Page = {
+      slug: 'h',
+      meta: { title: 'H', owner: 's', editors: [], type: 'person', aliases: [], categories: [], created: '2026-04-29' },
+      body: 'one',
+    };
+    await store.write('h', page, { name: 'A', email: 'a@x' }, 'first');
+    await store.write('h', { ...page, body: 'two' }, { name: 'B', email: 'b@x' }, 'second');
+    const log = await store.history('h', 5);
+    assert.equal(log.length, 2);
+    assert.equal(log[0]!.summary, 'second');
+    assert.equal(log[0]!.author, 'B');
   } finally {
     repo.cleanup();
   }

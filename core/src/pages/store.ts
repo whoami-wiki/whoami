@@ -1,8 +1,10 @@
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, writeFileSync, fsyncSync, openSync, closeSync, renameSync } from 'node:fs';
 import { join, basename } from 'node:path';
-import type { Page, PageMetaSummary } from './types.ts';
-import { parsePage } from './frontmatter.ts';
+import type { Page, PageMetaSummary, AuthorIdentity, Revision } from './types.ts';
+import { parsePage, serializePage } from './frontmatter.ts';
 import { assertValidSlug } from './slug.ts';
+import { addAndCommit, fileHistory, restoreFromIndex } from './git.ts';
+import { withLock } from './locks.ts';
 
 export interface PageStoreConfig {
   repoRoot: string;
@@ -11,22 +13,50 @@ export interface PageStoreConfig {
 
 export interface PageStore {
   read(slug: string): Promise<Page>;
+  write(slug: string, page: Page, author: AuthorIdentity, summary: string): Promise<void>;
   list(): Promise<PageMetaSummary[]>;
+  history(slug: string, limit?: number): Promise<Revision[]>;
 }
 
 export function createPageStore(cfg: PageStoreConfig): PageStore {
+  function pathFor(slug: string): string {
+    return join(cfg.pagesDir, `${slug}.md`);
+  }
+
   return {
     async read(slug: string): Promise<Page> {
       assertValidSlug(slug);
-      const path = join(cfg.pagesDir, `${slug}.md`);
-      if (!existsSync(path)) {
-        throw new Error(`page not found: ${slug}`);
-      }
-      const raw = readFileSync(path, 'utf-8');
-      return parsePage(slug, raw);
+      const path = pathFor(slug);
+      if (!existsSync(path)) throw new Error(`page not found: ${slug}`);
+      return parsePage(slug, readFileSync(path, 'utf-8'));
     },
 
-    async list(): Promise<PageMetaSummary[]> {
+    async write(slug, page, author, summary) {
+      assertValidSlug(slug);
+      const target = pathFor(slug);
+      const tmp = `${target}.tmp`;
+      const content = serializePage(page);
+
+      await withLock(slug, async () => {
+        const fd = openSync(tmp, 'w');
+        try {
+          writeFileSync(fd, content);
+          fsyncSync(fd);
+        } finally {
+          closeSync(fd);
+        }
+        renameSync(tmp, target);
+
+        try {
+          await addAndCommit(cfg.repoRoot, [target], author, summary);
+        } catch (err) {
+          await restoreFromIndex(cfg.repoRoot, target);
+          throw err;
+        }
+      });
+    },
+
+    async list() {
       const out: PageMetaSummary[] = [];
       for (const entry of readdirSync(cfg.pagesDir, { withFileTypes: true })) {
         if (entry.isDirectory()) continue;
@@ -49,6 +79,11 @@ export function createPageStore(cfg: PageStoreConfig): PageStore {
         } catch {}
       }
       return out.sort((a, b) => a.slug.localeCompare(b.slug));
+    },
+
+    async history(slug, limit = 50) {
+      assertValidSlug(slug);
+      return fileHistory(cfg.repoRoot, pathFor(slug), limit);
     },
   };
 }
