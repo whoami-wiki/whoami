@@ -1,5 +1,3 @@
-// @ts-nocheck
-// TODO(plan-h2b): rewrite for new WikiInstance shape and markdown content
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, appendFileSync, existsSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { join, resolve, isAbsolute } from 'node:path';
@@ -14,6 +12,23 @@ import { createCodexHarness } from '../harnesses/codex.js';
 import { createOpenCodeHarness } from '../harnesses/opencode.js';
 import { createCursorHarness } from '../harnesses/cursor.js';
 import { startWiki, findFreePort, writePageDirect, type WikiInstance } from '../wiki.js';
+
+/**
+ * Derive a markdown-vault slug from a wiki page title.
+ * Lowercase, strip apostrophes, non-alnum→hyphens, trim hyphens.
+ * Preserves a trailing `.talk` suffix (used to seed talk pages).
+ */
+function titleToSlug(title: string): string {
+  const trimmed = title.trim();
+  const talk = trimmed.endsWith('.talk');
+  const base = talk ? trimmed.slice(0, -5) : trimmed;
+  const slug = base
+    .toLowerCase()
+    .replace(/['‘’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return talk ? `${slug}.talk` : slug;
+}
 
 export interface E2EOptions {
   suite: string;
@@ -173,11 +188,11 @@ function writeWikiPage(pageTitle: string, wikitext: string, env: Record<string, 
   }
 }
 
-function restoreSourcePages(
+async function restoreSourcePages(
   resultPath: string,
   env: Record<string, string | undefined>,
   log: Logger,
-): CheckpointResult {
+): Promise<CheckpointResult> {
   const raw = readFileSync(resultPath, 'utf-8');
   const prev: EvalResult = JSON.parse(raw);
 
@@ -186,12 +201,11 @@ function restoreSourcePages(
     throw new Error('Previous result has no passing checkpoint 1');
   }
 
-  const dataPath = env['WIKI_DATA_PATH'];
-  const confPath = dataPath ? join(dataPath, 'LocalSettings.php') : undefined;
+  const vaultPath = env['WHOAMI_ROOT'];
   for (const page of cp1.pages) {
     log.log(`Restoring "${page.title}" (${page.wikitext.length} chars)`);
-    if (confPath) {
-      writePageDirect(confPath, page.title, page.wikitext);
+    if (vaultPath) {
+      await writePageDirect(vaultPath, titleToSlug(page.title), page.wikitext);
     } else {
       writeWikiPage(page.title, page.wikitext, env);
     }
@@ -438,14 +452,17 @@ function computeWeightedComposite(pageResults: PageResult[], hasExpectedEpisodes
 }
 
 function configureWaiCredentials(wiki: WikiInstance): void {
+  // The new (markdown-vault) wiki has no auth — `wai` reads only the server URL
+  // from ~/.whoami/config.json. We still write a credentials.json for any legacy
+  // tooling that looks for it, but username/password are placeholders.
   const configDir = join(homedir(), '.whoami');
   mkdirSync(configDir, { recursive: true });
 
   const credPath = join(configDir, 'credentials.json');
   const credentials = JSON.stringify({
     server: wiki.url,
-    username: wiki.username,
-    password: wiki.password,
+    username: 'eval',
+    password: '',
     role: 'owner',
   }, null, 2);
   writeFileSync(credPath, credentials + '\n', { mode: 0o600 });
@@ -586,14 +603,14 @@ async function runCheckpointLoop(
         startIndex++;
       }
 
-      // Write only the latest version of each page (avoids duplicate writes)
-      // Use PHP CLI directly when available (faster, no HTTP timeout issues)
-      const dataPath = env['WIKI_DATA_PATH'];
-      const confPath = dataPath ? join(dataPath, 'LocalSettings.php') : undefined;
+      // Write only the latest version of each page (avoids duplicate writes).
+      // When the wiki vault is in-process, write directly to the markdown files;
+      // otherwise fall back to `wai write` over HTTP.
+      const vaultPath = env['WHOAMI_ROOT'];
       for (const [title, { page }] of pagesToRestore) {
         log.log(`Restoring "${title}" (${page.wikitext.length} chars)`);
-        if (confPath) {
-          writePageDirect(confPath, title, page.wikitext);
+        if (vaultPath) {
+          await writePageDirect(vaultPath, titleToSlug(title), page.wikitext);
         } else {
           writeWikiPage(title, page.wikitext, env);
         }
@@ -860,7 +877,7 @@ async function runCases(
     if (options.fromResult) {
       // Restore source pages from a previous result, skip Phase 1 harness
       log.log(`Restoring checkpoint 1 from ${options.fromResult}`);
-      const prevCp1 = restoreSourcePages(options.fromResult, env, log);
+      const prevCp1 = await restoreSourcePages(options.fromResult, env, log);
       checkpoints.push(prevCp1);
       allPageResults.push(...prevCp1.pages);
       checkpoint1Failed = !prevCp1.passed;
@@ -1089,8 +1106,8 @@ export async function runE2E(options: E2EOptions): Promise<EvalResult[]> {
     port = parseInt(process.env['WIKI_PORT'] ?? '8081', 10);
   }
   log.log(`Starting isolated wiki on port ${port}`);
-  const wiki = await startWiki(port);
-  log.log(`Wiki ready at ${wiki.url} (data: ${wiki.dataPath})`);
+  const wiki = await startWiki({ port });
+  log.log(`Wiki ready at ${wiki.url} (vault: ${wiki.vaultPath})`);
 
   try {
     const env: Record<string, string | undefined> = { ...process.env, ...wiki.env };
@@ -1107,7 +1124,7 @@ export async function runE2E(options: E2EOptions): Promise<EvalResult[]> {
       await waitForEnter(`\n==> Wiki is running at ${wiki.url}\n    Press Enter to tear down and exit...`);
     }
     log.log('Tearing down wiki');
-    wiki.destroy();
+    await wiki.destroy();
   }
 }
 
