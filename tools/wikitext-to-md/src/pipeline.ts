@@ -16,6 +16,7 @@ import { transformRefs } from './transforms/refs.ts';
 import { transformTables } from './transforms/tables.ts';
 import { transformBoldItalic } from './transforms/bold-italic.ts';
 import { transformHeadings } from './transforms/headings.ts';
+import { pruneEmptyHeadings } from './transforms/prune-empty-headings.ts';
 
 export type ConvertResult =
   | {
@@ -66,6 +67,7 @@ export function convertPage(raw: RawPage, snapshotHash: string, owner: string): 
   body = transformHeadings(body);
   body = transformRefs(body);
   body = transformTables(body);
+  body = pruneEmptyHeadings(body);
 
   // 5. Build frontmatter
   const meta: PageMeta = {
