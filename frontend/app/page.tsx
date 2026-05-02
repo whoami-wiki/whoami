@@ -10,8 +10,13 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-3xl font-bold mb-2">Whoami Wiki</h1>
-      <p className="text-muted-foreground mb-6">{pages.length} pages</p>
+      <div className="flex items-baseline justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Whoami Wiki</h1>
+          <p className="text-muted-foreground">{pages.length} pages</p>
+        </div>
+        <Link href="/search" className="text-blue-600 hover:underline text-sm">Search →</Link>
+      </div>
 
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Pages ({main.length})</h2>
