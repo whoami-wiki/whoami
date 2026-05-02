@@ -53,12 +53,17 @@ async function main(): Promise<void> {
   const pages = results.filter(r => r.kind === 'page') as Extract<ConvertResult, { kind: 'page' }>[];
   const redirects = results.filter(r => r.kind === 'redirect') as Extract<ConvertResult, { kind: 'redirect' }>[];
 
-  // 4. Apply redirects to targets as aliases
+  // 4. Apply redirects to targets as aliases.
+  // MediaWiki page titles use underscores (`Steven_Barash`); wikilink targets in
+  // `#REDIRECT [[Steven Barash]]` use spaces. Normalize both sides to spaces before
+  // comparing — the canonical human-readable form.
+  const canon = (s: string) => s.replace(/_/g, ' ');
   const aliasesByTarget = new Map<string, string[]>();
   for (const r of redirects) {
-    const list = aliasesByTarget.get(r.target) ?? [];
-    list.push(r.fromTitle);
-    aliasesByTarget.set(r.target, list);
+    const key = canon(r.target);
+    const list = aliasesByTarget.get(key) ?? [];
+    list.push(canon(r.fromTitle));
+    aliasesByTarget.set(key, list);
   }
 
   // 5. Write each page (with merged aliases)
@@ -68,7 +73,7 @@ async function main(): Promise<void> {
   const warnings: Warning[] = [];
   for (const p of pages) {
     const slug = slugify(p.title);
-    const aliases = aliasesByTarget.get(p.title) ?? [];
+    const aliases = aliasesByTarget.get(canon(p.title)) ?? [];
     const md = aliases.length > 0 ? insertAliases(p.md, aliases) : p.md;
     // Talk pages (NS 1) become `<slug>.talk.md` siblings of their main page.
     const filename = p.namespace === 1 ? `${slug}.talk.md` : `${slug}.md`;
