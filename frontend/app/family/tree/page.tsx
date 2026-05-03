@@ -1,124 +1,384 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import type { CSSProperties } from 'react';
-import { FileText, LocateFixed, Search, UserRound } from 'lucide-react';
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, FileText, Home } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { CommandPalette } from '@/components/command-palette';
+import { GroupedList } from '@/components/family/grouped-list';
+import { PersonRow } from '@/components/family/person-row';
+import { AncestorTile } from '@/components/family/ancestor-tile';
 import { SELF_RECORD } from '@/lib/env';
-import { getFamilyTree, type BrowserPersonView, type BrowserRelationView } from '@/lib/family';
-import { cn } from '@/lib/utils';
+import {
+  getFamilyTree,
+  type BrowserPersonView,
+  type BrowserRelationView,
+} from '@/lib/family';
+import { roman } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  searchParams: Promise<{ person?: string; selected?: string }>;
+  searchParams: Promise<{ person?: string }>;
 }
 
 const GENERATION_HEADING: Record<number, string> = {
   1: 'Parents',
   2: 'Grandparents',
   3: 'Great-grandparents',
-  4: 'Great-great-grandparents',
-  5: 'Great-great-great-grandparents',
-  6: 'Great-great-great-great-grandparents',
+  4: '2× Great-grandparents',
+  5: '3× Great-grandparents',
+  6: '4× Great-grandparents',
+  7: '5× Great-grandparents',
+  8: '6× Great-grandparents',
 };
 
-function familyTreeHref(person: string, selected?: string): string {
-  const params = new URLSearchParams({ person });
-  if (selected) params.set('selected', selected);
-  return `/family/tree?${params.toString()}`;
+function familyTreeHref(person: string): string {
+  return `/family/tree?person=${encodeURIComponent(person)}`;
 }
 
 function formatDates(person: BrowserPersonView): string | null {
   const birth = person.birth?.date ?? null;
   const death = person.death?.date ?? null;
-  if (birth && death) return `${birth} - ${death}`;
+  if (birth && death) return `${birth} – ${death}`;
   if (birth) return `b. ${birth}`;
   if (death) return `d. ${death}`;
   return null;
 }
 
-function lineClasses(person: BrowserPersonView): string {
-  if (person.side === 'paternal') return 'border-l-[var(--family-paternal)] bg-white/85';
-  if (person.side === 'maternal') return 'border-l-[var(--family-maternal)] bg-white/85';
-  return 'border-l-foreground/20 bg-white/90';
-}
-
-function lineAccent(side: BrowserPersonView['side']): string {
-  if (side === 'paternal') return 'text-[var(--family-paternal-strong)]';
-  if (side === 'maternal') return 'text-[var(--family-maternal-strong)]';
-  return 'text-muted-foreground';
-}
-
-function PersonNode({
-  person,
-  rootRecord,
-  selectedRecord,
-}: {
-  person: BrowserPersonView;
-  rootRecord: string;
-  selectedRecord: string;
-}) {
+function formatTileMeta(person: BrowserPersonView): string | null {
   const dates = formatDates(person);
-  const selected = person.record === selectedRecord;
+  const place = person.birth?.place ?? null;
+  return [dates, place].filter(Boolean).join('  ·  ') || null;
+}
+
+function relationMeta(relation: BrowserRelationView): string | null {
+  return relation.detail || null;
+}
+
+
+export default async function FamilyTreePage({ searchParams }: Props) {
+  const params = await searchParams;
+  const rootRecord = params.person ?? SELF_RECORD;
+  const view = await getFamilyTree(rootRecord, rootRecord);
+  if (!view) notFound();
+
+  const person = view.root;
+  const dates = formatDates(person);
+  const isMe = person.record === SELF_RECORD;
+  const { parents, spouses, children } = view.selectedRelations;
+  const { siblings, cousins } = view.cohort;
+  const immediateCount = parents.length + spouses.length + children.length;
+  const cohortCount = siblings.length + cousins.length;
+  const familyCount = immediateCount + cohortCount;
+
+  const paternalGroups = view.byGeneration.map(g => ({ generation: g.generation, people: g.paternal }));
+  const maternalGroups = view.byGeneration.map(g => ({ generation: g.generation, people: g.maternal }));
+  let ancestorCount = 0;
+  let generationCount = 0;
+  for (const g of view.byGeneration) {
+    const n = g.paternal.length + g.maternal.length;
+    ancestorCount += n;
+    if (n > 0) generationCount += 1;
+  }
+  const hasLineage = ancestorCount > 0;
+
+  return (
+    <main className="min-h-dvh bg-background">
+      <header className="sticky top-0 z-20 border-b rule-hair bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+          <Link
+            href="/family"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" aria-hidden />
+            <span className="font-display tracking-tight">Family</span>
+          </Link>
+          <div className="font-display text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground/80">
+            The Registry
+          </div>
+          <div className="flex items-center gap-2">
+            {!isMe ? (
+              <Link
+                href={familyTreeHref(SELF_RECORD)}
+                className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+              >
+                <Home data-icon="inline-start" />
+                Me
+              </Link>
+            ) : null}
+            <CommandPalette />
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-6xl px-4 pt-8 pb-24 sm:px-6 sm:pt-12">
+        <section
+          className="registry-rise mb-10 grid gap-6 border-b rule-hair pb-7 sm:grid-cols-[1fr_auto] sm:items-start"
+          style={{ animationDelay: '0ms' }}
+        >
+          <div className="min-w-0">
+            <p className="font-display text-[0.66rem] uppercase tracking-[0.32em] text-muted-foreground">
+              Folio · {person.record}
+            </p>
+            <h1 className="mt-2 font-display text-[2.4rem] font-medium leading-[1.05] tracking-[-0.01em] text-balance text-foreground sm:text-[3rem]">
+              {person.name}
+            </h1>
+            {(dates || person.birth?.place) ? (
+              <p className="mt-2 font-mono text-sm tracking-tight text-muted-foreground">
+                {dates ?? ''}
+                {dates && person.birth?.place ? '  ·  ' : ''}
+                {person.birth?.place ?? ''}
+              </p>
+            ) : null}
+
+            <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2 border-t rule-hair pt-4 sm:max-w-lg sm:grid-cols-5">
+              <Stat label="Parents" value={parents.length} />
+              <Stat label="Siblings" value={siblings.length} />
+              <Stat label="Spouses" value={spouses.length} />
+              <Stat label="Children" value={children.length} />
+              <Stat label="Ancestors" value={ancestorCount} sub={`${generationCount} gens`} />
+            </dl>
+          </div>
+
+          {person.slug ? (
+            <div className="flex items-start sm:pt-1">
+              <Link
+                href={`/${person.slug}`}
+                className={buttonVariants({ variant: 'default', size: 'sm' })}
+              >
+                <FileText data-icon="inline-start" />
+                Article
+              </Link>
+            </div>
+          ) : null}
+        </section>
+
+        {familyCount > 0 ? (
+          <section className="registry-rise mb-12" style={{ animationDelay: '80ms' }}>
+            <SectionHeader title="Family" count={familyCount} />
+            <div className="flex flex-col gap-6">
+              {immediateCount > 0 ? (
+                <GroupedList title="Immediate">
+                  {[
+                    ...parents.map(p => ({ kind: 'parent' as const, person: p })),
+                    ...spouses.map(p => ({ kind: 'spouse' as const, person: p })),
+                    ...children.map(p => ({ kind: 'child' as const, person: p })),
+                  ].map(({ kind, person: p }, i) => (
+                    <PersonRow
+                      key={`${kind}-${p.record}`}
+                      href={familyTreeHref(p.record)}
+                      name={p.name}
+                      ordinal={roman(i + 1).toLowerCase()}
+                      meta={relationMeta(p)}
+                      trailing={<RelationLabel>{kind}</RelationLabel>}
+                    />
+                  ))}
+                </GroupedList>
+              ) : null}
+
+              {siblings.length > 0 ? (
+                <GroupedList title={`Siblings (${siblings.length})`}>
+                  {siblings.map((s, i) => (
+                    <PersonRow
+                      key={`sibling-${s.record}`}
+                      href={familyTreeHref(s.record)}
+                      name={s.name}
+                      ordinal={roman(i + 1).toLowerCase()}
+                      meta={s.detail}
+                      trailing={
+                        <RelationLabel>
+                          {s.kind === 'half' ? 'half-sibling' : 'sibling'}
+                        </RelationLabel>
+                      }
+                    />
+                  ))}
+                </GroupedList>
+              ) : null}
+
+              {cousins.length > 0 ? (
+                <GroupedList title={`First cousins (${cousins.length})`}>
+                  {cousins.map((c, i) => (
+                    <PersonRow
+                      key={`cousin-${c.record}`}
+                      href={familyTreeHref(c.record)}
+                      name={c.name}
+                      ordinal={roman(i + 1).toLowerCase()}
+                      meta={[c.detail, `via ${c.via}`].filter(Boolean).join('  ·  ')}
+                      trailing={<RelationLabel>cousin</RelationLabel>}
+                    />
+                  ))}
+                </GroupedList>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {hasLineage ? (
+          <section className="registry-rise" style={{ animationDelay: '160ms' }}>
+            <SectionHeader
+              title="Lineage"
+              count={ancestorCount}
+              after={
+                <p className="font-display text-[0.7rem] tracking-tight text-muted-foreground">
+                  <span className="inline-block size-1.5 -translate-y-px rounded-full bg-paternal mr-1.5 align-baseline" aria-hidden />
+                  Paternal
+                  <span className="mx-2 text-border">|</span>
+                  <span className="inline-block size-1.5 -translate-y-px rounded-full bg-maternal mr-1.5 align-baseline" aria-hidden />
+                  Maternal
+                </p>
+              }
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <LineageColumn title="Paternal" groups={paternalGroups} side="paternal" />
+              <LineageColumn title="Maternal" groups={maternalGroups} side="maternal" />
+            </div>
+          </section>
+        ) : null}
+
+        {familyCount === 0 && !hasLineage ? (
+          <p className="font-display text-center text-sm text-muted-foreground">
+            No related records yet.
+          </p>
+        ) : null}
+      </div>
+    </main>
+  );
+}
+
+function Stat({ label, value, sub }: { label: string; value: number; sub?: string }) {
+  return (
+    <div>
+      <dt className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="mt-0.5 flex items-baseline gap-1.5">
+        <span className="font-display text-2xl font-medium tabular-nums leading-none text-foreground">
+          {value}
+        </span>
+        {sub ? (
+          <span className="font-mono text-[0.6rem] tracking-tight text-muted-foreground">
+            {sub}
+          </span>
+        ) : null}
+      </dd>
+    </div>
+  );
+}
+
+function SectionHeader({
+  title,
+  count,
+  after,
+}: {
+  title: string;
+  count?: number;
+  after?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-3 flex items-end justify-between gap-3 border-b rule-hair pb-2">
+      <h2 className="flex items-baseline gap-2.5">
+        <span className="font-display text-xs uppercase tracking-[0.32em] text-muted-foreground">
+          {title}
+        </span>
+        {typeof count === 'number' ? (
+          <span className="font-mono text-[0.7rem] tabular-nums text-muted-foreground/70">
+            {String(count).padStart(2, '0')}
+          </span>
+        ) : null}
+      </h2>
+      {after}
+    </div>
+  );
+}
+
+function LineageColumn({
+  title,
+  groups,
+  side,
+}: {
+  title: string;
+  groups: { generation: number; people: BrowserPersonView[] }[];
+  side: 'paternal' | 'maternal';
+}) {
+  const accentVar = side === 'paternal' ? 'var(--paternal)' : 'var(--maternal)';
+  const total = groups.reduce((sum, g) => sum + g.people.length, 0);
+
   return (
     <Card
-      size="sm"
-      aria-current={selected ? 'true' : undefined}
-      className={cn(
-        'group border-l-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_45px_rgba(15,23,42,0.10)] aria-current:ring-2 aria-current:ring-ring/50',
-        lineClasses(person),
-      )}
+      className="gap-0 overflow-hidden p-0 py-0 shadow-none ring-foreground/12"
+      style={{ borderLeft: `2px solid ${accentVar}` }}
     >
-      <CardHeader>
-        <CardDescription className={cn('text-xs uppercase tracking-wide', lineAccent(person.side))}>
-          {person.label}
-        </CardDescription>
-        <CardTitle className="truncate text-[0.95rem] tracking-normal">{person.name}</CardTitle>
-        <CardAction>
-          <Link
-            href={familyTreeHref(rootRecord, person.record)}
-            className={buttonVariants({ variant: selected ? 'secondary' : 'ghost', size: 'icon-sm' })}
-            aria-label={`View ${person.name}`}
+      <header className="flex items-center justify-between border-b rule-hair bg-muted/40 px-4 py-2.5">
+        <div className="flex items-baseline gap-2.5">
+          <h3 className="font-display text-lg font-medium tracking-tight text-foreground">
+            {title}
+          </h3>
+          <span
+            className="font-display text-[0.62rem] uppercase tracking-[0.22em]"
+            style={{ color: accentVar }}
           >
-            <UserRound data-icon="inline-start" />
-          </Link>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-1 text-xs text-muted-foreground">
-        {dates ? <p>{dates}</p> : null}
-        {person.birth?.place ? <p className="truncate">{person.birth.place}</p> : null}
-        <p className="font-mono text-[0.68rem]">{person.record}</p>
-      </CardContent>
+            line
+          </span>
+        </div>
+        <Badge
+          variant="outline"
+          className="border-foreground/15 bg-transparent font-mono text-[0.65rem] tabular-nums text-foreground/80"
+        >
+          {String(total).padStart(2, '0')}
+        </Badge>
+      </header>
+      <div className="flex flex-col">
+        {groups.map(group => (
+          <GenerationBlock
+            key={`${side}-${group.generation}`}
+            generation={group.generation}
+            people={group.people}
+          />
+        ))}
+      </div>
     </Card>
   );
 }
 
-function RelationList({
-  title,
-  items,
-  rootRecord,
+function GenerationBlock({
+  generation,
+  people,
 }: {
-  title: string;
-  items: BrowserRelationView[];
-  rootRecord: string;
+  generation: number;
+  people: BrowserPersonView[];
 }) {
+  const sidePossible = generation > 0 && generation <= 10 ? 2 ** (generation - 1) : null;
+  const heading = GENERATION_HEADING[generation] ?? `Generation ${generation}`;
+  const isEmpty = people.length === 0;
+
   return (
-    <section className="flex flex-col gap-2">
-      <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</h3>
-      {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Unknown</p>
+    <section className="border-b rule-hair last:border-b-0">
+      <header className="flex items-baseline gap-3 px-3 py-1.5">
+        <span className="font-display text-[0.7rem] font-medium tabular-nums tracking-tight text-muted-foreground/70">
+          {roman(generation)}
+        </span>
+        <h4 className="flex-1 truncate font-display text-[0.78rem] uppercase tracking-[0.16em] text-muted-foreground">
+          {heading}
+        </h4>
+        {sidePossible ? (
+          <span className="font-mono text-[0.62rem] tabular-nums text-muted-foreground/70">
+            {String(people.length).padStart(2, '0')} / {String(sidePossible).padStart(2, '0')}
+          </span>
+        ) : null}
+      </header>
+      {isEmpty ? (
+        <p className="px-3 pb-2 font-mono text-[0.65rem] text-muted-foreground/55">— absentia —</p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {items.map(item => (
-            <Link
-              key={item.record}
-              href={familyTreeHref(item.record, item.record)}
-              className="group rounded-xl border bg-white/80 px-3 py-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
-            >
-              <span className="font-medium">{item.name}</span>
-              {item.detail ? <span className="ml-2 text-muted-foreground">{item.detail}</span> : null}
-            </Link>
+        <div className="grid gap-x-2 px-2 pb-1.5 sm:grid-cols-2">
+          {people.map((p, i) => (
+            <AncestorTile
+              key={`${p.record}-${p.pathFromRoot.join('-')}`}
+              href={familyTreeHref(p.record)}
+              name={p.name}
+              meta={formatTileMeta(p)}
+              ordinal={roman(i + 1).toLowerCase()}
+            />
           ))}
         </div>
       )}
@@ -126,176 +386,10 @@ function RelationList({
   );
 }
 
-function SelectedPanel({
-  selected,
-  rootRecord,
-  relations,
-}: {
-  selected: BrowserPersonView;
-  rootRecord: string;
-  relations: {
-    parents: BrowserRelationView[];
-    spouses: BrowserRelationView[];
-    children: BrowserRelationView[];
-  };
-}) {
-  const dates = formatDates(selected);
+function RelationLabel({ children }: { children: string }) {
   return (
-    <Card className="lg:sticky lg:top-6">
-      <CardHeader>
-        <div className="mb-2 flex size-14 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--family-paternal-soft),var(--family-maternal-soft))] text-foreground shadow-inner">
-          <UserRound />
-        </div>
-        <CardDescription className="text-xs uppercase tracking-wide">
-          Selected person
-        </CardDescription>
-        <CardTitle className="text-2xl tracking-normal">{selected.name}</CardTitle>
-        <CardDescription>{selected.label}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-5">
-        <div className="flex flex-col gap-2 rounded-xl bg-muted/50 p-3 text-sm">
-          {dates ? (
-            <p><span className="font-medium">Dates:</span> <span className="text-muted-foreground">{dates}</span></p>
-          ) : null}
-          {selected.birth?.place ? (
-            <p><span className="font-medium">Birthplace:</span> <span className="text-muted-foreground">{selected.birth.place}</span></p>
-          ) : null}
-          <p><span className="font-medium">Record:</span> <span className="text-muted-foreground">{selected.record}</span></p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {selected.slug ? (
-            <Link href={`/${selected.slug}`} className={buttonVariants({ variant: 'default', size: 'sm' })}>
-              <FileText data-icon="inline-start" />
-              Open page
-            </Link>
-          ) : null}
-          <Link href={familyTreeHref(selected.record, selected.record)} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-            <LocateFixed data-icon="inline-start" />
-            Center here
-          </Link>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <RelationList title="Parents" items={relations.parents} rootRecord={rootRecord} />
-          <RelationList title="Spouses" items={relations.spouses} rootRecord={rootRecord} />
-          <RelationList title="Children" items={relations.children} rootRecord={rootRecord} />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default async function FamilyTreePage({ searchParams }: Props) {
-  const params = await searchParams;
-  const rootRecord = params.person ?? SELF_RECORD;
-  const selectedRecord = params.selected ?? rootRecord;
-  const view = await getFamilyTree(rootRecord, selectedRecord);
-  if (!view) notFound();
-
-  return (
-    <main
-      className="family-tree-surface mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-6 p-4 sm:p-6"
-      style={{
-        '--family-paternal': 'oklch(0.60 0.16 247)',
-        '--family-paternal-strong': 'oklch(0.42 0.16 247)',
-        '--family-paternal-soft': 'oklch(0.92 0.05 247)',
-        '--family-maternal': 'oklch(0.65 0.18 18)',
-        '--family-maternal-strong': 'oklch(0.45 0.17 18)',
-        '--family-maternal-soft': 'oklch(0.93 0.05 18)',
-      } as CSSProperties}
-    >
-      <div className="flex flex-col gap-5 rounded-3xl border bg-white/70 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-2">
-          <Link href="/family" className="text-sm text-muted-foreground hover:text-foreground">Family lines</Link>
-          <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Perspective</p>
-            <h1 className="text-4xl font-semibold tracking-normal text-balance">{view.root.name}</h1>
-          </div>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            Browse the tree by family line. Select any person for context, or center the tree around them.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href={familyTreeHref(SELF_RECORD, SELF_RECORD)} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-            Steven
-          </Link>
-          <Link href="/search" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
-            <Search data-icon="inline-start" />
-            Search
-          </Link>
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <section className="overflow-hidden rounded-3xl border bg-white/55 p-3 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-5">
-          <div className="mb-5 flex justify-center">
-            <div className="w-full max-w-md">
-              <PersonNode person={view.root} rootRecord={view.root.record} selectedRecord={view.selected.record} />
-            </div>
-          </div>
-
-          <div className="grid gap-6 xl:grid-cols-2">
-            <div className="rounded-3xl border border-[var(--family-paternal)]/20 bg-[linear-gradient(180deg,var(--family-paternal-soft),rgba(255,255,255,0.72))] p-3 shadow-inner sm:p-4">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-sm font-medium uppercase tracking-wide text-[var(--family-paternal-strong)]">Paternal line</h2>
-                <span className="rounded-full bg-white/70 px-2 py-1 text-xs text-[var(--family-paternal-strong)] shadow-sm">father side</span>
-              </div>
-              <div className="flex flex-col gap-5">
-                {view.byGeneration.map(group => (
-                  <section key={`p-${group.generation}`} className="flex flex-col gap-2">
-                    <h3 className="text-sm font-medium text-foreground/80">{GENERATION_HEADING[group.generation] ?? `Generation ${group.generation}`}</h3>
-                    <div className="grid gap-2 md:grid-cols-2">
-                      {group.paternal.length === 0
-                        ? <p className="text-sm text-muted-foreground">Unknown</p>
-                        : group.paternal.map(person => (
-                          <PersonNode
-                            key={`${person.record}-${person.pathFromRoot.join('-')}-p`}
-                            person={person}
-                            rootRecord={view.root.record}
-                            selectedRecord={view.selected.record}
-                          />
-                        ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-[var(--family-maternal)]/20 bg-[linear-gradient(180deg,var(--family-maternal-soft),rgba(255,255,255,0.72))] p-3 shadow-inner sm:p-4">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-sm font-medium uppercase tracking-wide text-[var(--family-maternal-strong)]">Maternal line</h2>
-                <span className="rounded-full bg-white/70 px-2 py-1 text-xs text-[var(--family-maternal-strong)] shadow-sm">mother side</span>
-              </div>
-              <div className="flex flex-col gap-5">
-                {view.byGeneration.map(group => (
-                  <section key={`m-${group.generation}`} className="flex flex-col gap-2">
-                    <h3 className="text-sm font-medium">{GENERATION_HEADING[group.generation] ?? `Generation ${group.generation}`}</h3>
-                    <div className="grid gap-2 md:grid-cols-2">
-                      {group.maternal.length === 0
-                        ? <p className="text-sm text-muted-foreground">Unknown</p>
-                        : group.maternal.map(person => (
-                          <PersonNode
-                            key={`${person.record}-${person.pathFromRoot.join('-')}-m`}
-                            person={person}
-                            rootRecord={view.root.record}
-                            selectedRecord={view.selected.record}
-                          />
-                        ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <SelectedPanel
-          selected={view.selected}
-          rootRecord={view.root.record}
-          relations={view.selectedRelations}
-        />
-      </div>
-    </main>
+    <span className="font-display text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+      {children}
+    </span>
   );
 }
