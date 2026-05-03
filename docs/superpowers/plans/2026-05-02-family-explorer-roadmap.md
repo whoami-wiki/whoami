@@ -46,7 +46,7 @@
 **Why seventh:** separate concern from the family browser; touches `frontend/app/search/`. Filters by surname, decade, place. Worth doing after the family work because the family browser's data shape may change first and the search index will want to reflect that.
 **Plan:** `2026-05-02-search-facets.md`
 
-### 8. Map of birthplaces
+### 8. Map of birthplaces  (PARTIAL 2026-05-03 — places panel shipped; SVG dot-map deferred until coordinates exist)
 **Why eighth:** highest scope. Needs geocoding (place strings → lat/lon) which is either a one-shot batch via Nominatim with caching to a checked-in JSON, or a manual curated lookup. Render as a static SVG. Punt to last because the data work dominates.
 **Plan:** `2026-05-02-family-map.md`
 
