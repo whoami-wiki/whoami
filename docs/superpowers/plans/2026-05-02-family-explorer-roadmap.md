@@ -30,7 +30,7 @@
 **Why third:** needs bidirectional graph traversal (BFS up from both parties to a lowest common ancestor, then label the path). Gets significantly easier if the descendants walker (#2) and the cousin labeler (#1) already exist — the relationship terms ("first cousin once removed", "great-aunt") are the same logic. Highest delight-per-line-of-code.
 **Plan:** `2026-05-02-family-relationship-calculator.md`
 
-### 4. Coverage prompts
+### 4. Coverage prompts  (SHIPPED 2026-05-03)
 **Why fourth:** trivial once #1–#3 normalize how "known vs possible" is computed. Surface gaps as a sidebar panel ("3 of 8 great-great-grandparents unknown — paternal-paternal-paternal, paternal-paternal-maternal, …"). Already partially surfaced as `01 / 02` counts in the existing UI; this just promotes it.
 **Plan:** `2026-05-02-family-coverage.md`
 
