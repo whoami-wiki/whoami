@@ -14,6 +14,7 @@ export interface PageMeta {
   aliases: string[];
   categories: string[];
   gedcom?: GedcomRef;
+  portrait?: string;
   created: string;
   deletedAt?: string;
 }
@@ -31,6 +32,7 @@ export interface PageMetaSummary {
   categories: string[];
   aliases: string[];
   gedcomRecord?: string;
+  portrait?: string;
   isTalk: boolean;
   isArchived: boolean;
 }

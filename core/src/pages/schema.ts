@@ -18,6 +18,7 @@ const PageMetaSchema: z.ZodType<PageMeta, any, any> = z.object({
   aliases: z.array(z.string()),
   categories: z.array(z.string()),
   gedcom: GedcomRefSchema.optional(),
+  portrait: z.string().min(1).optional(),
   created: z.union([
     z.string().regex(ISO_DATE, 'expected YYYY-MM-DD'),
     z.date().transform(d => d.toISOString().slice(0, 10))

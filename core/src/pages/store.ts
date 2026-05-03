@@ -76,6 +76,7 @@ export function createPageStore(cfg: PageStoreConfig): PageStore {
             categories: page.meta.categories,
             aliases: page.meta.aliases,
             gedcomRecord: page.meta.gedcom?.record,
+            portrait: page.meta.portrait,
             isTalk,
             isArchived: !!page.meta.deletedAt,
           });

@@ -26,6 +26,7 @@ export interface FamilyView {
 
 export interface BrowserPersonView extends BrowserPerson {
   slug?: string;
+  portrait?: string;
 }
 
 export interface BrowserRelationView {
@@ -33,6 +34,7 @@ export interface BrowserRelationView {
   name: string;
   detail: string | null;
   slug?: string;
+  portrait?: string;
 }
 
 export interface BrowserSiblingView extends BrowserRelationView {
@@ -60,6 +62,7 @@ export interface ResearchFrontierView {
   generation: number;
   side: 'paternal' | 'maternal';
   slug?: string;
+  portrait?: string;
   missing: 'father' | 'mother' | 'both';
 }
 
@@ -189,18 +192,29 @@ function getCachedDerivedRecords(): Map<string, DerivedRecord> {
   return records;
 }
 
-async function buildSlugJoin(): Promise<(record: string, name: string) => string | undefined> {
+interface PageJoinResult {
+  slug?: string;
+  portrait?: string;
+}
+
+async function buildPageJoin(): Promise<(record: string, name: string) => PageJoinResult> {
   const { list } = await getCachedList();
-  const slugByRecord = new Map<string, string>();
-  const slugByName = new Map<string, string>();
+  const byRecord = new Map<string, PageJoinResult>();
+  const byName = new Map<string, PageJoinResult>();
   const slugifyName = (name: string): string =>
     name.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   for (const page of list) {
     if (page.isArchived) continue;
-    if (page.gedcomRecord) slugByRecord.set(page.gedcomRecord, page.slug);
-    slugByName.set(slugifyName(page.title), page.slug);
+    const entry: PageJoinResult = { slug: page.slug, portrait: page.portrait };
+    if (page.gedcomRecord) byRecord.set(page.gedcomRecord, entry);
+    byName.set(slugifyName(page.title), entry);
   }
-  return (record, name) => slugByRecord.get(record) ?? slugByName.get(slugifyName(name));
+  return (record, name) => byRecord.get(record) ?? byName.get(slugifyName(name)) ?? {};
+}
+
+async function buildSlugJoin(): Promise<(record: string, name: string) => string | undefined> {
+  const join = await buildPageJoin();
+  return (record, name) => join(record, name).slug;
 }
 
 export async function getFamilyTree(
@@ -214,34 +228,41 @@ export async function getFamilyTree(
   const core = buildFamilyBrowser({ records, rootRecord, selectedRecord });
   if (!core) return null;
 
-  const findSlug = await buildSlugJoin();
-  const enrich = (person: BrowserPerson): BrowserPersonView => ({
-    ...person,
-    slug: findSlug(person.record, person.name),
-  });
-  const relation = (r: { record: string; name: string }, detail: string | null): BrowserRelationView => ({
-    record: r.record,
-    name: r.name,
-    detail,
-    slug: findSlug(r.record, r.name),
-  });
+  const findPage = await buildPageJoin();
+  const findSlug = (record: string, name: string) => findPage(record, name).slug;
+  const enrich = (person: BrowserPerson): BrowserPersonView => {
+    const page = findPage(person.record, person.name);
+    return { ...person, slug: page.slug, portrait: page.portrait };
+  };
+  const relation = (r: { record: string; name: string }, detail: string | null): BrowserRelationView => {
+    const page = findPage(r.record, r.name);
+    return { record: r.record, name: r.name, detail, slug: page.slug, portrait: page.portrait };
+  };
 
   const targetForCohort = selectedRecord ?? rootRecord;
   const cohortRaw = computeCohort({ records, targetRecord: targetForCohort });
-  const siblings: BrowserSiblingView[] = cohortRaw.siblings.map(s => ({
-    record: s.record,
-    name: s.name,
-    detail: yearLabel(s.birth?.date ?? null),
-    slug: findSlug(s.record, s.name),
-    kind: s.kind,
-  }));
-  const cousins: BrowserCousinView[] = cohortRaw.cousins.map(c => ({
-    record: c.record,
-    name: c.name,
-    detail: yearLabel(c.birth?.date ?? null),
-    slug: findSlug(c.record, c.name),
-    via: c.via.parentName,
-  }));
+  const siblings: BrowserSiblingView[] = cohortRaw.siblings.map(s => {
+    const page = findPage(s.record, s.name);
+    return {
+      record: s.record,
+      name: s.name,
+      detail: yearLabel(s.birth?.date ?? null),
+      slug: page.slug,
+      portrait: page.portrait,
+      kind: s.kind,
+    };
+  });
+  const cousins: BrowserCousinView[] = cohortRaw.cousins.map(c => {
+    const page = findPage(c.record, c.name);
+    return {
+      record: c.record,
+      name: c.name,
+      detail: yearLabel(c.birth?.date ?? null),
+      slug: page.slug,
+      portrait: page.portrait,
+      via: c.via.parentName,
+    };
+  });
 
   const coverageByGen: CoverageGenerationView[] = core.byGeneration.map(group => {
     const possible = 2 ** group.generation;
@@ -263,12 +284,14 @@ export async function getFamilyTree(
       const hasFather = rec.parents.some(r => r.role === 'father');
       const hasMother = rec.parents.some(r => r.role === 'mother');
       if (hasFather && hasMother) continue;
+      const page = findPage(p.record, p.name);
       frontierAll.push({
         record: p.record,
         name: p.name,
         generation: p.generation,
         side,
-        slug: findSlug(p.record, p.name),
+        slug: page.slug,
+        portrait: page.portrait,
         missing: !hasFather && !hasMother ? 'both' : (!hasFather ? 'father' : 'mother'),
       });
     }
@@ -285,14 +308,18 @@ export async function getFamilyTree(
   const descendantsRaw = computeDescendants({ records, rootRecord: targetForCohort });
   const descendantsByGen = descendantsRaw.byGeneration.map(g => ({
     generation: g.generation,
-    people: g.people.map(p => ({
-      record: p.record,
-      name: p.name,
-      detail: yearLabel(p.birth?.date ?? null),
-      slug: findSlug(p.record, p.name),
-      generation: p.generation,
-      via: p.via.parentName,
-    } satisfies BrowserDescendantView)),
+    people: g.people.map(p => {
+      const page = findPage(p.record, p.name);
+      return {
+        record: p.record,
+        name: p.name,
+        detail: yearLabel(p.birth?.date ?? null),
+        slug: page.slug,
+        portrait: page.portrait,
+        generation: p.generation,
+        via: p.via.parentName,
+      } satisfies BrowserDescendantView;
+    }),
   }));
 
   return {
