@@ -96,7 +96,8 @@ function cousinLabel(equalDist: number, removed: number): string {
 function classify(aDist: number, bDist: number, fromRoles: ('father' | 'mother')[]): string {
   if (aDist === 0 && bDist === 0) return 'self';
   if (aDist === 0) return descendantLabel(bDist);
-  if (bDist === 0) return ancestorLabel(aDist, fromRoles[0]);
+  // Target's gender comes from their role in their child's family — the LAST hop in the chain.
+  if (bDist === 0) return ancestorLabel(aDist, fromRoles[fromRoles.length - 1]);
   if (aDist === 1 && bDist === 1) return 'sibling';
   if (aDist === 1) return nieceNephewLabel(bDist);
   if (bDist === 1) return auntUncleLabel(aDist);

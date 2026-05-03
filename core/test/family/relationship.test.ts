@@ -37,6 +37,18 @@ test('computeRelationship: child (inverse of parent)', () => {
   assert.equal(r?.label, 'child');
 });
 
+test('computeRelationship: maternal grandfather is grandfather, not grandmother', () => {
+  // Regression: gender should come from the last hop, not the first.
+  // Self → Mom (mother) → Mom's father (father) = grandfather, not grandmother.
+  const records = new Map<string, DerivedRecord>([
+    ['I1', person('I1', 'Self', { parents: [{ record: 'IM', name: 'Mom', role: 'mother' }] })],
+    ['IM', person('IM', 'Mom', { parents: [{ record: 'IMG', name: 'MaternalGrandpa', role: 'father' }] })],
+    ['IMG', person('IMG', 'MaternalGrandpa')],
+  ]);
+  const r = computeRelationship({ records, fromRecord: 'I1', toRecord: 'IMG' });
+  assert.equal(r?.label, 'grandfather');
+});
+
 test('computeRelationship: grandparent', () => {
   const records = new Map<string, DerivedRecord>([
     ['I1', person('I1', 'Self', { parents: [{ record: 'IF', name: 'Dad', role: 'father' }] })],
