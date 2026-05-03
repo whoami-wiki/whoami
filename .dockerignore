@@ -1,0 +1,23 @@
+.git
+.github
+.next
+node_modules
+dist
+*.tsbuildinfo
+.DS_Store
+.env
+
+# Desktop build artifacts
+desktop/resources/php/
+desktop/resources/lua/
+desktop/resources/mediawiki/
+desktop/resources/ffmpeg/
+desktop/dist-electron/
+desktop/.build/
+desktop/renderer/
+
+# Evals
+evals/
+
+# Assets (not needed in Docker build)
+assets/
