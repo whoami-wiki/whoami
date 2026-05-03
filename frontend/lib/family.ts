@@ -195,6 +195,9 @@ export function loadDerivedRecordsForTree(derivedDir: string = DERIVED_DIR): Map
 }
 
 const FILE_CACHE_TTL_MS = 2000;
+/** Cap the research-frontier list so the panel doesn't sprawl. Closer
+ *  generations are sorted first, so the cut keeps the most-actionable items. */
+const RESEARCH_FRONTIER_LIMIT = 12;
 let _derivedRecordsCache: { records: Map<string, DerivedRecord>; expiresAt: number; mtimeMs: number } | null = null;
 
 let _coordsCache: { coords: ReturnType<typeof parseCoordsYaml>; expiresAt: number; mtimeMs: number } | null = null;
@@ -340,7 +343,7 @@ export async function getFamilyTree(
     }
   }
   frontierAll.sort((a, b) => a.generation - b.generation || a.name.localeCompare(b.name));
-  const frontier = frontierAll.slice(0, 12);
+  const frontier = frontierAll.slice(0, RESEARCH_FRONTIER_LIMIT);
 
   const flatLineage = core.byGeneration.flatMap(g => [
     ...g.paternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'paternal' as const })),

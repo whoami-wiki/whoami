@@ -23,6 +23,9 @@ export interface ComputeDescendantsConfig {
 export function computeDescendants(cfg: ComputeDescendantsConfig): DescendantsView {
   const root = cfg.records.get(cfg.rootRecord);
   if (!root) return { byGeneration: [], total: 0 };
+  // Default depth is one shallower than the ancestor browser (which defaults
+  // to 6) — descendants of a typical research target tend not to extend as
+  // far forward as their ancestors do back.
   const maxDepth = cfg.maxDepth ?? 5;
 
   const seen = new Set<string>([cfg.rootRecord]);

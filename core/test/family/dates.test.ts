@@ -31,3 +31,11 @@ test('parseGedcomYear: null/empty/unrecognized returns null', () => {
   assert.equal(parseGedcomYear(''), null);
   assert.equal(parseGedcomYear('not a date'), null);
 });
+
+test('parseGedcomYear: bare 4-digit year inside free-form text matches without qualifier', () => {
+  // The fallback is intentional — GEDCOM occasionally embeds a year in a note
+  // (e.g. INT/source-citation values). Documented here so the behavior is
+  // explicit and the regex isn't tightened by accident.
+  assert.deepEqual(parseGedcomYear('INT 1880 (interpretation note)'), { year: 1880 });
+  assert.deepEqual(parseGedcomYear('Some random text 2024 hello'), { year: 2024 });
+});

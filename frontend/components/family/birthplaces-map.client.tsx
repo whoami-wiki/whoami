@@ -24,7 +24,9 @@ interface Props {
 }
 
 function radiusForCount(n: number): number {
-  return 4 + Math.min(8, Math.sqrt(n) * 2);
+  // sqrt scaling so doubling the count doesn't double the area; clamped to 14
+  // so a single town with many ancestors doesn't overwhelm the map.
+  return Math.min(14, 4 + Math.sqrt(n) * 3);
 }
 
 export function BirthplacesMap({ places }: Props) {
