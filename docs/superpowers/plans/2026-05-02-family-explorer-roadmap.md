@@ -22,7 +22,7 @@
 **Why first:** smallest, all data is in `DerivedRecord` already (parents → children minus self for siblings; parents' siblings' children for cousins). Directly fixes the "this feels like a chain" complaint. No new derivation, no UI primitives needed beyond what `PersonRow`/`AncestorTile` already provide.
 **Plan:** `2026-05-02-family-siblings-cousins.md`
 
-### 2. Descendants view
+### 2. Descendants view  (SHIPPED 2026-05-02)
 **Why second:** uses the same directional walker shape as the cousin computation in #1; reusing those primitives is cleanest if #1 lands first. Walks `children[]` recursively from any selected ancestor — answers "everyone who descends from Great-Grandpa Joe."
 **Plan:** `2026-05-02-family-descendants.md`
 
