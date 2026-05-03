@@ -105,7 +105,7 @@ export interface FamilyTreeView {
   };
   coverage: CoverageView;
   timeline: TimelineViewWithPortraits;
-  relationshipToSelf: { label: string; path: string[] } | null;
+  relationshipToSelf: { label: string; path: string[]; perspective: { record: string; name: string; isMe: boolean } } | null;
 }
 
 /**
@@ -229,8 +229,10 @@ async function buildSlugJoin(): Promise<(record: string, name: string) => string
 export async function getFamilyTree(
   rootRecord: string = SELF_RECORD,
   selectedRecord?: string | null,
+  perspectiveRecord?: string | null,
 ): Promise<FamilyTreeView | null> {
   if (!/^I\d+$/.test(rootRecord)) return null;
+  if (perspectiveRecord && !/^I\d+$/.test(perspectiveRecord)) return null;
   if (selectedRecord && !/^I\d+$/.test(selectedRecord)) return null;
 
   const records = getCachedDerivedRecords();
@@ -352,10 +354,22 @@ export async function getFamilyTree(
     descendants: { byGeneration: descendantsByGen, total: descendantsRaw.total },
     coverage: { byGeneration: coverageByGen, knownTotal, possibleTotal, frontier },
     timeline,
-    relationshipToSelf:
-      targetForCohort === SELF_RECORD
-        ? null
-        : computeRelationship({ records, fromRecord: SELF_RECORD, toRecord: targetForCohort }),
+    relationshipToSelf: (() => {
+      const fromRecord = perspectiveRecord ?? SELF_RECORD;
+      if (targetForCohort === fromRecord) return null;
+      const rel = computeRelationship({ records, fromRecord, toRecord: targetForCohort });
+      if (!rel) return null;
+      const fromRec = records.get(fromRecord);
+      return {
+        label: rel.label,
+        path: rel.path,
+        perspective: {
+          record: fromRecord,
+          name: fromRec?.name ?? 'me',
+          isMe: fromRecord === SELF_RECORD,
+        },
+      };
+    })(),
   };
 }
 

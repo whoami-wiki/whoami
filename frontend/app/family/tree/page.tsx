@@ -21,7 +21,7 @@ import { roman } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  searchParams: Promise<{ person?: string }>;
+  searchParams: Promise<{ person?: string; from?: string }>;
 }
 
 const GENERATION_HEADING: Record<number, string> = {
@@ -62,7 +62,7 @@ function relationMeta(relation: BrowserRelationView): string | null {
 export default async function FamilyTreePage({ searchParams }: Props) {
   const params = await searchParams;
   const rootRecord = params.person ?? SELF_RECORD;
-  const view = await getFamilyTree(rootRecord, rootRecord);
+  const view = await getFamilyTree(rootRecord, rootRecord, params.from ?? null);
   if (!view) notFound();
 
   const person = view.root;
@@ -136,7 +136,10 @@ export default async function FamilyTreePage({ searchParams }: Props) {
 
             {view.relationshipToSelf ? (
               <p className="mt-1.5 font-display text-[0.72rem] uppercase tracking-[0.18em] text-muted-foreground">
-                {view.relationshipToSelf.label} <span className="text-muted-foreground/60">· to me</span>
+                {view.relationshipToSelf.label}{' '}
+                <span className="text-muted-foreground/60">
+                  · to {view.relationshipToSelf.perspective.isMe ? 'me' : view.relationshipToSelf.perspective.name}
+                </span>
               </p>
             ) : null}
 
