@@ -1,4 +1,5 @@
 import type { DatedEvent, DerivedRecord } from '../gedcom/types.ts';
+import { byBirthThenName } from './sort.ts';
 
 export interface CohortSibling {
   record: string;
@@ -88,20 +89,3 @@ export function computeCohort(cfg: ComputeCohortConfig): Cohort {
   };
 }
 
-function byBirthThenName(
-  a: { birth: DatedEvent | null; name: string },
-  b: { birth: DatedEvent | null; name: string },
-): number {
-  const ay = yearOf(a.birth);
-  const by = yearOf(b.birth);
-  if (ay !== null && by !== null && ay !== by) return ay - by;
-  if (ay !== null && by === null) return -1;
-  if (ay === null && by !== null) return 1;
-  return a.name.localeCompare(b.name);
-}
-
-function yearOf(d: DatedEvent | null): number | null {
-  if (!d?.date) return null;
-  const m = d.date.match(/\b(\d{4})\b/);
-  return m ? Number(m[1]) : null;
-}

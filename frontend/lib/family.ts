@@ -14,20 +14,23 @@ import {
   type MappedPlace,
   type UnmappedPlace,
 } from '@core/family/places-coords.ts';
+import type { DerivedRecord } from '@core/gedcom/types.ts';
+import { DERIVED_DIR, PLACES_COORDS_FILE, SELF_RECORD } from './env';
+import { getCachedList } from './server-services';
+
+export type { AncestorNode, AncestryTree };
 
 export interface TimelineEntryView extends TimelineEntry {
   portrait?: string;
+  /** Right edge of the lifespan bar — same value `computeTimeline` used to
+   *  derive `range.maxYear`, so bars cannot overshoot the visualization. */
+  endYear: number;
 }
 
 export interface TimelineViewWithPortraits {
   entries: TimelineEntryView[];
   range: TimelineView['range'];
 }
-import type { DerivedRecord } from '@core/gedcom/types.ts';
-import { DERIVED_DIR, PLACES_COORDS_FILE, SELF_RECORD } from './env';
-import { getCachedList } from './server-services';
-
-export type { AncestorNode, AncestryTree };
 
 export interface AncestorView extends AncestorNode {
   /** Wiki slug for this individual, if a page exists. */
@@ -114,7 +117,7 @@ export interface FamilyTreeView {
   places: PlacesView;
   placesMap: { mapped: MappedPlace[]; unmapped: UnmappedPlace[] };
   timeline: TimelineViewWithPortraits;
-  relationshipToSelf: { label: string; path: string[]; perspective: { record: string; name: string; isMe: boolean } } | null;
+  relationship: { label: string; path: string[]; perspective: { record: string; name: string; isMe: boolean } } | null;
 }
 
 /**
@@ -191,7 +194,7 @@ export function loadDerivedRecordsForTree(derivedDir: string = DERIVED_DIR): Map
   return records;
 }
 
-const DERIVED_RECORDS_TTL_MS = 2000;
+const FILE_CACHE_TTL_MS = 2000;
 let _derivedRecordsCache: { records: Map<string, DerivedRecord>; expiresAt: number; mtimeMs: number } | null = null;
 
 let _coordsCache: { coords: ReturnType<typeof parseCoordsYaml>; expiresAt: number; mtimeMs: number } | null = null;
@@ -210,7 +213,7 @@ function getCachedCoords(): ReturnType<typeof parseCoordsYaml> {
   try {
     coords = parseCoordsYaml(readFileSync(PLACES_COORDS_FILE, 'utf-8'));
   } catch {}
-  _coordsCache = { coords, expiresAt: now + DERIVED_RECORDS_TTL_MS, mtimeMs };
+  _coordsCache = { coords, expiresAt: now + FILE_CACHE_TTL_MS, mtimeMs };
   return coords;
 }
 
@@ -226,7 +229,7 @@ function getCachedDerivedRecords(): Map<string, DerivedRecord> {
     return _derivedRecordsCache.records;
   }
   const records = loadDerivedRecordsForTree();
-  _derivedRecordsCache = { records, expiresAt: now + DERIVED_RECORDS_TTL_MS, mtimeMs };
+  _derivedRecordsCache = { records, expiresAt: now + FILE_CACHE_TTL_MS, mtimeMs };
   return records;
 }
 
@@ -257,15 +260,13 @@ async function buildSlugJoin(): Promise<(record: string, name: string) => string
 
 export async function getFamilyTree(
   rootRecord: string = SELF_RECORD,
-  selectedRecord?: string | null,
   perspectiveRecord?: string | null,
 ): Promise<FamilyTreeView | null> {
   if (!/^I\d+$/.test(rootRecord)) return null;
   if (perspectiveRecord && !/^I\d+$/.test(perspectiveRecord)) return null;
-  if (selectedRecord && !/^I\d+$/.test(selectedRecord)) return null;
 
   const records = getCachedDerivedRecords();
-  const core = buildFamilyBrowser({ records, rootRecord, selectedRecord });
+  const core = buildFamilyBrowser({ records, rootRecord, selectedRecord: rootRecord });
   if (!core) return null;
 
   const findPage = await buildPageJoin();
@@ -279,8 +280,10 @@ export async function getFamilyTree(
     return { record: r.record, name: r.name, detail, slug: page.slug, portrait: page.portrait };
   };
 
-  const targetForCohort = selectedRecord ?? rootRecord;
-  const cohortRaw = computeCohort({ records, targetRecord: targetForCohort });
+  // Cohort, descendants, timeline, places, and relationship are all anchored
+  // on the page's root person — that's what the user is viewing.
+  const targetRecord = rootRecord;
+  const cohortRaw = computeCohort({ records, targetRecord });
   const siblings: BrowserSiblingView[] = cohortRaw.siblings.map(s => {
     const page = findPage(s.record, s.name);
     return {
@@ -344,7 +347,7 @@ export async function getFamilyTree(
     ...g.maternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'maternal' as const })),
   ]);
   const placesEntries = [
-    { record: targetForCohort, name: records.get(targetForCohort)?.name ?? '', place: records.get(targetForCohort)?.birth?.place ?? null },
+    { record: targetRecord, name: records.get(targetRecord)?.name ?? '', place: records.get(targetRecord)?.birth?.place ?? null },
     ...flatLineage.map(p => ({ record: p.record, name: p.name, place: records.get(p.record)?.birth?.place ?? null })),
   ];
   const places = groupBirthplaces({ entries: placesEntries });
@@ -353,13 +356,19 @@ export async function getFamilyTree(
     .map(e => ({ record: e.record, name: e.name, place: e.place as string }));
   const placesMap = joinCoords({ coords: getCachedCoords(), people: placesPeople });
 
-  const timelineRaw = computeTimeline({ records, self: targetForCohort, lineage: flatLineage });
+  const timelineRaw = computeTimeline({ records, self: targetRecord, lineage: flatLineage });
   const timeline: TimelineViewWithPortraits = {
     range: timelineRaw.range,
-    entries: timelineRaw.entries.map(e => ({ ...e, portrait: findPage(e.record, e.name).portrait })),
+    entries: timelineRaw.entries.map(e => ({
+      ...e,
+      portrait: findPage(e.record, e.name).portrait,
+    })),
   };
 
-  const descendantsRaw = computeDescendants({ records, rootRecord: targetForCohort });
+  const descendantsRaw = computeDescendants({ records, rootRecord: targetRecord });
+
+  const fromRecord = perspectiveRecord ?? SELF_RECORD;
+  const relationship = computeRelationshipFromPerspective(records, targetRecord, fromRecord);
   const descendantsByGen = descendantsRaw.byGeneration.map(g => ({
     generation: g.generation,
     people: g.people.map(p => {
@@ -395,22 +404,27 @@ export async function getFamilyTree(
     places,
     placesMap,
     timeline,
-    relationshipToSelf: (() => {
-      const fromRecord = perspectiveRecord ?? SELF_RECORD;
-      if (targetForCohort === fromRecord) return null;
-      const rel = computeRelationship({ records, fromRecord, toRecord: targetForCohort });
-      if (!rel) return null;
-      const fromRec = records.get(fromRecord);
-      return {
-        label: rel.label,
-        path: rel.path,
-        perspective: {
-          record: fromRecord,
-          name: fromRec?.name ?? 'me',
-          isMe: fromRecord === SELF_RECORD,
-        },
-      };
-    })(),
+    relationship,
+  };
+}
+
+function computeRelationshipFromPerspective(
+  records: Map<string, DerivedRecord>,
+  targetRecord: string,
+  fromRecord: string,
+): FamilyTreeView['relationship'] {
+  if (targetRecord === fromRecord) return null;
+  const rel = computeRelationship({ records, fromRecord, toRecord: targetRecord });
+  if (!rel) return null;
+  const fromRec = records.get(fromRecord);
+  return {
+    label: rel.label,
+    path: rel.path,
+    perspective: {
+      record: fromRecord,
+      name: fromRec?.name ?? 'me',
+      isMe: fromRecord === SELF_RECORD,
+    },
   };
 }
 

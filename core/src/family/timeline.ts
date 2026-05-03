@@ -6,6 +6,11 @@ export interface TimelineEntry {
   name: string;
   birthYear: number;
   deathYear: number | null;
+  /** Right edge for the lifespan bar — `deathYear` if known, otherwise a
+   *  conservative cap (current year or birth + DEFAULT_LIFESPAN_YEARS). This
+   *  is the same value that drives `range.maxYear`, so bars stay inside the
+   *  visualization range without the renderer needing to recompute it. */
+  endYear: number;
   side: 'self' | 'paternal' | 'maternal';
   generation: number;
   birthQualified: boolean;
@@ -46,11 +51,14 @@ export function computeTimeline(cfg: ComputeTimelineConfig): TimelineView {
     const b = parseGedcomYear(rec.birth?.date ?? null);
     const d = parseGedcomYear(rec.death?.date ?? null);
     if (!b) continue;
+    const deathYear = d ? d.year : null;
+    const endYear = deathYear ?? Math.min(currentYear, b.year + DEFAULT_LIFESPAN_YEARS);
     entries.push({
       record: c.record,
       name: c.name,
       birthYear: b.year,
-      deathYear: d ? d.year : null,
+      deathYear,
+      endYear,
       side: c.side,
       generation: c.generation,
       birthQualified: b.qualifier !== undefined,
@@ -64,8 +72,7 @@ export function computeTimeline(cfg: ComputeTimelineConfig): TimelineView {
   let maxYear = -Infinity;
   for (const e of entries) {
     minYear = Math.min(minYear, e.birthYear);
-    const end = e.deathYear ?? Math.min(currentYear, e.birthYear + DEFAULT_LIFESPAN_YEARS);
-    maxYear = Math.max(maxYear, end);
+    maxYear = Math.max(maxYear, e.endYear);
   }
   entries.sort((a, b) => a.birthYear - b.birthYear || a.generation - b.generation);
   return { entries, range: { minYear, maxYear } };

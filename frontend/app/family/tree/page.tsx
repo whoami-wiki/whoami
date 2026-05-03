@@ -63,7 +63,7 @@ function relationMeta(relation: BrowserRelationView): string | null {
 export default async function FamilyTreePage({ searchParams }: Props) {
   const params = await searchParams;
   const rootRecord = params.person ?? SELF_RECORD;
-  const view = await getFamilyTree(rootRecord, rootRecord, params.from ?? null);
+  const view = await getFamilyTree(rootRecord, params.from ?? null);
   if (!view) notFound();
 
   const person = view.root;
@@ -135,11 +135,11 @@ export default async function FamilyTreePage({ searchParams }: Props) {
               </p>
             ) : null}
 
-            {view.relationshipToSelf ? (
+            {view.relationship ? (
               <p className="mt-1.5 font-display text-[0.72rem] uppercase tracking-[0.18em] text-muted-foreground">
-                {view.relationshipToSelf.label}{' '}
+                {view.relationship.label}{' '}
                 <span className="text-muted-foreground/60">
-                  · to {view.relationshipToSelf.perspective.isMe ? 'me' : view.relationshipToSelf.perspective.name}
+                  · to {view.relationship.perspective.isMe ? 'me' : view.relationship.perspective.name}
                 </span>
               </p>
             ) : null}
@@ -433,7 +433,7 @@ export default async function FamilyTreePage({ searchParams }: Props) {
                     side={e.side}
                     rangeMin={view.timeline.range!.minYear}
                     rangeMax={view.timeline.range!.maxYear}
-                    endYear={e.deathYear ?? Math.min(new Date().getUTCFullYear(), e.birthYear + 70)}
+                    endYear={e.endYear}
                     birthQualified={e.birthQualified}
                     deathQualified={e.deathQualified}
                     portrait={e.portrait}

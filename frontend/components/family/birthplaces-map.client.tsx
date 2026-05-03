@@ -79,6 +79,10 @@ export function BirthplacesMap({ places }: Props) {
                     {place.note}
                   </div>
                 ) : null}
+                {/* Leaflet renders popups outside React's tree, so next/link's
+                    prefetching and client navigation don't apply here. Plain
+                    <a> is the right choice — full reload is fine for occasional
+                    map clicks. */}
                 <ul className="mt-2 space-y-0.5 text-[0.8rem]">
                   {place.people.map(p => (
                     <li key={p.record}>

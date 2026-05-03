@@ -1,4 +1,5 @@
 import type { DatedEvent, DerivedRecord } from '../gedcom/types.ts';
+import { byBirthThenName } from './sort.ts';
 
 export interface DescendantPerson {
   record: string;
@@ -80,17 +81,3 @@ export function computeDescendants(cfg: ComputeDescendantsConfig): DescendantsVi
   return { byGeneration, total };
 }
 
-function byBirthThenName(a: DescendantPerson, b: DescendantPerson): number {
-  const ay = yearOf(a.birth);
-  const by = yearOf(b.birth);
-  if (ay !== null && by !== null && ay !== by) return ay - by;
-  if (ay !== null && by === null) return -1;
-  if (ay === null && by !== null) return 1;
-  return a.name.localeCompare(b.name);
-}
-
-function yearOf(d: DatedEvent | null): number | null {
-  if (!d?.date) return null;
-  const m = d.date.match(/\b(\d{4})\b/);
-  return m ? Number(m[1]) : null;
-}
