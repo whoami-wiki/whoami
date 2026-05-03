@@ -288,6 +288,8 @@ export async function getFamilyTree(
   // Cohort, descendants, timeline, places, and relationship are all anchored
   // on the page's root person — that's what the user is viewing.
   const targetRecord = rootRecord;
+
+  // ─── Cohort (siblings + first cousins) ───
   const cohortRaw = computeCohort({ records, targetRecord });
   const siblings: BrowserSiblingView[] = cohortRaw.siblings.map(s => {
     const page = findPage(s.record, s.name);
@@ -312,6 +314,7 @@ export async function getFamilyTree(
     };
   });
 
+  // ─── Coverage (per-generation completeness + research frontier) ───
   const coverageByGen: CoverageGenerationView[] = core.byGeneration.map(group => {
     const possible = 2 ** group.generation;
     const known = group.paternal.length + group.maternal.length;
@@ -347,6 +350,7 @@ export async function getFamilyTree(
   frontierAll.sort((a, b) => a.generation - b.generation || a.name.localeCompare(b.name));
   const frontier = frontierAll.slice(0, RESEARCH_FRONTIER_LIMIT);
 
+  // ─── Places (region grouping + map join via curated coords) ───
   const flatLineage = core.byGeneration.flatMap(g => [
     ...g.paternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'paternal' as const })),
     ...g.maternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'maternal' as const })),
@@ -361,6 +365,7 @@ export async function getFamilyTree(
     .map(e => ({ record: e.record, name: e.name, place: e.place as string }));
   const placesMap = joinCoords({ coords: getCachedCoords(), people: placesPeople });
 
+  // ─── Timeline (lifespans across the lineage) ───
   const timelineRaw = computeTimeline({ records, self: targetRecord, lineage: flatLineage });
   const timeline: TimelineViewWithPortraits = {
     range: timelineRaw.range,
@@ -370,6 +375,7 @@ export async function getFamilyTree(
     })),
   };
 
+  // ─── Descendants + relationship-to-perspective ───
   const descendantsRaw = computeDescendants({ records, rootRecord: targetRecord });
 
   const fromRecord = perspectiveRecord ?? SELF_RECORD;
