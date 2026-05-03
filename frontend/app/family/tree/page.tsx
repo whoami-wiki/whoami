@@ -8,6 +8,7 @@ import { CommandPalette } from '@/components/command-palette';
 import { GroupedList } from '@/components/family/grouped-list';
 import { PersonRow } from '@/components/family/person-row';
 import { AncestorTile } from '@/components/family/ancestor-tile';
+import { LifespanBar } from '@/components/family/lifespan-bar';
 import { SELF_RECORD } from '@/lib/env';
 import {
   getFamilyTree,
@@ -298,6 +299,39 @@ export default async function FamilyTreePage({ searchParams }: Props) {
                 </Card>
               )}
             </div>
+          </section>
+        ) : null}
+
+        {view.timeline.entries.length > 0 && view.timeline.range ? (
+          <section className="registry-rise mb-12" style={{ animationDelay: '110ms' }}>
+            <SectionHeader
+              title="Lifespans"
+              count={view.timeline.entries.length}
+              after={
+                <p className="font-mono text-[0.7rem] tabular-nums text-muted-foreground/80">
+                  {view.timeline.range.minYear} – {view.timeline.range.maxYear}
+                </p>
+              }
+            />
+            <Card className="gap-0 overflow-hidden p-0 py-0 shadow-none ring-foreground/12">
+              <div className="divide-y rule-hair">
+                {view.timeline.entries.map(e => (
+                  <LifespanBar
+                    key={`life-${e.record}`}
+                    href={familyTreeHref(e.record)}
+                    name={e.name}
+                    birthYear={e.birthYear}
+                    deathYear={e.deathYear}
+                    side={e.side}
+                    rangeMin={view.timeline.range!.minYear}
+                    rangeMax={view.timeline.range!.maxYear}
+                    endYear={e.deathYear ?? Math.min(new Date().getUTCFullYear(), e.birthYear + 70)}
+                    birthQualified={e.birthQualified}
+                    deathQualified={e.deathQualified}
+                  />
+                ))}
+              </div>
+            </Card>
           </section>
         ) : null}
 
