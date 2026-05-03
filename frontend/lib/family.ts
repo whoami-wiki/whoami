@@ -4,6 +4,7 @@ import yaml from 'js-yaml';
 import { buildFamilyBrowser, type BrowserPerson } from '@core/family/browser.ts';
 import { traceAncestry, type AncestryTree, type AncestorNode } from '@core/family/trace.ts';
 import { computeCohort } from '@core/family/cohort.ts';
+import { computeDescendants } from '@core/family/descendants.ts';
 import type { DerivedRecord } from '@core/gedcom/types.ts';
 import { DERIVED_DIR, SELF_RECORD } from './env';
 import { getCachedList } from './server-services';
@@ -40,6 +41,11 @@ export interface BrowserCousinView extends BrowserRelationView {
   via: string;
 }
 
+export interface BrowserDescendantView extends BrowserRelationView {
+  generation: number;
+  via: string;
+}
+
 export interface FamilyTreeView {
   root: BrowserPersonView;
   selected: BrowserPersonView;
@@ -56,6 +62,10 @@ export interface FamilyTreeView {
   cohort: {
     siblings: BrowserSiblingView[];
     cousins: BrowserCousinView[];
+  };
+  descendants: {
+    byGeneration: { generation: number; people: BrowserDescendantView[] }[];
+    total: number;
   };
 }
 
@@ -206,6 +216,19 @@ export async function getFamilyTree(
     via: c.via.parentName,
   }));
 
+  const descendantsRaw = computeDescendants({ records, rootRecord: targetForCohort });
+  const descendantsByGen = descendantsRaw.byGeneration.map(g => ({
+    generation: g.generation,
+    people: g.people.map(p => ({
+      record: p.record,
+      name: p.name,
+      detail: yearLabel(p.birth?.date ?? null),
+      slug: findSlug(p.record, p.name),
+      generation: p.generation,
+      via: p.via.parentName,
+    } satisfies BrowserDescendantView)),
+  }));
+
   return {
     root: enrich(core.root),
     selected: enrich(core.selected),
@@ -220,6 +243,7 @@ export async function getFamilyTree(
       children: core.selectedRelations.children.map(r => relation(r, r.born ? `b. ${r.born}` : null)),
     },
     cohort: { siblings, cousins },
+    descendants: { byGeneration: descendantsByGen, total: descendantsRaw.total },
   };
 }
 
