@@ -47,6 +47,28 @@ export interface BrowserDescendantView extends BrowserRelationView {
   via: string;
 }
 
+export interface CoverageGenerationView {
+  generation: number;
+  known: number;
+  possible: number;
+}
+
+export interface ResearchFrontierView {
+  record: string;
+  name: string;
+  generation: number;
+  side: 'paternal' | 'maternal';
+  slug?: string;
+  missing: 'father' | 'mother' | 'both';
+}
+
+export interface CoverageView {
+  byGeneration: CoverageGenerationView[];
+  knownTotal: number;
+  possibleTotal: number;
+  frontier: ResearchFrontierView[];
+}
+
 export interface FamilyTreeView {
   root: BrowserPersonView;
   selected: BrowserPersonView;
@@ -68,6 +90,7 @@ export interface FamilyTreeView {
     byGeneration: { generation: number; people: BrowserDescendantView[] }[];
     total: number;
   };
+  coverage: CoverageView;
   relationshipToSelf: { label: string; path: string[] } | null;
 }
 
@@ -218,6 +241,39 @@ export async function getFamilyTree(
     via: c.via.parentName,
   }));
 
+  const coverageByGen: CoverageGenerationView[] = core.byGeneration.map(group => {
+    const possible = 2 ** group.generation;
+    const known = group.paternal.length + group.maternal.length;
+    return { generation: group.generation, known, possible };
+  });
+  const knownTotal = coverageByGen.reduce((s, g) => s + g.known, 0);
+  const possibleTotal = coverageByGen.reduce((s, g) => s + g.possible, 0);
+
+  const frontierAll: ResearchFrontierView[] = [];
+  for (const group of core.byGeneration) {
+    const consider = [
+      ...group.paternal.map(p => ({ p, side: 'paternal' as const })),
+      ...group.maternal.map(p => ({ p, side: 'maternal' as const })),
+    ];
+    for (const { p, side } of consider) {
+      const rec = records.get(p.record);
+      if (!rec) continue;
+      const hasFather = rec.parents.some(r => r.role === 'father');
+      const hasMother = rec.parents.some(r => r.role === 'mother');
+      if (hasFather && hasMother) continue;
+      frontierAll.push({
+        record: p.record,
+        name: p.name,
+        generation: p.generation,
+        side,
+        slug: findSlug(p.record, p.name),
+        missing: !hasFather && !hasMother ? 'both' : (!hasFather ? 'father' : 'mother'),
+      });
+    }
+  }
+  frontierAll.sort((a, b) => a.generation - b.generation || a.name.localeCompare(b.name));
+  const frontier = frontierAll.slice(0, 12);
+
   const descendantsRaw = computeDescendants({ records, rootRecord: targetForCohort });
   const descendantsByGen = descendantsRaw.byGeneration.map(g => ({
     generation: g.generation,
@@ -246,6 +302,7 @@ export async function getFamilyTree(
     },
     cohort: { siblings, cousins },
     descendants: { byGeneration: descendantsByGen, total: descendantsRaw.total },
+    coverage: { byGeneration: coverageByGen, knownTotal, possibleTotal, frontier },
     relationshipToSelf:
       targetForCohort === SELF_RECORD
         ? null
