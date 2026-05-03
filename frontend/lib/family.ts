@@ -120,6 +120,13 @@ export interface FamilyTreeView {
   relationship: { label: string; path: string[]; perspective: { record: string; name: string; isMe: boolean } } | null;
 }
 
+/** Normalize a wiki page title into its slug shape so we can match the
+ *  recorded GEDCOM name against page titles when there's no explicit
+ *  `gedcom.record` in the frontmatter. */
+function slugifyName(name: string): string {
+  return name.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
 /**
  * Build a server-side family view for the configured SELF_RECORD.
  * Joins each ancestor with their wiki page slug (if one exists with a matching
@@ -136,9 +143,6 @@ export async function getFamily(): Promise<FamilyView | null> {
     if (page.gedcomRecord) slugByRecord.set(page.gedcomRecord, page.slug);
   }
 
-  function slugifyName(name: string): string {
-    return name.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-  }
   const titleByName = new Map<string, string>();
   for (const page of list) {
     if (page.isArchived) continue;
@@ -245,8 +249,6 @@ async function buildPageJoin(): Promise<(record: string, name: string) => PageJo
   const { list } = await getCachedList();
   const byRecord = new Map<string, PageJoinResult>();
   const byName = new Map<string, PageJoinResult>();
-  const slugifyName = (name: string): string =>
-    name.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   for (const page of list) {
     if (page.isArchived) continue;
     const entry: PageJoinResult = { slug: page.slug, portrait: page.portrait };
