@@ -34,7 +34,7 @@
 **Why fourth:** trivial once #1–#3 normalize how "known vs possible" is computed. Surface gaps as a sidebar panel ("3 of 8 great-great-grandparents unknown — paternal-paternal-paternal, paternal-paternal-maternal, …"). Already partially surfaced as `01 / 02` counts in the existing UI; this just promotes it.
 **Plan:** `2026-05-02-family-coverage.md`
 
-### 5. Lifespan timeline
+### 5. Lifespan timeline  (SHIPPED 2026-05-03)
 **Why fifth:** independent UI feature, but needs a GEDCOM-date → year parser (handles `12 JAN 1950`, `ABT 1880`, `BEF 1900`, `BET 1850 AND 1860`). Year parser is small but worth its own commit. Renders horizontal bars per ancestor — answers "who overlapped with whom."
 **Plan:** `2026-05-02-family-timeline.md`
 
