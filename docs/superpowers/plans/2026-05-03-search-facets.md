@@ -1,3 +1,22 @@
+# Search: Type Facets Implementation Plan
+
+**Goal:** Add type-faceting to the search page — counts by type at the top, click-to-filter, results grouped under type headings — so users can quickly narrow "150 results" to "12 people" or "3 families."
+
+**Scope cut:** Surname / decade / place facets need data joins that don't exist yet (search index is title/body text only, doesn't carry birth year or surname structure). Defer those.
+
+**Architecture:** Pure client-rendered grouping over the existing `SearchResult[]`. Add a `type` query param (`?q=foo&type=person`) that filters results. Keep the search itself unchanged.
+
+**Files:**
+- Modify: `frontend/app/search/page.tsx` — add type tabs and grouped rendering. No new components needed.
+
+---
+
+### Task 1: Type-faceted search page
+
+- [ ] Read existing page (already done — flat list).
+- [ ] Replace with: counts per type at top, tabs (links toggling `?type=`), grouped result list when no type filter, flat list when filtered.
+
+```tsx
 import Link from 'next/link';
 import { searchAndJoin } from '@/lib/server-services';
 
@@ -117,3 +136,13 @@ export default async function SearchPage({ searchParams }: Props) {
     </main>
   );
 }
+```
+
+- [ ] Type-check + curl with `?q=` to verify rendering.
+- [ ] Commit `feat: add type facets to search page`.
+
+---
+
+### Task 2: Roadmap
+
+- [ ] Mark feature #7 shipped (note: type-only; surname/decade/place deferred).
