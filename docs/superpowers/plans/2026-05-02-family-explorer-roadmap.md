@@ -38,7 +38,7 @@
 **Why fifth:** independent UI feature, but needs a GEDCOM-date → year parser (handles `12 JAN 1950`, `ABT 1880`, `BEF 1900`, `BET 1850 AND 1860`). Year parser is small but worth its own commit. Renders horizontal bars per ancestor — answers "who overlapped with whom."
 **Plan:** `2026-05-02-family-timeline.md`
 
-### 6. Portraits on tiles
+### 6. Portraits on tiles  (SHIPPED 2026-05-03 — monogram fallback; portrait field ready in PageMeta)
 **Why sixth:** depends on whether wiki page frontmatter already has portrait paths (TBD — first task in this plan is "audit the data"). If yes, this is a presentational change to `AncestorTile` + `PersonRow` with monogram fallback. If no, it's a separate data-shape change first.
 **Plan:** `2026-05-02-family-portraits.md`
 
