@@ -26,7 +26,7 @@
 **Why second:** uses the same directional walker shape as the cousin computation in #1; reusing those primitives is cleanest if #1 lands first. Walks `children[]` recursively from any selected ancestor — answers "everyone who descends from Great-Grandpa Joe."
 **Plan:** `2026-05-02-family-descendants.md`
 
-### 3. Relationship calculator
+### 3. Relationship calculator  (SHIPPED 2026-05-02)
 **Why third:** needs bidirectional graph traversal (BFS up from both parties to a lowest common ancestor, then label the path). Gets significantly easier if the descendants walker (#2) and the cousin labeler (#1) already exist — the relationship terms ("first cousin once removed", "great-aunt") are the same logic. Highest delight-per-line-of-code.
 **Plan:** `2026-05-02-family-relationship-calculator.md`
 
