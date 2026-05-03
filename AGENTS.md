@@ -65,6 +65,32 @@ be swept into a code commit. Stage specific files explicitly.
 
 The data repo is separate from this code repo. They evolve independently.
 
+### User data vs. project data — the stranger test
+
+Whether something belongs in this code repo or in `$WHOAMI_ROOT` isn't
+a question of "what kind of data" — it's a privacy question. Apply the
+**stranger test**: *could I show this file to a stranger without
+revealing anything about the user?*
+
+If the file's contents, structure, or the *fact that particular entries
+exist* would tell a stranger about the user's life, family, places, or
+relationships — it's user data. Stays in `$WHOAMI_ROOT`, even if every
+individual value is impersonal.
+
+The canonical example is `genealogy/places-coords.yml`. Every coordinate
+is universal geography (Kyiv is at 50.45, 30.52 regardless of whose
+family is from there), but the *list* of which places appear is "places
+this user's ancestors lived." The file as a whole reveals user-life
+information. It's user data.
+
+Project-data candidates are things that aren't keyed on the user at all:
+synthetic test fixtures (an invented family used by unit tests), schema
+definitions, default UI strings, taxonomy definitions that aren't
+user-derived.
+
+When in doubt, lean towards user data. The cost of two-repo coordination
+is the price of an honest privacy boundary.
+
 ## Tech and conventions
 
 ### Tests run via `tsx --test`
