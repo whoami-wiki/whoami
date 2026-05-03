@@ -308,6 +308,54 @@ export default async function FamilyTreePage({ searchParams }: Props) {
           </section>
         ) : null}
 
+        {view.places.regions.length > 0 ? (
+          <section className="registry-rise mb-12" style={{ animationDelay: '105ms' }}>
+            <SectionHeader
+              title="Places of birth"
+              count={view.places.regions.reduce((s, r) => s + r.people.length, 0)}
+              after={
+                <p className="font-mono text-[0.7rem] tabular-nums text-muted-foreground/80">
+                  {view.places.regions.length} region{view.places.regions.length === 1 ? '' : 's'}
+                </p>
+              }
+            />
+            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {view.places.regions.map(region => (
+                <Card
+                  key={`region-${region.region}`}
+                  className="gap-0 overflow-hidden p-0 py-0 shadow-none ring-foreground/12"
+                >
+                  <header className="flex items-baseline justify-between gap-3 border-b rule-hair bg-muted/40 px-3 py-2">
+                    <h3 className="truncate font-display text-[0.95rem] tracking-tight text-foreground">
+                      {region.region}
+                    </h3>
+                    <span className="font-mono text-[0.65rem] tabular-nums text-muted-foreground/80">
+                      {String(region.people.length).padStart(2, '0')}
+                    </span>
+                  </header>
+                  <ul className="divide-y rule-hair">
+                    {region.people.map(p => (
+                      <li key={`region-${region.region}-${p.record}`}>
+                        <Link
+                          href={familyTreeHref(p.record)}
+                          className="flex flex-col gap-0.5 px-3 py-1.5 transition-colors hover:bg-accent/45"
+                        >
+                          <span className="truncate font-display text-[0.85rem] tracking-tight text-foreground">
+                            {p.name}
+                          </span>
+                          <span className="truncate font-mono text-[0.62rem] tracking-tight text-muted-foreground/80">
+                            {p.place}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         {view.timeline.entries.length > 0 && view.timeline.range ? (
           <section className="registry-rise mb-12" style={{ animationDelay: '110ms' }}>
             <SectionHeader
