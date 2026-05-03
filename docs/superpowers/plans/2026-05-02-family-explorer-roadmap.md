@@ -42,7 +42,7 @@
 **Why sixth:** depends on whether wiki page frontmatter already has portrait paths (TBD — first task in this plan is "audit the data"). If yes, this is a presentational change to `AncestorTile` + `PersonRow` with monogram fallback. If no, it's a separate data-shape change first.
 **Plan:** `2026-05-02-family-portraits.md`
 
-### 7. Search facets
+### 7. Search facets  (SHIPPED 2026-05-03 — type facets only; surname/decade/place deferred)
 **Why seventh:** separate concern from the family browser; touches `frontend/app/search/`. Filters by surname, decade, place. Worth doing after the family work because the family browser's data shape may change first and the search index will want to reflect that.
 **Plan:** `2026-05-02-search-facets.md`
 
