@@ -6,7 +6,16 @@ import { traceAncestry, type AncestryTree, type AncestorNode } from '@core/famil
 import { computeCohort } from '@core/family/cohort.ts';
 import { computeDescendants } from '@core/family/descendants.ts';
 import { computeRelationship } from '@core/family/relationship.ts';
-import { computeTimeline, type TimelineView } from '@core/family/timeline.ts';
+import { computeTimeline, type TimelineEntry, type TimelineView } from '@core/family/timeline.ts';
+
+export interface TimelineEntryView extends TimelineEntry {
+  portrait?: string;
+}
+
+export interface TimelineViewWithPortraits {
+  entries: TimelineEntryView[];
+  range: TimelineView['range'];
+}
 import type { DerivedRecord } from '@core/gedcom/types.ts';
 import { DERIVED_DIR, SELF_RECORD } from './env';
 import { getCachedList } from './server-services';
@@ -95,7 +104,7 @@ export interface FamilyTreeView {
     total: number;
   };
   coverage: CoverageView;
-  timeline: TimelineView;
+  timeline: TimelineViewWithPortraits;
   relationshipToSelf: { label: string; path: string[] } | null;
 }
 
@@ -303,7 +312,11 @@ export async function getFamilyTree(
     ...g.paternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'paternal' as const })),
     ...g.maternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'maternal' as const })),
   ]);
-  const timeline = computeTimeline({ records, self: targetForCohort, lineage: flatLineage });
+  const timelineRaw = computeTimeline({ records, self: targetForCohort, lineage: flatLineage });
+  const timeline: TimelineViewWithPortraits = {
+    range: timelineRaw.range,
+    entries: timelineRaw.entries.map(e => ({ ...e, portrait: findPage(e.record, e.name).portrait })),
+  };
 
   const descendantsRaw = computeDescendants({ records, rootRecord: targetForCohort });
   const descendantsByGen = descendantsRaw.byGeneration.map(g => ({

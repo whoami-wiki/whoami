@@ -179,6 +179,7 @@ export default async function FamilyTreePage({ searchParams }: Props) {
                       name={p.name}
                       ordinal={roman(i + 1).toLowerCase()}
                       meta={relationMeta(p)}
+                      portrait={p.portrait}
                       trailing={<RelationLabel>{kind}</RelationLabel>}
                     />
                   ))}
@@ -194,6 +195,7 @@ export default async function FamilyTreePage({ searchParams }: Props) {
                       name={s.name}
                       ordinal={roman(i + 1).toLowerCase()}
                       meta={s.detail}
+                      portrait={s.portrait}
                       trailing={
                         <RelationLabel>
                           {s.kind === 'half' ? 'half-sibling' : 'sibling'}
@@ -213,6 +215,7 @@ export default async function FamilyTreePage({ searchParams }: Props) {
                       name={c.name}
                       ordinal={roman(i + 1).toLowerCase()}
                       meta={[c.detail, `via ${c.via}`].filter(Boolean).join('  ·  ')}
+                      portrait={c.portrait}
                       trailing={<RelationLabel>cousin</RelationLabel>}
                     />
                   ))}
@@ -328,6 +331,7 @@ export default async function FamilyTreePage({ searchParams }: Props) {
                     endYear={e.deathYear ?? Math.min(new Date().getUTCFullYear(), e.birthYear + 70)}
                     birthQualified={e.birthQualified}
                     deathQualified={e.deathQualified}
+                    portrait={e.portrait}
                   />
                 ))}
               </div>
@@ -514,6 +518,8 @@ function GenerationBlock({
               name={p.name}
               meta={formatTileMeta(p)}
               ordinal={roman(i + 1).toLowerCase()}
+              side={p.side === 'self' ? null : p.side}
+              portrait={p.portrait}
             />
           ))}
         </div>
@@ -567,6 +573,7 @@ function DescendantsBlock({
             name={p.name}
             meta={[p.detail, `via ${p.via}`].filter(Boolean).join('  ·  ')}
             ordinal={roman(i + 1).toLowerCase()}
+            portrait={p.portrait}
           />
         ))}
       </div>

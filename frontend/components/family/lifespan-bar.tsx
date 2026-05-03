@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AvatarMonogram } from './avatar-monogram';
 
 interface Props {
   href: string;
@@ -11,6 +12,7 @@ interface Props {
   endYear: number;
   birthQualified: boolean;
   deathQualified: boolean;
+  portrait?: string | null;
 }
 
 function pct(year: number, min: number, max: number): number {
@@ -20,7 +22,7 @@ function pct(year: number, min: number, max: number): number {
 
 export function LifespanBar({
   href, name, birthYear, deathYear, side, rangeMin, rangeMax, endYear,
-  birthQualified, deathQualified,
+  birthQualified, deathQualified, portrait,
 }: Props) {
   const left = pct(birthYear, rangeMin, rangeMax);
   const right = pct(endYear, rangeMin, rangeMax);
@@ -36,8 +38,9 @@ export function LifespanBar({
   return (
     <Link
       href={href}
-      className="grid grid-cols-[10rem_1fr_5rem] items-baseline gap-3 px-3 py-1.5 text-sm hover:bg-accent/45 transition-colors"
+      className="grid grid-cols-[1.5rem_10rem_1fr_5rem] items-center gap-3 px-3 py-1.5 text-sm hover:bg-accent/45 transition-colors"
     >
+      <AvatarMonogram name={name} side={side} portrait={portrait} size="sm" />
       <span className="truncate font-display tracking-tight text-foreground">{name}</span>
       <span className="relative h-2.5 rounded-sm bg-muted/40">
         <span
