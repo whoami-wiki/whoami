@@ -53,9 +53,38 @@ export function computeCohort(cfg: ComputeCohortConfig): Cohort {
     }
   }
 
+  // Cousins = children of the target's aunts and uncles.
+  // Aunt/uncle = a child of any of the target's grandparents who is not the target's parent.
+  const exclude = new Set<string>([target.record, ...siblingsMap.keys()]);
+  const cousinsMap = new Map<string, CohortCousin>();
+  for (const parent of target.parents) {
+    const parentRec = cfg.records.get(parent.record);
+    if (!parentRec) continue;
+    for (const grandparent of parentRec.parents) {
+      const grandparentRec = cfg.records.get(grandparent.record);
+      if (!grandparentRec) continue;
+      for (const auntUncle of grandparentRec.children) {
+        if (auntUncle.record === parent.record) continue;
+        const auntUncleRec = cfg.records.get(auntUncle.record);
+        if (!auntUncleRec) continue;
+        for (const cousin of auntUncleRec.children) {
+          if (exclude.has(cousin.record)) continue;
+          if (cousinsMap.has(cousin.record)) continue;
+          const cousinRec = cfg.records.get(cousin.record);
+          cousinsMap.set(cousin.record, {
+            record: cousin.record,
+            name: cousin.name,
+            birth: cousinRec?.birth ?? null,
+            via: { parentRecord: auntUncle.record, parentName: auntUncle.name },
+          });
+        }
+      }
+    }
+  }
+
   return {
     siblings: [...siblingsMap.values()].sort(byBirthThenName),
-    cousins: [],
+    cousins: [...cousinsMap.values()].sort(byBirthThenName),
   };
 }
 
