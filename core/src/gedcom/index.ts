@@ -4,8 +4,3 @@ export * from './derive.ts';
 export * from './snapshots.ts';
 export * from './sync.ts';
 export * from './recite.ts';
-export * from './parser.ts';
-export * from './derive.ts';
-export * from './snapshots.ts';
-export * from './sync.ts';
-export * from './recite.ts';
