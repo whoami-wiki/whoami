@@ -6,6 +6,7 @@ import { traceAncestry, type AncestryTree, type AncestorNode } from '@core/famil
 import { computeCohort } from '@core/family/cohort.ts';
 import { computeDescendants } from '@core/family/descendants.ts';
 import { computeRelationship } from '@core/family/relationship.ts';
+import { computeTimeline, type TimelineView } from '@core/family/timeline.ts';
 import type { DerivedRecord } from '@core/gedcom/types.ts';
 import { DERIVED_DIR, SELF_RECORD } from './env';
 import { getCachedList } from './server-services';
@@ -91,6 +92,7 @@ export interface FamilyTreeView {
     total: number;
   };
   coverage: CoverageView;
+  timeline: TimelineView;
   relationshipToSelf: { label: string; path: string[] } | null;
 }
 
@@ -274,6 +276,12 @@ export async function getFamilyTree(
   frontierAll.sort((a, b) => a.generation - b.generation || a.name.localeCompare(b.name));
   const frontier = frontierAll.slice(0, 12);
 
+  const flatLineage = core.byGeneration.flatMap(g => [
+    ...g.paternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'paternal' as const })),
+    ...g.maternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'maternal' as const })),
+  ]);
+  const timeline = computeTimeline({ records, self: targetForCohort, lineage: flatLineage });
+
   const descendantsRaw = computeDescendants({ records, rootRecord: targetForCohort });
   const descendantsByGen = descendantsRaw.byGeneration.map(g => ({
     generation: g.generation,
@@ -303,6 +311,7 @@ export async function getFamilyTree(
     cohort: { siblings, cousins },
     descendants: { byGeneration: descendantsByGen, total: descendantsRaw.total },
     coverage: { byGeneration: coverageByGen, knownTotal, possibleTotal, frontier },
+    timeline,
     relationshipToSelf:
       targetForCohort === SELF_RECORD
         ? null
