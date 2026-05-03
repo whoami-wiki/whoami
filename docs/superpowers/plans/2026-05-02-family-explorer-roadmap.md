@@ -50,7 +50,7 @@
 **Why eighth:** highest scope. Needs geocoding (place strings → lat/lon) which is either a one-shot batch via Nominatim with caching to a checked-in JSON, or a manual curated lookup. Render as a static SVG. Punt to last because the data work dominates.
 **Plan:** `2026-05-02-family-map.md`
 
-### 9. Shareable relationship links
+### 9. Shareable relationship links  (SHIPPED 2026-05-03)
 **Why last:** depends on #3 (relationship calculator) being in place. Tiny once #3 ships — `?from=I123&to=I456` query params produce a captioned page like "Y's paternal great-grandmother."
 **Plan:** `2026-05-02-family-shareable-links.md`
 
