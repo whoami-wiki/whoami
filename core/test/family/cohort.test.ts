@@ -145,3 +145,29 @@ test('computeCohort: cousins exclude self and siblings', () => {
   const result = computeCohort({ records, targetRecord: 'I1' });
   assert.equal(result.cousins.length, 0);
 });
+
+test('computeCohort: missing parent record does not throw', () => {
+  const records = new Map<string, DerivedRecord>([
+    ['I1', person('I1', 'Self', {
+      parents: [{ record: 'IF', name: 'Dad', role: 'father' }],
+    })],
+  ]);
+
+  const result = computeCohort({ records, targetRecord: 'I1' });
+  assert.deepEqual(result, { siblings: [], cousins: [] });
+});
+
+test('computeCohort: target with no parents returns empty cohort', () => {
+  const records = new Map<string, DerivedRecord>([
+    ['I1', person('I1', 'Self')],
+  ]);
+
+  const result = computeCohort({ records, targetRecord: 'I1' });
+  assert.deepEqual(result, { siblings: [], cousins: [] });
+});
+
+test('computeCohort: unknown target returns empty cohort', () => {
+  const records = new Map<string, DerivedRecord>();
+  const result = computeCohort({ records, targetRecord: 'I999' });
+  assert.deepEqual(result, { siblings: [], cousins: [] });
+});
