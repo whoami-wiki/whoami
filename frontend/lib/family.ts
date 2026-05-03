@@ -7,6 +7,7 @@ import { computeCohort } from '@core/family/cohort.ts';
 import { computeDescendants } from '@core/family/descendants.ts';
 import { computeRelationship } from '@core/family/relationship.ts';
 import { computeTimeline, type TimelineEntry, type TimelineView } from '@core/family/timeline.ts';
+import { groupBirthplaces, type PlacesView } from '@core/family/places.ts';
 
 export interface TimelineEntryView extends TimelineEntry {
   portrait?: string;
@@ -104,6 +105,7 @@ export interface FamilyTreeView {
     total: number;
   };
   coverage: CoverageView;
+  places: PlacesView;
   timeline: TimelineViewWithPortraits;
   relationshipToSelf: { label: string; path: string[]; perspective: { record: string; name: string; isMe: boolean } } | null;
 }
@@ -314,6 +316,12 @@ export async function getFamilyTree(
     ...g.paternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'paternal' as const })),
     ...g.maternal.map(p => ({ record: p.record, name: p.name, generation: p.generation, side: 'maternal' as const })),
   ]);
+  const placesEntries = [
+    { record: targetForCohort, name: records.get(targetForCohort)?.name ?? '', place: records.get(targetForCohort)?.birth?.place ?? null },
+    ...flatLineage.map(p => ({ record: p.record, name: p.name, place: records.get(p.record)?.birth?.place ?? null })),
+  ];
+  const places = groupBirthplaces({ entries: placesEntries });
+
   const timelineRaw = computeTimeline({ records, self: targetForCohort, lineage: flatLineage });
   const timeline: TimelineViewWithPortraits = {
     range: timelineRaw.range,
@@ -353,6 +361,7 @@ export async function getFamilyTree(
     cohort: { siblings, cousins },
     descendants: { byGeneration: descendantsByGen, total: descendantsRaw.total },
     coverage: { byGeneration: coverageByGen, knownTotal, possibleTotal, frontier },
+    places,
     timeline,
     relationshipToSelf: (() => {
       const fromRecord = perspectiveRecord ?? SELF_RECORD;
