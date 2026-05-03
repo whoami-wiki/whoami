@@ -133,6 +133,12 @@ export default async function FamilyTreePage({ searchParams }: Props) {
               </p>
             ) : null}
 
+            {view.relationshipToSelf ? (
+              <p className="mt-1.5 font-display text-[0.72rem] uppercase tracking-[0.18em] text-muted-foreground">
+                {view.relationshipToSelf.label} <span className="text-muted-foreground/60">· to me</span>
+              </p>
+            ) : null}
+
             <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2 border-t rule-hair pt-4 sm:max-w-lg sm:grid-cols-5">
               <Stat label="Parents" value={parents.length} />
               <Stat label="Siblings" value={siblings.length} />

@@ -5,6 +5,7 @@ import { buildFamilyBrowser, type BrowserPerson } from '@core/family/browser.ts'
 import { traceAncestry, type AncestryTree, type AncestorNode } from '@core/family/trace.ts';
 import { computeCohort } from '@core/family/cohort.ts';
 import { computeDescendants } from '@core/family/descendants.ts';
+import { computeRelationship } from '@core/family/relationship.ts';
 import type { DerivedRecord } from '@core/gedcom/types.ts';
 import { DERIVED_DIR, SELF_RECORD } from './env';
 import { getCachedList } from './server-services';
@@ -67,6 +68,7 @@ export interface FamilyTreeView {
     byGeneration: { generation: number; people: BrowserDescendantView[] }[];
     total: number;
   };
+  relationshipToSelf: { label: string; path: string[] } | null;
 }
 
 /**
@@ -244,6 +246,10 @@ export async function getFamilyTree(
     },
     cohort: { siblings, cousins },
     descendants: { byGeneration: descendantsByGen, total: descendantsRaw.total },
+    relationshipToSelf:
+      targetForCohort === SELF_RECORD
+        ? null
+        : computeRelationship({ records, fromRecord: SELF_RECORD, toRecord: targetForCohort }),
   };
 }
 
