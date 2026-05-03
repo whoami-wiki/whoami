@@ -9,6 +9,7 @@ import { GroupedList } from '@/components/family/grouped-list';
 import { PersonRow } from '@/components/family/person-row';
 import { AncestorTile } from '@/components/family/ancestor-tile';
 import { LifespanBar } from '@/components/family/lifespan-bar';
+import { BirthplacesMap } from '@/components/family/birthplaces-map';
 import { SELF_RECORD } from '@/lib/env';
 import {
   getFamilyTree,
@@ -315,10 +316,33 @@ export default async function FamilyTreePage({ searchParams }: Props) {
               count={view.places.regions.reduce((s, r) => s + r.people.length, 0)}
               after={
                 <p className="font-mono text-[0.7rem] tabular-nums text-muted-foreground/80">
-                  {view.places.regions.length} region{view.places.regions.length === 1 ? '' : 's'}
+                  {view.placesMap.mapped.length} located
+                  {view.placesMap.unmapped.length > 0
+                    ? ` · ${view.placesMap.unmapped.length} unlocated`
+                    : ''}
                 </p>
               }
             />
+
+            {view.placesMap.mapped.length > 0 ? (
+              <div className="mb-4">
+                <BirthplacesMap
+                  places={view.placesMap.mapped.map(m => ({
+                    name: m.coord.name,
+                    lat: m.coord.lat,
+                    lon: m.coord.lon,
+                    note: m.coord.note,
+                    people: m.people.map(p => ({
+                      record: p.record,
+                      name: p.name,
+                      place: p.place,
+                      href: familyTreeHref(p.record),
+                    })),
+                  }))}
+                />
+              </div>
+            ) : null}
+
             <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
               {view.places.regions.map(region => (
                 <Card
@@ -353,6 +377,36 @@ export default async function FamilyTreePage({ searchParams }: Props) {
                 </Card>
               ))}
             </div>
+
+            {view.placesMap.unmapped.length > 0 ? (
+              <div className="mt-6">
+                <h3 className="mb-2 font-display text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground">
+                  Unmapped places
+                  <span className="ml-2 font-mono tabular-nums text-muted-foreground/70">
+                    {view.placesMap.unmapped.length}
+                  </span>
+                </h3>
+                <p className="mb-3 max-w-2xl font-display text-[0.78rem] leading-relaxed text-muted-foreground">
+                  These places aren&rsquo;t yet in <code className="font-mono text-[0.72rem]">genealogy/places-coords.yml</code>.
+                  Add an entry there to bring them onto the map. See{' '}
+                  <code className="font-mono text-[0.72rem]">research-plans/places-research.md</code>{' '}
+                  for current research notes.
+                </p>
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {view.placesMap.unmapped.map(u => (
+                    <li
+                      key={`unmapped-${u.place}`}
+                      className="flex items-baseline justify-between gap-3 rounded border border-dashed rule-hair px-3 py-1.5 text-[0.78rem]"
+                    >
+                      <span className="truncate font-mono text-muted-foreground">{u.place}</span>
+                      <span className="font-mono text-[0.65rem] tabular-nums text-muted-foreground/70">
+                        {u.people.length}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </section>
         ) : null}
 

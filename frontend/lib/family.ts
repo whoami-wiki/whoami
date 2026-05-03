@@ -8,6 +8,12 @@ import { computeDescendants } from '@core/family/descendants.ts';
 import { computeRelationship } from '@core/family/relationship.ts';
 import { computeTimeline, type TimelineEntry, type TimelineView } from '@core/family/timeline.ts';
 import { groupBirthplaces, type PlacesView } from '@core/family/places.ts';
+import {
+  joinCoords,
+  parseCoordsYaml,
+  type MappedPlace,
+  type UnmappedPlace,
+} from '@core/family/places-coords.ts';
 
 export interface TimelineEntryView extends TimelineEntry {
   portrait?: string;
@@ -18,7 +24,7 @@ export interface TimelineViewWithPortraits {
   range: TimelineView['range'];
 }
 import type { DerivedRecord } from '@core/gedcom/types.ts';
-import { DERIVED_DIR, SELF_RECORD } from './env';
+import { DERIVED_DIR, PLACES_COORDS_FILE, SELF_RECORD } from './env';
 import { getCachedList } from './server-services';
 
 export type { AncestorNode, AncestryTree };
@@ -106,6 +112,7 @@ export interface FamilyTreeView {
   };
   coverage: CoverageView;
   places: PlacesView;
+  placesMap: { mapped: MappedPlace[]; unmapped: UnmappedPlace[] };
   timeline: TimelineViewWithPortraits;
   relationshipToSelf: { label: string; path: string[]; perspective: { record: string; name: string; isMe: boolean } } | null;
 }
@@ -186,6 +193,26 @@ export function loadDerivedRecordsForTree(derivedDir: string = DERIVED_DIR): Map
 
 const DERIVED_RECORDS_TTL_MS = 2000;
 let _derivedRecordsCache: { records: Map<string, DerivedRecord>; expiresAt: number; mtimeMs: number } | null = null;
+
+let _coordsCache: { coords: ReturnType<typeof parseCoordsYaml>; expiresAt: number; mtimeMs: number } | null = null;
+function getCachedCoords(): ReturnType<typeof parseCoordsYaml> {
+  const now = Date.now();
+  let mtimeMs = 0;
+  try {
+    mtimeMs = statSync(PLACES_COORDS_FILE).mtimeMs;
+  } catch {
+    return [];
+  }
+  if (_coordsCache && _coordsCache.expiresAt > now && _coordsCache.mtimeMs === mtimeMs) {
+    return _coordsCache.coords;
+  }
+  let coords: ReturnType<typeof parseCoordsYaml> = [];
+  try {
+    coords = parseCoordsYaml(readFileSync(PLACES_COORDS_FILE, 'utf-8'));
+  } catch {}
+  _coordsCache = { coords, expiresAt: now + DERIVED_RECORDS_TTL_MS, mtimeMs };
+  return coords;
+}
 
 function getCachedDerivedRecords(): Map<string, DerivedRecord> {
   const now = Date.now();
@@ -321,6 +348,10 @@ export async function getFamilyTree(
     ...flatLineage.map(p => ({ record: p.record, name: p.name, place: records.get(p.record)?.birth?.place ?? null })),
   ];
   const places = groupBirthplaces({ entries: placesEntries });
+  const placesPeople = placesEntries
+    .filter(e => e.place !== null && e.place.trim() !== '')
+    .map(e => ({ record: e.record, name: e.name, place: e.place as string }));
+  const placesMap = joinCoords({ coords: getCachedCoords(), people: placesPeople });
 
   const timelineRaw = computeTimeline({ records, self: targetForCohort, lineage: flatLineage });
   const timeline: TimelineViewWithPortraits = {
@@ -362,6 +393,7 @@ export async function getFamilyTree(
     descendants: { byGeneration: descendantsByGen, total: descendantsRaw.total },
     coverage: { byGeneration: coverageByGen, knownTotal, possibleTotal, frontier },
     places,
+    placesMap,
     timeline,
     relationshipToSelf: (() => {
       const fromRecord = perspectiveRecord ?? SELF_RECORD;
