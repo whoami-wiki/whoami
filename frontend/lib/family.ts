@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import yaml from 'js-yaml';
 import { buildFamilyBrowser, type BrowserPerson } from '@core/family/browser.ts';
 import { traceAncestry, type AncestryTree, type AncestorNode } from '@core/family/trace.ts';
+import { computeCohort } from '@core/family/cohort.ts';
 import type { DerivedRecord } from '@core/gedcom/types.ts';
 import { DERIVED_DIR, SELF_RECORD } from './env';
 import { getCachedList } from './server-services';
@@ -31,6 +32,14 @@ export interface BrowserRelationView {
   slug?: string;
 }
 
+export interface BrowserSiblingView extends BrowserRelationView {
+  kind: 'full' | 'half';
+}
+
+export interface BrowserCousinView extends BrowserRelationView {
+  via: string;
+}
+
 export interface FamilyTreeView {
   root: BrowserPersonView;
   selected: BrowserPersonView;
@@ -43,6 +52,10 @@ export interface FamilyTreeView {
     parents: BrowserRelationView[];
     spouses: BrowserRelationView[];
     children: BrowserRelationView[];
+  };
+  cohort: {
+    siblings: BrowserSiblingView[];
+    cousins: BrowserCousinView[];
   };
 }
 
@@ -176,6 +189,23 @@ export async function getFamilyTree(
     slug: findSlug(r.record, r.name),
   });
 
+  const targetForCohort = selectedRecord ?? rootRecord;
+  const cohortRaw = computeCohort({ records, targetRecord: targetForCohort });
+  const siblings: BrowserSiblingView[] = cohortRaw.siblings.map(s => ({
+    record: s.record,
+    name: s.name,
+    detail: yearLabel(s.birth?.date ?? null),
+    slug: findSlug(s.record, s.name),
+    kind: s.kind,
+  }));
+  const cousins: BrowserCousinView[] = cohortRaw.cousins.map(c => ({
+    record: c.record,
+    name: c.name,
+    detail: yearLabel(c.birth?.date ?? null),
+    slug: findSlug(c.record, c.name),
+    via: c.via.parentName,
+  }));
+
   return {
     root: enrich(core.root),
     selected: enrich(core.selected),
@@ -189,5 +219,12 @@ export async function getFamilyTree(
       spouses: core.selectedRelations.spouses.map(r => relation(r, r.married ? `m. ${r.married}` : null)),
       children: core.selectedRelations.children.map(r => relation(r, r.born ? `b. ${r.born}` : null)),
     },
+    cohort: { siblings, cousins },
   };
+}
+
+function yearLabel(raw: string | null): string | null {
+  if (!raw) return null;
+  const m = raw.match(/\b(\d{4})\b/);
+  return m ? `b. ${m[1]}` : null;
 }
