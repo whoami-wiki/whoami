@@ -2,10 +2,22 @@ import { readFileSync } from 'node:fs';
 import matter from 'gray-matter';
 import type { Page, PageMeta } from './types.ts';
 import { parsePageMeta } from './schema.ts';
+import { migrate } from './migrations/index.ts';
 
+/**
+ * Parse a page from raw markdown text. Owns the full read chain:
+ *
+ *   parse YAML → migrate (no-op when current) → Zod-validate → Page
+ *
+ * Pages without an on-disk schemaVersion field default to v1 before
+ * migration. Throws FutureSchemaVersionError if the page is on a
+ * version newer than this build supports.
+ */
 export function parsePage(slug: string, raw: string): Page {
   const { data, content } = matter(raw);
-  const meta: PageMeta = parsePageMeta(data);
+  const fromVersion = ((data as { schemaVersion?: unknown }).schemaVersion as number | undefined) ?? 1;
+  const migrated = migrate(data as Record<string, unknown>, fromVersion);
+  const meta: PageMeta = parsePageMeta(migrated);
   return { slug, meta, body: content.trimStart() };
 }
 

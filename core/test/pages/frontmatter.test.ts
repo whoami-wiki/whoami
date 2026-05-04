@@ -4,7 +4,10 @@ import { writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parsePage, serializePage, peekSchemaVersion } from '../../src/pages/frontmatter.ts';
-import { CURRENT_SCHEMA_VERSION } from '../../src/pages/migrations/index.ts';
+import {
+  CURRENT_SCHEMA_VERSION,
+  FutureSchemaVersionError,
+} from '../../src/pages/migrations/index.ts';
 
 const SAMPLE = `---
 title: Abby Rickelman
@@ -117,4 +120,34 @@ test('peekSchemaVersion returns the explicit value', () => {
   const file = join(dir, 'p.md');
   writeFileSync(file, '---\nschemaVersion: 7\ntitle: x\n---\nbody');
   assert.equal(peekSchemaVersion(file), 7);
+});
+
+test('parsePage defaults missing schemaVersion to CURRENT_SCHEMA_VERSION', () => {
+  const raw = `---
+title: Sample
+owner: me
+editors: []
+type: person
+aliases: []
+categories: []
+created: 2026-05-01
+---
+body`;
+  const page = parsePage('sample', raw);
+  assert.equal(page.meta.schemaVersion, CURRENT_SCHEMA_VERSION);
+});
+
+test('parsePage throws FutureSchemaVersionError for too-new pages', () => {
+  const raw = `---
+schemaVersion: ${CURRENT_SCHEMA_VERSION + 1}
+title: Sample
+owner: me
+editors: []
+type: person
+aliases: []
+categories: []
+created: 2026-05-01
+---
+body`;
+  assert.throws(() => parsePage('sample', raw), FutureSchemaVersionError);
 });
