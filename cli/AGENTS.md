@@ -18,6 +18,7 @@ drive it without specific bindings.
 | `delete`         | Soft-delete (moves to `_archived/`).                                     |
 | `search`         | Search title/body/aliases/categories + GEDCOM-derived fields.            |
 | `sync-gedcom`    | Re-derive `genealogy/derived/*.yml` from a `.ged` file.                  |
+| `rebuild-search` | Rebuild the search index from disk (use after editing pages outside the API). `--check` exits non-zero if stale. |
 | `recite`         | Report or advance stale snapshot pointers in pages.                      |
 | `healthz`        | Ping the API.                                                            |
 | `config server`  | Set the server URL in `~/.whoami/config.json`.                           |
