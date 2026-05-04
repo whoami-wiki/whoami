@@ -80,6 +80,7 @@ because they *are* the seam between the rest of the system and disk):
 | File | Role |
 | --- | --- |
 | `pages/store.ts` | Page-store interface — read/write/list pages on disk. |
+| `pages/migrate-runner.ts` | Walks pages dir, applies pending migrations, writes + commits per page. |
 | `pages/git.ts` | Git plumbing on page files (commit, blame, history). |
 | `gedcom/parser.ts` | Parse a `.ged` file into the AST. |
 | `gedcom/derive.ts` | Read AST + write `genealogy/derived/*.yml`. |
