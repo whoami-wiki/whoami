@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runMigrate, type MigrateRunnerCli } from '../src/commands/migrate.js';
-import type { MigrateReport } from '../src/api-client.js';
+import { ApiError, type MigrateReport } from '../src/api-client.js';
 
 function makeFakeClient(report: MigrateReport): { migrate: () => Promise<MigrateReport> } {
   return { migrate: async () => report };
@@ -40,6 +40,19 @@ test('runMigrate exits non-zero on per-page failures', async () => {
     json: false, dryRun: false, force: false,
   });
   assert.equal(code, 2);
+});
+
+test('runMigrate exits 3 on dirty-repo 409', async () => {
+  const out: string[] = [];
+  const code = await runMigrate({
+    client: {
+      migrate: async () => { throw new ApiError(409, 'dirty-repo'); },
+    },
+    write: (s) => out.push(s),
+    json: false, dryRun: false, force: false,
+  });
+  assert.equal(code, 3);
+  assert.match(out.join(''), /uncommitted changes/);
 });
 
 test('runMigrate --json prints the raw report', async () => {

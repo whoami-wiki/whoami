@@ -8,6 +8,7 @@ export class BadRequest extends ApiError {}
 export class ServerError extends ApiError {}
 
 export interface PageMeta {
+  schemaVersion: number;
   title: string;
   owner: string;
   editors: string[];
@@ -15,6 +16,7 @@ export interface PageMeta {
   aliases: string[];
   categories: string[];
   gedcom?: { file: string; record: string; snapshot: string };
+  portrait?: string;
   created: string;
   deletedAt?: string;
 }
