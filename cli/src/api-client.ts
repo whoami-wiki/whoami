@@ -87,6 +87,14 @@ export class ApiClient {
     return this.json('GET', `/api/search?${params.toString()}`);
   }
 
+  async rebuildSearch(): Promise<{ ok: true; pages: number; ms: number }> {
+    return this.json('POST', '/api/search/rebuild');
+  }
+
+  async rebuildSearchCheck(): Promise<{ stale: boolean }> {
+    return this.json('GET', '/api/search/rebuild');
+  }
+
   private async json<T>(method: string, path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${this.baseUrl}${path}`, {
       method,
