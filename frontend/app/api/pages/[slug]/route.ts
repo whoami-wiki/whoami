@@ -79,7 +79,7 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
     }
     if (err instanceof FutureSchemaVersionError) {
       return NextResponse.json(
-        { error: 'future-schema-version', detail: err.message },
+        { error: 'future-schema-version', slug, onDisk: err.fromVersion, current: err.current },
         { status: 409 },
       );
     }
@@ -110,7 +110,7 @@ export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ slug: s
     }
     if (err instanceof FutureSchemaVersionError) {
       return NextResponse.json(
-        { error: 'future-schema-version', detail: err.message },
+        { error: 'future-schema-version', slug, onDisk: err.fromVersion, current: err.current },
         { status: 409 },
       );
     }
