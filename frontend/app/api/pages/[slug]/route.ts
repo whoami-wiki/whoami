@@ -4,6 +4,11 @@ import { getPageStore, invalidateListCache, getSearchIndex, persistSearchIndex }
 import { DEFAULT_AUTHOR, WHOAMI_ROOT } from '@/lib/env';
 import { isValidSlug } from '@core/pages/index.ts';
 import type { Page, PageMeta } from '@core/pages/index.ts';
+import {
+  CURRENT_SCHEMA_VERSION,
+  FutureSchemaVersionError,
+} from '@core/pages/migrations/index.ts';
+import { StaleSchemaVersionError } from '@core/pages/store.ts';
 import { buildSearchDoc } from '@core/search/module.ts';
 import { loadDerivedRecord } from '@/lib/derived';
 
@@ -14,6 +19,7 @@ const PutBody = z.object({
 
 function defaultMeta(slug: string): PageMeta {
   return {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     title: titleCaseFromSlug(slug),
     owner: DEFAULT_AUTHOR.name,
     editors: [],
@@ -65,6 +71,18 @@ export async function PUT(req: NextRequest, ctx: { params: Promise<{ slug: strin
   try {
     await pages.write(slug, page, DEFAULT_AUTHOR, parsed.data.summary);
   } catch (err) {
+    if (err instanceof StaleSchemaVersionError) {
+      return NextResponse.json(
+        { error: 'stale-schema-version', slug: err.slug, onDisk: err.onDisk, current: err.current },
+        { status: 409 },
+      );
+    }
+    if (err instanceof FutureSchemaVersionError) {
+      return NextResponse.json(
+        { error: 'future-schema-version', detail: err.message },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: 'write-failed', detail: (err as Error).message }, { status: 500 });
   }
   const idx = await getSearchIndex();
@@ -84,6 +102,18 @@ export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ slug: s
   try {
     await getPageStore().softDelete(slug, DEFAULT_AUTHOR);
   } catch (err) {
+    if (err instanceof StaleSchemaVersionError) {
+      return NextResponse.json(
+        { error: 'stale-schema-version', slug: err.slug, onDisk: err.onDisk, current: err.current },
+        { status: 409 },
+      );
+    }
+    if (err instanceof FutureSchemaVersionError) {
+      return NextResponse.json(
+        { error: 'future-schema-version', detail: err.message },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: 'delete-failed', detail: (err as Error).message }, { status: 500 });
   }
   const idx = await getSearchIndex();
