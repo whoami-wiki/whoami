@@ -14,6 +14,7 @@ export function serializePage(page: Page): string {
 
 function renderFrontmatter(meta: PageMeta): string {
   const lines: string[] = ['---'];
+  lines.push(`schemaVersion: ${meta.schemaVersion}`);
   lines.push(`title: ${yamlScalar(meta.title)}`);
   lines.push(`owner: ${meta.owner}`);
   lines.push(`editors: ${flowArray(meta.editors)}`);
@@ -26,6 +27,7 @@ function renderFrontmatter(meta: PageMeta): string {
     lines.push(`  record: ${meta.gedcom.record}`);
     lines.push(`  snapshot: ${meta.gedcom.snapshot}`);
   }
+  if (meta.portrait) lines.push(`portrait: ${yamlScalar(meta.portrait)}`);
   lines.push(`created: ${meta.created}`);
   if (meta.deletedAt) lines.push(`deletedAt: ${yamlScalar(meta.deletedAt)}`);
   lines.push('---');
