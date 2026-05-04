@@ -5,6 +5,7 @@ import {
   createSearchIndex, loadSearchIndex, saveSearchIndex, rebuildSearchIndex,
   type SearchIndex, type SearchResult,
 } from '@core/search/module.ts';
+import { runMigrate, type MigrateRunnerOptions, type MigrateReport } from '@core/pages/migrate-runner.ts';
 import { WHOAMI_ROOT, PAGES_DIR, SEARCH_INDEX_FILE } from './env.ts';
 import { isSearchIndexStale } from './search-staleness';
 
@@ -96,6 +97,38 @@ export async function rebuildSearchIndexFromDisk(): Promise<{ pages: number; ms:
   await saveSearchIndex(idx, SEARCH_INDEX_FILE);
   _search = idx;
   return { pages, ms: Date.now() - t0 };
+}
+
+/**
+ * Pure orchestration: run the migrate runner, then trigger the
+ * rebuild only when at least one page was actually migrated and we
+ * are not in dry-run. Pulled out for unit testing without touching
+ * real disk or the real rebuild path.
+ */
+export async function orchestrateMigrate(
+  opts: MigrateRunnerOptions,
+  runner: (o: MigrateRunnerOptions) => Promise<MigrateReport>,
+  rebuild: () => Promise<unknown>,
+): Promise<MigrateReport> {
+  const report = await runner(opts);
+  if (!opts.dryRun && report.migrated.length > 0) {
+    await rebuild();
+  }
+  return report;
+}
+
+/**
+ * Server-side wrapper that wires runMigrate to the real
+ * rebuildSearchIndexFromDisk and the real WHOAMI_ROOT / PAGES_DIR.
+ */
+export async function runMigrateOnDisk(
+  opts: Pick<MigrateRunnerOptions, 'page' | 'dryRun' | 'force'>,
+): Promise<MigrateReport> {
+  return orchestrateMigrate(
+    { repoRoot: WHOAMI_ROOT, pagesDir: PAGES_DIR, ...opts },
+    runMigrate,
+    rebuildSearchIndexFromDisk,
+  );
 }
 
 export async function searchAndJoin(query: string, limit: number): Promise<SearchResult[]> {
