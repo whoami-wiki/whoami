@@ -51,6 +51,20 @@ export interface SearchResult {
   type: string;
 }
 
+/** Mirror of core's MigrateReport — the wire format. */
+export interface MigrateReport {
+  walked: number;
+  migrated: { slug: string; from: number; to: number }[];
+  skipped: { slug: string; version: number }[];
+  failed: { slug: string; error: string }[];
+}
+
+export interface MigrateOptions {
+  page?: string;
+  dryRun?: boolean;
+  force?: boolean;
+}
+
 export class ApiClient {
   constructor(private readonly baseUrl: string) {}
 
@@ -93,6 +107,18 @@ export class ApiClient {
 
   async rebuildSearchCheck(): Promise<{ stale: boolean }> {
     return this.json('GET', '/api/search/rebuild');
+  }
+
+  /**
+   * Trigger a migration walk on the server.
+   *
+   * The server returns 409 with `error: "dirty-repo"` if the data
+   * repo is dirty (rerun with `force: true` after committing or
+   * stashing); 409 with `error: "future-schema-version"` if the data
+   * is ahead of the running build.
+   */
+  async migrate(opts: MigrateOptions = {}): Promise<MigrateReport> {
+    return this.json<MigrateReport>('POST', '/api/migrate', opts);
   }
 
   private async json<T>(method: string, path: string, body?: unknown): Promise<T> {

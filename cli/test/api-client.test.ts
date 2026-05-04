@@ -103,3 +103,30 @@ test('ApiClient.rebuildSearchCheck: GETs and parses staleness', async () => {
     },
   );
 });
+
+test('ApiClient.migrate POSTs to /api/migrate with the body', async () => {
+  let receivedUrl = '';
+  let receivedMethod = '';
+  let receivedBody = '';
+  await withServer(
+    (req, res) => {
+      receivedUrl = req.url ?? '';
+      receivedMethod = req.method ?? '';
+      let chunks = '';
+      req.on('data', (c: Buffer) => { chunks += c.toString(); });
+      req.on('end', () => {
+        receivedBody = chunks;
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ walked: 0, migrated: [], skipped: [], failed: [] }));
+      });
+    },
+    async (base) => {
+      const client = new ApiClient(base);
+      const report = await client.migrate({ dryRun: true });
+      assert.equal(report.walked, 0);
+      assert.equal(receivedUrl, '/api/migrate');
+      assert.equal(receivedMethod, 'POST');
+      assert.deepEqual(JSON.parse(receivedBody), { dryRun: true });
+    },
+  );
+});
