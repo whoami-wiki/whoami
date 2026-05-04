@@ -6,6 +6,7 @@ import {
   type SearchIndex, type SearchResult,
 } from '@core/search/module.ts';
 import { WHOAMI_ROOT, PAGES_DIR, SEARCH_INDEX_FILE } from './env.ts';
+import { isSearchIndexStale } from './search-staleness';
 
 let _pages: PageStore | null = null;
 
@@ -44,6 +45,7 @@ export function invalidateListCache(): void {
 
 let _search: SearchIndex | null = null;
 let _searchReady: Promise<void> | null = null;
+let _devStaleCheck: Promise<void> | null = null;
 
 export async function getSearchIndex(): Promise<SearchIndex> {
   if (!_search) {
@@ -60,6 +62,22 @@ export async function getSearchIndex(): Promise<SearchIndex> {
     })();
   }
   await _searchReady;
+  // Dev only: if pages have been edited outside the API path, rebuild
+  // before returning. Single in-flight guard collapses concurrent checks.
+  if (process.env.NODE_ENV === 'development') {
+    if (!_devStaleCheck) {
+      _devStaleCheck = (async () => {
+        try {
+          if (isSearchIndexStale(PAGES_DIR, SEARCH_INDEX_FILE)) {
+            await rebuildSearchIndexFromDisk();
+          }
+        } finally {
+          _devStaleCheck = null;
+        }
+      })();
+    }
+    await _devStaleCheck;
+  }
   return _search!;
 }
 
@@ -68,14 +86,16 @@ export async function persistSearchIndex(): Promise<void> {
   await saveSearchIndex(_search, SEARCH_INDEX_FILE);
 }
 
-export async function rebuildSearchIndexFromDisk(): Promise<void> {
+export async function rebuildSearchIndexFromDisk(): Promise<{ pages: number; ms: number }> {
+  const t0 = Date.now();
   const idx = createSearchIndex();
-  await rebuildSearchIndex(idx, {
+  const pages = await rebuildSearchIndex(idx, {
     pagesDir: join(WHOAMI_ROOT, 'pages'),
     genealogyDir: join(WHOAMI_ROOT, 'genealogy'),
   });
   await saveSearchIndex(idx, SEARCH_INDEX_FILE);
   _search = idx;
+  return { pages, ms: Date.now() - t0 };
 }
 
 export async function searchAndJoin(query: string, limit: number): Promise<SearchResult[]> {

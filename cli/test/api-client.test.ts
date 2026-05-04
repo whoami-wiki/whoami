@@ -69,3 +69,37 @@ test('ApiClient.write: 400 throws BadRequest', async () => {
     },
   );
 });
+
+test('ApiClient.rebuildSearch: POSTs and parses metrics', async () => {
+  await withServer(
+    (req, res) => {
+      assert.equal(req.method, 'POST');
+      assert.equal(req.url, '/api/search/rebuild');
+      res.setHeader('content-type', 'application/json');
+      res.end('{"ok":true,"pages":42,"ms":17}');
+    },
+    async (base) => {
+      const c = new ApiClient(base);
+      const r = await c.rebuildSearch();
+      assert.equal(r.ok, true);
+      assert.equal(r.pages, 42);
+      assert.equal(r.ms, 17);
+    },
+  );
+});
+
+test('ApiClient.rebuildSearchCheck: GETs and parses staleness', async () => {
+  await withServer(
+    (req, res) => {
+      assert.equal(req.method, 'GET');
+      assert.equal(req.url, '/api/search/rebuild');
+      res.setHeader('content-type', 'application/json');
+      res.end('{"stale":true}');
+    },
+    async (base) => {
+      const c = new ApiClient(base);
+      const r = await c.rebuildSearchCheck();
+      assert.equal(r.stale, true);
+    },
+  );
+});

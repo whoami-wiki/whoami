@@ -10,6 +10,7 @@ import { runCreate } from './commands/create.js';
 import { runEdit } from './commands/edit.js';
 import { runDelete } from './commands/delete.js';
 import { runSyncGedcom } from './commands/sync-gedcom.js';
+import { runRebuildSearch } from './commands/rebuild-search.js';
 import { runRecite } from './commands/recite.js';
 import { runSearch } from './commands/search.js';
 import { runHealthz } from './commands/healthz.js';
@@ -38,6 +39,11 @@ GEDCOM:
               --notes "..."
   recite                      Report stale snapshot pointers
   recite --apply              Advance pointers in pages
+
+Search:
+  rebuild-search              Rebuild the search index from disk
+                                (use after editing pages outside the API)
+  rebuild-search --check      Exit non-zero if the index is stale (no rebuild)
 
 Server:
   healthz                     Ping the API
@@ -172,6 +178,14 @@ async function main(): Promise<number> {
         const query = args.positional[0] ?? '';
         const limit = parseInt(String(args.flags.limit ?? '25'), 10) || 25;
         await runSearch({ query, limit, json: !!args.flags.json, client, write });
+        break;
+      }
+      case 'rebuild-search': {
+        await runRebuildSearch({
+          check: !!args.flags.check,
+          client,
+          write,
+        });
         break;
       }
       case 'healthz': {

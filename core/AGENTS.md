@@ -20,6 +20,25 @@ should accept data, not paths.
 | `family/`       | Pure graph operations on GEDCOM records — ancestors, descendants, cohort (siblings/cousins), relationship calculator, lifespan timeline, places. |
 | `search/`       | FlexSearch index build + persist for wiki content. |
 
+## Search index rebuild contract
+
+The search index lives at `~/whoami/data/search.idx.json` and is updated on
+several paths:
+
+- **Page write/delete via API** — incremental: the route calls
+  `idx.upsert(...)` / `idx.remove(slug)` and persists. No manual action.
+- **GEDCOM sync** — full rebuild from disk after derived YAMLs regenerate.
+- **Direct edits to `~/whoami/pages/`** (text editor, git pull, schema
+  migration) — the API never sees the write. Run `wai rebuild-search` to
+  refresh, or `wai rebuild-search --check` to see if a rebuild is needed.
+- **Dev mode** — `getSearchIndex()` checks page mtimes against the index
+  mtime on each call and rebuilds before returning if stale. Off in prod
+  to avoid request-path latency.
+
+The "talks to disk" code lives in `core/src/search/rebuild.ts` (boundary
+module). The contract above is implemented in `frontend/lib/server-services.ts`
+and exposed via `POST /api/search/rebuild` and `wai rebuild-search`.
+
 ## How tests work here
 
 Tests live next to the module under `core/test/<area>/<name>.test.ts` and
