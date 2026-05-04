@@ -1,10 +1,41 @@
 import { readFileSync, readdirSync, existsSync, writeFileSync, fsyncSync, openSync, closeSync, renameSync, mkdirSync } from 'node:fs';
 import { join, basename, relative } from 'node:path';
 import type { Page, PageMetaSummary, AuthorIdentity, Revision } from './types.ts';
-import { parsePage, serializePage } from './frontmatter.ts';
+import { parsePage, serializePage, peekSchemaVersion } from './frontmatter.ts';
 import { assertValidSlug } from './slug.ts';
 import { addAndCommit, fileHistory, restoreFromIndex } from './git.ts';
 import { withLock } from './locks.ts';
+import {
+  CURRENT_SCHEMA_VERSION,
+  FutureSchemaVersionError,
+} from './migrations/index.ts';
+
+/**
+ * Thrown by store.write / store.softDelete when the on-disk page is
+ * at a schemaVersion below CURRENT_SCHEMA_VERSION. Run `wai migrate`
+ * to update before retrying the write.
+ */
+export class StaleSchemaVersionError extends Error {
+  constructor(
+    public readonly slug: string,
+    public readonly onDisk: number,
+    public readonly current: number,
+  ) {
+    super(`page ${slug} on disk is schema v${onDisk}; current is v${current}. run \`wai migrate\`.`);
+    this.name = 'StaleSchemaVersionError';
+  }
+}
+
+function assertPeekSchemaCurrent(slug: string, path: string): void {
+  if (!existsSync(path)) return;
+  const onDisk = peekSchemaVersion(path);
+  if (onDisk < CURRENT_SCHEMA_VERSION) {
+    throw new StaleSchemaVersionError(slug, onDisk, CURRENT_SCHEMA_VERSION);
+  }
+  if (onDisk > CURRENT_SCHEMA_VERSION) {
+    throw new FutureSchemaVersionError(onDisk, CURRENT_SCHEMA_VERSION);
+  }
+}
 
 export interface PageStoreConfig {
   repoRoot: string;
@@ -35,6 +66,7 @@ export function createPageStore(cfg: PageStoreConfig): PageStore {
     async write(slug, page, author, summary) {
       assertValidSlug(slug);
       const target = pathFor(slug);
+      assertPeekSchemaCurrent(slug, target);
       const tmp = `${target}.tmp`;
       const content = serializePage(page);
 
@@ -94,6 +126,7 @@ export function createPageStore(cfg: PageStoreConfig): PageStore {
       assertValidSlug(slug);
       const src = pathFor(slug);
       if (!existsSync(src)) throw new Error(`page not found: ${slug}`);
+      assertPeekSchemaCurrent(slug, src);
       const archivedDir = join(cfg.pagesDir, '_archived');
       const dst = join(archivedDir, `${slug}.md`);
 

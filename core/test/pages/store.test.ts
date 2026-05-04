@@ -231,3 +231,126 @@ test('PageStore.softDelete: moves file to _archived/ and marks deletedAt', async
     repo.cleanup();
   }
 });
+
+import { StaleSchemaVersionError } from '../../src/pages/store.ts';
+import {
+  CURRENT_SCHEMA_VERSION,
+  FutureSchemaVersionError,
+} from '../../src/pages/migrations/index.ts';
+
+/** Helper for these tests — minimal valid PageMeta at CURRENT version. */
+function freshMeta(title: string): Page['meta'] {
+  return {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    title,
+    owner: 'steven',
+    editors: [],
+    type: 'person',
+    aliases: [],
+    categories: [],
+    created: '2026-04-29',
+  };
+}
+
+test('PageStore.write: throws StaleSchemaVersionError when on-disk version is below CURRENT', async () => {
+  // No-op when CURRENT === 1 — there is no version below 1 to write.
+  if (CURRENT_SCHEMA_VERSION === 1) return;
+
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const slug = 'p1';
+    writeFileSync(
+      join(repo.pagesDir, `${slug}.md`),
+      `---\nschemaVersion: ${CURRENT_SCHEMA_VERSION - 1}\ntitle: P\nowner: me\neditors: []\ntype: person\naliases: []\ncategories: []\ncreated: 2026-04-29\n---\nbody`,
+    );
+
+    await assert.rejects(
+      () => store.write(
+        slug,
+        { slug, meta: freshMeta('P'), body: 'b' },
+        { name: 'A', email: 'a@x' },
+        'msg',
+      ),
+      StaleSchemaVersionError,
+    );
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test('PageStore.write: throws FutureSchemaVersionError when on-disk version exceeds CURRENT', async () => {
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const slug = 'p2';
+    writeFileSync(
+      join(repo.pagesDir, `${slug}.md`),
+      `---\nschemaVersion: ${CURRENT_SCHEMA_VERSION + 1}\ntitle: P\nowner: me\neditors: []\ntype: person\naliases: []\ncategories: []\ncreated: 2026-04-29\n---\nbody`,
+    );
+
+    await assert.rejects(
+      () => store.write(
+        slug,
+        { slug, meta: freshMeta('P'), body: 'b' },
+        { name: 'A', email: 'a@x' },
+        'msg',
+      ),
+      FutureSchemaVersionError,
+    );
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test('PageStore.write: succeeds when on-disk equals CURRENT', async () => {
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const slug = 'p3';
+    const author = { name: 'A', email: 'a@x' };
+    // Create at CURRENT, then overwrite — both writes must succeed
+    await store.write(slug, { slug, meta: freshMeta('P'), body: 'b1' }, author, 'create');
+    await store.write(slug, { slug, meta: freshMeta('P'), body: 'b2' }, author, 'update');
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test('PageStore.softDelete: throws StaleSchemaVersionError on stale page', async () => {
+  if (CURRENT_SCHEMA_VERSION === 1) return;
+
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const slug = 'p4';
+    writeFileSync(
+      join(repo.pagesDir, `${slug}.md`),
+      `---\nschemaVersion: ${CURRENT_SCHEMA_VERSION - 1}\ntitle: P\nowner: me\neditors: []\ntype: person\naliases: []\ncategories: []\ncreated: 2026-04-29\n---\nbody`,
+    );
+    await assert.rejects(
+      () => store.softDelete(slug, { name: 'A', email: 'a@x' }),
+      StaleSchemaVersionError,
+    );
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test('PageStore.softDelete: throws FutureSchemaVersionError on future page', async () => {
+  const repo = await makeTestRepo();
+  try {
+    const store = createPageStore({ repoRoot: repo.root, pagesDir: repo.pagesDir });
+    const slug = 'p5';
+    writeFileSync(
+      join(repo.pagesDir, `${slug}.md`),
+      `---\nschemaVersion: ${CURRENT_SCHEMA_VERSION + 1}\ntitle: P\nowner: me\neditors: []\ntype: person\naliases: []\ncategories: []\ncreated: 2026-04-29\n---\nbody`,
+    );
+    await assert.rejects(
+      () => store.softDelete(slug, { name: 'A', email: 'a@x' }),
+      FutureSchemaVersionError,
+    );
+  } finally {
+    repo.cleanup();
+  }
+});
