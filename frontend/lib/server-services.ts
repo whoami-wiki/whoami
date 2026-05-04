@@ -68,14 +68,16 @@ export async function persistSearchIndex(): Promise<void> {
   await saveSearchIndex(_search, SEARCH_INDEX_FILE);
 }
 
-export async function rebuildSearchIndexFromDisk(): Promise<void> {
+export async function rebuildSearchIndexFromDisk(): Promise<{ pages: number; ms: number }> {
+  const t0 = Date.now();
   const idx = createSearchIndex();
-  await rebuildSearchIndex(idx, {
+  const pages = await rebuildSearchIndex(idx, {
     pagesDir: join(WHOAMI_ROOT, 'pages'),
     genealogyDir: join(WHOAMI_ROOT, 'genealogy'),
   });
   await saveSearchIndex(idx, SEARCH_INDEX_FILE);
   _search = idx;
+  return { pages, ms: Date.now() - t0 };
 }
 
 export async function searchAndJoin(query: string, limit: number): Promise<SearchResult[]> {
