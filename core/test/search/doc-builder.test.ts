@@ -7,6 +7,7 @@ import type { DerivedRecord } from '../../src/gedcom/types.ts';
 const page: Page = {
   slug: 'abby-rickelman',
   meta: {
+    schemaVersion: 1,
     title: 'Abby Rickelman',
     owner: 'steven',
     editors: [],
