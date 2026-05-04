@@ -11,6 +11,7 @@ import { runEdit } from './commands/edit.js';
 import { runDelete } from './commands/delete.js';
 import { runSyncGedcom } from './commands/sync-gedcom.js';
 import { runRebuildSearch } from './commands/rebuild-search.js';
+import { runMigrate } from './commands/migrate.js';
 import { runRecite } from './commands/recite.js';
 import { runSearch } from './commands/search.js';
 import { runHealthz } from './commands/healthz.js';
@@ -44,6 +45,12 @@ Search:
   rebuild-search              Rebuild the search index from disk
                                 (use after editing pages outside the API)
   rebuild-search --check      Exit non-zero if the index is stale (no rebuild)
+
+Migrations:
+  migrate [--dry-run] [--page <slug>] [--force]
+                              Apply pending schema migrations to all pages.
+                              Use after pulling a code update that bumps
+                              CURRENT_SCHEMA_VERSION.
 
 Server:
   healthz                     Ping the API
@@ -187,6 +194,17 @@ async function main(): Promise<number> {
           write,
         });
         break;
+      }
+      case 'migrate': {
+        const code = await runMigrate({
+          client,
+          write,
+          page: typeof args.flags.page === 'string' ? args.flags.page : undefined,
+          dryRun: !!args.flags['dry-run'],
+          force: !!args.flags.force,
+          json: !!args.flags.json,
+        });
+        return code;
       }
       case 'healthz': {
         await runHealthz({ client, write });
