@@ -7,6 +7,12 @@ export interface GedcomRef {
 }
 
 export interface PageMeta {
+  /**
+   * Schema version of this page's frontmatter. Always present after
+   * parse — readers that encounter pages with no on-disk schemaVersion
+   * field default it to 1 before validation.
+   */
+  schemaVersion: number;
   title: string;
   owner: string;
   editors: string[];
