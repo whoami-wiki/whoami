@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parsePageMeta } from '../../src/pages/schema.ts';
+import { CURRENT_SCHEMA_VERSION } from '../../src/pages/migrations/index.ts';
 
 test('parsePageMeta: accepts a minimal valid frontmatter object', () => {
   const meta = parsePageMeta({
@@ -47,4 +48,46 @@ test('parsePageMeta: rejects bad date format', () => {
   assert.throws(() => parsePageMeta({
     title: 'X', owner: 'a', editors: [], type: 'person', aliases: [], categories: [], created: '2026/04/29',
   }));
+});
+
+test('parsePageMeta defaults missing schemaVersion to CURRENT_SCHEMA_VERSION', () => {
+  const out = parsePageMeta({
+    title: 'Test',
+    owner: 'me',
+    editors: [],
+    type: 'person',
+    aliases: [],
+    categories: [],
+    created: '2026-05-01',
+  });
+  assert.equal(out.schemaVersion, CURRENT_SCHEMA_VERSION);
+});
+
+test('parsePageMeta accepts an explicit schemaVersion', () => {
+  const out = parsePageMeta({
+    schemaVersion: 1,
+    title: 'Test',
+    owner: 'me',
+    editors: [],
+    type: 'person',
+    aliases: [],
+    categories: [],
+    created: '2026-05-01',
+  });
+  assert.equal(out.schemaVersion, 1);
+});
+
+test('parsePageMeta rejects non-integer schemaVersion', () => {
+  assert.throws(() =>
+    parsePageMeta({
+      schemaVersion: 1.5,
+      title: 'Test',
+      owner: 'me',
+      editors: [],
+      type: 'person',
+      aliases: [],
+      categories: [],
+      created: '2026-05-01',
+    }),
+  );
 });

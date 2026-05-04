@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { PageMeta } from './types.ts';
+import { CURRENT_SCHEMA_VERSION } from './migrations/index.ts';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -11,6 +12,7 @@ const GedcomRefSchema = z.object({
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const PageMetaSchema: z.ZodType<PageMeta, any, any> = z.object({
+  schemaVersion: z.number().int().positive().default(CURRENT_SCHEMA_VERSION),
   title: z.string().min(1),
   owner: z.string().min(1),
   editors: z.array(z.string()),
@@ -29,6 +31,12 @@ const PageMetaSchema: z.ZodType<PageMeta, any, any> = z.object({
   ]).optional(),
 });
 
+/**
+ * Validate a raw frontmatter object against the current PageMeta
+ * schema. Callers that read pages from disk must run frontmatter
+ * through `migrate(...)` first — the schema describes the current
+ * shape only.
+ */
 export function parsePageMeta(input: unknown): PageMeta {
   return PageMetaSchema.parse(input);
 }
