@@ -4,6 +4,7 @@ dist/
 *.tsbuildinfo
 .env
 .DS_Store
+.worktrees/
 
 # Desktop app
 desktop/resources/php/
