@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parsePage, serializePage } from '../../src/pages/frontmatter.ts';
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { parsePage, serializePage, peekSchemaVersion } from '../../src/pages/frontmatter.ts';
 import { CURRENT_SCHEMA_VERSION } from '../../src/pages/migrations/index.ts';
 
 const SAMPLE = `---
@@ -100,4 +103,18 @@ test('serializePage omits portrait when not set (no empty/null emission)', () =>
   };
   const serialized = serializePage(page);
   assert.ok(!/^portrait:/m.test(serialized), `expected no portrait line, got:\n${serialized}`);
+});
+
+test('peekSchemaVersion returns 1 when frontmatter has no schemaVersion', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'peek-'));
+  const file = join(dir, 'p.md');
+  writeFileSync(file, '---\ntitle: x\n---\nbody');
+  assert.equal(peekSchemaVersion(file), 1);
+});
+
+test('peekSchemaVersion returns the explicit value', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'peek-'));
+  const file = join(dir, 'p.md');
+  writeFileSync(file, '---\nschemaVersion: 7\ntitle: x\n---\nbody');
+  assert.equal(peekSchemaVersion(file), 7);
 });

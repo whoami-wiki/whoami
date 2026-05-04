@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import matter from 'gray-matter';
 import type { Page, PageMeta } from './types.ts';
 import { parsePageMeta } from './schema.ts';
@@ -10,6 +11,20 @@ export function parsePage(slug: string, raw: string): Page {
 
 export function serializePage(page: Page): string {
   return `${renderFrontmatter(page.meta)}\n${page.body.trimStart()}`;
+}
+
+/**
+ * Read just the on-disk schemaVersion of a page file, defaulting to 1
+ * when the field is absent. Used by store.write / store.softDelete to
+ * enforce the strict-write rule without instantiating a full Page or
+ * running Zod validation.
+ */
+export function peekSchemaVersion(path: string): number {
+  const raw = readFileSync(path, 'utf-8');
+  const { data } = matter(raw);
+  const v = (data as { schemaVersion?: unknown }).schemaVersion;
+  if (typeof v === 'number' && Number.isInteger(v) && v >= 1) return v;
+  return 1;
 }
 
 function renderFrontmatter(meta: PageMeta): string {
