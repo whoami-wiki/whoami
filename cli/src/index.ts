@@ -203,6 +203,26 @@ async function run(cmd: Promise<void>, updateNotice: Promise<string | null>): Pr
   if (notice) console.error(notice);
 }
 
+/**
+ * API responses are not consistent:
+ * - MediaWiki commonly returns an object like { info, code, ... }.
+ * - Other local services may return a plain string error payload.
+ * Normalize both into a single user-facing message.
+ */
+function formatApiErrorMessage(errorData: unknown): string | null {
+  if (!errorData) return null;
+  if (typeof errorData === 'string') return errorData;
+  if (typeof errorData !== 'object') return null;
+
+  const value = errorData as Record<string, unknown>;
+  if (typeof value.info === 'string') return value.info;
+  if (typeof value.message === 'string') return value.message;
+  if (typeof value.error === 'string') return value.error;
+  if (typeof value.code === 'string') return value.code;
+
+  return null;
+}
+
 main().catch((err: unknown) => {
   if (err instanceof WaiError) {
     if (!((err instanceof UsageError) || (err instanceof AuthError))) {
@@ -214,8 +234,13 @@ main().catch((err: unknown) => {
   } else if (err instanceof Error) {
     // Axios errors
     const axiosErr = err as any;
-    if (axiosErr.response?.data?.error) {
-      console.error(`API error: ${axiosErr.response.data.error.info}`);
+    const apiError = formatApiErrorMessage(axiosErr.response?.data?.error);
+    if (apiError) {
+      console.error(`API error: ${apiError}`);
+      const baseUrl = typeof axiosErr.config?.baseURL === 'string' ? axiosErr.config.baseURL : '';
+      if (apiError === 'Not found' && baseUrl.includes('localhost:8080')) {
+        console.error('Hint: try --server http://127.0.0.1:8080');
+      }
       process.exitCode = 1;
     } else if (axiosErr.code === 'ECONNREFUSED') {
       console.error(`Cannot connect to wiki server. Is it running?`);
