@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import { imageMap } from "@/utils/image-map";
+import { WikiMainPagePreview } from "@/components/wiki-main-page-preview";
 
 interface Props {
   activePage: WikiPage | null;
@@ -110,15 +111,40 @@ export function WikiWindow({ activePage, zIndex }: Props) {
 }
 
 function WikiArticle({ activePage }: { activePage: WikiPage }) {
+  const isMainPage = activePage.mainPage === true;
+
   return (
-    <div className="relative flex-1 overflow-hidden">
-      {/* Table of contents — hidden on mobile, fixed on desktop */}
+    <div
+      className={`relative flex-1 ${isMainPage ? "overflow-y-auto" : "overflow-hidden"}`}
+    >
+      {/* Table of contents — always rendered (even on Main Page) so the
+          left rail doesn't shift when flipping between article and front
+          page views. On the Main Page, entries mirror the wiki section
+          headings (Today's featured page, Did you know, etc.). */}
       <div className="absolute top-[6.5rem] left-6 w-48 bg-neutral-100 dark:bg-neutral-900 p-3 hidden md:block z-10">
         <div className="font-sans text-xs font-medium text-muted uppercase tracking-wider mb-2">
           Contents
         </div>
         <TocList entries={activePage.toc} />
       </div>
+
+      {/* Main Page variant: render Wikipedia-style front page in the
+          same content slot as articles. */}
+      {isMainPage && (
+        <div className="px-5 pt-4 md:px-6 md:pt-5">
+          <div className="md:ml-52">
+            <WikiMainPagePreview />
+          </div>
+        </div>
+      )}
+      {!isMainPage && <ArticleBody activePage={activePage} />}
+    </div>
+  );
+}
+
+function ArticleBody({ activePage }: { activePage: WikiPage }) {
+  return (
+    <>
 
       <div
         className="px-5 py-3 md:p-6"
@@ -200,7 +226,7 @@ function WikiArticle({ activePage }: { activePage: WikiPage }) {
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

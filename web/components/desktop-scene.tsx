@@ -37,6 +37,10 @@ export interface WikiPage {
   intro: string;
   sections: ContentSection[];
   scrollTop?: number; // px offset to simulate mid-read state
+  // When true, WikiArticle renders the Wikipedia-style Main Page layout
+  // (banner + featured grid + POTD) instead of the standard article
+  // layout. Other fields are ignored in this mode; supply empty defaults.
+  mainPage?: boolean;
 }
 
 interface WindowItem {
@@ -914,6 +918,28 @@ const standalonePages: WindowItem[] = [
           body: "In August 2023, Appa was hospitalized for a cardiac event. Jay took the 3 AM flight from Bangalore — the one that shows up as a single outlier point in his location history. Appa recovered fully. The event is referenced obliquely in the [[Aai]] page and not at all in the College Gang group chat. Some things stay in the family.",
         },
       ],
+    },
+  },
+  // Final flip: the wiki's Main Page itself. After watching the agent
+  // process the desktop archive into a long roll of articles, the
+  // viewer lands on the assembled encyclopedia front page. TOC mirrors
+  // the section structure of the actual Main_Page.wiki template so the
+  // left rail keeps the same look as the article views beside it.
+  {
+    hideAt: 0.97,
+    page: {
+      title: "Main Page",
+      mainPage: true,
+      toc: [
+        { label: "Today's featured page" },
+        { label: "Did you know" },
+        { label: "This week in the wiki" },
+        { label: "On this day" },
+        { label: "Today's featured picture" },
+      ],
+      infobox: [],
+      intro: "",
+      sections: [],
     },
   },
 ];
