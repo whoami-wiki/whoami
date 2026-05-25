@@ -1,4 +1,53 @@
-<div style="max-width: 42em;">
+<!--
+  Main Page layout.
+
+  - The banner (welcome + tagline + "X% of your life documented")
+    always renders. The % stat hides itself gracefully if Template:
+    DaysDocumented or the owner's birth date isn't set yet.
+  - The body switches between get-started content and the Wikipedia-
+    style featured grid based on whether the curator has ever produced
+    output (PAGESINCATEGORY:Featured TFA > 0). This means a brand-new
+    install sees get-started content under the banner until the first
+    curator run transforms the page.
+  - Pure ParserFunctions + Scribunto (Module:OwnerData). No extension.
+-->
+
+<div id="mp-topbanner" class="mp-box">
+<div id="mp-welcomecount">
+<div id="mp-welcome">Welcome [[Me|{{#invoke:OwnerData|firstName}}]],</div>
+<div id="mp-free">to your personal encyclopedia.</div>
+<div id="articlecount">
+{{#if: {{#invoke:OwnerData|birthDate}}
+| {{#expr: ({{DaysDocumented}} * 100 / {{#invoke:OwnerData|daysLived}}) round 1}}
+| 0
+}}% of your life documented
+</div>
+</div>
+</div>
+
+{{#ifexpr: {{PAGESINCATEGORY:Featured TFA}} > 0 |
+<div id="mp-upper">{{#if: {{#ifexist: Featured:{{#time:Y-m-d}}/TFA|x}}{{#ifexist: Featured:{{#time:Y-m-d}}/DYK|x}} |
+<div id="mp-left" class="MainPageBG mp-box">{{#ifexist: Featured:{{#time:Y-m-d}}/TFA |
+<h2 class="mp-h2">Today's featured page</h2>
+{{Featured:{{#time:Y-m-d}}/TFA}}
+|}}{{#ifexist: Featured:{{#time:Y-m-d}}/DYK |
+<h2 class="mp-h2">Did you know&#160;...</h2>
+{{Featured:{{#time:Y-m-d}}/DYK}}
+|}}
+</div>|}}{{#if: {{#ifexist: Featured:{{#time:Y-m-d}}/ITN|x}}{{#ifexist: Featured:{{#time:Y-m-d}}/OTD|x}} |
+<div id="mp-right" class="MainPageBG mp-box">{{#ifexist: Featured:{{#time:Y-m-d}}/ITN |
+<h2 class="mp-h2">This week in the wiki</h2>
+{{Featured:{{#time:Y-m-d}}/ITN}}
+|}}{{#ifexist: Featured:{{#time:Y-m-d}}/OTD |
+<h2 class="mp-h2">On this day</h2>
+{{Featured:{{#time:Y-m-d}}/OTD}}
+|}}
+</div>|}}</div>{{#ifexist: Featured:{{#time:Y-m-d}}/POTD |
+<div id="mp-lower" class="MainPageBG mp-box">
+<h2 class="mp-h2">Today's featured picture</h2>
+{{Featured:{{#time:Y-m-d}}/POTD}}
+</div>|}}
+|<div style="max-width: 42em;">
 
 == Hello, welcome to your wiki ==
 
@@ -22,3 +71,4 @@ Your job is simple: point the agent at your data (old chats, photos, notes, what
 If something breaks or feels wrong, open an issue at [https://github.com/whoami-wiki/whoami/issues github.com/whoami-wiki/whoami/issues]. We read every one.
 
 </div>
+}}

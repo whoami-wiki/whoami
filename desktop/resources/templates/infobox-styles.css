@@ -1,107 +1,131 @@
-/* Infobox styles */
-.infobox {
-  border: 1px solid #a2a9b1;
-  border-spacing: 3px;
-  background-color: #f8f9fa;
-  color: #202122;
-  margin: 0.5em 0 0.5em 1em;
-  padding: 0.2em;
-  float: right;
-  clear: right;
-  font-size: 88%;
-  line-height: 1.5em;
-  width: 22em;
+/* Audio player: stretch idle player to full width */
+audio[data-mw-tmh] {
+    width: 100% !important;
 }
 
-.infobox caption {
-  font-size: 125%;
-  font-weight: bold;
-  padding: 0.2em;
+/* ─── Main Page sections ──────────────────────────────────────────
+ * Ported directly from Wikipedia's Main Page TemplateStyles
+ * (TemplateStyles:r1343415131) — same class/ID structure, same hex
+ * palette in light mode, same dark-mode overrides via Vector's
+ * skin-theme-clientpref-night / -os classes.
+ *
+ * Per-column palette:
+ *   #mp-left   (TFA + DYK)  → green
+ *   #mp-right  (ITN + OTD)  → blue
+ *   #mp-lower  (POTD)       → purple
+ */
+
+.mw-parser-output .mp-box {
+    border: 1px solid #aaa;
+    padding: 0 0.5em 0.5em;
+    margin-top: 4px;
 }
 
-.infobox td,
-.infobox th {
-  vertical-align: top;
-  text-align: left;
-  padding: 0.2em 0.4em;
+.mw-parser-output .mp-h2 {
+    border: 1px solid #aaa;
+    margin: 0.5em 0;
+    padding: 0.2em 0.4em;
+    font-size: 120%;
+    font-weight: bold;
+    font-family: inherit;
 }
 
-.infobox th {
-  font-weight: bold;
-  text-align: right;
-  white-space: nowrap;
+.mw-parser-output .mp-contains-float::after {
+    content: "";
+    display: block;
+    clear: both;
 }
 
-.infobox .infobox-image {
-  text-align: center;
-  padding: 4px;
+/* Hide the "Main Page" h1 on the main page itself — the topbanner takes
+ * its place visually. Wikipedia does the same via inline style. */
+body.page-Main_Page #firstHeading,
+body.page-Main_Page .mw-first-heading {
+    display: none;
 }
 
-.infobox .infobox-header {
-  text-align: center;
-  background-color: #ddd;
-  font-weight: bold;
+/* ─── Welcome banner ──────────────────────────────────────────── */
+
+.mw-parser-output #mp-welcomecount { text-align: center; margin: 0.4em; }
+.mw-parser-output #mp-welcome      { font-size: 162%; padding: 0.75em 0.1em 0.1em; line-height: 1.1; }
+.mw-parser-output #mp-welcome h1,
+.mw-parser-output #mp-welcome .mw-heading1 {
+    font-size: inherit;
+    font-family: inherit;
+    display: inline;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+.mw-parser-output #mp-free         { font-size: 95%; }
+.mw-parser-output #articlecount    { font-size: 85%; margin-top: 0.6em; }
+.mw-parser-output #articlecount > ul { margin: 0; padding: 0; }
+.mw-parser-output #articlecount > ul > li { margin: 0; display: inline; }
+.mw-parser-output #articlecount > ul > li::after { content: " · "; font-weight: bold; }
+.mw-parser-output #articlecount > ul > li:last-child::after { content: ""; }
+
+/* Constrain main-page images on both axes. max-width covers narrow
+ * windows (Vector's limited-width + sidebars can shrink the column
+ * below the curator's requested 480px). max-height keeps portrait
+ * photos from dominating the viewport — the browser picks dimensions
+ * that satisfy both limits while preserving aspect ratio. */
+.mw-parser-output .mp-box img,
+.mw-parser-output .mp-box .mw-file-element {
+    max-width: 100%;
+    max-height: 420px;
+    width: auto;
+    height: auto;
 }
 
-.infobox .infobox-above {
-  text-align: center;
-  font-size: 125%;
-  font-weight: bold;
+@media ( max-width: 500px ) {
+    .mw-parser-output .mp-contains-float > * {
+        float: none !important;
+        margin: auto !important;
+    }
 }
 
-.infobox .infobox-below {
-  text-align: center;
-  font-size: 90%;
-  padding: 4px;
+/* Wikipedia uses 875px, but their main page is borderless. With Vector's
+ * limited-width + two sidebars, our content area sits closer to 700px on
+ * a typical window, so lower the breakpoint to keep the two-column layout.
+ *
+ * flex-grow 55/45 with flex-basis 0 means: when both columns render, they
+ * split 55/45 like Wikipedia; when only one renders (the other was gated
+ * out for being empty), it expands to fill the full width naturally. */
+@media ( min-width: 700px ) {
+    .mw-parser-output #mp-upper { display: flex; }
+    .mw-parser-output #mp-left  { flex: 55 1 0; margin-right: 2px; min-width: 0; }
+    .mw-parser-output #mp-right { flex: 45 1 0; margin-left:  2px; min-width: 0; }
 }
 
-/* Gap template */
-.gap-box {
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  border-radius: 4px;
-  padding: 8px 12px;
-  margin: 8px 0;
-  font-size: 0.9em;
+/* ─── Light mode ───────────────────────────────────────────────── */
+
+@media screen {
+    .mw-parser-output #mp-topbanner     { background-color: #f9f9f9; border-color: #ddd; }
+    .mw-parser-output #mp-left          { background-color: #f5fffa; border-color: #cef2e0; }
+    .mw-parser-output #mp-left  .mp-h2  { background-color: #cef2e0; border-color: #a3bfb1; }
+    .mw-parser-output #mp-right         { background-color: #f5faff; border-color: #cedff2; }
+    .mw-parser-output #mp-right .mp-h2  { background-color: #cedff2; border-color: #a3b0bf; }
+    .mw-parser-output #mp-lower         { background-color: #faf5ff; border-color: #ddcef2; }
+    .mw-parser-output #mp-lower .mp-h2  { background-color: #ddcef2; border-color: #afa3bf; }
 }
 
-/* Dialogue template */
-.dialogue blockquote {
-  margin: 0;
-  padding: 4px 0 4px 16px;
-  border-left: 3px solid #c8c8cc;
-}
+/* ─── Explicit dark mode (user selected) ───────────────────────── */
 
-.dialogue-speaker {
-  font-weight: bold;
-  margin-bottom: 2px;
-}
+html.skin-theme-clientpref-night .mw-parser-output #mp-topbanner     { background-color: #171a1d; border-color: #676767; }
+html.skin-theme-clientpref-night .mw-parser-output #mp-left          { background-color: #0b1e1c; border-color: #104437; }
+html.skin-theme-clientpref-night .mw-parser-output #mp-left  .mp-h2  { background-color: #104437; border-color: #2f4d41; }
+html.skin-theme-clientpref-night .mw-parser-output #mp-right         { background-color: #0d1a27; border-color: #082849; }
+html.skin-theme-clientpref-night .mw-parser-output #mp-right .mp-h2  { background-color: #082849; border-color: #a3b0bf; }
+html.skin-theme-clientpref-night .mw-parser-output #mp-lower         { background-color: #130e20; border-color: #7545ab; }
+html.skin-theme-clientpref-night .mw-parser-output #mp-lower .mp-h2  { background-color: #7545ab; border-color: #afa3bf; }
 
-/* Source namespace — slightly larger font like article namespace */
-.ns-100 #mw-content-text,
-.ns-101 #mw-content-text {
-  font-size: 1em;
-}
+/* ─── OS-following dark mode ───────────────────────────────────── */
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .infobox {
-    background-color: #2a2a2e;
-    border-color: #48484a;
-    color: #e5e5e7;
-  }
-
-  .infobox .infobox-header {
-    background-color: #3a3a3c;
-  }
-
-  .gap-box {
-    background: #3a3000;
-    border-color: #665800;
-    color: #ffd600;
-  }
-
-  .dialogue blockquote {
-    border-left-color: #636366;
-  }
+@media screen and ( prefers-color-scheme: dark ) {
+    html.skin-theme-clientpref-os .mw-parser-output #mp-topbanner     { background-color: #171a1d; border-color: #676767; }
+    html.skin-theme-clientpref-os .mw-parser-output #mp-left          { background-color: #0b1e1c; border-color: #104437; }
+    html.skin-theme-clientpref-os .mw-parser-output #mp-left  .mp-h2  { background-color: #104437; border-color: #2f4d41; }
+    html.skin-theme-clientpref-os .mw-parser-output #mp-right         { background-color: #0d1a27; border-color: #082849; }
+    html.skin-theme-clientpref-os .mw-parser-output #mp-right .mp-h2  { background-color: #082849; border-color: #a3b0bf; }
+    html.skin-theme-clientpref-os .mw-parser-output #mp-lower         { background-color: #130e20; border-color: #7545ab; }
+    html.skin-theme-clientpref-os .mw-parser-output #mp-lower .mp-h2  { background-color: #7545ab; border-color: #afa3bf; }
 }

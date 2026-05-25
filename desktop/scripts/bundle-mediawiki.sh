@@ -163,6 +163,19 @@ for dir in "$OUT"/extensions/*/tests "$OUT"/skins/*/tests; do
   [ -d "$dir" ] && rm -rf "$dir"
 done
 
+# 4b. Copy in-tree extensions (authored locally, not downloaded)
+# Run unconditionally so iterating on extension source just needs a re-bundle.
+LOCAL_EXTENSIONS_SRC="$ROOT/extensions"
+if [ -d "$LOCAL_EXTENSIONS_SRC" ]; then
+  for src in "$LOCAL_EXTENSIONS_SRC"/*/; do
+    [ -d "$src" ] || continue
+    name="$(basename "$src")"
+    echo "==> Copying in-tree extension: $name"
+    rm -rf "$OUT/extensions/$name"
+    cp -R "$src" "$OUT/extensions/$name"
+  done
+fi
+
 # 5. Create router.php for PHP's built-in server
 cat > "$OUT/router.php" << 'ROUTER'
 <?php

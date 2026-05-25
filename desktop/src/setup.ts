@@ -164,6 +164,24 @@ export async function runSetup(
     "Initial template import",
   );
 
+  // Main Page banner infrastructure — reads owner birth date for "X% of
+  // your life documented", caches the date count in DaysDocumented.
+  await createPage(
+    apiUrl,
+    csrfToken,
+    "Module:OwnerData",
+    readFileSync(join(templatesDir, "OwnerData.lua"), "utf-8"),
+    "Initial module import",
+  );
+
+  await createPage(
+    apiUrl,
+    csrfToken,
+    "Template:DaysDocumented",
+    "<onlyinclude>0</onlyinclude>",
+    "Initial stat — curator refreshes this nightly",
+  );
+
   // Import Common.css
   await createPage(
     apiUrl,
@@ -185,6 +203,10 @@ export async function runSetup(
   send("templates", "done");
 
   // 4. Create user's name page + [[Me]] redirect
+  // Minimal seed — the user fills in biographical details (including
+  // their birth date, which powers the "X% of your life documented"
+  // banner stat) when they go through the "Writing your first page"
+  // guide. Until then, the % stat shows 0%.
   send("userpage", "running");
   const namePage = `{{Infobox person\n| name = ${params.name}\n}}\n\n'''${params.name}'''.\n\n[[Category:People]]`;
   await createPage(
@@ -418,6 +440,13 @@ function generateLocalSettings(opts: LocalSettingsOpts): string {
     'define("NS_TASK_TALK", 103);',
     '$wgExtraNamespaces[NS_TASK] = "Task";',
     '$wgExtraNamespaces[NS_TASK_TALK] = "Task_talk";',
+    "",
+    "## Featured namespace (104/105) — curator-written daily pages",
+    'define("NS_FEATURED", 104);',
+    'define("NS_FEATURED_TALK", 105);',
+    '$wgExtraNamespaces[NS_FEATURED] = "Featured";',
+    '$wgExtraNamespaces[NS_FEATURED_TALK] = "Featured_talk";',
+    "$wgNamespacesToBeSearchedDefault[NS_FEATURED] = false;",
     "",
     "## Short URLs",
     "$wgUsePathInfo = true;",
