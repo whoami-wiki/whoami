@@ -75,9 +75,9 @@ export function Navbar() {
     <>
       <nav className="navbar font-sans px-6 py-6 flex flex-row items-center justify-between max-w-360 mx-auto w-full">
         <div className="flex flex-row gap-4 text-sm items-center">
-          <div className="text-primary">
+          <Link href="/" aria-label="whoami.wiki home" className="text-primary">
             <WordmarkIcon />
-          </div>
+          </Link>
 
           {navItems.map(({ label, href }) => (
             <Link
@@ -90,7 +90,7 @@ export function Navbar() {
                       ? pathname !== href
                       : !pathname.startsWith(href),
                 },
-                href !== "/" && "hidden md:inline",
+                "hidden md:inline",
               )}
             >
               {label}
