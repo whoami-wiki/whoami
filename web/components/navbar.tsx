@@ -1,11 +1,11 @@
 "use client";
 
 import cn from "classnames";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { MenuIcon, CloseIcon } from "@/components/icons";
+import { MenuIcon, CloseIcon, WordmarkIcon } from "@/components/icons";
 import { motion, AnimatePresence } from "motion/react";
 import { DISCORD_INVITE_LINK, GITHUB_REPO_LINK } from "@/utils/constants";
 
@@ -21,23 +21,28 @@ const externalItems = [
   { label: "GitHub", href: GITHUB_REPO_LINK },
 ];
 
+const subscribeMount = () => () => {};
+function useMounted() {
+  return useSyncExternalStore(
+    subscribeMount,
+    () => true,
+    () => false,
+  );
+}
+
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   return (
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className={cn(
-        "size-4.5 rounded-full cursor-pointer focus:outline-3",
-        {
-          "bg-amber-500 focus:outline-amber-500/50":
-            mounted && resolvedTheme === "light",
-          "bg-purple-300 focus:outline-purple-300/50":
-            mounted && resolvedTheme === "dark",
-        },
-      )}
+      className={cn("size-4.5 rounded-full cursor-pointer focus:outline-3", {
+        "bg-amber-500 focus:outline-amber-500/50":
+          mounted && resolvedTheme === "light",
+        "bg-purple-300 focus:outline-purple-300/50":
+          mounted && resolvedTheme === "dark",
+      })}
       aria-label="Toggle theme"
     />
   );
@@ -46,13 +51,15 @@ function ThemeToggle() {
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [lastPathname, setLastPathname] = useState(pathname);
 
   const close = useCallback(() => setOpen(false), []);
 
-  // Close drawer on route change
-  useEffect(() => {
+  // Close drawer on route change (derive state during render)
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -67,7 +74,11 @@ export function Navbar() {
   return (
     <>
       <nav className="navbar font-sans px-6 py-6 flex flex-row items-center justify-between max-w-360 mx-auto w-full">
-        <div className="flex flex-row gap-4 text-sm">
+        <div className="flex flex-row gap-4 text-sm items-center">
+          <div className="text-primary">
+            <WordmarkIcon />
+          </div>
+
           {navItems.map(({ label, href }) => (
             <Link
               key={href}
@@ -89,12 +100,7 @@ export function Navbar() {
 
         <div className="hidden md:flex flex-row items-center gap-4 text-sm">
           {externalItems.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              target="_blank"
-              className="text-muted"
-            >
+            <Link key={href} href={href} target="_blank" className="text-muted">
               {label}
             </Link>
           ))}
