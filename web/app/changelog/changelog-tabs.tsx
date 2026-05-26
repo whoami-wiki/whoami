@@ -1,8 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ImgHTMLAttributes } from "react";
 import Markdown from "react-markdown";
 import { MarkdownBlocks } from "@/components/markdown-blocks";
+
+const ChangelogMarkdownBlocks = {
+  ...MarkdownBlocks,
+  img: (props: ImgHTMLAttributes<HTMLImageElement>) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img {...props} alt={props.alt ?? ""} className="rounded-lg" />
+  ),
+};
 
 interface Release {
   tag_name: string;
@@ -88,7 +96,7 @@ export function ChangelogTabs({ releases }: { releases: Release[] }) {
 
             {release.body && (
               <div className="font-sans text-neutral-700 dark:text-neutral-300 prose dark:prose-invert prose-li:m-0 prose-p:m-0 prose-ul:mt-0 prose-code:before:content-none prose-code:after:content-none flex flex-col gap-4">
-                <Markdown components={MarkdownBlocks}>
+                <Markdown components={ChangelogMarkdownBlocks}>
                   {release.body}
                 </Markdown>
               </div>
