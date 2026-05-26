@@ -33,9 +33,10 @@ import { placeCommand } from './commands/place.js';
 import { snapshotCommand } from './commands/snapshot.js';
 import { exportCommand } from './commands/export.js';
 import { importCommand } from './commands/import.js';
+import { purgeCommand } from './commands/purge.js';
 import { checkForUpdate, updateCommand } from './update.js';
 
-const VERSION = '1.2.1';
+const VERSION = '1.2.2';
 
 const HELP = `wai — personal wiki CLI
 
@@ -73,6 +74,9 @@ Discovery:
   category [name]             List categories or pages in one
   changes                     Recent changes
   place <query>               Look up a place (Google Places)
+
+Maintenance:
+  purge <title> [title ...]   Drop parser cache so the page re-renders
 
 Data:
   source list                 List pages in the Source namespace
@@ -143,7 +147,7 @@ async function main(): Promise<void> {
   const wikiCommands = new Set([
     'read', 'write', 'edit', 'create', 'search',
     'section', 'talk', 'upload', 'link', 'category', 'changes', 'source',
-    'snapshot', 'task',
+    'snapshot', 'task', 'purge',
   ]);
 
   if (!wikiCommands.has(command)) {
@@ -188,6 +192,8 @@ async function main(): Promise<void> {
         return snapshotCommand(commandArgs, globals, client);
       case 'task':
         return taskCommand(commandArgs, globals, client);
+      case 'purge':
+        return purgeCommand(commandArgs, globals, client);
       default:
         return Promise.resolve();
     }

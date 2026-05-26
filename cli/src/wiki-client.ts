@@ -539,6 +539,38 @@ export class WikiClient {
     }));
   }
 
+  // ── Purge ──────────────────────────────────────────────────────────
+
+  /**
+   * Forces MediaWiki to drop the parser cache for the given pages and
+   * re-render on next view. Useful for transcluding pages where the
+   * host doesn't auto-invalidate when included pages change — e.g. the
+   * Main Page after the curator writes new Featured: pages.
+   *
+   * Returns the list of titles MediaWiki accepted (some may be missing
+   * or invalid). `forcelinkupdate` also rebuilds pagelinks so newly-
+   * referenced pages immediately count for {{PAGESINCATEGORY}} etc.
+   */
+  async purgePages(
+    titles: string[],
+    opts: { forceLinkUpdate?: boolean } = {},
+  ): Promise<{ title: string; purged: boolean; missing: boolean }[]> {
+    if (titles.length === 0) return [];
+    const params: Record<string, string> = {
+      action: 'purge',
+      titles: titles.join('|'),
+      format: 'json',
+    };
+    if (opts.forceLinkUpdate) params.forcelinkupdate = '1';
+    const res = await this.client.post(this.api, new URLSearchParams(params));
+    const entries = res.data?.purge ?? [];
+    return entries.map((e: any) => ({
+      title: e.title ?? '',
+      purged: 'purged' in e,
+      missing: 'missing' in e,
+    }));
+  }
+
   // ── Export ─────────────────────────────────────────────────────────
 
   async getNamespaces(): Promise<{ id: number; name: string }[]> {
