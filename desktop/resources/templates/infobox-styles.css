@@ -36,17 +36,22 @@ audio[data-mw-tmh] {
     clear: both;
 }
 
-/* Hide the "Main Page" h1 on the main page itself — the topbanner takes
- * its place visually. Wikipedia does the same via inline style. */
+/* Hide the "Main Page" h1 and the surrounding titlebar/contentSub on the
+ * main page — the topbanner takes their place visually. Hiding the
+ * containers (not just the H1) collapses the empty vertical space Vector
+ * would otherwise leave above the banner. */
+body.page-Main_Page .mw-body-header,
 body.page-Main_Page #firstHeading,
-body.page-Main_Page .mw-first-heading {
+body.page-Main_Page .mw-first-heading,
+body.page-Main_Page #contentSub {
     display: none;
 }
 
 /* ─── Welcome banner ──────────────────────────────────────────── */
 
+.mw-parser-output #mp-topbanner    { padding: 0.6em 0.5em; }
 .mw-parser-output #mp-welcomecount { text-align: center; margin: 0.4em; }
-.mw-parser-output #mp-welcome      { font-size: 162%; padding: 0.75em 0.1em 0.1em; line-height: 1.1; }
+.mw-parser-output #mp-welcome      { font-size: 162%; padding: 0.25em 0.1em 0.1em; line-height: 1.1; }
 .mw-parser-output #mp-welcome h1,
 .mw-parser-output #mp-welcome .mw-heading1 {
     font-size: inherit;

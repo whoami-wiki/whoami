@@ -1,27 +1,17 @@
 <!--
   Main Page layout.
 
-  - The banner (welcome + tagline + "X% of your life documented")
-    always renders. The % stat hides itself gracefully if Template:
-    DaysDocumented or the owner's birth date isn't set yet.
+  - The banner (welcome + tagline) always renders.
   - The body switches between get-started content and the Wikipedia-
     style featured grid based on whether the curator has ever produced
     output (PAGESINCATEGORY:Featured TFA > 0). This means a brand-new
     install sees get-started content under the banner until the first
     curator run transforms the page.
   - Pure ParserFunctions + Scribunto (Module:OwnerData). No extension.
--->
-
-<div id="mp-topbanner" class="mp-box">
+--><div id="mp-topbanner" class="mp-box">
 <div id="mp-welcomecount">
 <div id="mp-welcome">Welcome [[Me|{{#invoke:OwnerData|firstName}}]],</div>
 <div id="mp-free">to your personal encyclopedia.</div>
-<div id="articlecount">
-{{#if: {{#invoke:OwnerData|birthDate}}
-| {{#expr: ({{DaysDocumented}} * 100 / {{#invoke:OwnerData|daysLived}}) round 1}}
-| 0
-}}% of your life documented
-</div>
 </div>
 </div>
 
