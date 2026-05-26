@@ -1,5 +1,7 @@
-Enable photo uploads in the desktop wiki.
+![Main page with curator-driven sections](https://raw.githubusercontent.com/whoami-wiki/whoami/desktop-v1.2.5/desktop/assets/release-notes/1.2.5-main-page.png)
 
-Fixes:
-- JPEG thumbnails are generated correctly (the bundled PHP was missing libjpeg support)
-- Upload size limit raised from 2 MB to 10 MB to allow full-resolution photos
+New Wikipedia-style main page and refreshed app icon.
+
+Features:
+- Main page now has curator-driven sections (featured article, on this day, in the news) built from owner data
+- Updated app icon to the new "wai" wordmark
