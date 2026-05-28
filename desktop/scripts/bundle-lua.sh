@@ -1,10 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
-# Build Lua 5.1 from source.
-# Scribunto requires Lua 5.1 specifically (not 5.4).
+# Build LuaJIT 2.1 from source.
+#
+# LuaJIT is a Lua 5.1-compatible JIT runtime — same calling conventions as
+# vanilla Lua 5.1 (which is what Scribunto requires) but actively maintained
+# and 5-20× faster on Scribunto workloads. This is what Wikipedia itself
+# runs for Scribunto.
 #
 # Output: resources/lua/bin/lua
+#
+# The binary is named `lua` (not `luajit`) so Scribunto's
+# $wgScribuntoEngineConf['luastandalone']['luaPath'] = "$resources/lua/bin/lua"
+# finds it without any config change.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$SCRIPT_DIR/.."
@@ -23,44 +31,43 @@ if [ -f "$OUT/bin/lua" ]; then
   exit 0
 fi
 
-echo "==> Building Lua 5.1 from source..."
-
-LUA_VERSION="5.1.5"
+# LuaJIT 2.1 is a rolling release branch — no semver tags. Pin to the branch
+# tip; switch to a specific commit hash here if you need bit-exact reproducibility.
+LUAJIT_REF="v2.1"
 mkdir -p "$ROOT/.build"
-LUA_TARBALL="$ROOT/.build/lua-$LUA_VERSION.tar.gz"
+SRC_DIR="$ROOT/.build/LuaJIT"
 
-if [ ! -f "$LUA_TARBALL" ]; then
-  curl -L -o "$LUA_TARBALL" "https://www.lua.org/ftp/lua-$LUA_VERSION.tar.gz"
+if [ ! -d "$SRC_DIR/.git" ]; then
+  echo "==> Cloning LuaJIT $LUAJIT_REF..."
+  rm -rf "$SRC_DIR"
+  git clone --depth 1 --branch "$LUAJIT_REF" https://github.com/LuaJIT/LuaJIT.git "$SRC_DIR"
 fi
 
-cd "$ROOT/.build"
-rm -rf "lua-$LUA_VERSION"
-tar xzf "$LUA_TARBALL"
-cd "lua-$LUA_VERSION"
+echo "==> Building LuaJIT $LUAJIT_REF (amalgamated)..."
+cd "$SRC_DIR"
 
-PLATFORM="macosx"
-if [[ "$(uname)" == "Linux" ]]; then
-  PLATFORM="linux"
-fi
+# macOS deployment target — match the rest of the bundle (php / lua / ffmpeg)
+export MACOSX_DEPLOYMENT_TARGET=12.0
 
-# Cross-compilation: build in src/ directly with -target in CC to ensure
-# both compilation and linking use the correct architecture. The macosx
-# make target uses nested makes that don't propagate LDFLAGS reliably.
 case "$TARGET_ARCH" in
   x64|x86_64)
-    make -C src all \
-      CC="cc -target x86_64-apple-darwin" \
-      MYCFLAGS="-DLUA_USE_MACOSX -mmacosx-version-min=12.0" \
-      MYLDFLAGS="-mmacosx-version-min=12.0"
+    make clean
+    make TARGET_FLAGS="-arch x86_64" amalg
+    ;;
+  arm64|aarch64)
+    make clean
+    make TARGET_FLAGS="-arch arm64" amalg
     ;;
   *)
-    make "$PLATFORM" MYCFLAGS="-mmacosx-version-min=12.0"
+    make clean
+    make amalg
     ;;
 esac
 
 mkdir -p "$OUT/bin"
-cp src/lua "$OUT/bin/lua"
+cp src/luajit "$OUT/bin/lua"
 chmod +x "$OUT/bin/lua"
 
-echo "==> Lua $LUA_VERSION ready at $OUT/bin/lua"
+echo "==> LuaJIT ready at $OUT/bin/lua"
+"$OUT/bin/lua" -v
 file "$OUT/bin/lua"
