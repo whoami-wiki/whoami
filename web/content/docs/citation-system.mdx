@@ -12,7 +12,7 @@ All inline citations use `<ref>` tags, rendered via `<references />` at the bott
 ```wikitext
 Jane was born in Munich and moved to Berlin at eighteen.<ref name="ig-2021-04-15">
 {{Cite message|snapshot=a1b2c3d4e5f6|date=2021-04-15
-|thread=janedoe_12345|note=Family background exchange}}</ref>
+  |thread=janedoe_12345|note=Family background exchange}}</ref>
 ```
 
 ## Citation templates
@@ -25,7 +25,7 @@ For text message content (DMs, chats).
 
 ```wikitext
 {{Cite message|snapshot=a1b2c3d4e5f6|date=2021-04-15
-|thread=janedoe_12345|note=Family background exchange}}
+  |thread=janedoe_12345|note=Family background exchange}}
 ```
 
 Renders as: Instagram DM, 15 April 2021 (snapshot a1b2c3d4)
@@ -36,7 +36,7 @@ For voice note content.
 
 ```wikitext
 {{Cite voice note|number=7|date=2021-06-03|speaker=Jane
-|snapshot=a1b2c3d4e5f6|note=Darkroom discovery story}}
+  |snapshot=a1b2c3d4e5f6|note=Darkroom discovery story}}
 ```
 
 Renders as: Voice note #7, Jane, 3 June 2021
@@ -47,7 +47,7 @@ For facts derived from photos or screenshots.
 
 ```wikitext
 {{Cite photo|file=IMG_2847.jpg|hash=...|date=2021-05-20
-|snapshot=a1b2c3d4e5f6|note=University ID confirming enrollment}}
+  |snapshot=a1b2c3d4e5f6|note=University ID confirming enrollment}}
 ```
 
 Renders as: Photo: IMG\_2847.jpg, 20 May 2021
@@ -58,7 +58,7 @@ For video content.
 
 ```wikitext
 {{Cite video|file=berlin_gallery_opening.mp4|date=2021-11-12
-|snapshot=a1b2c3d4e5f6|note=Gallery opening footage}}
+  |snapshot=a1b2c3d4e5f6|note=Gallery opening footage}}
 ```
 
 Renders as: Video: berlin\_gallery\_opening.mp4, 12 November 2021
@@ -69,7 +69,7 @@ For the Bibliography section. Describes a full vault snapshot consulted during r
 
 ```wikitext
 {{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
-|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
+  |timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
 ```
 
 Renders as: Vault: Instagram DM thread with Jane Doe, Mar 2021–May 2022 (snapshot a1b2c3d4)
@@ -113,7 +113,7 @@ Many facts from the same conversation session share a source. Use named refs:
 Jane's mother is from Munich.<ref name="ig-2021-04-15" />
 Her father works in Zurich.<ref name="ig-2021-05-02">
 {{Cite message|snapshot=a1b2c3d4e5f6|date=2021-05-02
-|thread=janedoe_12345|note=Family details, father in Zurich}}</ref>
+  |thread=janedoe_12345|note=Family details, father in Zurich}}</ref>
 She has a younger brother named Max.<ref name="ig-2021-04-15" />
 ```
 
@@ -127,9 +127,9 @@ Every person page and episode page ends with two sections:
 
 == Bibliography ==
 {{Cite vault|type=messages|snapshot=a1b2c3d4e5f6
-|timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
+  |timestamp=2021-03-01/2022-05-15|note=Instagram DM thread with Jane Doe}}
 {{Cite vault|type=voice_notes|snapshot=b2c3d4e5f6a1
-|timestamp=2021-04-12/2021-06-03|note=47 voice notes, Jane and wiki owner}}
+  |timestamp=2021-04-12/2021-06-03|note=47 voice notes, Jane and wiki owner}}
 ```
 
 **References** are inline citations. Each one traces a specific claim back to a specific moment in the vault. They are auto-generated from `<ref>` tags.
