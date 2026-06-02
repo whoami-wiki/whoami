@@ -1,0 +1,234 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+DATA_DIR="/config"
+MW_DIR="/app/mediawiki"
+PHP="$(command -v php)"
+TEMPLATES_DIR="/app/templates"
+
+WIKI_ADMIN_USER="${WIKI_ADMIN_USER:-admin}"
+WIKI_NAME="${WIKI_NAME:-Whoami Wiki}"
+OWNER_NAME="${OWNER_NAME:-}"
+WIKI_PORT="${WIKI_PORT:-8080}"
+WIKI_SERVER_URL="${WIKI_SERVER_URL:-http://localhost:${WIKI_PORT}}"
+
+mkdir -p \
+    "${DATA_DIR}/images" \
+    "${DATA_DIR}/cache"
+
+generate_secret() {
+    head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' | head -c "$1"
+}
+
+generate_local_data() {
+    local secret_key
+    local upgrade_key
+    secret_key="$(generate_secret 64)"
+    upgrade_key="$(generate_secret 16)"
+    cat <<PHPEOF
+<?php
+\$wgSecretKey = "${secret_key}";
+\$wgUpgradeKey = "${upgrade_key}";
+PHPEOF
+}
+
+generate_local_settings() {
+    local has_tmh="false"
+    if [ -f "${MW_DIR}/extensions/TimedMediaHandler/extension.json" ]; then
+        has_tmh="true"
+    fi
+
+    cat <<PHPEOF
+<?php
+require __DIR__ . '/LocalData.php';
+
+\$wgSitename = "${WIKI_NAME}";
+\$wgServer = "${WIKI_SERVER_URL}";
+\$wgScriptPath = "";
+\$wgArticlePath = "/wiki/\$1";
+
+\$wgDBtype = "sqlite";
+\$wgDBname = "wiki";
+\$wgSQLiteDataDir = "${DATA_DIR}";
+
+\$wgUploadDirectory = "${DATA_DIR}/images";
+\$wgUploadPath = "/images";
+\$wgCacheDirectory = "${DATA_DIR}/cache";
+
+\$wgGroupPermissions['*']['createaccount'] = false;
+\$wgGroupPermissions['*']['edit'] = false;
+\$wgGroupPermissions['*']['read'] = true;
+
+error_reporting( E_ALL & ~E_DEPRECATED & ~E_STRICT );
+ini_set( 'display_errors', '0' );
+
+\$wgLanguageCode = "en";
+\$wgLocaltimezone = "UTC";
+
+\$wgEnableUploads = true;
+\$wgUseImageMagick = false;
+\$wgFileExtensions = array_merge( \$wgFileExtensions, [ 'mp3', 'mp4', 'ogg', 'ogv', 'opus', 'wav', 'webm', 'flac' ] );
+\$wgMaxUploadSize = 10 * 1024 * 1024;
+\$wgUploadSizeWarning = 10 * 1024 * 1024;
+ini_set( 'upload_max_filesize', '10M' );
+ini_set( 'post_max_size', '10M' );
+
+wfLoadSkin( 'Vector' );
+\$wgDefaultSkin = "vector-2022";
+
+wfLoadExtension( 'Cite' );
+wfLoadExtension( 'CiteThisPage' );
+wfLoadExtension( 'ParserFunctions' );
+wfLoadExtension( 'Scribunto' );
+wfLoadExtension( 'TemplateData' );
+wfLoadExtension( 'TemplateStyles' );
+PHPEOF
+
+    if [ "${has_tmh}" = "true" ]; then
+        cat <<PHPEOF
+
+wfLoadExtension( 'TimedMediaHandler' );
+\$wgTmhEnableTranscoding = false;
+\$wgTmhFileExtensions = [ 'mp3', 'mp4', 'ogg', 'ogv', 'opus', 'wav', 'webm', 'flac' ];
+\$wgFFmpegLocation = '$(command -v ffmpeg)';
+\$wgMaxShellMemory = 0;
+PHPEOF
+    fi
+
+    cat <<PHPEOF
+
+\$wgScribuntoDefaultEngine = 'luastandalone';
+\$wgScribuntoEngineConf['luastandalone']['luaPath'] = '/app/lua/bin/lua';
+
+define("NS_SOURCE", 100);
+define("NS_SOURCE_TALK", 101);
+\$wgExtraNamespaces[NS_SOURCE] = "Source";
+\$wgExtraNamespaces[NS_SOURCE_TALK] = "Source_talk";
+
+define("NS_TASK", 102);
+define("NS_TASK_TALK", 103);
+\$wgExtraNamespaces[NS_TASK] = "Task";
+\$wgExtraNamespaces[NS_TASK_TALK] = "Task_talk";
+
+\$wgUsePathInfo = true;
+
+\$wgMainCacheType = CACHE_NONE;
+\$wgCachePages = false;
+
+\$wgJobRunRate = 1;
+PHPEOF
+}
+
+run_mw_php() {
+    "${PHP}" \
+        -d display_errors=Off \
+        -d error_reporting=22527 \
+        "$@" 2>&1 | grep -v -E "^(Deprecated:|.*deprecated since)" || true
+}
+
+import_page() {
+    local title="$1"
+    local file="$2"
+    local summary="${3:-Initial import}"
+    run_mw_php "${MW_DIR}/maintenance/run.php" edit \
+        --conf "${DATA_DIR}/LocalSettings.php" \
+        --user "${WIKI_ADMIN_USER}" \
+        --summary "${summary}" \
+        --no-rc \
+        "${title}" < "${file}"
+}
+
+if [ ! -f "${DATA_DIR}/LocalSettings.php" ]; then
+    echo "**** first run detected — setting up wiki ****"
+
+    if [ -z "${WIKI_ADMIN_PASS}" ]; then
+        WIKI_ADMIN_PASS="$(generate_secret 16)"
+        echo "============================================"
+        echo "  Generated admin password: ${WIKI_ADMIN_PASS}"
+        echo "  Username: ${WIKI_ADMIN_USER}"
+        echo ""
+        echo "  Set WIKI_ADMIN_PASS to avoid regeneration."
+        echo "============================================"
+    fi
+
+    echo "**** installing MediaWiki database ****"
+    mw_ls="${MW_DIR}/LocalSettings.php"
+    [ -f "${mw_ls}" ] && rm -f "${mw_ls}"
+
+    run_mw_php "${MW_DIR}/maintenance/run.php" install \
+        --dbtype sqlite \
+        --dbpath "${DATA_DIR}" \
+        --dbname wiki \
+        --scriptpath "" \
+        --pass "${WIKI_ADMIN_PASS}" \
+        --server "${WIKI_SERVER_URL}" \
+        "Whoami Wiki" \
+        "${WIKI_ADMIN_USER}"
+
+    [ -f "${mw_ls}" ] && rm -f "${mw_ls}"
+
+    echo "**** generating configuration ****"
+    generate_local_data > "${DATA_DIR}/LocalData.php"
+    generate_local_settings > "${DATA_DIR}/LocalSettings.php"
+
+    echo "**** running schema update ****"
+    run_mw_php "${MW_DIR}/maintenance/run.php" update \
+        --quick \
+        --conf "${DATA_DIR}/LocalSettings.php"
+
+    echo "**** importing templates ****"
+    for tpl in Gap Dialogue Infobox_person Closed Open; do
+        tpl_file="${TEMPLATES_DIR}/${tpl}.wiki"
+        if [ -f "${tpl_file}" ]; then
+            echo "  -> Template:${tpl}"
+            import_page "Template:${tpl}" "${tpl_file}" "Initial template import"
+        fi
+    done
+
+    css_file="${TEMPLATES_DIR}/infobox-styles.css"
+    if [ -f "${css_file}" ]; then
+        echo "  -> MediaWiki:Common.css"
+        import_page "MediaWiki:Common.css" "${css_file}" "Initial styles import"
+    fi
+
+    main_page="${TEMPLATES_DIR}/Main_Page.wiki"
+    if [ -f "${main_page}" ]; then
+        echo "  -> Main Page"
+        import_page "Main Page" "${main_page}" "Initial main page"
+    fi
+
+    if [ -n "${OWNER_NAME}" ]; then
+        echo "**** creating user page for ${OWNER_NAME} ****"
+        tmp_page="$(mktemp)"
+        cat > "${tmp_page}" <<WIKIEOF
+{{Infobox person
+| name = ${OWNER_NAME}
+}}
+
+'''${OWNER_NAME}'''.
+
+[[Category:People]]
+WIKIEOF
+        import_page "${OWNER_NAME}" "${tmp_page}" "Initial page creation"
+        rm -f "${tmp_page}"
+
+        tmp_redirect="$(mktemp)"
+        echo "#REDIRECT [[${OWNER_NAME}]]" > "${tmp_redirect}"
+        import_page "Me" "${tmp_redirect}" "Redirect to user page"
+        rm -f "${tmp_redirect}"
+    fi
+
+    echo "**** first-run setup complete ****"
+else
+    echo "**** existing installation detected — regenerating config ****"
+    generate_local_settings > "${DATA_DIR}/LocalSettings.php"
+
+    if [ ! -f "${DATA_DIR}/LocalData.php" ]; then
+        echo "**** migrating: generating LocalData.php ****"
+        generate_local_data > "${DATA_DIR}/LocalData.php"
+    fi
+fi
+
+if [ -z "${LSIO_NON_ROOT_USER}" ]; then
+    lsiown -R abc:abc "${DATA_DIR}"
+fi
