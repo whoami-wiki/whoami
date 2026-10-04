@@ -41,7 +41,7 @@ export default async function BlogPostPage({ params }: Props) {
           href="https://news.ycombinator.com/item?id=47522173"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-center bg-neutral-100 px-6 py-2 text-center font-sans text-sm text-neutral-700 transition-colors hover:bg-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-black dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus-visible:outline-white"
+          className="flex w-full items-center justify-center bg-neutral-100 px-6 py-2 text-center font-sans text-sm text-neutral-700 transition-colors hover:bg-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-black dark:bg-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-600 dark:focus-visible:outline-white"
         >
           Read discussion on Hacker News
         </a>
