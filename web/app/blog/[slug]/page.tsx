@@ -41,10 +41,9 @@ export default async function BlogPostPage({ params }: Props) {
           href="https://news.ycombinator.com/item?id=47522173"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 bg-[#ff6600] px-6 py-3 text-center font-sans text-sm text-black transition-colors hover:bg-[#e65c00] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-black"
+          className="flex w-full items-center justify-center bg-[#ff6600] px-6 py-3 text-center font-sans text-sm text-white transition-colors hover:bg-[#e65c00] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-black"
         >
           <span className="underline underline-offset-4">Read discussion on Hacker News</span>
-          <span aria-hidden="true">↗</span>
         </a>
       )}
       <div className="max-w-2xl w-full flex flex-col gap-8 py-18 px-6">
