@@ -43,7 +43,7 @@ export default async function BlogPostPage({ params }: Props) {
           rel="noopener noreferrer"
           className="flex w-full items-center justify-center bg-[#ff6600] px-6 py-3 text-center font-sans text-sm text-white transition-colors hover:bg-[#e65c00] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-black"
         >
-          <span className="underline underline-offset-4">Read discussion on Hacker News</span>
+          Read discussion on Hacker News
         </a>
       )}
       <div className="max-w-2xl w-full flex flex-col gap-8 py-18 px-6">
